@@ -97,6 +97,18 @@ export default function LandingPage({ confidential = false }: LandingPageProps) 
           <div className="mt-14">
             <WaitlistSection confidential={confidential} inline />
           </div>
+
+          {confidential && (
+            <a
+              href="https://mowinckel.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 text-[0.65rem] no-underline tracking-wide transition-opacity hover:opacity-40"
+              style={{ color: 'var(--text-ghost)' }}
+            >
+              or get in touch
+            </a>
+          )}
         </div>
 
         {/* Scroll indicator */}
