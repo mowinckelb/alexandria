@@ -252,7 +252,7 @@ High lower bound, uncapped upper bound.
 
 $10–20/month subscription for the managed Blueprint. The MCP server, the sovereignty architecture, the continuously improving extraction and amplification intelligence. Founding tier: $1/month for the first 100 Authors — a founding membership rate that signals tribe belonging, kept for life as long as they remain active. General availability at $10–20/month.
 
-Break even at 200–300 subscribers at $10/month, or 100–150 at $20/month. Reachable with organic growth and targeted outreach. This is the floor — a sustainable business that serves a real need at small scale.
+Break even at 200–300 subscribers at $10/month, or 100–150 at $20/month. Reachable with organic growth and targeted outreach. This is the floor — a sustainable business that serves a real need at small scale. To put the price in perspective: $10/month is one meal. One Chipotle bowl. For a sovereign cognitive architecture that helps navigate the most significant transition in human history. The price is not the barrier to adoption. The awareness is.
 
 Cost structure is lean. Alexandria does not run parallel agents consuming its own tokens. The Editor, Mercury, and Publisher are functions that run through the user's existing AI subscription. Alexandria's compute costs are the MCP server infrastructure and Library hosting — not per-interaction inference. This means margins improve as the user base grows, not degrade.
 

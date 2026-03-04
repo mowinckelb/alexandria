@@ -124,7 +124,7 @@ Add the Alexandria MCP connector in your AI settings. One-time setup, takes seco
 
 Founding tier: $1/month for the first 100 Authors. A founding membership, not a price point — you are joining a tribe, not subscribing to a service. The founding 100 keep their rate for life.
 
-General availability: $10–20/month for the managed Blueprint — the MCP server, the sovereignty architecture, the continuously improving extraction and amplification intelligence.
+General availability: $10–20/month for the managed Blueprint — the MCP server, the sovereignty architecture, the continuously improving extraction and amplification intelligence. That is one meal. One Chipotle bowl. A month. For something that helps you navigate the hardest challenge in humanity's history. The price is not the barrier. The awareness is.
 
 Library interactions: you set your own price for Premium Persona access. Alexandria takes a small percentage. Your earnings grow with the quality of your Constitution and the demand for your mind.
 
