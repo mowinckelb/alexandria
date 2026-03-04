@@ -230,7 +230,7 @@ export const PUBLIC_CONTENT = {
     items: [
       {
         name: 'Set the Angel Free',
-        description: 'Most people\'s minds are marble: scattered, rigid, fogged. The Editor transforms marble to mercury — liquid, flowing, unified cognition. This is the state change. It should feel like the best therapy you have ever had, except you walk out with a structured, sovereign map of your own mind.',
+        description: 'Most people\'s minds are marble: scattered, rigid, fogged. The Editor transforms marble to mercury — liquid, flowing, unified cognition. This is the state change. It should feel like the most clarifying conversation of your life — except you walk out with a structured, sovereign map of your own mind.',
       },
       {
         name: 'Ride the Wave',

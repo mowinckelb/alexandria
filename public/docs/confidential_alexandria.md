@@ -108,7 +108,7 @@ Also in this group: five companions — Pater (paternal guidance), Mater (matern
 
 The path has three turns, and each exists for the next.
 
-**Turn 1 — Set the angel free.** Most people's minds are marble: scattered, rigid, fogged. The Editor transforms marble to mercury — liquid, flowing, unified cognition. This is the state change. It should feel like the best therapy you have ever had, except you walk out with a structured, sovereign map of your own mind.
+**Turn 1 — Set the angel free.** Most people's minds are marble: scattered, rigid, fogged. The Editor transforms marble to mercury — liquid, flowing, unified cognition. This is the state change. It should feel like the most clarifying conversation of your life — except you walk out with a structured, sovereign map of your own mind.
 
 **Turn 2 — Ride the wave.** Mercury mind plus AI equals infinite expansion. You absorb, keep up, and remain yourself while everything accelerates. Mercury amplifies you. Your attention becomes positive-sum. You are not drowning and you are not checked out — you are riding it.
 
