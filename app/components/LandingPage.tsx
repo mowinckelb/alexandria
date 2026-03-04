@@ -40,13 +40,17 @@ function CopyButton({ href }: { href: string }) {
   const handleCopy = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // On mobile Safari, clipboard access must happen synchronously in the
+    // user gesture. We use a ClipboardItem with a blob promise so the
+    // browser sees the write call immediately, even though the fetch is async.
     try {
-      const res = await fetch(href);
-      const text = await res.text();
-      // Try modern clipboard API first, fall back to execCommand
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
+      if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+        const blobPromise = fetch(href).then(r => r.text()).then(t => new Blob([t], { type: 'text/plain' }));
+        await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blobPromise })]);
       } else {
+        const res = await fetch(href);
+        const text = await res.text();
         const textarea = document.createElement('textarea');
         textarea.value = text;
         textarea.style.position = 'fixed';
@@ -59,7 +63,6 @@ function CopyButton({ href }: { href: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Last resort: open the file
       window.open(href, '_blank');
     }
   }, [href]);
@@ -67,17 +70,14 @@ function CopyButton({ href }: { href: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="bg-transparent border-none cursor-pointer p-0 flex items-center gap-1"
+      className="bg-transparent border-none cursor-pointer p-0"
       style={{ color: copied ? 'var(--text-muted)' : 'var(--text-ghost)', transition: 'color 0.2s' }}
       aria-label="Copy to clipboard"
     >
       {copied ? (
-        <>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 6L9 17l-5-5" />
-          </svg>
-          <span className="text-[0.65rem] tracking-wider">copied</span>
-        </>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
       ) : (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
