@@ -190,15 +190,18 @@ function HeroSection({ confidential }: { confidential: boolean }) {
         </div>
       </div>
 
-      {/* Scroll indicator — fades in after 2.5s */}
-      <div className="scroll-hint absolute bottom-10 flex flex-col items-center gap-2">
-        <span className="text-[0.65rem] tracking-widest" style={{ color: 'var(--text-ghost)' }}>
-          scroll
+      {/* Scroll indicator — fades in after 2s, impossible to miss */}
+      <div className="scroll-hint absolute bottom-8 sm:bottom-10 flex flex-col items-center gap-3">
+        <span
+          className="text-[0.75rem] sm:text-[0.65rem] tracking-widest"
+          style={{ color: 'var(--text-muted)', animation: 'thinkingPulse 2s ease-in-out infinite' }}
+        >
+          there is more below
         </span>
         <svg
-          width="18" height="18" viewBox="0 0 24 24" fill="none"
+          width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
-          style={{ color: 'var(--text-ghost)', animation: 'bounce 2.5s ease-in-out infinite' }}
+          style={{ color: 'var(--text-muted)', animation: 'bounce 2s ease-in-out infinite' }}
         >
           <path d="M7 10l5 5 5-5" />
         </svg>
