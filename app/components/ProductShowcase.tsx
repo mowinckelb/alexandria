@@ -269,7 +269,9 @@ function LibraryPreview() {
   );
 }
 
-// ─── Main ────────────────────────────────────────────────────────────
+// ─── Exports ─────────────────────────────────────────────────────────
+
+export { ConstitutionPreview, LibraryPreview };
 
 export default function ProductShowcase() {
   return (

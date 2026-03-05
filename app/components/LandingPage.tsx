@@ -1,13 +1,40 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTheme } from './ThemeProvider';
-import ProductShowcase from './ProductShowcase';
+import { ConstitutionPreview, LibraryPreview } from './ProductShowcase';
+import { PUBLIC_CONTENT } from './mockData';
 import WaitlistSection from './WaitlistSection';
+import ConcreteSection from './ConcreteSection';
 import FooterSection from './FooterSection';
 
 interface LandingPageProps {
   confidential?: boolean;
+}
+
+// ─── Utilities ───────────────────────────────────────────────────────
+
+function useFadeIn(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) entry.target.classList.add('visible'); },
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref]);
+}
+
+function Section({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLElement>(null);
+  useFadeIn(ref);
+  return (
+    <section ref={ref} className={`fade-section py-24 sm:py-32 px-8 ${className}`}>
+      <div className="max-w-2xl mx-auto">{children}</div>
+    </section>
+  );
 }
 
 function ThemeToggle() {
@@ -41,9 +68,6 @@ function CopyButton({ href }: { href: string }) {
     e.preventDefault();
     e.stopPropagation();
 
-    // On mobile Safari, clipboard access must happen synchronously in the
-    // user gesture. We use a ClipboardItem with a blob promise so the
-    // browser sees the write call immediately, even though the fetch is async.
     try {
       if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
         const blobPromise = fetch(href).then(r => r.text()).then(t => new Blob([t], { type: 'text/plain' }));
@@ -88,108 +112,435 @@ function CopyButton({ href }: { href: string }) {
   );
 }
 
-export default function LandingPage({ confidential = false }: LandingPageProps) {
+// ─── Sections ────────────────────────────────────────────────────────
+
+function HeroSection({ confidential }: { confidential: boolean }) {
   return (
-    <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', overflowX: 'hidden' }}>
-      <ThemeToggle />
+    <section className="min-h-screen flex flex-col items-center justify-center px-8 relative">
+      <div className="flex flex-col items-center">
+        <h1
+          className="text-[2.2rem] sm:text-[2.8rem] font-normal leading-none tracking-tight"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          alexandria.
+        </h1>
 
-      {/* Hero — single screen */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-8 relative">
-        <div className="flex flex-col items-center">
-          {/* Title */}
-          <h1
-            className="text-[2.2rem] sm:text-[2.8rem] font-normal leading-none tracking-tight"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            alexandria.
-          </h1>
+        <p
+          className="mt-2 text-[0.75rem] tracking-wide italic"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          droplets of grace
+        </p>
 
-          {/* Subtitle */}
+        {confidential && (
           <p
-            className="mt-2 text-[0.75rem] tracking-wide italic"
-            style={{ color: 'var(--text-muted)' }}
+            className="mt-3 text-[0.6rem] tracking-widest uppercase"
+            style={{ color: 'var(--text-ghost)' }}
           >
-            droplets of grace
+            confidential
           </p>
+        )}
 
-          {confidential && (
-            <p
-              className="mt-3 text-[0.6rem] tracking-widest uppercase"
-              style={{ color: 'var(--text-ghost)' }}
+        <div className="mt-20 flex flex-col items-center gap-12">
+          <div className="flex items-center gap-3">
+            <a
+              href="/docs/Alexandria.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[0.8rem] no-underline transition-opacity hover:opacity-40 tracking-wide"
+              style={{ color: 'var(--text-primary)', opacity: 0.45 }}
             >
-              confidential
-            </p>
-          )}
-
-          {/* Links + Waitlist */}
-          <div className="mt-20 flex flex-col items-center gap-12">
-            <div className="flex items-center gap-3">
+              abstract
+            </a>
+            <span className="text-[0.35rem]" style={{ color: 'var(--text-ghost)' }}>&bull;</span>
+            <span className="flex items-center gap-1.5">
               <a
-                href="/docs/Alexandria.pdf"
+                href={confidential ? '/docs/confidential_alexandria.md' : '/docs/alexandria.md'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[0.8rem] no-underline transition-opacity hover:opacity-40 tracking-wide"
                 style={{ color: 'var(--text-primary)', opacity: 0.45 }}
               >
-                abstract
+                concrete
               </a>
-              <span className="text-[0.35rem]" style={{ color: 'var(--text-ghost)' }}>&bull;</span>
-              <span className="flex items-center gap-1.5">
-                <a
-                  href={confidential ? '/docs/confidential_alexandria.md' : '/docs/alexandria.md'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[0.8rem] no-underline transition-opacity hover:opacity-40 tracking-wide"
-                  style={{ color: 'var(--text-primary)', opacity: 0.45 }}
-                >
-                  concrete
-                </a>
-                <CopyButton href={confidential ? '/docs/confidential_alexandria.md' : '/docs/alexandria.md'} />
+              <CopyButton href={confidential ? '/docs/confidential_alexandria.md' : '/docs/alexandria.md'} />
+            </span>
+          </div>
+
+          <WaitlistSection confidential={confidential} inline />
+
+          {confidential && (
+            <div className="flex flex-col items-center gap-1.5 text-[0.65rem]" style={{ color: 'var(--text-ghost)' }}>
+              <a
+                href="mailto:benjamin@mowinckel.com"
+                className="no-underline tracking-wide transition-opacity hover:opacity-40"
+                style={{ color: 'var(--text-ghost)' }}
+              >
+                benjamin@mowinckel.com
+              </a>
+              <a
+                href="tel:+4746643844"
+                className="no-underline tracking-wide transition-opacity hover:opacity-40"
+                style={{ color: 'var(--text-ghost)' }}
+              >
+                +47 466 43 844
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Scroll indicator — subtle chevron */}
+      <div className="absolute bottom-10 flex flex-col items-center">
+        <svg
+          width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          style={{ color: 'var(--text-ghost)', animation: 'bounce 2.5s ease-in-out infinite' }}
+        >
+          <path d="M7 10l5 5 5-5" />
+        </svg>
+      </div>
+    </section>
+  );
+}
+
+function SovereigntyHookSection() {
+  return (
+    <Section>
+      <div className="space-y-8">
+        <h2
+          className="text-[1.4rem] sm:text-[1.7rem] font-normal leading-snug"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Your AI already knows you.
+          <br />
+          You don&rsquo;t own any of it.
+        </h2>
+
+        <div className="space-y-4">
+          <p
+            className="text-[0.88rem] leading-[1.75]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Every conversation you have with your AI builds a richer model of who you are &mdash; your thinking patterns, your values, your taste.
+            That model lives on someone else&rsquo;s servers. You can&rsquo;t see it. You can&rsquo;t download it. You can&rsquo;t take it with you.
+          </p>
+          <p
+            className="text-[0.88rem] leading-[1.75]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Alexandria adds one connector to your existing AI. Your cognition gets extracted into structured, portable markdown files that you own.
+            Switch from Claude to GPT to Gemini &mdash; everything comes with you. No lock-in. No permission required.
+          </p>
+        </div>
+
+        <p
+          className="text-[0.8rem] tracking-wide italic"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          sovereignty as a service
+        </p>
+      </div>
+    </Section>
+  );
+}
+
+function ThreeTurnsSection() {
+  const turns = PUBLIC_CONTENT.threeTurns.items;
+  return (
+    <Section>
+      <div className="space-y-20">
+        {/* Turn 1 — Set the Angel Free */}
+        <div className="space-y-4">
+          <h2
+            className="text-[1.3rem] sm:text-[1.5rem] font-normal italic"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            &ldquo;Set the angel free.&rdquo;
+          </h2>
+          <p
+            className="text-[0.88rem] leading-[1.75]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            {turns[0].description}
+          </p>
+        </div>
+
+        {/* Turn 2 — Absorb the Abundance */}
+        <div className="space-y-4">
+          <h2
+            className="text-[1.3rem] sm:text-[1.5rem] font-normal italic"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            &ldquo;Absorb the abundance.&rdquo;
+          </h2>
+          <p
+            className="text-[0.88rem] leading-[1.75]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Mercury mind plus AI equals infinite expansion. The world flows into you &mdash; curated, prioritised, filtered through who you actually are. You absorb, keep up, and remain yourself while everything accelerates. Your attention becomes positive-sum. You are not drowning and you are not checked out &mdash; you are taking it all in.
+          </p>
+        </div>
+
+        {/* Turn 3 — The First Goodbye */}
+        <div className="space-y-4">
+          <h2
+            className="text-[1.3rem] sm:text-[1.5rem] font-normal italic"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            &ldquo;The first goodbye.&rdquo;
+          </h2>
+          <p
+            className="text-[0.88rem] leading-[1.75]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            {turns[2].description}
+          </p>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function ConstitutionDemoSection() {
+  return (
+    <Section>
+      <div className="space-y-6">
+        <p
+          className="text-[0.88rem] italic"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          A sovereign map of your mind.
+        </p>
+        <ConstitutionPreview />
+      </div>
+    </Section>
+  );
+}
+
+function LibraryDemoSection() {
+  return (
+    <Section>
+      <div className="space-y-6">
+        <p
+          className="text-[0.88rem] italic"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          A network of minds.
+        </p>
+        <LibraryPreview />
+      </div>
+    </Section>
+  );
+}
+
+function FiveThingsSection() {
+  const items = PUBLIC_CONTENT.fiveThings.items;
+  return (
+    <Section>
+      <div className="space-y-10">
+        <div className="space-y-4">
+          <h2
+            className="text-[1.2rem] sm:text-[1.4rem] font-normal"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            What you get
+          </h2>
+          <p
+            className="text-[0.85rem] leading-[1.75]"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            A Constitution that maps who you are. A Library where your mind lives and earns. Between them &mdash; the tools that transform marble to mercury, amplify your thinking, and help you create your best work. Five things, one connector.
+          </p>
+        </div>
+
+        <div className="space-y-8">
+          {items.map((item) => (
+            <div key={item.name} className="flex flex-col gap-1.5">
+              <span
+                className="text-[0.88rem]"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {item.name}
+              </span>
+              <span
+                className="text-[0.78rem] leading-[1.7]"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                {item.description}
               </span>
             </div>
+          ))}
+        </div>
+      </div>
+    </Section>
+  );
+}
 
-            <WaitlistSection confidential={confidential} inline />
+function GoDeeper({ confidential }: { confidential: boolean }) {
+  return (
+    <Section>
+      <div className="space-y-6 text-center">
+        <p
+          className="text-[0.88rem] leading-[1.75]"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          Everything above is the surface. The Abstract is the feeling &mdash; 19 pages, ten minutes, the reason any of this matters. The Concrete is the understanding &mdash; every detail, every mechanism, ready for your AI or your own reading. Start with the Abstract. It deserves your attention.
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="/docs/Alexandria.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[0.8rem] no-underline transition-opacity hover:opacity-40 tracking-wide"
+            style={{ color: 'var(--text-primary)', opacity: 0.45 }}
+          >
+            read the abstract
+          </a>
+          <span className="text-[0.35rem]" style={{ color: 'var(--text-ghost)' }}>&bull;</span>
+          <span className="flex items-center gap-1.5">
+            <a
+              href={confidential ? '/docs/confidential_alexandria.md' : '/docs/alexandria.md'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[0.8rem] no-underline transition-opacity hover:opacity-40 tracking-wide"
+              style={{ color: 'var(--text-primary)', opacity: 0.45 }}
+            >
+              read the concrete
+            </a>
+            <CopyButton href={confidential ? '/docs/confidential_alexandria.md' : '/docs/alexandria.md'} />
+          </span>
+        </div>
+      </div>
+    </Section>
+  );
+}
 
-            {confidential && (
-              <div className="flex flex-col items-center gap-1.5 text-[0.65rem]" style={{ color: 'var(--text-ghost)' }}>
-                <a
-                  href="mailto:benjamin@mowinckel.com"
-                  className="no-underline tracking-wide transition-opacity hover:opacity-40"
-                  style={{ color: 'var(--text-ghost)' }}
-                >
-                  benjamin@mowinckel.com
-                </a>
-                <a
-                  href="tel:+4746643844"
-                  className="no-underline tracking-wide transition-opacity hover:opacity-40"
-                  style={{ color: 'var(--text-ghost)' }}
-                >
-                  +47 466 43 844
-                </a>
-              </div>
-            )}
+function PricingSection({ confidential }: { confidential: boolean }) {
+  if (confidential) {
+    return <ConcreteSection confidential />;
+  }
+
+  return (
+    <Section>
+      <div className="space-y-10">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h3
+              className="text-[1rem] font-normal"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Sovereignty
+            </h3>
+            <p
+              className="text-[0.82rem] leading-[1.7]"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              One connector. Passive extraction. Your cognition in portable files you own.
+            </p>
+            <p
+              className="text-[0.78rem] italic"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Less than a coffee. Freedom insurance.
+            </p>
+          </div>
+
+          <div
+            className="w-full"
+            style={{ borderTop: '1px solid var(--border-light)' }}
+          />
+
+          <div className="space-y-2">
+            <h3
+              className="text-[1rem] font-normal"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              The Examined Life
+            </h3>
+            <p
+              className="text-[0.82rem] leading-[1.7]"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              The three turns. The Editor. Mercury. The Publisher. The Library. The full cognitive transformation.
+            </p>
+            <p
+              className="text-[0.78rem] italic"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              One meal a month. The examined life.
+            </p>
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <a href="#showcase" className="absolute bottom-10 flex flex-col items-center gap-2 no-underline cursor-pointer">
-          <span className="text-[0.6rem] tracking-wider" style={{ color: 'var(--text-whisper)' }}>
-            see what you build
-          </span>
-          <svg
-            width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
-            style={{ color: 'var(--text-ghost)', animation: 'bounce 2.5s ease-in-out infinite' }}
+        <div
+          className="pt-6"
+          style={{ borderTop: '1px solid var(--border-light)' }}
+        >
+          <p
+            className="text-[0.78rem] leading-[1.7]"
+            style={{ color: 'var(--text-muted)' }}
           >
-            <path d="M7 10l5 5 5-5" />
-          </svg>
-        </a>
-      </section>
+            Founding members: pay what you want. Minimum $1/month.
+          </p>
+        </div>
 
-      {/* Product demo */}
-      <div id="showcase">
-        <ProductShowcase />
       </div>
+    </Section>
+  );
+}
+
+function PhilosophyCloseSection({ confidential }: { confidential: boolean }) {
+  return (
+    <Section>
+      <div className="space-y-12 text-center">
+        <p
+          className="text-[0.95rem] sm:text-[1.05rem] leading-[1.8] italic"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          Your mind is a droplet. It blazes through the sky for a moment &mdash; eternal darkness on either side.
+          Alexandria ensures the droplet moves with grace, and that it leaves a mark.
+        </p>
+
+        <WaitlistSection confidential={confidential} inline />
+      </div>
+    </Section>
+  );
+}
+
+// ─── Main ────────────────────────────────────────────────────────────
+
+export default function LandingPage({ confidential = false }: LandingPageProps) {
+  return (
+    <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', overflowX: 'hidden' }}>
+      <ThemeToggle />
+
+      {/* Section 1 — Hero */}
+      <HeroSection confidential={confidential} />
+
+      {/* Section 2 — The Sovereignty Hook */}
+      <SovereigntyHookSection />
+
+      {/* Section 3 — The Three Turns */}
+      <ThreeTurnsSection />
+
+      {/* Section 4 — Constitution Demo */}
+      <ConstitutionDemoSection />
+
+      {/* Section 5 — Library Demo */}
+      <LibraryDemoSection />
+
+      {/* Section 6 — Five Value Adds */}
+      <FiveThingsSection />
+
+      {/* Section 7 — Go Deeper */}
+      <GoDeeper confidential={confidential} />
+
+      {/* Section 8 — Pricing (public) / Investment Detail (confidential) */}
+      <PricingSection confidential={confidential} />
+
+      {/* Section 8 — Philosophy Close */}
+      <PhilosophyCloseSection confidential={confidential} />
 
       <FooterSection />
     </div>
