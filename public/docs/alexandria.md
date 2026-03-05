@@ -136,7 +136,9 @@ Two tiers. Two different propositions.
 
 The sovereignty tier is for everyone who uses AI. The full tier is for the people who resonate. Many will start with sovereignty and stay. Some will go deeper. The product itself demonstrates the value of going further — your Constitution builds, you read it back, you see what extraction alone has revealed, and the natural next step is obvious.
 
-Founding members — the earliest Authors — pay what they want. Minimum $1/month, no maximum. What you choose to pay is a reflection of how much you believe.
+There are many ways in. You might believe in the philosophy but not have the technology set up yet — come in through the Library, engage with the community, the technology catches up. You might care about the technology but not the philosophy — sovereignty insurance, nothing more, and the product shows you the rest over time. You might believe in both — the full experience, the tribe, the cathedral. You might just want to support the project and the founder — becoming an Author is more dignified than donating and more natural than investing. Every entry point feeds the same system. Same Constitution, same Library, same architecture. Just at different depths.
+
+Founding members — the earliest Authors — pay what they want. Minimum $1/month, no maximum. What you choose to pay is a reflection of how much you believe. Each founding Author has a number — chronological, permanent. The number tells the story.
 
 Library interactions: you set your own price for Premium Persona access. Alexandria takes a small percentage. Your earnings grow with the quality of your Constitution and the demand for your mind.
 
