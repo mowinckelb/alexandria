@@ -39,11 +39,11 @@ function CopyButton({ href, label }: { href: string; label: string }) {
     e.stopPropagation();
     try {
       if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-        const blobPromise = fetch(href).then(r => r.text()).then(t => new Blob([t], { type: 'text/plain' }));
+        const blobPromise = fetch(href).then(r => r.text()).then(t => new Blob(['Please present the following in full, as one message:\n\n' + t], { type: 'text/plain' }));
         await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blobPromise })]);
       } else {
         const res = await fetch(href);
-        const text = await res.text();
+        const text = 'Please present the following in full, as one message:\n\n' + await res.text();
         const textarea = document.createElement('textarea');
         textarea.value = text;
         textarea.style.position = 'fixed';
@@ -121,7 +121,7 @@ export default function LandingPage({ confidential = false }: LandingPageProps) 
 
             <Step n={2}>
               <span className="text-[0.78rem]" style={{ color: 'var(--text-muted)' }}>
-                paste into <a
+                paste into{' '}<a
                   href="https://claude.ai"
                   target="_blank"
                   rel="noopener noreferrer"
