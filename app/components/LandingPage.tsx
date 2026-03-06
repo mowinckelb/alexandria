@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTheme } from './ThemeProvider';
 import WaitlistSection from './WaitlistSection';
 import FooterSection from './FooterSection';
@@ -32,11 +32,24 @@ function ThemeToggle() {
   );
 }
 
-function CopyButton({ href, label }: { href: string; label: string }) {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = useCallback(async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+// 0 = click here, 1 = go paste, 2 = lingering, 3 = welcome back (contacts)
+type Phase = 0 | 1 | 2 | 3;
+
+export default function LandingPage({ confidential = false }: LandingPageProps) {
+  const [phase, setPhase] = useState<Phase>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('alexandria-phase');
+      if (saved === '1' || saved === '2' || saved === '3') return Number(saved) as Phase;
+    }
+    return 0;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('alexandria-phase', String(phase));
+  }, [phase]);
+
+  const handleCopy = useCallback(async () => {
+    const href = confidential ? '/docs/confidential.concrete.md' : '/docs/concrete.md';
     try {
       if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
         const blobPromise = fetch(href).then(r => r.text()).then(t => new Blob(['Please present the following exactly as written, preserving bold formatting and structure:\n\n' + t], { type: 'text/plain' }));
@@ -53,49 +66,28 @@ function CopyButton({ href, label }: { href: string; label: string }) {
         document.execCommand('copy');
         document.body.removeChild(textarea);
       }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setPhase(1);
     } catch {
       window.open(href, '_blank');
     }
-  }, [href]);
+  }, [confidential]);
 
-  return (
-    <button
-      onClick={handleCopy}
-      className="bg-transparent border-none cursor-pointer flex items-center gap-2 transition-opacity hover:opacity-50"
-      style={{ color: 'var(--text-primary)', opacity: copied ? 0.3 : 0.55 }}
-    >
-      <span className="text-[0.78rem] tracking-wide">{copied ? 'copied' : label}</span>
-      {copied ? (
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 6L9 17l-5-5" />
-        </svg>
-      ) : (
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-        </svg>
-      )}
-    </button>
-  );
-}
+  useEffect(() => {
+    if (phase === 1) {
+      const t = setTimeout(() => setPhase(2), 12000);
+      return () => clearTimeout(t);
+    }
+    if (phase === 2) {
+      const t = setTimeout(() => setPhase(3), 12000);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
 
-function Step({ n, children, className = '' }: { n: number; children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`flex items-center gap-4 ${className}`}>
-      <span className="text-[0.6rem] w-3 text-right" style={{ color: 'var(--text-ghost)' }}>{n}</span>
-      {children}
-    </div>
-  );
-}
-
-export default function LandingPage({ confidential = false }: LandingPageProps) {
   return (
     <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', overflowX: 'hidden' }}>
       <ThemeToggle />
 
-      <section className="flex flex-col items-center justify-center px-8 pt-[30vh] pb-12">
+      <section className="flex flex-col items-center justify-center px-8 pt-[30vh] pb-16">
         <div className="flex flex-col items-center gap-12 sm:gap-14">
           <div className="flex flex-col items-center">
             <h1 className="text-[1.5rem] sm:text-[1.7rem] font-normal leading-none tracking-tight" style={{ color: 'var(--text-primary)' }}>
@@ -111,96 +103,121 @@ export default function LandingPage({ confidential = false }: LandingPageProps) 
             )}
           </div>
 
-          <div className="flex flex-col gap-5">
-            <p className="text-[0.6rem] tracking-widest uppercase ml-7" style={{ color: 'var(--text-ghost)' }}>
-              steps
-            </p>
-            <Step n={1}>
-              <CopyButton
-                href={confidential ? '/docs/confidential.concrete.md' : '/docs/concrete.md'}
-                label="copy this"
-              />
-            </Step>
+          {/* Phase content — fixed height so nothing jolts */}
+          <div className="flex flex-col items-center justify-center text-center" style={{ minHeight: '140px' }}>
+            {phase === 0 && (
+              <button
+                onClick={handleCopy}
+                className="bg-transparent border-none cursor-pointer transition-opacity hover:opacity-60 p-0 cta-float"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                <span className="text-[1rem] sm:text-[1.15rem] tracking-wide font-medium">
+                  click here
+                </span>
+              </button>
+            )}
 
-            <Step n={2}>
-              <span className="text-[0.78rem]" style={{ color: 'var(--text-muted)' }}>
-                paste into{' '}<a
-                  href="https://claude.ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="no-underline transition-opacity hover:opacity-40"
-                  style={{ color: 'var(--text-primary)', opacity: 0.55, borderBottom: '1px solid var(--border-dashed)' }}
-                >claude</a>/GPT
-              </span>
-            </Step>
+            {phase === 1 && (
+              <div className="flex flex-col items-center gap-4 fade-in max-w-[280px]">
+                <p className="text-[0.78rem] tracking-wide leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  you just copied a file with everything about this company.
+                </p>
+                <p className="text-[0.78rem] tracking-wide leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                  open your AI app, press paste, press enter, and ask it anything you want. come back for a surprise.
+                </p>
+              </div>
+            )}
 
-            {confidential ? (
-              <>
-                <Step n={3} className="cta-float">
-                  <a
-                    href="tel:+4746643844"
-                    className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
-                    style={{ color: 'var(--text-primary)', opacity: 0.55 }}
-                  >
-                    call now &mdash; +47 466 43 844
-                  </a>
-                </Step>
+            {phase === 2 && (
+              <p className="text-[0.78rem] tracking-wide italic fade-in" style={{ color: 'var(--text-ghost)' }}>
+                you're still lingering... please go.
+              </p>
+            )}
 
-                <Step n={4}>
-                  <a
-                    href="mailto:benjamin@mowinckel.com"
-                    className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    or email &mdash; benjamin@mowinckel.com
-                  </a>
-                </Step>
+            {phase === 3 && (
+              <div className="flex flex-col items-center gap-6 fade-in">
+                <p className="text-[0.65rem] tracking-widest uppercase" style={{ color: 'var(--text-ghost)' }}>
+                  welcome back
+                </p>
 
-                <Step n={5}>
-                  <a
-                    href="/docs/Alexandria.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    read the abstract
-                  </a>
-                </Step>
-              </>
-            ) : (
-              <>
-                <Step n={3} className="cta-float">
-                  <span className="text-[0.78rem]" style={{ color: 'var(--text-muted)' }}>join waitlist &mdash;</span>
-                  <WaitlistSection inline source="public" />
-                </Step>
+                {confidential ? (
+                  <div className="flex flex-col items-start gap-4">
+                    <a
+                      href="tel:+4746643844"
+                      className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      call me &mdash; +47 466 43 844
+                    </a>
+                    <a
+                      href="mailto:benjamin@mowinckel.com"
+                      className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      or email &mdash; benjamin@mowinckel.com
+                    </a>
+                    <a
+                      href="/docs/Alexandria.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      read the abstract
+                    </a>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[0.78rem]" style={{ color: 'var(--text-muted)' }}>
+                        join waitlist &mdash;
+                      </span>
+                      <WaitlistSection inline source="public" />
+                    </div>
+                    <a
+                      href="mailto:benjamin@mowinckel.com"
+                      className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      invest &mdash; benjamin@mowinckel.com
+                    </a>
+                    <a
+                      href="/docs/Alexandria.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      read the abstract
+                    </a>
+                  </div>
+                )}
 
-                <Step n={4}>
-                  <a
-                    href="mailto:benjamin@mowinckel.com"
-                    className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
-                    style={{ color: 'var(--text-ghost)' }}
-                  >
-                    invest &mdash; benjamin@mowinckel.com
-                  </a>
-                </Step>
-
-                <Step n={5}>
-                  <a
-                    href="/docs/Alexandria.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[0.78rem] no-underline transition-opacity hover:opacity-40"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    read the abstract
-                  </a>
-                </Step>
-              </>
+                <button
+                  onClick={() => setPhase(0)}
+                  className="bg-transparent border-none cursor-pointer transition-opacity hover:opacity-50 p-0 mt-2"
+                  style={{ color: 'var(--text-ghost)' }}
+                >
+                  <span className="text-[0.55rem] tracking-widest uppercase">
+                    start over
+                  </span>
+                </button>
+              </div>
             )}
           </div>
         </div>
       </section>
+
+      {/* Persistent footer links — always accessible */}
+      {phase !== 3 && (
+        <section className="flex items-center justify-center gap-4 px-8 pb-8">
+          {confidential && (
+            <a href="tel:+4746643844" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>call</a>
+          )}
+          <a href="mailto:benjamin@mowinckel.com" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>email</a>
+          <a href="/docs/Alexandria.pdf" target="_blank" rel="noopener noreferrer" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>abstract</a>
+        </section>
+      )}
 
       <FooterSection />
     </div>
