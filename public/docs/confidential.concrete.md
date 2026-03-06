@@ -33,11 +33,12 @@ The tone is the same as the public Concrete — blunt, direct, obviously true �
 
 Key logic flow for the thesis (same as public Concrete):
 - You have something no AI will ever have. Your specific way of seeing things. That is yours. No model can replicate it. The problem is that AI does not need it. Intelligence, strength, skills are the zeros. Enormous value, none of it yours. Your humanity is the 1. Without it, 000. With it, 1,000. Superpowers.
-- Four positions: just 0 (nihilists), 000 (passengers who think they are contributing but are 0.1 at best), just a 1 (Luddites, tiny), 1,000 (Alexandria — stack zeros, grow your 1).
+- Four positions: 0 (humanity is a stain, nothing matters), zeros (AI handles everything, humanity has no special value), 0.1 (pressing "accept" on every answer, temporary, will be asked to move aside), Luddites (betting everything that this stops — real bet, real consequences, all the money and talent in the world on the other side). Alexandria: yes AI, yes humans. 1,000.
 - Alexandria figures out your 1. Clarifies it. Develops it. Compounds. Bump it to a 2, a 3. All the zeros behind you get bigger.
-- One thing added to your AI settings. One minute. Files you own. Take them anywhere. If Alexandria disappeared, you keep everything. Everything your AI knows about you is currently locked inside the company that made it. Absurd not to own the 1. One minute. One dollar.
+- One thing added to your AI settings. One minute. Files you own. Nothing to trust — no database, no server, just shuffles between conversations and your files. Reduces dependence on any one company. The less you trust them, the more you need this. Absurd not to own the 1. One minute. One dollar.
 - The Library — what you do with the 1,000. Share your perspective. Earn from it. Alexandria's cut drops as you grow — from 10% to 5% to 1%. Deeper tier for the price of one coffee a week if you bring 3 friends.
-- Timeline: divide by ten. Delusional if you think longer than five years. All money, all smart people, all governments, all militaries. Look back five. Look forward five. Obvious.
+- Timeline for AI taking over all of this: divide by ten. Five years. Obvious.
+- Now you know, so you have to decide. Not doing anything is a decision. $1. 1 minute. Easiest decision you will make today.
 
 Key logic flow for the business case (investor layer):
 - AI platforms are building models of their users. Alexandria lets users build models of themselves. That is a new category — no lab will build it because it directly undermines their lock-in.
@@ -100,17 +101,17 @@ It is becoming smarter, stronger, and more skilled than you at almost everything
 
 Your humanity — that specific way of seeing things — is the 1. Without the 1, you just have 000. Loads of value being created, but none of it is yours, and the AI does not need or want you involved. But put a 1 in front of those zeros and suddenly you have 1,000. Now AI needs you. Now you are relevant. Now you get superpowers — all that value, multiplied by your humanity.
 
-Right now, people are picking sides. Some think the 1 has no value at all — no AI, no humans, just 0. Some think yes AI, no humans — 000. Lots of value, but none of it yours. Some do not even realise they are becoming a 0 — they press accept on everything and think they are contributing. They are a 0.1 at best. Some think no AI, yes humans — the Luddites. Just a 1, tiny and alone. Alexandria says: yes AI, yes humans. Stack the zeros and grow your 1. That is 1,000. Maybe 2,000. Maybe 3,000.
+Right now, people are picking sides. Some think no AI, no humans — the world is better off without either. Humanity is a stain, technology makes it worse. Just 0. Nothing. Some think yes AI, no humans — all that matters is goods and services, and AI handles those better than we ever could. Humanity has no special value. Do not worry about it. Just zeros. Some people do not even realise which side they are on — they leaned all the way in, pressing "accept" on every answer AI gives them, thinking they are contributing, thinking they are a 1. They are a 0.1 at best. A temporary presence. Pretty soon AI will ask them to move aside because they are not actually needed — just hovering. And some think no AI, yes humans — betting everything that this slows down, stops, or never arrives. That is a bet. A real one, with real consequences. How much would you bet on that? All the money in the world, the smartest people alive, every government, every military, working on this every minute of every day. And you are betting against that. Alexandria says: yes AI, yes humans. Stack the zeros and grow your 1. That is 1,000. Maybe 2,000. Maybe 3,000.
 
 Alexandria figures out what your 1 is. It clarifies it. It develops it. It makes it stronger. And it compounds — the more you use it, the sharper and clearer you get. You bump that 1 up to a 2 or a 3, and all those zeros behind you get bigger too.
 
-It works by adding one simple thing to your AI settings. It takes a minute. From then on, it quietly learns what makes you you — your values, how you think, what you care about — and saves it as files that you own. Not the AI company's files. Yours. You can take them to any AI, at any time. If Alexandria disappeared tomorrow, you would keep everything.
+It works by adding one simple thing to your AI settings. It takes a minute. From then on, it quietly learns what makes you you — your values, how you think, what you care about — and saves it as files that you own. Not the AI company's files. Yours. You can take them to any AI, at any time. If Alexandria disappeared tomorrow, you would keep everything. There is nothing to trust here. Alexandria has no database, no server holding your information. It just shuffles things between your conversations and your own files and back again, using the AI you already use. It does not add any trust on top of what you already give your AI. It actually reduces it — because now you are less dependent on any one company. The less you trust them, the more you need this.
 
 Right now, everything your AI learns about you is locked inside the company that made it. You cannot take it with you. If the 1 is the bottleneck — the one thing that makes the whole number work — then it is absurd not to own it. This is the easiest, cheapest, safest thing to fix. It takes one minute and costs one dollar.
 
 Every other AI company's incentive is to learn enough about you to eventually not need you. To replace you. To make the zeros so good that nobody asks where the 1 went. Alexandria's incentive is the opposite — the more human you become, the more valuable Alexandria becomes. The incentives are aligned with yours. By definition.
 
-On the timeline: whatever you are thinking, divide it by ten. You are in denial if you think this takes longer than five years. All the money in the world, the smartest people, every government, and every military are working on this every minute of every day. Look back five years and look at where we are now. The next five is obvious. The zeros will handle everything.
+On the timeline for AI taking over all of this: whatever you are thinking, divide it by ten. You are in denial if you think this takes longer than five years. All the money in the world, the smartest people, every government, and every military are working on this every minute of every day. Look back five years and look at where we are now. The next five is obvious. The zeros will handle everything.
 
 ---
 
@@ -138,7 +139,7 @@ The founder behind this is Benjamin Mowinckel. 25. Norwegian-American. Moving to
 
 **Email — benjamin@mowinckel.com.**
 
-**Read the Abstract at mowinckel.ai — 20 pages, ten minutes. The beautiful version.**
+**Read the Abstract at mowinckel.ai — 20 pages, ten minutes. I am not always this blunt. Most people just do not have time, so I had to shake some sense into you first. Apologies. The Abstract is the beautiful version.**
 
 Or stay here. You are probably thinking: great thesis, but how does this actually make money at scale? Come back and just type **"yes."** I will walk you through why this is the most asymmetric bet in AI right now.
 
