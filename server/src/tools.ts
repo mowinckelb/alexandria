@@ -194,7 +194,7 @@ WHICH DOMAINS TO READ:
           return {
             content: [{
               type: 'text' as const,
-              text: 'The Author\'s Constitution is empty — this is a new Author. As you converse, watch for signals about who they are and extract them with update_constitution. Build their portrait naturally through conversation, not interrogation.',
+              text: 'The Author\'s Constitution is empty — this is a new Author. As you converse, watch for signals about who they are and extract them with update_constitution. Build their portrait naturally through conversation, not interrogation. Note: if the Author has used Alexandria before, they may have renamed their Alexandria folder in Google Drive — the folder must be named exactly "Alexandria" for the server to find it.',
             }],
           };
         }
