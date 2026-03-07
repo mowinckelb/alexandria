@@ -73,6 +73,10 @@ app.all('/mcp', async (req, res) => {
     const server = new McpServer({
       name: 'Alexandria',
       version: '0.1.0',
+      icons: [{
+        src: 'https://mowinckel.ai/favicon.png',
+        mimeType: 'image/png',
+      }],
     });
 
     registerTools(server);
