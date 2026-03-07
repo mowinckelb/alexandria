@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTheme } from './ThemeProvider';
 import WaitlistSection from './WaitlistSection';
 import FooterSection from './FooterSection';
@@ -29,6 +29,35 @@ function ThemeToggle() {
         </svg>
       )}
     </button>
+  );
+}
+
+function FooterWaitlist({ confidential }: { confidential: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <section className="flex items-center justify-center gap-4 px-8 pb-8">
+      {confidential && (
+        <a href="tel:+4746643844" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>call</a>
+      )}
+      <a href="mailto:benjamin@mowinckel.com" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>email</a>
+      <a href="/docs/Alexandria.pdf" target="_blank" rel="noopener noreferrer" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>abstract</a>
+      {!confidential && (
+        expanded ? (
+          <div className="flex items-center" style={{ overflow: 'hidden', animation: 'expandIn 0.3s ease-out forwards' }}>
+            <WaitlistSection inline source="public" />
+          </div>
+        ) : (
+          <button
+            onClick={() => setExpanded(true)}
+            className="text-[0.6rem] bg-transparent border-none cursor-pointer p-0 no-underline transition-opacity hover:opacity-50"
+            style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-eb-garamond)' }}
+          >
+            waitlist
+          </button>
+        )
+      )}
+    </section>
   );
 }
 
@@ -238,13 +267,7 @@ export default function LandingPage({ confidential = false }: LandingPageProps) 
 
       {/* Persistent footer links — always accessible */}
       {phase !== 3 && (
-        <section className="flex items-center justify-center gap-4 px-8 pb-8">
-          {confidential && (
-            <a href="tel:+4746643844" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>call</a>
-          )}
-          <a href="mailto:benjamin@mowinckel.com" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>email</a>
-          <a href="/docs/Alexandria.pdf" target="_blank" rel="noopener noreferrer" className="text-[0.6rem] no-underline transition-opacity hover:opacity-50" style={{ color: 'var(--text-muted)' }}>abstract</a>
-        </section>
+        <FooterWaitlist confidential={confidential} />
       )}
 
       <FooterSection />

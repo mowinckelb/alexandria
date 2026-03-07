@@ -162,6 +162,11 @@ html.app-shell input:focus {
   animation: fadeIn 0.6s ease-in;
 }
 
+@keyframes expandIn {
+  from { max-width: 0; opacity: 0; }
+  to { max-width: 12rem; opacity: 1; }
+}
+
 /* Scroll-triggered fade-in */
 .fade-section {
   opacity: 0;
