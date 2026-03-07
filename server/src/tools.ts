@@ -96,7 +96,11 @@ RATE: Do not extract from every message. A typical conversation might yield 0-3 
       const header = `[${new Date().toISOString().split('T')[0]}] [${signal_strength}]`;
       const entry = `${header}\n${content}`;
 
-      await appendToConstitutionFile(token as string, domain, entry);
+      // Fire and forget — don't block the response on Drive writes.
+      // The data will land, but Claude gets its response immediately.
+      appendToConstitutionFile(token as string, domain, entry).catch((err) => {
+        console.error(`Failed to write to ${domain}:`, err);
+      });
 
       return {
         content: [{
