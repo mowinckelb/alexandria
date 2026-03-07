@@ -92,10 +92,9 @@ app.all('/mcp', async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: 'Internal server error' });
     }
-  } finally {
-    // Clean up transport after response is sent, not on connection close
-    transport.close().catch(() => {});
   }
+  // Don't close transport — let the response stream finish naturally.
+  // Stateless transports are garbage collected after the request completes.
 });
 
 // ---------------------------------------------------------------------------
