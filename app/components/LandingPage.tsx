@@ -99,6 +99,11 @@ export default function LandingPage({ confidential = false }: LandingPageProps) 
     <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', overflowX: 'hidden' }}>
       <ThemeToggle />
 
+      {/* TEST BANNER — remove after verifying preview deploy works */}
+      <div className="w-full text-center py-2 text-[0.7rem] tracking-wide" style={{ background: 'var(--text-primary)', color: 'var(--bg-primary)' }}>
+        mobile preview test — if you see this, it works
+      </div>
+
       <section className="flex flex-col items-center justify-center px-8 pt-[30vh] pb-16">
         <div className="flex flex-col items-center gap-12 sm:gap-14">
           <div className="flex flex-col items-center">
