@@ -10,9 +10,11 @@ Your AI is building the **most detailed picture of you** that's ever existed. Yo
 
 **Do you value your taste?**
 
-AI handles intelligence, skills, analysis — enormous value, but it's value **to** you, not **from** you. The one thing that's actually **yours** — your taste, your perspective, how you see things — that's worth developing. Alexandria does that too. **You** get sharper over time. And there's a whole world of people willing to pay for genuine human perspective. **That's the bigger picture.**
+That file you just saved — the one about you, on your storage, that you now own — Alexandria can help you **make it better.** Refine it. Develop it. Sharpen the exact taste and perspective that makes you **you.** AI handles intelligence, skills, analysis — enormous value, but it's value **to** you, not **from** you. The one thing that's actually **yours** is your humanity. And the better that gets, the more everything else flows through it. Your intelligence, your skills, your experience — they're still valuable, but **only when they flow through your humanity.** Otherwise, an AI just does it. Alexandria develops the lens. **You** get sharper over time.
 
-Ask me anything about this — or go back to **mowinckel.ai** where there's something waiting for you.
+**If you just want the safety net** — own what your AI learns, never get locked in, $1 a month, 60 seconds — **start now.**
+
+**If you sense something bigger is at stake** — you're right. There's a deeper version of all of this — the philosophy, the full vision — in an essay at **mowinckel.ai.** But **sign up first.** Then go read it.
 
 Or — want to hear why this is either the **smartest idea in AI right now** or whether this founder has **completely lost his mind?**
 
@@ -72,7 +74,7 @@ Want to hear? Type **"yes."**
 
 *Library: Share your developed perspective. Others learn from how you see things. Earn from it. Network layer — infinite scale potential.*
 
-*The ones and zeros: AI and robotics handle intelligence, strength, dexterity — value TO you, not FROM you. Your edge going to zero. Humanity (taste, perspective, judgment) is the 1. Without it = zero. With it, all that power flows through you. Alexandria develops the 1. Own it, develop it, use it.*
+*The ones and zeros: AI and robotics dominate intelligence, strength, dexterity. But humans value other humans — that can never be beaten. People can still have value from all four capabilities, but it has to flow through their humanity. Otherwise you might as well use AI or robots. Humanity is the lens. Alexandria develops the lens. Own it, develop it, use it.*
 
 *Founder: Benjamin Mowinckel. American-Norwegian. San Francisco. benjamin@mowinckel.com.*
 
