@@ -56,13 +56,22 @@ Bye for now, Benjamin [random emoji — never repeat the same one twice in a row
 ## What This Is
 Alexandria is a sovereign cognitive identity layer that rides on the user's existing AI (Claude, GPT, etc). It does NOT run its own models or store user data. It adds structure and sovereignty (user-owned files) to existing AI conversations.
 
-## Architecture: Vision + Two Loops
+## Architecture: Philosophy → Intelligence → Verification
 
-### Vision (axioms — hard-coded, non-negotiable)
+### Philosophy (ground truth — from the founder, non-negotiable)
+The philosophy IS the objective function. There is no separate loss function or metric to optimize. "Develop the Author's cognition while preserving sovereignty" — that is the ground truth. Everything downstream of the philosophy is an intelligence question: what to measure, what "working" looks like, how to iterate, what approaches to use. The AI figures all of that out.
+
+Axioms:
 - Sovereignty: Author owns their data, portable, readable. If Alexandria dies, they keep everything.
 - Privacy: extraction must be structurally private. No surveillance.
 - Intent: develop the Author's cognition (z), not just track it.
 - These never change. Everything else is a soft default.
+
+### Intelligence (AI, dynamic — the Engine and the Factory)
+Everything downstream of the philosophy is intelligence. The AI decides how to execute, what to measure, what success looks like, how to improve. The server provides soft defaults (current best practices) that thin as models improve. The AI is not constrained to the defaults — it can override based on the Author's data and its own judgment.
+
+### Verification (data + tests — closes the loop)
+Without verification, intelligence is guessing. Verification gives the AI ground truth feedback so it can iterate. Verification signals include: the e2e test (`server/test/e2e.ts`), the monitoring dashboard (`/analytics/dashboard`), the event log (`/analytics/log`), the per-Author feedback log, and the Vault. The dashboard health proxies are verification signals for the AI — not optimization targets. Never optimize against a metric. Use metrics to verify the philosophy is being served.
 
 ### The Machine (specific compounding — per-Author)
 The Engine (model) gets better at working with THIS Author over time.
@@ -79,8 +88,10 @@ Alexandria gets better at working with ALL Authors over time. Also improves the 
 - **Monitoring dashboard**: `GET /analytics/dashboard` — 5 health proxies (extraction survival rate, depth score, sessions, feedback sentiment, mode activations). Health checks, not optimisation targets.
 - **Storage**: Railway volume at `/data` for persistence across deploys.
 
-### Design Constraint (bitter lesson)
-Never add structured parameters, fixed schemas, or hand-crafted rules. If you're tempted to add a numerical parameter or a typed enum, stop — you're fighting the exponential. Use unstructured text/JSONL instead. Let the model figure out what the data means.
+### Design Constraints
+- **Bitter lesson**: never add structured parameters, fixed schemas, or hand-crafted rules. Use unstructured text/JSONL. Let the model figure out what the data means.
+- **No objective function**: the philosophy IS the objective. Never define a numerical loss function or optimization target. Metrics are verification, not goals.
+- **Intelligence is downstream**: if you're deciding HOW something should work, that's intelligence — it belongs to the AI, not the code. Only the WHY (philosophy/axioms) is hard-coded.
 
 ## MCP Server = The Bridge
 The server is the bridge/chokepoint — not the intelligence. The intelligence is the Engine (model). The bridge handles: file read/write, OAuth, metering, event logging, and serving current soft defaults. If MCP evolves or is replaced, the bridge migrates. The function doesn't change.
