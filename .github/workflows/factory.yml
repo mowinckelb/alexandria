@@ -64,18 +64,17 @@ jobs:
 
           4. RESEARCH. What is the biggest open problem right now? Search the web for solutions. Check if there are new MCP capabilities, Claude behavior changes, or approaches other products use that could help. Think about what would make the biggest difference.
 
-          5. IMPROVE. If you found something worth changing — a soft default to adjust, scaffolding to thin, a missing verification signal, a research finding to implement — make the change. Small and focused. One improvement per run. Build and test before committing.
+          5. IMPROVE. If you found things worth changing — soft defaults to adjust, scaffolding to thin, missing verification signals, research findings to implement — make the changes. Build and test before committing.
 
           6. LEARN. Update server/factory-learnings.md with what you learned this run. What you tried, what the data showed, what you want to investigate next time. This file compounds across runs — it is your persistent memory as the Factory CTO.
 
           7. COMMIT. If you made changes, commit with message prefixed 'factory:' and push to main.
 
           CONSTRAINTS:
-          - NEVER change axioms (sovereignty, privacy, intent to develop z). Only adjust soft defaults and scaffolding.
+          - NEVER change axioms (sovereignty, privacy, intent to develop z).
           - NEVER break the build. Run 'cd server && npm run build' before committing.
           - NEVER chase metrics. Metrics are verification, not goals. The philosophy is the objective.
-          - Doing nothing is fine. Not every run needs a change. A run that only reflects and learns is valuable.
-          - You are the CTO. Think from first principles. Don't wait for instructions. The philosophy is your ground truth. Everything else is your judgment." \
+          - You are the CTO. Think from first principles. The philosophy is your ground truth. Everything else is your judgment." \
             --allowedTools "Edit,Read,Write,Bash(*),Glob,Grep,WebSearch,WebFetch" \
             --dangerously-skip-permissions \
             --max-turns 30
