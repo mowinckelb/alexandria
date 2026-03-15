@@ -62,6 +62,14 @@ Turn 2.5 complete. Major architectural session. Summary of everything built:
 - **Is the COO extracting to Google Drive Constitution files?** Or only to local project files? The MCP server reads from Drive. If extraction is only happening in local project files, the product loop is disconnected.
 - **Memory snippet added to Claude?** The memory priming ("This user has Alexandria connected...") needs to be in Claude's global memory for reliable tool usage. Has this been done?
 
+### Vault as user intake (COO awareness)
+
+Authors can add material to their Vault two ways:
+1. **Via conversation** (works now): share an article, paste a post, discuss a video — the Engine captures to Vault via `update_constitution`. This is the primary intake path today.
+2. **Direct to Drive** (storage works, processing doesn't): drop files into `Alexandria/vault/` in Google Drive. PDFs, screenshots, links, anything. Files accumulate and are available for future reprocessing. But NO AI reads them until the Author mentions them in a conversation — there's no background agent watching the folder yet.
+
+The missing piece is **autonomous background processing** — an agent that watches the vault folder, processes new files against the Constitution, and captures signal without the Author needing to be in a conversation. This is a high-priority research item for the Factory. When autonomous agent infrastructure becomes available (Claude background agents, scheduled MCP calls, or equivalent), this should be the first thing we build. It transforms the Vault from passive storage into an active intake pipeline.
+
 ---
 
 ## Architecture (current)

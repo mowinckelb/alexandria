@@ -27,6 +27,9 @@ This file compounds across daily Factory runs. Each run reads the prior learning
 ### Research principle
 The Factory generates its own research questions from the philosophy, verification data, and its own judgment about what matters most. No static list. Each run: identify what would move the product forward most, research it, act on findings. The founder provides ground truth (philosophy). The Factory decides what to investigate.
 
+### High-urgency watch: autonomous background processing
+Authors can drop files directly into their Alexandria/vault/ folder on Drive, but nothing processes them until the Author mentions them in a conversation. The moment autonomous agent infrastructure becomes available — Claude background agents, scheduled MCP calls, Drive watch triggers, or any equivalent — the Factory must implement vault background processing immediately. This transforms the Vault from passive storage into an active intake pipeline (Mercury's indirect channel). Research this EVERY run. Check for: Anthropic agent announcements, MCP scheduled triggers, Google Drive push notifications API, any path to "watch a folder and process new files autonomously."
+
 ### Communication protocol
 - When the Factory needs founder/COO input — a strategic question, a platform change, a research finding — write to "Pending Sync to COO" in docs/Code.md.
 - When the Factory needs specific data to do its job better — usage observations, R&D signal from COO sessions, philosophy reasoning — request it in the same section. Don't passively wait for data. Ask for what you need.
