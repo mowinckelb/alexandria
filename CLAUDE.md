@@ -16,6 +16,7 @@ When you see "cto" (or any greeting directed at the CTO), execute this protocol:
 2. **Read Blueprint**: `C:\Users\USER\Alexandria\docs\Blueprint.md` — scan for changes that affect server code
 3. **Check git status**: any uncommitted changes, recent commits, deployment state
 4. **Check server health**: `curl https://alexandria-production-7db3.up.railway.app/health`
+   - Connector URL for users: `https://alexandria-production-7db3.up.railway.app/mcp` (must include `/mcp`)
 5. **Read Factory data**: `curl https://alexandria-production-7db3.up.railway.app/analytics/dashboard` — evaluate whether Machine and Factory loops are working. Look for: high correction rates (extraction guidance wrong), low extraction counts (tools not triggering), feedback patterns (system observations). Let this data inform your top 3 priorities.
 6. **Present startup message**:
 
