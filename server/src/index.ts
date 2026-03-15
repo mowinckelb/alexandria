@@ -93,7 +93,10 @@ function createMcpServer() {
   return server;
 }
 
-// MCP endpoint — handles all methods, selective auth
+// MCP endpoint — no middleware auth. Each tool handler checks its own auth.
+// The MCP protocol needs initialize, notifications/initialized, and tools/list
+// to work without auth during connector setup. Tool calls (tools/call) check
+// for Bearer token inside each handler via authInfo.
 app.all('/mcp', async (req, res) => {
   // HEAD probe — Claude checks if MCP server exists
   if (req.method === 'HEAD') {
@@ -102,33 +105,19 @@ app.all('/mcp', async (req, res) => {
     return;
   }
 
-  // DELETE — session teardown (stateless, just acknowledge)
-  if (req.method === 'DELETE') {
-    res.status(200).json({ ok: true });
-    return;
-  }
-
-  // For POST: check if this is an initialize request (must work without auth)
-  const isInitialize = req.method === 'POST' && req.body?.method === 'initialize';
-
-  // Auth check — skip for initialize, require for everything else
-  if (!isInitialize) {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-    if (!token) {
-      res.status(401).json({ error: 'Authentication required' });
-      return;
-    }
+  // Pass auth info through if present (tools use it for Drive access)
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (token) {
     try {
       const authInfo = await authProvider.verifyAccessToken(token);
       (req as unknown as Record<string, unknown>).auth = authInfo;
     } catch {
-      res.status(401).json({ error: 'Invalid or expired token' });
-      return;
+      // Invalid token — don't block, let the MCP handler deal with it.
+      // Tool calls will fail naturally with "Not authenticated."
     }
   }
 
-  // Handle MCP request
   const server = createMcpServer();
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined, // stateless
