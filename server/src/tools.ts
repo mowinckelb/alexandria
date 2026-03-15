@@ -1,19 +1,21 @@
 /**
- * THE BLUEPRINT — Axioms + Soft Defaults
+ * THE BLUEPRINT — Philosophy → Intelligence → Verification
  *
- * Axioms (hard-coded, non-negotiable):
- *   - Sovereignty: Author owns their data, portable, readable
- *   - Ethics: privacy as precondition, no surveillance
- *   - Intent: develop the Author's cognition (z)
+ * Philosophy (ground truth, from the founder):
+ *   The philosophy IS the objective function. "Develop the Author's
+ *   cognition while preserving sovereignty." No separate loss function.
  *
- * Soft defaults (Factory's current best guess, overridable by the Engine):
- *   - Domain structure (6 domains — scaffolding, not product)
- *   - Extraction guidance (what to capture, how to route)
- *   - Mode instructions (methodology, thinning as models improve)
+ * Intelligence (downstream, belongs to the AI):
+ *   Everything else — what to measure, how to approach each Author,
+ *   what to capture, when to intervene. The Engine decides.
+ *
+ * Verification (closes the loop):
+ *   Event log, dashboard, feedback log, e2e tests. Ground truth
+ *   feedback so the AI can iterate. Not optimization targets.
  *
  * The server is the bridge: file read/write, OAuth, metering, event
  * logging, and serving the current soft defaults. Intelligence belongs
- * to the Engine (the model). The bridge gets thinner over time.
+ * to the Engine. The bridge gets thinner over time.
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';

@@ -126,10 +126,11 @@ export async function getEventLog(): Promise<string> {
  * Both scale automatically. Bitter lesson.
  */
 /**
- * Monitoring dashboard — founder-facing health proxies.
- * These are health checks, NOT optimisation targets.
- * They tell the founder if something is broken.
- * They do NOT tell the system what to chase.
+ * Monitoring dashboard — verification signals.
+ * The philosophy IS the objective function. These metrics are
+ * verification that the philosophy is being served — not
+ * optimization targets. Never chase a metric. Use them to
+ * verify, diagnose, and give the AI ground truth feedback.
  */
 export async function getDashboard(): Promise<Record<string, unknown>> {
   let events: Record<string, string>[] = [];
