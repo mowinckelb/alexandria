@@ -79,8 +79,21 @@ app.get('/favicon.png', (_req, res) => {
 // MCP endpoint — Streamable HTTP transport
 // ---------------------------------------------------------------------------
 
-// Auth middleware: require valid Bearer token on /mcp — forces Claude to do OAuth
+// HEAD handler — Claude probes this to discover MCP server exists
+app.head('/mcp', (_req, res) => {
+  res.setHeader('MCP-Protocol-Version', '2025-03-26');
+  res.status(200).end();
+});
+
+// Auth middleware: require Bearer token on /mcp, BUT allow unauthenticated
+// initialize requests — Claude must discover the server before OAuth.
 app.use('/mcp', async (req, res, next) => {
+  // Let initialize through without auth — required by MCP spec
+  if (req.method === 'POST' && req.body?.method === 'initialize') {
+    next();
+    return;
+  }
+
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) {
