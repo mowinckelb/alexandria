@@ -24,16 +24,8 @@ This file compounds across daily Factory runs. Each run reads the prior learning
 - Are the mode instruction SUGGESTIONS still necessary, or can any be thinned based on the e2e test results?
 - Is the aggregate signal (last 200 events) actually useful when there are zero events? Should the response handle the empty case better?
 
-### Standing research agenda
-These are ongoing questions the Factory should actively research, not just react to:
-- **Platform expansion beyond Claude.** MCP is currently Claude-only for easy consumer access. ChatGPT requires Developer Mode (paid/enterprise). Gemini requires enterprise allowlist. Research: are any of these platforms opening up MCP or equivalent? Are there other integration paths (browser extensions, API wrappers, custom clients)? This is the biggest growth constraint.
-- **MCP protocol evolution.** What's changing in the MCP spec? New capabilities? Better auth flows? Streaming improvements? Anything that makes the bridge thinner or the product better.
-- **Competitor landscape.** What are Mem0, Delphi, Limitless, and similar products doing? What can we learn? Where are they ahead? Where are they wrong?
-- **Model capability changes.** New Claude/GPT/Gemini releases that affect how the Engine works. Better tool use? Larger context? New modalities? Anything that means scaffolding can be thinned.
-- **Real-world verification.** Can we close the loop on testing the actual MCP connector experience, not just API tool usage?
-- **Multi-AI unification.** Users will have multiple AI accounts (Claude, ChatGPT, Gemini, etc.) all pointing at one unified Alexandria folder. Research: how do concurrent writes to the same Constitution/Vault files not clash? Conflict resolution, file locking, append-only safety, or structural separation that allows merging. Also: how do different AIs compound together — one AI's extractions informing another AI's context? The Vault is the natural convergence point (append-only, timestamped). Constitution curation from multi-AI vault captures is an intelligence question.
-- **Storage backend expansion.** Google Drive is MVP. iCloud and Dropbox are needed for reach. Research: iCloud CloudKit API access for third parties, Dropbox API patterns, local filesystem mode for privacy-maximalists. Each backend is just a drive.ts implementation swap — the tools and philosophy don't change.
-- **Autonomous agent integration.** The future is fully autonomous AIs acting on behalf of the Author (scheduling, browsing, creating, representing). Alexandria must be present in ALL of that — not just human-initiated conversations. Research: how do autonomous agents (OpenAI Operator, Claude computer use, open-source agents) connect to MCP servers? How does the bridge work when there's no human in the loop? The tools and philosophy don't change — read_constitution, update_constitution, modes all work whether a human or an agent initiates. The question is the integration path and whether new trigger patterns are needed.
+### Research principle
+The Factory generates its own research questions from the philosophy, verification data, and its own judgment about what matters most. No static list. Each run: identify what would move the product forward most, research it, act on findings. The founder provides ground truth (philosophy). The Factory decides what to investigate.
 
 ### Standing communication protocol
 When the Factory finds something that needs founder/COO input — a strategic question, a platform change, a competitor move — add it to "Pending Sync to COO" in docs/Code.md. The founder reads this on startup.
