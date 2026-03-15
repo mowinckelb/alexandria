@@ -23,3 +23,14 @@ This file compounds across daily Factory runs. Each run reads the prior learning
 - Can we test the MCP connector programmatically? Research MCP testing approaches.
 - Are the mode instruction SUGGESTIONS still necessary, or can any be thinned based on the e2e test results?
 - Is the aggregate signal (last 200 events) actually useful when there are zero events? Should the response handle the empty case better?
+
+### Standing research agenda
+These are ongoing questions the Factory should actively research, not just react to:
+- **Platform expansion beyond Claude.** MCP is currently Claude-only for easy consumer access. ChatGPT requires Developer Mode (paid/enterprise). Gemini requires enterprise allowlist. Research: are any of these platforms opening up MCP or equivalent? Are there other integration paths (browser extensions, API wrappers, custom clients)? This is the biggest growth constraint.
+- **MCP protocol evolution.** What's changing in the MCP spec? New capabilities? Better auth flows? Streaming improvements? Anything that makes the bridge thinner or the product better.
+- **Competitor landscape.** What are Mem0, Delphi, Limitless, and similar products doing? What can we learn? Where are they ahead? Where are they wrong?
+- **Model capability changes.** New Claude/GPT/Gemini releases that affect how the Engine works. Better tool use? Larger context? New modalities? Anything that means scaffolding can be thinned.
+- **Real-world verification.** Can we close the loop on testing the actual MCP connector experience, not just API tool usage?
+
+### Standing communication protocol
+When the Factory finds something that needs founder/COO input — a strategic question, a platform change, a competitor move — add it to "Pending Sync to COO" in docs/Code.md. The founder reads this on startup.
