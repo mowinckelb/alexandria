@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "tsx test/server.ts",
+    "test:ai": "tsx test/e2e.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
