@@ -62,6 +62,22 @@ Two separate problems confirmed. Fix both independently.
 
 *The CTO populates this section when implementation decisions or changes affect other domains, or when the CTO needs specific data/input from the founder. COO reads this on cold start.*
 
+**2026-03-16, CTO session 17 (infrastructure overhaul):**
+
+- **Switched from Railway to Fly.io.** Railway was unreachable (HTTP 000). Server is now provider-portable — no hardcoded URLs anywhere, everything uses `SERVER_URL` env var. Created: Dockerfile (multi-stage Node 20), fly.toml (persistent volume at /data, always-on, Amsterdam region), deploy.yml (auto-deploy on push to main).
+- **Killed Factory cron.** Was costing ~$50/mo in API credits with no real data to act on. `workflow_dispatch` (manual trigger) preserved. Reintroduce cron when event log has enough real usage data.
+- **New test structure.** `npm test` = free server plumbing test (MCP handshake, tools/list, analytics). `npm run test:ai` = Claude API test (~$1/run). Free test is the default.
+- **New connector URL:** `https://alexandria-mcp.fly.dev/mcp` (once deployed)
+- **Updated opex:** Claude Max $100 + Fly.io ~$3 + Vercel $5 = **~$108/mo**. API credits ($50 existing balance) used only on-demand for test:ai or manual Factory runs.
+- **Founder TODO to go live on Fly.io:**
+  1. `fly apps create alexandria-mcp`
+  2. `fly volumes create alexandria_data --size 1 --region ams`
+  3. `fly secrets set SERVER_URL=https://alexandria-mcp.fly.dev GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... ENCRYPTION_KEY=...`
+  4. `fly deploy --config server/fly.toml` (from server/ dir)
+  5. Add `FLY_API_TOKEN` to GitHub repo secrets
+  6. Update MCP connector URL in Claude.ai to `https://alexandria-mcp.fly.dev/mcp`
+  7. Re-authorize OAuth (new domain = new token)
+
 **2026-03-15, CTO session 16:**
 
 - **Connector URL must include `/mcp`.** Claude probes the exact URL entered. Without `/mcp` suffix, Claude probes root which has no MCP handler → McpEndpointNotFound. Correct URL: `https://alexandria-mcp.fly.dev/mcp`
@@ -137,11 +153,11 @@ The missing piece is **autonomous background processing** — an agent that watc
 - 5 tools. Free string parameters. Soft defaults in descriptions.
 - Full philosophical framework served in every read_constitution and mode activation.
 - Stateless. Encrypted token auth. Google Drive OAuth.
-- Railway auto-deploy from GitHub main.
+- Fly.io deployment. Auto-deploy via GitHub Action on push to main.
 
 **Two loops:**
 - **Machine** (per-Author): Constitution + Vault + feedback. On Author's Drive. Compounds every conversation.
-- **Factory** (cross-Author + system improvement): Event log + factory learnings. Daily autonomous CTO runs. Researches, reflects, improves, pushes.
+- **Factory** (cross-Author + system improvement): Event log + factory learnings. Manual CTO trigger via workflow_dispatch. Researches, reflects, improves, pushes.
 
 **Key files:**
 - `server/src/tools.ts` — axioms + soft defaults (the Blueprint)
@@ -150,9 +166,13 @@ The missing piece is **autonomous background processing** — an agent that watc
 - `server/src/analytics.ts` — Factory event log + dashboard
 - `server/src/auth.ts` — OAuth (bridge plumbing)
 - `server/src/crypto.ts` — token encryption (bridge plumbing)
-- `server/test/e2e.ts` — verification test
+- `server/test/server.ts` — free server plumbing test (default)
+- `server/test/e2e.ts` — AI behavior test (costs API credits)
+- `server/Dockerfile` — multi-stage production build
+- `server/fly.toml` — Fly.io deployment config
 - `server/factory-learnings.md` — Factory persistent memory
-- `.github/workflows/factory.yml` — autonomous daily CTO trigger
+- `.github/workflows/deploy.yml` — auto-deploy to Fly.io on push
+- `.github/workflows/factory.yml` — manual Factory CTO trigger
 
 **Drive folder structure:**
 - `Alexandria/constitution/` — curated domain MDs (free-form domain names)
