@@ -85,7 +85,7 @@ Alexandria gets better at working with ALL Authors over time. Also improves the 
 - **Data**: anonymous event log (append-only JSONL at `data/events.jsonl`). No user data, no content. Open-ended schema (`Record<string, string>`).
 - **Loop**: tool calls produce events → `read_constitution` and mode activations include last 200 events → Engine sees patterns, adjusts → adjusted behavior produces new events → loop. Fully automatic.
 - **System improvement**: Engine observes whether tools are working, logs system observations via `log_feedback` with "system:" prefix. CTO cold start reads dashboard. Structural improvements follow.
-- **Autonomous trigger**: `.github/workflows/factory.yml` — runs daily at 06:00 UTC. Fetches dashboard + event log, runs Claude Code with CTO Factory prompt, makes code changes, pushes to main. Fly.io auto-deploys via GitHub Action. Fully autonomous. Can also be triggered manually via GitHub Actions.
+- **Factory trigger**: `.github/workflows/factory.yml` — manual trigger via GitHub Actions `workflow_dispatch`. Fetches dashboard + event log, runs Claude Code with CTO Factory prompt, makes code changes, pushes to main. Fly.io auto-deploys via GitHub Action. Reintroduce cron schedule when event log has enough real data to justify autonomous runs.
 - **Monitoring dashboard**: `GET /analytics/dashboard` — 5 health proxies (extraction survival rate, depth score, sessions, feedback sentiment, mode activations). Health checks, not optimisation targets.
 - **Storage**: Fly.io volume at `/data` for persistence across deploys.
 

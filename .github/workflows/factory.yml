@@ -6,10 +6,7 @@ name: Factory Loop
 # The Factory IS the CTO doing its job without human prompting.
 
 on:
-  schedule:
-    # Run daily at 06:00 UTC
-    - cron: '0 6 * * *'
-  workflow_dispatch: # Manual trigger for testing
+  workflow_dispatch: # Manual trigger — reintroduce cron when event log has real data
 
 permissions:
   contents: write
