@@ -307,13 +307,25 @@ export async function readVaultCaptures(
   const files = listRes.data.files || [];
   if (files.length === 0) return [];
 
-  // Only read text-based files — skip binary (images, PDFs, etc.)
-  const textFiles = files.filter(f => {
-    const mime = f.mimeType || '';
-    return mime.startsWith('text/') || mime === 'application/json';
-  });
+  // Blacklist known-binary mimeTypes. Everything else we attempt to read
+  // as text — biased toward reading, consistent with zero false negatives.
+  // (Google Drive sometimes assigns application/octet-stream to .md files.)
+  const BINARY_PREFIXES = ['image/', 'video/', 'audio/'];
+  const BINARY_TYPES = new Set([
+    'application/pdf', 'application/zip', 'application/gzip',
+    'application/x-tar', 'application/x-7z-compressed',
+    'application/vnd.google-apps.document',
+    'application/vnd.google-apps.spreadsheet',
+    'application/vnd.google-apps.presentation',
+  ]);
 
-  const reads = textFiles.map(async (f) => {
+  const isBinary = (mime: string) =>
+    BINARY_PREFIXES.some(p => mime.startsWith(p)) || BINARY_TYPES.has(mime);
+
+  const readable = files.filter(f => !isBinary(f.mimeType || ''));
+  const binary = files.filter(f => isBinary(f.mimeType || ''));
+
+  const reads = readable.map(async (f) => {
     const res = await drive.files.get(
       { fileId: f.id!, alt: 'media' },
       { responseType: 'text' },
@@ -321,17 +333,13 @@ export async function readVaultCaptures(
     return { name: f.name!, content: res.data as string };
   });
 
-  // Include non-text files as metadata-only entries so the Engine knows they exist
-  const nonTextFiles = files.filter(f => {
-    const mime = f.mimeType || '';
-    return !mime.startsWith('text/') && mime !== 'application/json';
-  });
-  const nonTextEntries = nonTextFiles.map(f => ({
+  // Include binary files as metadata-only entries so the Engine knows they exist
+  const binaryEntries = binary.map(f => ({
     name: f.name!,
     content: `[Binary file — ${f.mimeType || 'unknown type'}. Cannot be read as text. The Author placed this in the Vault; acknowledge it but note it cannot be processed directly.]`,
   }));
 
-  return [...await Promise.all(reads), ...nonTextEntries];
+  return [...await Promise.all(reads), ...binaryEntries];
 }
 
 /**
