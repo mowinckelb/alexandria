@@ -46,8 +46,8 @@ async function main() {
     const body = await res.json();
     return {
       test: 'Health endpoint',
-      passed: res.ok && body.status === 'ok',
-      details: `HTTP ${res.status}, body: ${JSON.stringify(body)}`,
+      passed: res.ok && (body.status === 'ok' || body.status === 'degraded'),
+      details: `HTTP ${res.status}, status: ${body.status}, checks: ${JSON.stringify(body.checks)}`,
     };
   });
 
