@@ -85,7 +85,9 @@ app.get('/health', async (_req, res) => {
 
   const healthy = checks.volume === 'ok' && checks.encryption_key === 'ok';
 
-  res.status(healthy ? 200 : 503).json({
+  // Always 200 (server is alive). Checks are informational for CTO/monitoring.
+  // Unhealthy state is visible via checks + dashboard errors, not HTTP status.
+  res.json({
     status: healthy ? 'ok' : 'degraded',
     server: 'alexandria-mcp',
     version: '0.1.0',

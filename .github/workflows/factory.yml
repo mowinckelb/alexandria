@@ -88,6 +88,7 @@ jobs:
             --max-turns 30
 
       - name: Push if changes exist
+        if: always()
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "Alexandria Factory"
