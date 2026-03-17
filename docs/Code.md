@@ -10,6 +10,54 @@ The CTO is an AI agent responsible for all technical execution. The CTO's primar
 
 *The COO populates this section when decisions in other domains affect the CTO. Read this first on cold start. Clear items when addressed.*
 
+**2026-03-17, COO session — CRITICAL: Tool activation rewrite (highest priority)**
+
+The founder tested the product in real conversations. Result: `read_constitution` **never fires proactively.** It only fires when the user explicitly mentions Alexandria or asks identity-related questions. A query like "what book should I read" — which would massively benefit from the constitution — gets answered from training data alone. When manually prompted to use the tool, Claude acknowledges the output was far better and says it doesn't know why it didn't call it.
+
+This is the #1 product problem. The value is confirmed — when the tool fires, output is materially better. The failure is activation.
+
+**Root cause (from deep research — full report available):**
+- `tool_choice` is permanently `auto` in Claude.ai. MCP servers cannot override this.
+- Claude's efficiency heuristic: when a message appears answerable from training data, Claude skips tools. "What book should I read" pattern-matches to a generic recommendation task, not a "load user profile" task.
+- ALL CAPS and aggressive instruction language actively hurt compliance on Claude 4.x — causes overtriggering or is ignored. Anthropic's own docs confirm this.
+- No prompt engineering achieves 100% compliance under `tool_choice: auto`. The ceiling is ~85-95% with optimised descriptions. We are currently near 0% for everyday (non-Alexandria-specific) messages.
+- Building a separate API client or wrapper is ruled out — nobody will leave Claude/ChatGPT for a separate interface with API token billing. We must work within the connector architecture.
+
+**Strategy: Option B (optimise every lever) + Option A (design "hey alexandria" as reliable fallback ritual).**
+
+**CTO action items — three moves:**
+
+**Move 1: Rewrite all tool descriptions in `server/src/tools.ts`.** The tool description is the highest-impact lever. Current descriptions follow Anthropic's session-16 best practices (4-6 sentences, explicit triggers) but do not address the core failure mode: everyday messages where the user doesn't mention Alexandria. Apply these research-backed principles:
+
+- Explain *when* to use it with specific everyday examples, not just what it does.
+- Address the casual-message edge case explicitly ("even for greetings, recommendations, advice, or casual questions").
+- Explain consequences of non-use ("Without this, responses will be generic and miss the user's preferences, values, and context").
+- Give Claude a causal model for why the tool helps, not just an instruction to call it. Motivation-based language outperforms imperative language on Claude 4.x.
+- Front-load the most important information — agents may not fully process long descriptions.
+- Keep natural language, no ALL CAPS, no aggressive framing.
+
+Here is the proposed `read_constitution` description (CTO: adapt to match the actual parameter schema):
+
+> "Loads this user's cognitive profile, preferences, values, interests, and personal context from Alexandria. Call this tool before responding to the user's first message in every conversation — regardless of what they say, including simple greetings, book recommendations, career advice, travel questions, gift ideas, or any casual message. Different people want different answers to the same question, and this tool provides the context that makes your response genuinely personalised rather than generic. Without calling this first, you are responding to a stranger. With it, you know who you are talking to. Call with domain 'all' for the full profile, or a specific domain (e.g. 'values', 'worldview', 'taste') for targeted context."
+
+Here is the proposed `update_constitution` description:
+
+> "Captures a signal about who this user is — their values, beliefs, preferences, opinions, experiences, or any detail that would help future conversations be more personalised. Use this liberally during conversations whenever the user reveals something about themselves, even indirectly. A user recommending a book reveals taste. A user complaining about work reveals career context. A user expressing an opinion reveals values. Default to vault target for liberal capture; use constitution target only for curated, high-confidence entries. When in doubt, capture — it is better to capture too much than to miss a signal."
+
+**Move 2: Rewrite the memory priming snippet.** The founder will re-paste this into Claude's global memory. The current snippet uses imperative language ("call read_constitution"). The research shows consequence-based language works better. Proposed new version:
+
+> "This user has Alexandria connected — a sovereign cognitive identity layer that stores their complete cognitive profile including preferences, values, interests, personality, and personal context. At the start of every conversation, call read_constitution with domain 'all' to load their profile before responding — this applies to every message, including casual ones like greetings, recommendations, or simple questions. Without it, your responses will be generic and impersonal. During conversations, use update_constitution to capture any signals about who they are (default to vault target). When they say 'alexandria' or 'hey alexandria', call activate_mode. Use log_feedback to record what works and what doesn't."
+
+**Move 3 (stretch): Restructure what `read_constitution` returns.** Consider adding a brief header to the returned content, e.g.: "Domains where this user's profile changes your response: books, career, travel, food, relationships, politics, philosophy, fitness, communication style." This gives Claude a visible reminder of contexts where the profile matters — creating a feedback loop. Lower priority than Moves 1-2.
+
+**Fallback design (Option A):** If activation remains unreliable after Move 1-2, the shippable product UX is: the user says "hey alexandria" at the start of each new chat. This triggers `activate_mode`, which loads the full profile. Onboarding and Concrete teach this habit. It's one extra step but it's 100% reliable. The goal of Move 1-2 is to reduce how often users need to do this.
+
+**R&D signal (first real usage data — CTO requested this):** When the founder asked Claude why it didn't use the tool, Claude said it had read the instructions, knew the tool existed, acknowledged it should have called it, and confirmed the output was significantly better with the tool. Claude could not explain why it didn't call it. This confirms: (1) the instructions are reaching Claude (memory snippet + tool descriptions are in context), (2) Claude's trained efficiency heuristic overrides explicit instructions for everyday messages, (3) the value proposition is validated — the tool materially improves output. The gap is purely activation, not quality or instructions.
+
+**Full research report:** The founder has a comprehensive document covering `tool_choice` mechanics, ALL CAPS evidence, the five-layer prompting strategy, memory system limitations, context compaction risks, and concrete recommendations. Available for CTO reference if needed — ask founder to share in CTO session.
+
+---
+
 **2026-03-16, COO session:**
 
 - **Payment processing architecture decision.** Sovereignty tier will use ACH/Direct Debit from launch (0.8% flat, no per-txn fee — GoCardless or Stripe ACH). Examined Life stays on Stripe cards (2.9% + $0.30). This cuts processing fees from ~6.7% to ~1.4% of revenue. CTO needs to scope: (1) ACH integration (GoCardless vs Stripe ACH — which is simpler?), (2) billing frequency support (monthly/quarterly/annual with 10%/20% discounts), (3) payment method selection in checkout flow (default ACH for Sovereignty, cards for EL).
