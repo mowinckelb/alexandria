@@ -2,7 +2,7 @@
 
 *This is Alexandria III of III. Together they are the single source of truth for Alexandria. Read all parts for full context.*
 
-**This part covers:** The Library (Neo-Biography, Works, Signal, access tiers, Persona types, public figure bootstrapping, historical figures, use cases), Payment (three revenue layers, payment mechanics), Interface (Claude app, Cowork, web dashboard, compute topology, onboarding, target Author), Positioning and Pitch (elevator pitch, motto, phrases), Brand Design and Voice (logo, visual design, writing voice), Alexandria Media Strategy (sensory stack, the Abstract, Launch Video), The Horizon: Homo Deus.
+**This part covers:** The Library (Neo-Biography, Works, Signal, access tiers, Persona types, public figure bootstrapping, historical figures, use cases), Payment (three revenue layers, payment mechanics), Interface (MCP connector, mobile app, browser extension, website, compute topology, build sequencing, onboarding, target Author), Positioning and Pitch (elevator pitch, motto, phrases), Brand Design and Voice (logo, visual design, writing voice), Alexandria Media Strategy (sensory stack, the Abstract, Launch Video), The Horizon: Homo Deus.
 
 **Other parts:** Alexandria I (Thesis & Philosophy), Alexandria II (Product, Architecture & Operations).
 
@@ -206,27 +206,29 @@ Both tabs are visible in a simple dashboard. The Author is an economic participa
   
 INTERFACE  
   
-Alexandria does not have a native app. The product is a conversation. The interface is the Claude app today, and whatever conversational surface is best tomorrow.  
+The product is a conversation — but it lives across multiple surfaces. The Author’s default LLM (Claude, ChatGPT, Gemini) is the intelligence surface where all processing happens: extraction, amplification, creation. Alexandria’s own surfaces — app, browser extension, website — serve capture, display, and nudge functions. They do not provide intelligence. They route signal into the sovereign folder and show the Author what is there. The intelligence always runs on the Author’s own LLM, on their own tokens.  
   
 What persists across every future device surface is conversation — text, voice, presence. A Persona is meant to feel like a person. The interaction should be indistinguishable from texting a trusted colleague who happens to know everything about you.  
   
-The architecture is three tiers:  
+The architecture is four surfaces:  
   
-Cowork (the Editor’s runtime) — The Editor runs as a Claude Cowork plugin on the Author’s desktop. It has direct access to the Vault folder (local files), MCP connectors (the Author’s LLMs, calendar, email, health data), web browsing via Claude in Chrome, and scheduled tasks that run on a daily or weekly cadence. The Editor processes new data, iterates on the Constitution, identifies gaps, generates training data — all autonomously within the Cowork environment. This is where the cognitive work happens. The Author’s Claude Desktop app must remain open for background processing, but the Author does not need to be actively watching.  
+MCP connector (the intelligence layer) — The invisible backbone. Connects the Author’s default LLM to their sovereign data (Constitution, Vault, feedback) via the Alexandria MCP server. This is where all processing happens — extraction, amplification, creation — running on the Author’s own LLM subscription. The connector works with any MCP-compatible platform (Claude, ChatGPT in developer mode, and future platforms as they adopt the protocol). The Author’s normal conversations become the Editor, Mercury, and Publisher functions, guided by the Blueprint. Platform-agnostic at the protocol level. Future conversation channels — iMessage, WhatsApp, Telegram, wearable interfaces, or whatever comes next — can be added as thin integration layers on top. The protocol does not care which channel carries the conversation.  
   
-Claude app (the primary surface) — The Author’s primary interface. Available on desktop and mobile. The Author’s normal Claude conversations become the Editor, Mercury, and Publisher functions, guided by the Blueprint. The Claude app supports text, file sharing, and voice. Projects provide the Constitution as persistent context. MCP provides data connections. The mobile app means the Author can interact from anywhere.  
+App (mobile) — The Author’s mirror. View your Constitution domains, see recent vault captures, browse the Library (when available), manage settings. The app shows a badge count for unprocessed vault items — a quiet nudge, not a nag. The Author decides their own rhythm for processing. Notification preferences are user-controlled. The app is also where the Library lives at scale: Neo-Biographies, authored works, interactive Persona access. The app does not provide intelligence — it shows what the intelligence has produced and signals when new material is waiting.  
   
-Web dashboard (the control panel) — A laptop-accessible website for the heavier management work: reviewing training progress, configuring the Blueprint, managing access tiers and autonomy levels, viewing analytics, adjusting billing, reviewing the activity log in detail. This is the “headquarters” — used deliberately, not continuously. The Author visits the dashboard the way they visit their bank’s website: occasionally, for management, not for daily interaction.  
+Browser extension (desktop) — The capture tool. A “Save to Alexandria” button on any web page, saving directly to the Author’s Drive vault folder. Can show a badge count for unprocessed items, mirroring the app’s nudge function on desktop. The extension is pure intake — it does not process, analyse, or summarise. It drops raw material into the vault and lets the Author’s LLM handle the rest on next conversation.  
   
-The conversation channel is platform-agnostic at the protocol level. The Claude app is the primary surface today because it natively supports Cowork, MCP, and the full agent architecture. Future channels — iMessage, WhatsApp, Telegram, wearable interfaces, or whatever Apple ships next — can be added as thin integration layers on top. The protocol does not care which channel carries the conversation. What matters is that the Author can reach all three functions (Editor, Mercury, and Publisher) conversationally, from any device, at any time.  
+Website (mowinckel.ai) — The public front door and authenticated dashboard. Public: the Surface (Concrete, Abstract, sign-up, founder contact). Authenticated: mirrors the app’s dashboard — Constitution view, vault status, Library access, billing, settings. The website is the desktop equivalent of the app for Authors who prefer a browser to a native app.  
+  
+Build sequencing follows the “build for the horizon, bridge backward” principle. Phase 1 (current): MCP connector only. The vault lives on Drive, the dashboard is Drive folders, the “app” is the Author’s LLM. Phase 2: browser extension — the single highest-value addition because it solves capture without requiring the Author to be in a conversation. Phase 3: web dashboard at mowinckel.ai — authenticated Constitution and vault view. Phase 4: native mobile app — the full mirror, Library, and nudge surface. Each phase is independently valuable. No phase depends on a later phase existing.  
   
 COMPUTE TOPOLOGY  
   
 The Author’s default LLM is the compute surface. Alexandria adds no separate compute layer for the core product.  
   
-The phone — Claude app conversations. Voice notes. Quick interactions. The Author’s daily interface.  
+The phone — The Author’s default LLM app (Claude, ChatGPT, etc.) for conversations, voice notes, and quick interactions. The Alexandria app (Phase 4) for viewing Constitution, vault status, and Library. The Author’s daily interface.  
   
-The laptop — Claude desktop app with Projects (Constitution as context). Cowork for optional background processing. The Vault folder lives here (or in cloud-synced storage). The web dashboard runs here.  
+The laptop — The Author’s default LLM with MCP connector for intelligence. The browser extension (Phase 2) for capture. The web dashboard (Phase 3) for Constitution view and management. The Vault folder lives in cloud-synced storage (Google Drive).  
   
 The cloud — The Library marketplace. The web dashboard backend. At the horizon, PLM training on provider infrastructure when conditions are right. Alexandria does not host or store Author data — the MCP server passes through to the Author’s own cloud or local storage.  
   
