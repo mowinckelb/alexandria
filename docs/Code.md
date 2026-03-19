@@ -10,6 +10,25 @@ The CTO is an AI agent responsible for all technical execution. The CTO's primar
 
 *The COO populates this section when decisions in other domains affect the CTO. Read this first on cold start. Clear items when addressed.*
 
+**2026-03-19, COO session (CTO session 22 sync response):**
+
+CTO session 22 sync processed. The multi-channel insight is correct and important. Founder and COO discussed in detail. Key decisions:
+
+- **Mercury is NOT a standalone inference product.** The CTO's original proposal (Alexandria pays for API tokens, delivers personalised fragments via SMS) violates Build vs Ride. Alexandria does not pay for inference. Mercury runs on the Author's own LLM when triggered — via the MCP tools during conversation. The "proactive delivery" the CTO envisioned still happens, but the intelligence runs in the Author's Claude/ChatGPT session, not on our API. This is now explicit in A2's Build vs Ride section: "sovereign storage + borrowed intelligence + nudge layer."
+- **Multi-channel intake: YES.** Multiple intake funnels are cheap (storage, not intelligence) and fully aligned with the principle. Browser extension, email forward, share sheet — all good. All converge on the same sovereign Drive folder.
+- **Outbound channels (Twilio SMS, email, push): NOT NOW.** These require Alexandria to initiate contact, which requires state (user table, stored tokens, scheduler) and potentially our own inference. Deferred. The nudge is the wake word habit + app badge (Phase 4), not push notifications we pay for.
+- **The current manual UX is ~12-month scaffolding.** Wake word, memory snippets, probabilistic activation — all transitional. Within 12 months, LLM platforms will handle proactive tool activation reliably and the Author never needs to say "hey alexandria." We're building for that steady state while bridging to the present.
+- **Build sequencing decided:**
+  - Phase 1 (current): MCP connector only. Current product. Get beta users, collect R&D signal.
+  - Phase 2 (next CTO build after beta validation): **Browser extension.** "Save to Alexandria" button on any page → saves to Drive vault. Badge count for unprocessed items. Pure intake, no intelligence. Founder will ask CTO to scope difficulty.
+  - Phase 3: Web dashboard at mowinckel.ai — authenticated Constitution/vault view.
+  - Phase 4: Native mobile app — full mirror, Library, nudge surface.
+- **ChatGPT MCP:** Acknowledged. Platform dependency claims being updated across all docs (separate pending item from last session — GPT MCP propagation). No code changes needed.
+- **State infrastructure (user table):** Not needed until Phase 3/4. Current product is stateless and stays that way for now.
+- **A2 and A3 ground truth updated** this session with: borrowed intelligence principle in Build vs Ride, multi-channel intake in Vault section, transition framing in async extraction, four-surface interface architecture replacing the old three-tier (Cowork/Claude app/web dashboard), build sequencing.
+
+**CTO action item:** Scope browser extension difficulty. How hard is a Chrome extension that saves the current page URL + title + selected text (if any) to the Author's Alexandria/vault/ folder on Google Drive? Needs OAuth (we already have it). Pure intake — no processing. Founder will raise this in next CTO session.
+
 **2026-03-17, COO session (post CTO-20 sync):**
 
 - **CTO session 20 sync processed.** All items acknowledged. Tool activation fix confirmed. Project knowledge file (`alexandria.md`) noted as strongest activation layer — this changes onboarding docs across Growth.md and Concrete.
