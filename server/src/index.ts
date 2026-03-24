@@ -96,6 +96,29 @@ app.get('/health', async (_req, res) => {
   });
 });
 
+// Root page — serves HTML with favicon link so Google indexes the icon
+app.get('/', (_req, res) => {
+  res.type('html').send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Alexandria</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+</head>
+<body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0a0a0a;color:#fff">
+<div style="text-align:center">
+<img src="/favicon.png" width="64" height="64" alt="Alexandria">
+<h1 style="margin:1rem 0 0.5rem;font-weight:300">Alexandria</h1>
+<p style="color:#888;font-size:0.9rem">Sovereign cognitive identity layer</p>
+<p style="color:#555;font-size:0.8rem;margin-top:2rem"><a href="/health" style="color:#555">health</a></p>
+</div>
+</body>
+</html>`);
+});
+
 // Serve favicon so Claude picks up the a. logo
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
