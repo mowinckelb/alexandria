@@ -90,20 +90,42 @@ async function findFile(
   return null;
 }
 
+// Google Docs native files require export, not binary download
+const GOOGLE_DOCS_MIME = 'application/vnd.google-apps.document';
+
+async function readFileContent(
+  drive: drive_v3.Drive,
+  fileId: string,
+  mimeType?: string,
+): Promise<string> {
+  if (mimeType === GOOGLE_DOCS_MIME) {
+    const res = await drive.files.export(
+      { fileId, mimeType: 'text/plain' },
+      { responseType: 'text' },
+    );
+    return res.data as string;
+  }
+  const res = await drive.files.get(
+    { fileId, alt: 'media' },
+    { responseType: 'text' },
+  );
+  return res.data as string;
+}
+
 export async function readConstitutionFile(
   encryptedToken: string,
   domain: string,
 ): Promise<string | null> {
   const drive = getDriveClient(encryptedToken);
   const { constitutionId } = await ensureFolderStructure(drive, encryptedToken.slice(0, 16));
-  const fileId = await findFile(drive, `${domain}.md`, constitutionId);
-  if (!fileId) return null;
 
-  const res = await drive.files.get(
-    { fileId, alt: 'media' },
-    { responseType: 'text' },
-  );
-  return res.data as string;
+  // Search for both .md files and native Google Docs
+  const q = `'${constitutionId}' in parents and trashed=false and (name='${domain}.md' or name='${domain}')`;
+  const res = await drive.files.list({ q, fields: 'files(id,name,mimeType)', spaces: 'drive' });
+  const file = res.data.files?.[0];
+  if (!file?.id) return null;
+
+  return readFileContent(drive, file.id, file.mimeType || undefined);
 }
 
 export async function readAllConstitution(
@@ -115,21 +137,18 @@ export async function readAllConstitution(
   // List all files in constitution folder in one API call
   const listRes = await drive.files.list({
     q: `'${constitutionId}' in parents and trashed=false`,
-    fields: 'files(id,name)',
+    fields: 'files(id,name,mimeType)',
     spaces: 'drive',
   });
 
   const files = listRes.data.files || [];
   if (files.length === 0) return {};
 
-  // Read all files in parallel
+  // Read all files in parallel (handle both .md uploads and native Google Docs)
   const reads = files.map(async (f) => {
-    const res = await drive.files.get(
-      { fileId: f.id!, alt: 'media' },
-      { responseType: 'text' },
-    );
+    const content = await readFileContent(drive, f.id!, f.mimeType || undefined);
     const domain = f.name!.replace('.md', '');
-    return [domain, res.data as string] as const;
+    return [domain, content] as const;
   });
 
   const entries = await Promise.all(reads);

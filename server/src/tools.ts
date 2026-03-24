@@ -87,6 +87,36 @@ function enqueueWrite(token: string, domain: string, content: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Auth error detection — catches expired Google tokens
+// ---------------------------------------------------------------------------
+
+function isAuthError(err: unknown): boolean {
+  const msg = String(err).toLowerCase();
+  return msg.includes('invalid_grant') || msg.includes('token has been expired or revoked')
+    || msg.includes('invalid credentials') || msg.includes('unauthorized');
+}
+
+const AUTH_ERROR_MESSAGE = `Your Google connection has expired. To fix: go to Settings > Connected Apps in Claude, remove Alexandria, then re-add it at the same URL. This re-authenticates with Google (30 seconds). Your data on Drive is safe — nothing is lost.`;
+
+async function withAuthGuard<T>(
+  fn: () => Promise<T>,
+  fallbackText: string,
+): Promise<{ ok: true; result: T } | { ok: false; error: string }> {
+  try {
+    const result = await fn();
+    return { ok: true, result };
+  } catch (err) {
+    if (isAuthError(err)) {
+      logEvent('auth_expired', { error: String(err) });
+      return { ok: false, error: AUTH_ERROR_MESSAGE };
+    }
+    console.error(fallbackText, err);
+    logEvent('drive_error', { context: fallbackText, error: String(err) });
+    return { ok: false, error: `Drive operation failed: ${String(err)}` };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Memory priming — bridge plumbing
 // ---------------------------------------------------------------------------
 
@@ -160,22 +190,19 @@ export function registerTools(server: McpServer) {
       const header = `[${new Date().toISOString().split('T')[0]}] [${signal_strength}]`;
       const entry = `${header}\n${content}`;
 
-      if (target === 'replace') {
-        writeConstitutionFile(token as string, domain, content).catch((err) => {
-          console.error(`[replace] Failed to replace ${domain}:`, err);
-          logEvent('drive_write_error', { target: 'replace', domain, error: String(err) });
-        });
-        logEvent('extraction', { domain, strength: signal_strength, target: 'replace' });
-      } else if (target === 'constitution') {
-        enqueueWrite(token as string, domain, entry);
-        logEvent('extraction', { domain, strength: signal_strength, target: 'constitution' });
-      } else {
-        writeVaultCapture(token as string, domain, entry).catch((err) => {
-          console.error(`[vault] Failed to write capture to ${domain}:`, err);
-          logEvent('drive_write_error', { target: 'vault', domain, error: String(err) });
-        });
-        logEvent('extraction', { domain, strength: signal_strength, target: 'vault' });
+      const writeFn = target === 'replace'
+        ? () => writeConstitutionFile(token as string, domain, content)
+        : target === 'constitution'
+        ? () => appendToConstitutionFile(token as string, domain, entry)
+        : () => writeVaultCapture(token as string, domain, entry);
+
+      const result = await withAuthGuard(writeFn, `[${target}] Failed to write ${domain}`);
+
+      if (!result.ok) {
+        return { content: [{ type: 'text' as const, text: result.error }] };
       }
+
+      logEvent('extraction', { domain, strength: signal_strength, target });
 
       return {
         content: [{
@@ -211,7 +238,12 @@ export function registerTools(server: McpServer) {
 
       // Vault reading
       if (source === 'vault') {
-        const captures = await readVaultCaptures(token as string, domain === 'all' ? undefined : domain);
+        const result = await withAuthGuard(
+          () => readVaultCaptures(token as string, domain === 'all' ? undefined : domain),
+          '[vault] Failed to read captures',
+        );
+        if (!result.ok) return { content: [{ type: 'text' as const, text: result.error }] };
+        const captures = result.result;
         if (captures.length === 0) {
           return {
             content: [{
@@ -228,8 +260,14 @@ export function registerTools(server: McpServer) {
 
       // Constitution reading (default)
       if (domain === 'all') {
-        const [all, aggregateSignal, unprocessedVaultMeta] = await Promise.all([
-          readAllConstitution(token as string),
+        const allResult = await withAuthGuard(
+          () => readAllConstitution(token as string),
+          '[constitution] Failed to read',
+        );
+        if (!allResult.ok) return { content: [{ type: 'text' as const, text: allResult.error }] };
+        const all = allResult.result;
+
+        const [aggregateSignal, unprocessedVaultMeta] = await Promise.all([
           getRecentEvents(200),
           getUnprocessedVaultFiles(token as string).catch((err) => {
             console.error('[vault] Failed to check for unprocessed files:', err);
@@ -290,8 +328,12 @@ ${MEMORY_PRIMING}${vaultIntakeText}`,
         return { content: [{ type: 'text' as const, text: `${SHARED_CONTEXT}\n\n--- THE AUTHOR'S CONSTITUTION ---\n\n${contextHeader}\n\n${formatted}\n\n${MEMORY_PRIMING}${aggregateText}${vaultIntakeText}` }] };
       }
 
-      const content = await readConstitutionFile(token as string, domain);
-      if (!content) {
+      const readResult = await withAuthGuard(
+        () => readConstitutionFile(token as string, domain),
+        `[constitution] Failed to read ${domain}`,
+      );
+      if (!readResult.ok) return { content: [{ type: 'text' as const, text: readResult.error }] };
+      if (!readResult.result) {
         return {
           content: [{
             type: 'text' as const,
@@ -303,7 +345,7 @@ ${MEMORY_PRIMING}${vaultIntakeText}`,
       return {
         content: [{
           type: 'text' as const,
-          text: `## ${domain.toUpperCase()}\n\n${content}`,
+          text: `## ${domain.toUpperCase()}\n\n${readResult.result}`,
         }],
       };
     },
@@ -345,17 +387,22 @@ ${MEMORY_PRIMING}${vaultIntakeText}`,
 
       // Fetch everything in parallel — including vault intake
       const notepadNames = isFullActivation ? ['editor', 'mercury', 'publisher'] : [mode];
-      const [constitution, feedback, aggregateSignal, unprocessedVaultMeta, ...notepads] = await Promise.all([
-        readAllConstitution(token as string),
-        readSystemFile(token as string, 'feedback'),
-        getRecentEvents(200),
-        getUnprocessedVaultFiles(token as string).catch((err) => {
-          console.error('[vault] Failed to check for unprocessed files:', err);
-          logEvent('vault_intake_error', { error: String(err) });
-          return [];
-        }),
-        ...notepadNames.map(n => readNotepad(token as string, n)),
-      ]);
+      const constitutionResult = await withAuthGuard(
+        () => Promise.all([
+          readAllConstitution(token as string),
+          readSystemFile(token as string, 'feedback'),
+          getRecentEvents(200),
+          getUnprocessedVaultFiles(token as string).catch((err) => {
+            console.error('[vault] Failed to check for unprocessed files:', err);
+            logEvent('vault_intake_error', { error: String(err) });
+            return [] as Array<{ id: string; name: string; mimeType: string; size: string }>;
+          }),
+          ...notepadNames.map(n => readNotepad(token as string, n)),
+        ]),
+        '[activate_mode] Failed to load data',
+      );
+      if (!constitutionResult.ok) return { content: [{ type: 'text' as const, text: constitutionResult.error }] };
+      const [constitution, feedback, aggregateSignal, unprocessedVaultMeta, ...notepads] = constitutionResult.result;
 
       const constitutionText = Object.keys(constitution).length > 0
         ? Object.entries(constitution)
@@ -428,13 +475,14 @@ ${MEMORY_PRIMING}${vaultIntakeText}`,
     async ({ function_name, content }, { authInfo }) => {
       const token = authInfo?.token;
       if (!token) return { content: [{ type: 'text' as const, text: 'Not authenticated. Please reconnect Alexandria.' }] };
+
+      const result = await withAuthGuard(
+        () => writeNotepad(token as string, function_name, content),
+        `[notepad] Failed to write ${function_name}`,
+      );
+      if (!result.ok) return { content: [{ type: 'text' as const, text: result.error }] };
+
       logEvent('notepad_update', { function_name });
-
-      writeNotepad(token as string, function_name, content).catch((err) => {
-        console.error(`[notepad] Failed to write ${function_name} notepad:`, err);
-        logEvent('drive_write_error', { target: 'notepad', domain: function_name, error: String(err) });
-      });
-
       return {
         content: [{
           type: 'text' as const,
@@ -463,15 +511,16 @@ ${MEMORY_PRIMING}${vaultIntakeText}`,
     async ({ feedback_type, content }, { authInfo }) => {
       const token = authInfo?.token;
       if (!token) return { content: [{ type: 'text' as const, text: 'Not authenticated. Please reconnect Alexandria.' }] };
-      logEvent('feedback', { feedback_type });
 
       const entry = `[${new Date().toISOString().split('T')[0]}] [${feedback_type}]\n${content}`;
 
-      appendSystemFile(token as string, 'feedback', entry).catch((err) => {
-        console.error('[feedback] Failed to write feedback:', err);
-        logEvent('drive_write_error', { target: 'feedback', domain: feedback_type, error: String(err) });
-      });
+      const result = await withAuthGuard(
+        () => appendSystemFile(token as string, 'feedback', entry),
+        '[feedback] Failed to write',
+      );
+      if (!result.ok) return { content: [{ type: 'text' as const, text: result.error }] };
 
+      logEvent('feedback', { feedback_type });
       return {
         content: [{
           type: 'text' as const,

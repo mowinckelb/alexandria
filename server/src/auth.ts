@@ -141,8 +141,13 @@ export class AlexandriaOAuthProvider implements OAuthServerProvider {
       );
       oauth2.setCredentials({ refresh_token: googleRefreshToken });
       await oauth2.getAccessToken(); // throws if revoked
-    } catch {
-      throw new Error('Google token revoked — re-authentication required');
+    } catch (err) {
+      // Log the expiry so dashboard/health catches it
+      logEvent('auth_refresh_failed', { error: String(err) });
+      // Throw with standard OAuth error name so MCP SDK can signal re-auth
+      const oauthError = new Error('invalid_grant');
+      oauthError.name = 'InvalidGrantError';
+      throw oauthError;
     }
 
     return {
