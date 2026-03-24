@@ -84,7 +84,7 @@ Each Author's Machine compounds through usage. Constitution deepens, feedback lo
   - 5 tools: update_constitution, read_constitution, activate_mode, update_notepad, log_feedback.
   - Stateless: encrypted Google refresh token IS the access token. No user data stored.
 - **Static assets:** `public/` (includes `public/docs/` served by website).
-- **Build:** `npm run build` (server/). **Deploy:** `fly deploy` from server/ (Railway), push to main (Vercel). **Render Logic PDF:** `python render_logic.py` (requires fpdf2, pymupdf).
+- **Build:** `npm run build` (server/). **Deploy:** `fly deploy` from server/ (Railway), push to main (Vercel). **Render Logic PDF:** `python render_logic.py` (requires fpdf2, pymupdf). **Render any PDF:** `python scripts/generate_pdf.py <input.md> [output.pdf]` — branded (cream, Playfair, EB Garamond, gold rules), generates PNG previews for visual verification. Always verify by reading the preview PNGs before committing. Clean up preview PNGs after verification.
 - **Server health:** `curl https://alexandria-production-7db3.up.railway.app/health`
 - **Stack:** Vercel (website), Railway (MCP server), GitHub, Google Cloud (OAuth), Claude.
 
@@ -112,7 +112,7 @@ Do not report. Just do it. Save memories, update GTs, push to Blueprint, check d
 
 **Downstream staleness check.** If A1, A2, or A3 changed this session, verify these artifacts still match:
 - `files/confidential/Memo.md` + `public/partners/Memo.md` (must be identical)
-- `files/confidential/Alexandria.md`
+- `files/confidential/Alexandria.md` → re-render to PDF via `python scripts/generate_pdf.py files/confidential/Alexandria.md` (verify preview PNGs, clean up after)
 - `files/confidential/Logic.md` → re-render to PDF via `python render_logic.py` (writes both `files/confidential/Logic.pdf` and `public/partners/Logic.pdf`)
 - `files/public/Concrete.md`
 - `files/public/Vision.md`
