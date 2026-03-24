@@ -2,7 +2,7 @@
 
 ## For new users
 
-1. **Add connector:** Claude.ai → Settings → Connectors → paste `https://alexandria-production-7db3.up.railway.app/mcp` → authorize Google (click "Continue" past the unverified app warning)
+1. **Add connector:** Claude.ai → Settings → Connectors → paste `https://mcp.mowinckel.ai/mcp` → authorize Google (click "Continue" past the unverified app warning)
 2. **Account memory:** Settings → Memory → add THREE separate memory edits (may require a few chats before editing is unlocked — do it as soon as you can)
 
 That's it. Start conversations with "hey alexandria" and end them with "bye alexandria" — your AI learns who you are.

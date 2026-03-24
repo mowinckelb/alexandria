@@ -5,7 +5,7 @@
 **Claude:** Claude.ai → Settings → Connectors → paste this URL → authorize Google (click "Continue" past the unverified app warning)
 
 ```
-https://alexandria-production-7db3.up.railway.app/mcp
+https://mcp.mowinckel.ai/mcp
 ```
 
 **ChatGPT:** Coming soon.
@@ -46,7 +46,7 @@ That's it. Every conversation makes it smarter about you.
 - Have a few more conversations. Claude unlocks memory editing after some usage. Check back in a day.
 
 **"Google authorization failed"**
-- The app shows an "unverified" warning — that's normal. Click "Continue" to proceed.
+- If you see an "unverified app" warning, click "Advanced" → "Continue" to proceed.
 - If it still fails, try a different browser or clear cookies and retry.
 
 **"My profile feels wrong or outdated"**

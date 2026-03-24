@@ -41,17 +41,19 @@ Everything lives in `files/`. Three access levels: private (internal only), conf
 
 Investor flow: Memo.md (AI-delivered first touch) → Logic.pdf + Numbers.xlsx (pre-meeting deep dive) → Meeting (conversation) → Alexandria.md/alexandria.pdf (IC leave-behind).
 
-- `Memo.md` — Investment memo. AI-presentable with hidden follow-up notes for Q&A. First touch.
-- `Alexandria.md` — Source markdown for IC-ready PDF. Dense, self-contained, for the partner who wasn't in the room. Render to PDF for distribution.
-- `alexandria.pdf` — Rendered IC overview (regenerate from Alexandria.md when content changes).
-- `Numbers.xlsx` — Financial model and projections.
-- `Logic.pdf` — Formal argument chain (44 premises, 11 conclusions, 20 assumptions).
+Each artifact has an objective function. Form serves that function. Beauty is universal; tone is not.
+
+- `Memo.md` — **Objective: make the investor want a meeting.** AI-presentable with hidden follow-up notes for Q&A. First touch. Tone: direct, substantive, honest. The AI is a knowledgeable analyst, not a salesperson.
+- `Logic.md` → `Logic.pdf` — **Objective: make the investor feel the argument is airtight.** Formal proof chain. Settled premises cost no time; assumptions are the only conversation. Tone: mathematical rigor. The form should say "this is a proof" not "this is a pitch." Render via `python render_logic.py`.
+- `Numbers.xlsx` — **Objective: let the investor stress-test the economics.** Financial model and projections. Tone: spreadsheet — clean, auditable, no narrative.
+- `Alexandria.md` → `alexandria.pdf` — **Objective: give the IC partner who wasn't in the room enough to vote yes.** Dense, self-contained, authoritative. Tone: branded per A3 — the document IS the company's taste made visible. Render via `python scripts/generate_pdf.py`.
+- `alexandria.pdf` — Rendered from Alexandria.md. Regenerate when content changes.
 
 ### files/public/ — External
 
-- `Concrete.md` — Consumer pitch (copy-paste into any AI chat). Skeleton format: topics + points, model writes fresh each time.
-- `Vision.md` — Full philosophy in plain English. ~20 min read. For someone who wants to understand everything.
-- `abstract.pdf` — Philosophical abstract PDF.
+- `Concrete.md` — **Objective: make someone try the product in the next 5 minutes.** Consumer pitch (copy-paste into any AI chat). Skeleton format: topics + points, model writes fresh each time. Tone: gossip energy — "dude, you have to try this." Truck driver language.
+- `Vision.md` — **Objective: make someone who reads the whole thing believe the thesis is true.** Full philosophy in plain English. ~20 min read. Tone: calm, clear, confident. No jargon. The argument does the work.
+- `abstract.pdf` — **Objective: emotional lock-in for the deeply convinced.** Philosophical abstract PDF.
 - `setup.md` — User onboarding guide (connector setup, memory edits, troubleshooting).
 - `logo_*.png` — Logo variants. `logo_reference.html` — interactive reference.
 - `Benjamin_Mowinckel_Headshot.jpg` — Founder headshot.
@@ -85,7 +87,7 @@ Each Author's Machine compounds through usage. Constitution deepens, feedback lo
   - Stateless: encrypted Google refresh token IS the access token. No user data stored.
 - **Static assets:** `public/` (includes `public/docs/` served by website).
 - **Build:** `npm run build` (server/). **Deploy:** `fly deploy` from server/ (Railway), push to main (Vercel). **Render Logic PDF:** `python render_logic.py` (requires fpdf2, pymupdf). **Render any PDF:** `python scripts/generate_pdf.py <input.md> [output.pdf]` — branded per A3 brand system, generates PNG previews for visual verification. Always verify by reading the preview PNGs before committing. Clean up preview PNGs after verification.
-- **Server health:** `curl https://alexandria-production-7db3.up.railway.app/health`
+- **Server health:** `curl https://mcp.mowinckel.ai/health`
 - **Stack:** Vercel (website), Railway (MCP server), GitHub, Google Cloud (OAuth), Claude.
 
 ## Design Constraints
