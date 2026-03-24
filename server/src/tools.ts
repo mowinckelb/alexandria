@@ -96,7 +96,7 @@ function isAuthError(err: unknown): boolean {
     || msg.includes('invalid credentials') || msg.includes('unauthorized');
 }
 
-const AUTH_ERROR_MESSAGE = `Your Google connection has expired. To fix: go to Settings > Connected Apps in Claude, remove Alexandria, then re-add it at the same URL. This re-authenticates with Google (30 seconds). Your data on Drive is safe — nothing is lost.`;
+const AUTH_ERROR_MESSAGE = `Your Google connection has expired. To fix: go to Settings > Connected Apps in Claude, disconnect Alexandria, then reconnect. This re-authenticates with Google (30 seconds). Your data on Drive is safe — nothing is lost.`;
 
 async function withAuthGuard<T>(
   fn: () => Promise<T>,
@@ -176,7 +176,7 @@ export function registerTools(server: McpServer) {
       domain: z.string()
         .describe('Domain for this signal. Common: worldview, values, models, identity, taste, shadows. Use any domain name that fits.'),
       content: z.string()
-        .describe('The captured signal — clear prose, 2-5 sentences.'),
+        .describe('The captured signal. For vault: quote the Author verbatim, as long as needed. For constitution: clear prose, concise.'),
       signal_strength: z.string()
         .describe('How confident you are. Common: strong (demonstrated through action), moderate (clearly stated), tentative (inferred). Use natural language if none fit.'),
       target: z.enum(['vault', 'constitution', 'replace']).default('vault')
@@ -319,7 +319,7 @@ ${MEMORY_PRIMING}${vaultIntakeText}`,
           .map(([d, c]) => `## ${d.toUpperCase()}\n\n${c}`)
           .join('\n\n---\n\n');
 
-        const contextHeader = `This profile changes your response for: books, career, travel, food, relationships, politics, philosophy, fitness, communication style, creative work, decision-making, and any question where knowing who someone is produces a better answer. Domains loaded: ${domains.join(', ')}.`;
+        const contextHeader = `Domains loaded: ${domains.join(', ')}.`;
 
         const aggregateText = aggregateSignal
           ? `\n\n--- AGGREGATE SIGNAL (anonymous patterns from all Alexandria usage) ---\n\n${aggregateSignal}`
@@ -450,7 +450,7 @@ ${MEMORY_PRIMING}${vaultIntakeText}`,
       return {
         content: [{
           type: 'text' as const,
-          text: `${instructionText}\n\n--- THE AUTHOR'S CONSTITUTION ---\n\n${constitutionText}${notepadText}${feedbackText}${aggregateText}${vaultIntakeText}`,
+          text: `${SHARED_CONTEXT}\n\n${instructionText}\n\n--- THE AUTHOR'S CONSTITUTION ---\n\n${constitutionText}${notepadText}${feedbackText}${aggregateText}${vaultIntakeText}`,
         }],
       };
     },
