@@ -7,10 +7,29 @@ Blue for assumptions. Grey for annotations. Bold for conclusions. Text breathes.
 
 import re
 import shutil
+import urllib.request
 from pathlib import Path
 from fpdf import FPDF
 
 FONT_DIR = Path(__file__).parent / ".font_cache"
+
+FONT_URLS = {
+    "EBGaramond-Regular.ttf": "https://github.com/google/fonts/raw/main/ofl/ebgaramond/static/EBGaramond-Regular.ttf",
+    "EBGaramond-Italic.ttf": "https://github.com/google/fonts/raw/main/ofl/ebgaramond/EBGaramond-Italic%5Bwght%5D.ttf",
+    "EBGaramond-Bold.ttf": "https://github.com/google/fonts/raw/main/ofl/ebgaramond/static/EBGaramond-Bold.ttf",
+    "EBGaramond-BoldItalic.ttf": "https://github.com/google/fonts/raw/main/ofl/ebgaramond/static/EBGaramond-BoldItalic.ttf",
+}
+
+
+def ensure_fonts():
+    """Download any missing EB Garamond fonts."""
+    FONT_DIR.mkdir(exist_ok=True)
+    for name, url in FONT_URLS.items():
+        path = FONT_DIR / name
+        if not path.exists():
+            print(f"Downloading {name}...")
+            urllib.request.urlretrieve(url, path)
+            print(f"  saved to {path}")
 
 # Colours
 BLUE = (41, 98, 255)       # assumptions — the only things worth discussing
@@ -22,6 +41,7 @@ BLACK = (0, 0, 0)          # reset
 class LogicPDF(FPDF):
     def __init__(self):
         super().__init__()
+        ensure_fonts()
         self.add_font("Garamond", "", str(FONT_DIR / "EBGaramond-Regular.ttf"))
         self.add_font("Garamond", "I", str(FONT_DIR / "EBGaramond-Italic.ttf"))
         self.add_font("Garamond", "B", str(FONT_DIR / "EBGaramond-Bold.ttf"))
