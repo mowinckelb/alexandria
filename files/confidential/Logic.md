@@ -72,19 +72,15 @@ C2: **The symbolic layer has independent value — not as the whole mind, but as
 
 (Valid — follows from P6-P10. The scientific grounding is well-supported theory, not speculative.)
 
-### 3. A structured cognitive file has marginal value
+### 3. A structured cognitive file has clear value
 
-P11. A structured file about a user — how they think, what they value, how they reason — is either useful to an AI or it is not. If an AI has access to this file alongside everything else it already knows, the output is at least as good as without it. Worst case, it adds nothing. Best case, it meaningfully improves the experience. It cannot make things worse.
+P11. A structured cognitive file has clear value to any AI that interacts with the user. This follows from C1 and C2: the file develops the thing the tiebreaker depends on (C1) and operates at the intervention point where cognition becomes compoundable (C2). Every major lab confirms this through investment in personalisation. The question is not whether the file has value but why nobody is building it deeply.
 
-(Settled. Marginal value is either zero or positive. Cannot be negative.)
+(Settled. Follows from C1, C2, and observable lab behaviour.)
 
-P12. Personalisation is valuable to AI labs. Every major lab invests in it.
+C3: **A structured cognitive file is valuable. Labs confirm this. The question is why nobody is building it deeply.**
 
-(Settled. Observable.)
-
-C3: **A structured personal file about the user would be valuable to labs. Having it is better than or equal to not having it.**
-
-(Valid — follows from P11 and P12. Sound — both settled.)
+(Valid — follows from C1, C2, and observable investment. Sound.)
 
 ### 4. Why don't the lab giants do this?
 
