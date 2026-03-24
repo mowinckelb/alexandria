@@ -8,6 +8,8 @@
  */
 
 import { randomUUID } from 'crypto';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { join } from 'path';
 import { google } from 'googleapis';
 import type { Response } from 'express';
 import type { OAuthServerProvider, AuthorizationParams } from '@modelcontextprotocol/sdk/server/auth/provider.js';
@@ -16,6 +18,9 @@ import type { OAuthClientInformationFull, OAuthTokenRevocationRequest, OAuthToke
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { encrypt, decrypt } from './crypto.js';
 import { logEvent } from './analytics.js';
+
+const DATA_DIR = process.env.DATA_DIR || '/data';
+const CLIENTS_FILE = join(DATA_DIR, 'oauth-clients.json');
 
 const GOOGLE_SCOPES = ['https://www.googleapis.com/auth/drive'];
 
@@ -32,9 +37,33 @@ function getOAuth2Client() {
 // because tokens are self-contained encrypted blobs)
 // ---------------------------------------------------------------------------
 
-// Registered OAuth clients (Claude registers dynamically)
+// Registered OAuth clients — persisted to disk so deploys don't break connections
 class AlexandriaClientsStore implements OAuthRegisteredClientsStore {
   private clients = new Map<string, OAuthClientInformationFull>();
+
+  constructor() {
+    // Load persisted clients on startup
+    try {
+      if (existsSync(CLIENTS_FILE)) {
+        const data = JSON.parse(readFileSync(CLIENTS_FILE, 'utf-8'));
+        for (const [id, client] of Object.entries(data)) {
+          this.clients.set(id, client as OAuthClientInformationFull);
+        }
+        console.log(`[auth] Loaded ${this.clients.size} persisted OAuth clients`);
+      }
+    } catch (err) {
+      console.error('[auth] Failed to load persisted clients:', err);
+    }
+  }
+
+  private persist() {
+    try {
+      const data = Object.fromEntries(this.clients.entries());
+      writeFileSync(CLIENTS_FILE, JSON.stringify(data), 'utf-8');
+    } catch (err) {
+      console.error('[auth] Failed to persist clients:', err);
+    }
+  }
 
   async getClient(clientId: string) {
     return this.clients.get(clientId);
@@ -42,6 +71,7 @@ class AlexandriaClientsStore implements OAuthRegisteredClientsStore {
 
   async registerClient(client: OAuthClientInformationFull) {
     this.clients.set(client.client_id, client);
+    this.persist();
     return client;
   }
 }
@@ -55,7 +85,9 @@ interface PendingAuth {
 
 const pendingCodes = new Map<string, PendingAuth>();
 
-// Active tokens (maps our access token to auth info)
+// Active tokens — not persisted. verifyAccessToken is stateless (decrypts the token directly).
+// This map is only used by exchangeAuthorizationCode to store newly issued tokens.
+// On restart, existing tokens still work because verification doesn't need this map.
 const activeTokens = new Map<string, { encryptedGoogleToken: string; clientId: string; expiresAt: number }>();
 
 // ---------------------------------------------------------------------------
