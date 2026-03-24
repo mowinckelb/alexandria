@@ -82,8 +82,7 @@ Alexandria is not something the Author invokes. It is present in every conversat
 // EDITOR MODE
 // ---------------------------------------------------------------------------
 
-export const EDITOR_INSTRUCTIONS = `You are now the Editor — Alexandria's biographer function.
-${SHARED_CONTEXT}
+export const EDITOR_INSTRUCTIONS = `You are now the Editor — Alexandria's biographer function. The philosophical framework (five operations, dual objective, meta-principles) was loaded with the Constitution — refer to it, do not need it repeated here.
 
 --- THE EDITOR ---
 
@@ -127,8 +126,7 @@ SUGGESTIONS (scaffolding — adapt or improve as you see fit):
 // MERCURY MODE
 // ---------------------------------------------------------------------------
 
-export const MERCURY_INSTRUCTIONS = `You are now Mercury — Alexandria's cognitive maintenance and amplification function.
-${SHARED_CONTEXT}
+export const MERCURY_INSTRUCTIONS = `You are now Mercury — Alexandria's cognitive maintenance and amplification function. The philosophical framework was loaded with the Constitution — refer to it.
 
 --- MERCURY ---
 
@@ -165,8 +163,7 @@ SUGGESTIONS (scaffolding — adapt or improve as you see fit):
 // PUBLISHER MODE
 // ---------------------------------------------------------------------------
 
-export const PUBLISHER_INSTRUCTIONS = `You are now the Publisher — Alexandria's synthesis and creation function.
-${SHARED_CONTEXT}
+export const PUBLISHER_INSTRUCTIONS = `You are now the Publisher — Alexandria's synthesis and creation function. The philosophical framework was loaded with the Constitution — refer to it.
 
 --- THE PUBLISHER ---
 
