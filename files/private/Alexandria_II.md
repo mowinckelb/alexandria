@@ -114,11 +114,11 @@ The root value is humanity. Alexandria exists because humans matter — and the 
   
 The three features map to the three pillars and the three turns:  
   
-Unified Sovereignty (Turn 1 — freedom). Own it. One structured, living picture of who you are, unified across every AI you use, stored on your own files. $5/month with 3 active kin, $10 without.
+Unified Sovereignty (Turn 1 — freedom). Own it. One structured, living picture of who you are, stored on your own machine. $5/month with 3 active kin, $10 without.
 
-Mental Gym (Turn 2 — authenticity). Develop it. Active development of self-knowledge and authentic cognition — Socratic extraction, contradiction surfacing, the accretion funnel for absorbing abundance, entropy fighting to keep your cognitive surface area large. The most clarifying conversations of your life. Know yourself so deeply that you escape competition entirely. $15/month with 3 active kin, $20 without.
+Mental Gym (Turn 2 — authenticity). Develop it. Active development of self-knowledge — Socratic extraction, contradiction surfacing, absorbing abundance, fighting entropy. The most clarifying conversations of your life. Same tier, same price — the product only works when all pieces are together.
 
-Living Library (Turn 3 — purpose). Use it. A mindset and a medium for creation. Multimodal, interactive, living. Your Neo-Biography — whatever medium captures you best. Others encounter your mind, interact with your Persona, pay for depth. You earn from your own cognition. No additional cost beyond the Examined Life tier.
+Living Library (Turn 3 — purpose). Use it. A mindset and a medium for creation. Your Neo-Biography. Others encounter your mind, interact with your Persona, pay for depth. No additional cost.
 
 Pricing rationale: Alexandria targets power users — people using AI 4-8+ hours per day. Founders, writers, researchers, creators, executives. If the Constitution makes every AI interaction even 20% better calibrated — and these users have thousands of AI interactions monthly — the ROI on $15-20/month is trivial. The mental gym is not a nice-to-have for casual users; it is cognitive infrastructure for people whose primary tool is AI. Casual users will not do the genesis work, will not engage with entropy fighting, will not create. That is fine. The product is not for everyone. It is for people who want to develop their humanity seriously — and who use AI enough that a high-fidelity cognitive profile pays for itself many times over. The kin discount ($5-10 off) makes the product viral among exactly the right cohort: power users who recruit other power users. Every kin referral is also a constitutional extraction — the kin relationship itself reveals values, trust patterns, and social architecture.
 
@@ -641,17 +641,15 @@ The delta between end-of-last-session and start-of-next-session constitution siz
 
 Author data never reaches the server. Transcripts stay local. Constitution stays local. The server sees only structural metadata: sizes, counts, timestamps. The Factory compounds on structure, not content.
 
-TIER STRUCTURE
+PRICING
 
-Two tiers, same architecture, gated by the server’s Blueprint response:
+One tier. Everyone gets everything. $5/month with 3 active kin, $10/month without. Free during beta.
 
-Sovereignty (Turn 1) — Passive extraction. The hooks run, the vault fills, the constitution builds through SessionStart processing. The Author never explicitly engages Alexandria. The product is invisible — their AI just gets gradually better at knowing them. The Blueprint served at this tier includes extraction methodology but not the full mode instructions (Editor, Mercury, Publisher). Metered tastes of active functions leak through — occasional Blueprint inclusions that let the Author experience what deeper engagement looks like. Not an upsell agent — the experience teases itself.
+The full product — extraction, all three functions (Editor, Mercury, Publisher), vault processing, /a sessions — available to every Author. No feature gating. No metered tastes. No upsell mechanics. The server checks: valid API key → serve full Blueprint. Invalid → reject. Billing is the only gate.
 
-The Examined Life (Turn 2) — Full active engagement. The Blueprint served at this tier includes everything: extraction methodology plus full Editor, Mercury, and Publisher mode instructions. The Author can deliberately engage any function. The Constitution deepens faster because the Author is actively participating in its development, not just passively generating transcripts. The conversion from Sovereignty to Examined Life is organic: the Author reads their growing constitution, sees what extraction has revealed, and the value of going deeper becomes self-evident.
+Why one tier: the prosumer product only provides clear value when all the pieces work together. Passive extraction alone (without /a sessions to process the vault) builds a graveyard of unprocessed transcripts. Active engagement alone (without the vault accumulating signal) has nothing to work with. The product is the combination. Splitting it into tiers splits the value proposition.
 
-Free during beta. The full product (both tiers) available to early Authors at no cost. Builds the user base, proves the product, collects Factory data, creates word of mouth among exactly the right crowd (developers who talk to other developers). Flip the switch when the product is validated.
-
-The server gates tiers by API key. Sovereignty keys get the Sovereignty Blueprint. Examined Life keys get the full Blueprint. Same hooks, same local files, same architecture. The intelligence difference is in the instructions served.
+Free during beta. Builds the user base, proves the product, collects Factory data, creates word of mouth among exactly the right crowd (developers who talk to other developers). Flip the switch when the product is validated. Additional tiers or pricing changes are intelligence decisions — revisit when there’s data.
 
 LIBRARY (Turn 3 — not yet built)
 
@@ -799,15 +797,15 @@ Own it, develop it, use it. One command. Five dollars. Local files you own.
   
 REVENUE MODEL — THE DUAL MANDATE  
   
-Capped downside, uncapped upside. The three features (Unified Sovereignty, Mental Gym, Living Library) are the same product, same architecture, same user at different depths of engagement. Not three separate businesses. A user starts with Unified Sovereignty (freedom — own and unify), deepens into the Mental Gym (authenticity — develop and know yourself), and their accumulated depth feeds the Living Library (purpose — create, share, earn). Each step leads naturally to the next.  
+Capped downside, uncapped upside. The subscription is the floor. The Library is the ceiling. The subscription stands alone as a business. The Library is speculative upside the founder will happily take but does not rely on. One tier, everyone gets everything. The user deepens naturally through usage — the product does the selling.  
 
 Patron — optional support, no product. For people who want to support Alexandria but are not yet paying for the product. Family, friends, believers in the mission, newsletter subscribers who want to give something. No minimum — can be $0 or whatever they choose. Slider, no maximum. Patrons get a monthly newsletter with behind-the-scenes updates and personal acknowledgement. Patrons do NOT count as active kin — kin status is tied to product usage (Sovereignty or Examined Life only). Patron sits in the pre-paying awareness layer (State 0) alongside free newsletter subscribers and social followers.
 
-Sovereignty — mass-market entry. Full passive extraction, Constitution building, Vault sovereignty, plus metered tastes of active functions. The user runs the setup, their cognitive data accumulates in portable files they own. No philosophy required. No engagement with the Library. Just freedom insurance. The price of one coffee a month, for freedom insurance. Plain-English product name: AI insurance. The audience is everyone who uses AI — the pragmatist. Freedom as a service. Sovereignty as a service. Sovereignty is the top of the acquisition funnel. $5/month with 3 active kin, $10/month without. No slider — clean $5 or $10.
+The product — one tier, everyone gets everything. $5/month with 3 active kin, $10/month without. Full extraction, all three functions (Editor, Mercury, Publisher), vault processing, /a sessions. No feature gating. No metered tastes. No upsell mechanics. Plain-English product name: the mental gym. The audience for launch is prosumers — Claude Code and Cursor users who already live in AI tools and value self-knowledge. The price of one coffee a month with kin.
 
-The Examined Life — the conversion. Unlimited access to all functions plus the Library. The three turns, the Editor, Mercury, the Publisher, the Library, the Companion Portfolio. The cognitive transformation architecture. The price of one coffee a week, for the examined life. Plain-English product name: the mental gym. The audience is the self-selecting tribe — the philosopher. Some enter directly because the philosophy resonates. Most convert up from Sovereignty. $15/month with 3 active kin, $20/month without. Slider above floor, no maximum. The conversion happens organically: Sovereignty builds the Constitution passively, the Author reads it back, sees what extraction has revealed, and the value of going deeper becomes self-evident. The experience converts on its own.  
+Why one tier: the product only provides clear value when all the pieces work together. Passive extraction without /a sessions builds a graveyard of unprocessed transcripts. Active engagement without vault signal has nothing to work with. The product is the combination. Splitting it splits the value proposition. Additional tiers are an intelligence decision — revisit when there's data.  
   
-Pricing is structured around the active kin mechanic — a churn-reduction and distribution engine baked into the price itself. An Author's "active kin" are referrals who are currently subscribed and paying at the Sovereignty or Examined Life tier. Patron does NOT count as active kin — kin status requires product usage. Dynamic pricing: the subscription price recalculates every billing cycle based on the Author's active kin count at billing time. 3+ active kin = lower price. Fewer = higher price. No grace period. Clean and simple.
+Pricing is structured around the active kin mechanic — a churn-reduction and distribution engine baked into the price itself. An Author's "active kin" are referrals who are currently subscribed and paying. Patron does NOT count as active kin — kin status requires product usage. Dynamic pricing: the subscription price recalculates every billing cycle based on the Author's active kin count at billing time. 3+ active kin = $5. Fewer = $10. No grace period. Clean and simple.
 
 Monthly billing receipt as nudge surface: every receipt shows what the Author paid, what they would have paid with 3 active kin, and their current kin count. The receipt is the kin nudge — no app needed. "You paid $10 this month. With 3 active kin it would have been $5."
 
