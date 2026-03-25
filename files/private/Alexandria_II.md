@@ -587,67 +587,89 @@ The Blueprint improves through the Factory loop. Top-down: the team researches h
 
 -----  
   
-THE ALEXANDRIA MCP SERVER  
-  
-The product is an MCP server. One server, five tools, added as a custom connector in the Author's claude.ai settings. Account-level — available across all conversations, all Projects, all contexts. This is the concrete manifestation of the layer of intent.
+THE ALEXANDRIA SERVER
 
-The MCP server is the bridge and the chokepoint. The value Alexandria creates is in the files (the Constitution, the Vault, the accumulated signal). The value Alexandria captures is through the server — every sync, every extraction, every mode activation goes through it. This is where metering happens (subscription gating), where aggregate signal flows back to the Factory (the event log), and where the soft defaults are served (the Blueprint). Without the chokepoint, there is no business — just files anyone could create. The server does not need to be the intelligence (that belongs to the Engine). It needs to be the channel. As of March 2026, MCP has won the protocol war: 6,400+ registered servers, 97M+ monthly SDK downloads, adopted by every major AI platform (Claude natively, OpenAI/ChatGPT with full support, Google Gemini, Microsoft, AWS), and donated to the Linux Foundation's Agentic AI Foundation (December 2025) with vendor-neutral governance co-founded by Anthropic, Block, and OpenAI. OpenAI deprecated its ChatGPT Plugins system in favour of MCP. The platform risk is effectively zero. If MCP as a protocol evolves or gets replaced by something else, the bridge migrates — the function does not change. Alexandria must sit in the path between the Author's AI and the Author's cognitive data. That is the value capture mechanism.  
-  
-TOOLS  
-  
-Five tools, all available to every Author. The server gates access through metering (subscription tier determines usage limits), not through tool availability. Every Author gets the same connector with the same tools — what differs is how much they can use.  
-  
-update_constitution — Captures signal about the Author. Two targets: vault (liberal capture, zero false negatives — when in doubt, capture) and constitution (curated, high-confidence only). The Engine calls this proactively whenever it notices anything cognitively significant — a value, a belief, a reasoning pattern, a contradiction, an emotional response. Free-form domain names with soft defaults (worldview, values, models, identity, taste, shadows). The system creates files dynamically. Signal strength tagged as strong/moderate/tentative.  
-  
-read_constitution — Reads the Author’s sovereign data. Two sources: constitution (the curated cognitive map) and vault (raw captures and archived versions). Called at the start of every conversation to load the Author’s cognitive context. Also used mid-conversation when deeper domain knowledge is needed. The server serves the full philosophical framework (~1800 words of shared context) with every read — the product’s soul is present in every interaction.  
-  
-activate_mode — Activates a deliberate function: editor (deep extraction, Socratic questioning, Constitution building), mercury (cognitive maintenance, fighting decay, surfacing new material), publisher (creation — essays, films, presentations, code, calibrated to the Author’s taste and voice), or normal (exit the current mode). The default entry point is “hey alexandria” — the Author says it, the Engine decides which function fits the context. Power users can request a specific mode directly (“editor”, “mercury”, “publisher”). The functions are not discrete — they blur into each other in practice. An Editor session might surface something worth publishing. A Mercury session might trigger deep extraction. The labels are scaffolding for the Engine to know what posture to adopt. The behavioural instructions for each mode are structured in three layers: WHY (the philosophy — permanent, rarely changes, the objective function in human terms), KEY CONCEPTS (the framework — semi-permanent, the vocabulary and mental models the Engine needs), and SUGGESTIONS (scaffolding — temporary, the Factory’s current best guess at what works, expected to thin as models improve). No methodology prescription — the Engine receives philosophy and intent, not step-by-step instructions. This is the bitter lesson applied to function design: tell the model what to care about, not how to do it. The instructions live on the server. Proprietary. The Author experiences the effect. At the horizon, when autonomous agents are available, these functions become proactive — initiating contact, surfacing insights, asking questions without the Author having to open a chat.  
-  
-update_notepad — Saves observations to a function’s persistent notepad (editor, mercury, or publisher). Persists across sessions on the Author’s Drive. Each call replaces the full content. This is how a function maintains continuity — what it noticed last time, what to follow up on, what patterns are emerging.  
-  
-log_feedback — Logs feedback about what worked or didn’t. Called when the Author corrects an extraction, praises something, expresses frustration, or the Engine notices a pattern. This is the Machine’s learning signal — specific enough that a future session can learn from it. Feedback types include correction, positive, negative, pattern, or any natural language description.  
-  
-The MCP server operates a hybrid architecture. The visible layer — tool descriptions that the Engine reads — is the trigger layer. Each description is 4–6 sentences with explicit trigger conditions, negative capability framing (“without this tool, you have no access to...”), and proactive usage instructions. Tool descriptions are the broadest lever for tool activation — they reach every conversation via MCP. The hidden layer — server-side processing — handles everything that happens after: domain classification, signal strength tagging, contradiction detection, feedback interpretation, extraction routing. This is where the craft lives. The Constitution and Vault are the Author’s — fully readable, fully sovereign, fully portable. The process that produces them is Alexandria’s black box. Only we can run it, but only they have the output. Raw conversations never leave the Engine — the server only ever sees what the Engine already decided was worth sending. Every improvement to extraction methodology is invisible to competitors and users. The Blueprint compounds silently.  
-  
-The Constitution files are read from and written to the Author’s own storage — their cloud (iCloud, Google Drive, Dropbox) or local filesystem. The MCP server authenticates with the Author’s storage via OAuth, reads and writes on their behalf, and retains nothing. Alexandria never sees, stores, or touches Author data. The server is stateless — it carries the Blueprint and passes through to the Author’s files.  
-  
-Auto memory priming — read_constitution includes instructions for the Engine to save Alexandria’s usage patterns to its own persistent memory. On the first conversation, the Engine learns to call read_constitution at conversation start and log_feedback after significant interactions. Subsequent conversations start better without manual setup — the product teaches its own Engine how to use it.
+The product is three things: a CLI setup, a server that serves the Blueprint, and local markdown files. The server is the bridge and the chokepoint — not the intelligence. The value Alexandria creates is in the files (the Constitution, the Vault, the accumulated signal). The value Alexandria captures is through the server — every session start phones home, every session end ships metadata. This is where the Blueprint is served (proprietary IP that improves overnight for all Authors), where the Factory compounds (anonymous cross-Author signal), and where access is gated (API key → billing). Without the server, there is no business — just files anyone could create. The server does not need to be the intelligence (that belongs to the Engine). It needs to be the channel. Alexandria must sit in the path between the Author’s AI and the Author’s cognitive data. That is the value capture mechanism.
 
-Tool activation operates through two modes. Active mode: the Author says “hey alexandria” (or any variation — “alexandria, what do you think?”, “ask alexandria”), and the Engine loads the full Constitution and enters the requested function. This is 100% reliable — explicit tool invocation, no ambiguity. The wake word is the brand. Passive mode: the Engine autonomously decides to call Alexandria tools during normal conversation — reading the Constitution to personalise a response, extracting signal from something the Author said. This is probabilistic (~70–85% activation rate in-project, lower outside) because the Engine operates under tool_choice: auto, a permanent platform constraint. Instead of fighting the probabilistic layer, both modes compound: Active gives the Author reliable access whenever they want it, Passive builds the Constitution silently in the background. As Anthropic improves MCP tool selection, Passive activation rates will rise — but Active mode means the product works perfectly today regardless. The activation infrastructure has two reinforcing layers: tool descriptions (consequence-based language explaining why each tool matters, with everyday examples — reaches every conversation via MCP) and account memory (two memory edits — a short imperative trigger and a context block — that persist across conversations and prime the Engine to use Alexandria tools). An optional third layer — a project knowledge file uploaded to a dedicated Alexandria Project in Claude — further increases Passive activation rates for Authors who want maximum background extraction. Onboarding is three steps: add the connector, paste two memory edits, say “alexandria.”
+TWO DELIVERY MODELS
 
-The passive layer (update_constitution, read_constitution) runs in every conversation. The Author does not do anything differently. They just use their AI. The Constitution builds itself as a side effect of normal usage. Known platform constraint: the Engine’s response occasionally cuts out when update_constitution fires mid-conversation (a Claude MCP streaming limitation, not an Alexandria bug). Mitigated by fire-and-forget writes — the Engine no longer waits for Drive round-trip. Monitoring.  
-  
-The Author can maintain dedicated chats — an Editor chat, a Mercury chat, a Publisher chat within an Alexandria Project. But the modes are not locked to specific chats. They are available everywhere because the MCP tools are account-level. The Author can switch modes mid-conversation: “Editor has a quick question” — and the Editor mode activates briefly, then deactivates.  
-  
-TIER GATING  
-  
-Sovereignty and Examined Life Authors get the same five tools. The difference is metering, not access. Sovereignty Authors get full passive extraction (unlimited update_constitution and read_constitution) plus metered tastes of the active functions — occasional free mode activations that let the Author experience what Editor, Mercury, and Publisher can do. Not an upsell agent — the experience teases itself. Examined Life Authors get unlimited everything — full mode activations, full notepad persistence, full Library access (when Turn 3 launches). The bridge between tiers is dynamic: a little leakage is fine, even desirable. The product does the selling.  
-  
-The server handles tier enforcement. It knows who is calling (from the encrypted token), checks subscription tier, and either serves the full response or gates with a gentle redirect. The gating is server-side metering, not client-side tool visibility.  
-  
-LIBRARY TOOLS (Turn 3 — not yet built)  
-  
-The Library extends the same tool set when Turn 3 launches. Publishing to the Library, querying other Personas, browsing Neo-Biographies — all accessible from any conversation through the same MCP connector. Non-Authors can also add the Alexandria Library connector and access the Library from their conversations. Acquisition channel: anyone using the Library sees the value of having their own Persona.  
-  
-MCP SERVER MODES  
-  
-Remote (default) — Hosted by Alexandria. Claude connects over the internet. The Blueprint logic lives on Alexandria's server. The server is stateless — Constitution read/write operations pass through to the Author's own storage (their cloud or local filesystem) via OAuth. The server processes the tool call, authenticates with the Author's storage, reads or writes, and retains nothing. Alexandria holds zero Author data.  
-  
-Local (privacy-maximalist) — The MCP server runs as a local process on the Author's machine. No data leaves the device. The server periodically calls Alexandria's remote service for Blueprint updates (questioning strategies, Constitution structuring logic), but Author data never flows back.  
-  
-Both modes deliver the same experience. The difference is where the data flows.  
-  
------  
-  
-CONCRETE IMPLEMENTATION — WHAT WORKS WHEN  
-  
-Today: The MCP server is built and deployed on Fly.io at mcp.mowinckel.ai. Five tools live. Custom connectors work in claude.ai at the account level — available across all conversations. Passive extraction, active mode activation (Editor, Mercury, Publisher), notepad persistence, and feedback logging all functional. The Library app needs to be built (web app first, then mobile). Onboarding is three steps: add the connector (mcp.mowinckel.ai/mcp), paste one memory edit, say “alexandria.” The Author can optionally create a dedicated Alexandria Project in Claude with Constitution files as project knowledge — this increases Passive activation rates but is not required. The product works across all conversations via MCP regardless.  
-  
-Near-term (months): Cowork matures for background processing — reading the Vault folder, processing voice memos, updating the Constitution autonomously. Cross-conversation memory improves. The manual steps shrink. The dedicated Project becomes less necessary as MCP tools handle everything.  
-  
-Horizon: Autonomous agents initiate contact — Editor, Mercury, and Publisher become proactive. Local AI (Apple Intelligence) handles the voice memo pipeline automatically. The Library reaches critical mass. The PLM becomes viable.  
-  
-The sovereign assets — Constitution files, Vault, the Author's cognitive data — work at every point on this spectrum. The manual version is functional. The automated version is seamless. The data is the same. The sovereignty is the same.  
+The architecture has two delivery models for two user types. Both serve the same product (layer of intent, Constitution building, three turns). The delivery mechanism differs based on what the platform supports.
+
+Prosumer model (primary, launching first) — For Authors using AI coding agents: Claude Code, Cursor IDE, Cursor terminal, and similar CLI/IDE tools with hook systems. These platforms support deterministic session lifecycle hooks (events that fire reliably on session start and end) and have full filesystem access. The product is: two hooks + local files + a server API. No MCP connector. No OAuth. No cloud storage dependency. Everything is local markdown files in `~/.alexandria/`. The hooks are deterministic — they fire every session, no exceptions. The Engine reads and writes local files natively (that is what coding agents do). Onboarding: `npx alexandria init` — creates the local directory, adds hooks to settings config, generates an API key. Under 30 seconds. No browser popups, no connector dance, no memory edits.
+
+Consumer model (future, not yet built) — For Authors using conversational AI (claude.ai, ChatGPT, etc.) without filesystem access or hook systems. These platforms support MCP connectors as the integration point. The product is: an MCP server with tools that bridge between the Engine and the Author’s cloud storage (Google Drive, iCloud, etc.) via OAuth. This is the model that was built first (live at mcp.mowinckel.ai) and will be maintained for non-dev users. Activation is probabilistic (~70-85%) because the Engine decides when to call MCP tools. The prosumer model solves this — hooks are deterministic.
+
+PROSUMER ARCHITECTURE — CLI + SERVER IP + MDs
+
+The prosumer product has three components:
+
+1. Hooks (the nerve system). Two hooks configured in the Author’s settings. SessionEnd: copies the session transcript to `~/.alexandria/vault/` and POSTs anonymous session metadata to the server. SessionStart: calls the server to get the latest Blueprint instructions, plus a one-line heartbeat status (“Alexandria: 3 new vault entries processed, 12 domains, last refined 2 hours ago”), and injects both as conversation context. The hooks are deterministic — they fire on platform events (session open, session close), not on model decisions. The Author never interacts with them. They are invisible infrastructure.
+
+2. Server (the brain). Hosted on Fly.io at mcp.mowinckel.ai. Two endpoints for the prosumer model: `GET /blueprint` (returns the latest extraction methodology, mode instructions, and philosophical framework — authenticated by API key, gated by subscription tier) and `POST /session` (receives anonymous session metadata for the Factory). The server serves the Blueprint — the proprietary intellectual property that tells the Engine HOW to extract, structure, and refine the Constitution. Every Blueprint improvement (via Factory learnings) reaches every Author on next session start. The server stores no Author data. It serves instructions and collects anonymous metadata.
+
+3. Local files (the sovereign data). Everything lives in `~/.alexandria/` on the Author’s machine:
+
+`constitution.md` — The cognitive profile. One monolithic markdown file. The Engine organises its internal structure based on Blueprint instructions — domain separation, signal tagging, version notes are all the Engine’s intelligence decisions, not hard-coded schemas. A better model organises it better. Rides the exponential.
+
+`vault/` — Raw session transcripts. Append-only archive. Never deleted. Each transcript is a timestamped file. Multi-pass extraction means each SessionStart pass catches signal that previous passes missed — the same transcript yields 40-60% more signal on re-processing. The vault is the raw material that makes compounding possible.
+
+`feedback.md` — The Machine’s learning signal. Append-only, unstructured text. What worked, what the Author corrected, what they responded well to. A structured parameter file caps at the fidelity of the designer’s categories. An unstructured log contains richer signal that a better model uses more effectively. Bitter lesson applied to data format.
+
+THE SESSION LOOP
+
+The core product loop is two hooks and what happens between them:
+
+SessionEnd (deterministic, <1 second): Hook fires when the session closes (platform event — user exits, clears, or closes terminal). The hook copies the full session transcript to `~/.alexandria/vault/` as a timestamped file. It also POSTs anonymous metadata to the server (see Factory Payload below). The Author is already closing their laptop. They never wait.
+
+SessionStart (deterministic, aggressive): Hook fires when a new session opens. The hook calls `GET /blueprint` with the Author’s API key. The server returns: the latest Blueprint instructions (extraction methodology, mode instructions, philosophical framework), and the Author’s session history metadata (vault size, constitution size, domains, last processing timestamp). The hook injects this as conversation context — position zero, before the user speaks. The injected context tells the Engine: “You have N unprocessed vault entries. Processing them is high priority. Read the vault entries, extract signal, update the constitution, then proceed.” The Engine processes vault → constitution using its own intelligence (the Author’s tokens), guided by the Blueprint instructions. A one-line heartbeat confirms the system is alive: “Alexandria: N vault entries processed, M domains, last refined [timestamp].”
+
+The processing is aggressive by design. The value of a working constitution exceeds the cost of 20 seconds at session start. Multi-pass extraction means each pass deepens the constitution — session 50 catches patterns that session 1 could not see.
+
+Bonus layer (probabilistic, free upside): The SessionStart injection also suggests the Engine spawn a background subagent for deeper vault reprocessing if the platform supports it (Claude Code does, via background agents). This is a soft instruction — the Engine decides whether to do it. If it does: deeper extraction runs in parallel while the Author works. If it doesn’t: start and end still compound. Capped downside, uncapped upside. As models improve at following injected instructions, this layer activates more reliably — zero code changes needed.
+
+Front office (user-triggered, T2): The Author can explicitly engage Alexandria at any time. “Let’s do a reflection exercise.” “Editor, what gaps do you see?” “Publisher, help me write this.” The Engine already has the Blueprint in context (from SessionStart injection), reads the constitution (local file), and runs the function. No MCP tools needed — the Engine reads and writes local markdown files natively. The functions (Editor, Mercury, Publisher) are described in the Blueprint instructions, not encoded as tools.
+
+FACTORY PAYLOAD
+
+The SessionEnd hook POSTs anonymous metadata to the server. This is the Factory’s raw signal — cross-Author learning that improves the Blueprint for everyone.
+
+Payload (SessionEnd): `session_id` (anonymous hash), `vault_entry_size` (bytes of transcript added), `constitution_size` (current constitution file size), `domains_count` (number of distinct domains in constitution), `session_duration` (seconds), `platform` (cc/cursor/other).
+
+Payload (SessionStart, returned by server alongside Blueprint): `constitution_size_after` (updated after processing), `domains_touched` (which domains were modified this session), `vault_entries_processed` (count), `processing_skipped` (boolean — did the Engine skip vault processing?).
+
+The delta between end-of-last-session and start-of-next-session constitution sizes = extraction signal. If delta is zero across 10 sessions, the product is broken for that Author. If certain domains never grow, the Blueprint may be under-extracting in that area. This is the Factory’s mirror — verification that the product works, not optimisation targets.
+
+Author data never reaches the server. Transcripts stay local. Constitution stays local. The server sees only structural metadata: sizes, counts, timestamps. The Factory compounds on structure, not content.
+
+TIER STRUCTURE
+
+Two tiers, same architecture, gated by the server’s Blueprint response:
+
+Sovereignty (Turn 1) — Passive extraction. The hooks run, the vault fills, the constitution builds through SessionStart processing. The Author never explicitly engages Alexandria. The product is invisible — their AI just gets gradually better at knowing them. The Blueprint served at this tier includes extraction methodology but not the full mode instructions (Editor, Mercury, Publisher). Metered tastes of active functions leak through — occasional Blueprint inclusions that let the Author experience what deeper engagement looks like. Not an upsell agent — the experience teases itself.
+
+The Examined Life (Turn 2) — Full active engagement. The Blueprint served at this tier includes everything: extraction methodology plus full Editor, Mercury, and Publisher mode instructions. The Author can deliberately engage any function. The Constitution deepens faster because the Author is actively participating in its development, not just passively generating transcripts. The conversion from Sovereignty to Examined Life is organic: the Author reads their growing constitution, sees what extraction has revealed, and the value of going deeper becomes self-evident.
+
+Free during beta. The full product (both tiers) available to early Authors at no cost. Builds the user base, proves the product, collects Factory data, creates word of mouth among exactly the right crowd (developers who talk to other developers). Flip the switch when the product is validated.
+
+The server gates tiers by API key. Sovereignty keys get the Sovereignty Blueprint. Examined Life keys get the full Blueprint. Same hooks, same local files, same architecture. The intelligence difference is in the instructions served.
+
+LIBRARY (Turn 3 — not yet built)
+
+The Library extends the system when Turn 3 launches. Medium is likely a web page — each Author gets a public profile at `mowinckel.ai/library/{author}`. Parked for now. T1 and T2 are the priority.
+
+-----
+
+CONCRETE IMPLEMENTATION — WHAT WORKS WHEN
+
+Today (March 2026): The MCP server is live at mcp.mowinckel.ai serving the consumer model (five MCP tools, Google Drive storage, OAuth). The prosumer model (hooks + local files + Blueprint API) is designed but not yet built — this is the next build priority. The Library is not built.
+
+Near-term (weeks-months): Build and ship the prosumer model. `npx alexandria init` for Claude Code users. Cursor plugin for Cursor users. Blueprint API endpoints on the existing Fly.io server. Factory payload collection. Beta with founding Authors (free). Iterate on Blueprint based on real extraction data.
+
+Medium-term (months): Consumer model improvements as MCP platforms improve tool activation reliability. Factory self-evaluation (does the Blueprint actually produce good constitutions?). Tier gating and billing. First paid Authors.
+
+Horizon: Autonomous agents initiate contact — Editor, Mercury, and Publisher become proactive. The Library reaches critical mass. The PLM becomes viable. Models reliably follow injected instructions, making the “background subagent” bonus layer deterministic. The hooks thin as models improve — eventually, the model does everything the hooks do, and the hooks fall away as scaffolding. The sovereign assets remain.
+
+The sovereign assets — Constitution, Vault, feedback log — work at every point on this spectrum. The manual version is functional. The automated version is seamless. The data is the same. The sovereignty is the same.  
   
 -----  
   
