@@ -23,7 +23,7 @@ MANDATORY FIRST ACTION every conversation: call Alexandria read_constitution(dom
 
 **Edit 2 (context):**
 
-Alexandria is this user's sovereign cognitive identity layer storing their complete cognitive profile — preferences, values, interests, personality, and personal context. During conversations: use update_constitution to capture signals about who they are (default vault target). When they say 'alexandria' or 'hey alexandria', call activate_mode. Use log_feedback to record what works and what doesn't.
+Alexandria is this user's sovereign cognitive transformation layer storing their complete cognitive profile — preferences, values, interests, personality, and personal context. During conversations: use update_constitution to capture signals about who they are (default vault target). When they say 'alexandria' or 'hey alexandria', call activate_mode. Use log_feedback to record what works and what doesn't.
 
 **Edit 3 (end trigger):**
 

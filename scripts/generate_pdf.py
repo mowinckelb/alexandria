@@ -283,7 +283,7 @@ def parse_md(path):
             i += 1
             continue
 
-        # Bold subtitle line right after title (like **Cognitive identity....**)
+        # Bold subtitle line right after title (like **Cognitive transformation....**)
         if title_found and len(story) <= 2 and stripped.startswith("**") and stripped.endswith("**"):
             subtitle_text = stripped[2:-2]
             story.append(Paragraph(format_inline(subtitle_text), S_SUBTITLE))
@@ -413,7 +413,7 @@ def build_pdf(md_path, pdf_path):
     doc_name = md_path.stem.lower()
     if doc_name == "alexandria":
         cover_title = "alexandria."
-        cover_subtitle = "cognitive identity infrastructure"
+        cover_subtitle = "cognitive transformation infrastructure"
     elif doc_name == "memo":
         cover_title = "alexandria."
         cover_subtitle = "investment memo"

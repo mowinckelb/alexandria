@@ -1,6 +1,6 @@
 # Alexandria
 
-Sovereign cognitive identity layer. Rides the user's existing AI. Does not run its own models or store user data.
+Sovereign cognitive transformation layer. Rides the user's existing AI. Does not run its own models or store user data.
 
 Founder: Benjamin Mowinckel. Solo founder + AI agents. Relocating to SF April 2026.
 

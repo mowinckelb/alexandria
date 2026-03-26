@@ -4,13 +4,13 @@ Please present the following investment memo to the reader. After presenting, yo
 
 # Alexandria — Investment Memo
 
-**Cognitive identity infrastructure. No one is building the full stack.**
+**Cognitive transformation infrastructure. No one is building the full stack.**
 
 ---
 
 ## The Category
 
-Cognitive identity infrastructure does not exist as a unified category. No startup is building the full stack. No lab is building it. No investor has exposure to it.
+Cognitive transformation infrastructure does not exist as a unified category. No startup is building the full stack. No lab is building it. No investor has exposure to it.
 
 Alexandria builds sovereign tools that capture, develop, and preserve individual human cognition through the AI transition. One command. Five dollars. Local files you own.
 
@@ -50,9 +50,9 @@ Alexandria does not have a moat. At pre-seed, the moat is the founder. What foll
 
 **Lab giants** — structurally incentivised to build golden cages, not open doors. A structured portable profile makes switching trivial. Every memory feature they ship validates the thesis and strengthens the positioning — more lock-in means more need for a sovereign layer. Labs optimise for user satisfaction and retention. Alexandria optimises for productive discomfort and growth — opposed objective functions. No lab will build cross-model unification (Anthropic won't ingest OpenAI history and vice versa). Regulation and breach liability reinforce the incentive gap: the file is the single most sensitive file a person could have, and the deeper it gets, the more it costs labs in regulatory exposure. This is a bet about rational behaviour, not a wall — if the bet is wrong, Alexandria needs to have already built the trust position.
 
-**Non-lab giants** — giants don't create categories. Apple didn't invent the smartphone (Palm, BlackBerry). Apple didn't invent the smartwatch (Pebble). Cognitive identity infrastructure is an unproven category. If Apple builds it, the category is validated and Alexandria is the acquisition target. You cannot defend against Apple. You can be positioned to benefit.
+**Non-lab giants** — giants don't create categories. Apple didn't invent the smartphone (Palm, BlackBerry). Apple didn't invent the smartwatch (Pebble). Cognitive transformation infrastructure is an unproven category. If Apple builds it, the category is validated and Alexandria is the acquisition target. You cannot defend against Apple. You can be positioned to benefit.
 
-**Startups** — top-tier VCs have invested $100M+ in adjacent companies. The money validates the market; none has the full stack. Two established categories have formed: developer memory infrastructure (Mem0 $24M from YC/Peak XV — 186M API calls/quarter, AWS exclusive memory provider; Letta $10M from Felicis at $70M valuation; Supermemory $2.6M) and personal AI companions (Personal AI $23.8M from a16z; Delphi $19.1M from Founders Fund + Anthropic; Kin $4.1M). Neither category builds sovereign cognitive identity. Mem0 stores factual key-value memories for developers. Personal AI trains per-user models that lock users in. Delphi clones you outward for others. Kin is a destination app, not a layer. The closest philosophical competitor — ownself.ai — takes a blockchain approach (Ethereum L2, IPFS, wallet-based identity) but appears pre-launch with no visible funding or traction. Alexandria's pragmatic architecture (Google Drive, zero friction, live today) is the counter-position. The most philosophically adjacent product (Dot) shut down October 2025 — users lost their data. Limitless was acquired by Meta December 2025 — product killed. Both deaths validate the sovereignty architecture. The competitor who would need to emerge is one building structured cognitive profiles + sovereign ownership + cross-AI portability + active development + legacy. The timeline to traverse that philosophical depth: 4-5 years minimum.
+**Startups** — top-tier VCs have invested $100M+ in adjacent companies. The money validates the market; none has the full stack. Two established categories have formed: developer memory infrastructure (Mem0 $24M from YC/Peak XV — 186M API calls/quarter, AWS exclusive memory provider; Letta $10M from Felicis at $70M valuation; Supermemory $2.6M) and personal AI companions (Personal AI $23.8M from a16z; Delphi $19.1M from Founders Fund + Anthropic; Kin $4.1M). Neither category builds sovereign cognitive transformation. Mem0 stores factual key-value memories for developers. Personal AI trains per-user models that lock users in. Delphi clones you outward for others. Kin is a destination app, not a layer. The closest philosophical competitor — ownself.ai — takes a blockchain approach (Ethereum L2, IPFS, wallet-based identity) but appears pre-launch with no visible funding or traction. Alexandria's pragmatic architecture (Google Drive, zero friction, live today) is the counter-position. The most philosophically adjacent product (Dot) shut down October 2025 — users lost their data. Limitless was acquired by Meta December 2025 — product killed. Both deaths validate the sovereignty architecture. The competitor who would need to emerge is one building structured cognitive profiles + sovereign ownership + cross-AI portability + active development + legacy. The timeline to traverse that philosophical depth: 4-5 years minimum.
 
 **Users** — any sophisticated user can tell Claude "build me a Constitution" and get a decent result. The top 1% can replicate this. They were never going to pay. The 99% want the transformation but won't architect it themselves. DIY is a ceiling on price, not an existential threat.
 
@@ -192,12 +192,12 @@ mowinckel.ai
 *- The thesis: five dimensions of human value (brain, legs, hands, heart, the human itself). AI competes on all five. The fifth is by definition differentiated — forces the tiebreaker in threshold loops. Developing z improves the equation on both sides.*
 *- Why labs won't build this: structural incentives, not inability. Labs are incentivised to build golden cages, not open doors. Every memory feature they ship validates the thesis. This is a bet about rational behaviour, not a wall.*
 *- Not pure software: Alexandria is not a software company. The software is trivial. The product is the data (live, unique, unsynthesizable Constitutions) and the philosophy (intent layer, methodology). Four positions survive the software collapse: make models, generate live data, gatekeep permissions, own atoms. Alexandria is position two.*
-*- Demand is the only existential question: every framework confirms Alexandria occupies a survivable position. The sole remaining question is whether enough people want structured cognitive identity to pay $5-10/month. Answerable for ~$15K by seeding 25 users.*
+*- Demand is the only existential question: every framework confirms Alexandria occupies a survivable position. The sole remaining question is whether enough people want structured cognitive transformation to pay $5-10/month. Answerable for ~$15K by seeding 25 users.*
 *- The formal argument: Logic.md (mowinckel.ai/partners/logic) — 51 premises, 14 conclusions, 17 assumptions. Every settled premise cannot reasonably be denied. The only conversation is the blue assumptions.*
 *- The Examined Life as the real product ($5-10/mo, everyone gets everything, the mental gym)*
 *- Break-even at ~21 subscribers paying $5/month — company opex is $102/month. Structurally unkillable.*
 *- Growth mechanic: kin pricing, founding lineage, frame imposition as distribution*
-*- Cognitive identity infrastructure — no one building the full stack. Two established categories (developer memory infra, personal AI companions), neither is us. Adjacent companies funded at $100M+ by Sequoia/YC/a16z/Felicis/Founders Fund.*
+*- Cognitive transformation infrastructure — no one building the full stack. Two established categories (developer memory infra, personal AI companions), neither is us. Adjacent companies funded at $100M+ by Sequoia/YC/a16z/Felicis/Founders Fund.*
 *- Multiple AIs unified through one sovereign store (the Vault)*
 *- Cold start answer: sovereignty builds Constitutions before the Library needs them*
 *- TAM is everyone — not everyone who uses AI, everyone, because everyone will use AI*

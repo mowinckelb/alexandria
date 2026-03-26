@@ -19,7 +19,7 @@ export default function Privacy() {
 
       <section style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: 400 }}>What Alexandria does</h2>
-        <p>Alexandria is a sovereign cognitive identity layer. It helps AI systems understand who you are by maintaining a personal profile — your Constitution — on your own Google Drive.</p>
+        <p>Alexandria is a sovereign cognitive transformation layer. It helps AI systems understand who you are by maintaining a personal profile — your Constitution — on your own Google Drive.</p>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>

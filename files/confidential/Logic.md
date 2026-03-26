@@ -118,7 +118,7 @@ P18. Non-lab giants (e.g. Apple) have the talent, distribution, and user base to
 
 (Settled. Factual.)
 
-P19. Cognitive identity infrastructure is not a recognised category. No proven market. No existing playbook. Giants allocate resources to proven categories, not unproven ones. The consistent historical pattern: Palm before iPhone, BlackBerry before iPhone, Pebble before Apple Watch. Pioneers create categories, giants acquire or copy once validated.
+P19. Cognitive transformation infrastructure is not a recognised category. No proven market. No existing playbook. Giants allocate resources to proven categories, not unproven ones. The consistent historical pattern: Palm before iPhone, BlackBerry before iPhone, Pebble before Apple Watch. Pioneers create categories, giants acquire or copy once validated.
 
 (Assumption. Strong historical pattern, not a law of nature.)
 
@@ -212,7 +212,7 @@ C9: **Buying the dataset means buying access to a marketplace of opted-in Person
 
 ### 10. How Alexandria gets there
 
-P35. Layer 1 — The Examined Life ($5/month with active kin, $10/month without). Sovereign portable cognitive identity plus active cognitive development — Socratic questioning, blind spot surfacing, creative iteration calibrated to the user's taste. One tier, everyone gets everything. The product is the changed person. Socrates said the unexamined life is not worth living. Alexandria sells the examined one.
+P35. Layer 1 — The Examined Life ($5/month with active kin, $10/month without). Sovereign portable cognitive infrastructure plus active cognitive development — Socratic questioning, blind spot surfacing, creative iteration calibrated to the user's taste. One tier, everyone gets everything. The product is the changed person. Socrates said the unexamined life is not worth living. Alexandria sells the examined one.
 
 (Settled on the product. Assumption on adoption.)
 
@@ -288,7 +288,7 @@ C13: **Capped downside, tiered upside. The floor is a profitable business. The c
 
 ### 14. Why this, why now
 
-P48. Every AI investor is taking a shotgun approach — spreading bets across categories because nobody knows which will matter. Most categories have dozens of funded competitors. Cognitive identity infrastructure has zero funded competitors building the full stack.
+P48. Every AI investor is taking a shotgun approach — spreading bets across categories because nobody knows which will matter. Most categories have dozens of funded competitors. Cognitive transformation infrastructure has zero funded competitors building the full stack.
 
 (Settled. Verifiable.)
 
@@ -389,7 +389,7 @@ Assessment: Depends on P16. If the breathing room is large (years), even slow co
 
 **P19 — Non-lab giants won't move on an unproven category.**
 
-For: Historical pattern is strong: Palm before iPhone, BlackBerry before iPhone, Pebble before Apple Watch. Giants enter proven categories. No giant has a cognitive identity infrastructure team or product.
+For: Historical pattern is strong: Palm before iPhone, BlackBerry before iPhone, Pebble before Apple Watch. Giants enter proven categories. No giant has a cognitive transformation infrastructure team or product.
 
 Against: Apple specifically has the brand trust, device ecosystem, and privacy positioning to build this. If any giant would break the pattern, it would be Apple. And if the category becomes hot, a giant could move faster than the pattern suggests.
 
@@ -405,7 +405,7 @@ Assessment: The magnitude is genuinely uncertain. The mechanism is real. Whether
 
 **P23 — The question is non-obvious.**
 
-For: As of March 2026, nobody is building this. The category does not appear in any market map. The question "what is the structure of human cognitive identity and how do you systematically extract it?" requires traversing philosophy, cognitive science, and product design simultaneously. Most AI founders are solving engineering problems, not framing problems.
+For: As of March 2026, nobody is building this. The category does not appear in any market map. The question "what is the structure of human cognition and how do you systematically develop it?" requires traversing philosophy, cognitive science, and product design simultaneously. Most AI founders are solving engineering problems, not framing problems.
 
 Against: Philosophy is not a moat. Ideas spread. Once the methodology is visible (through the product itself), a well-resourced team could study it and replicate or improve. Philosophical depth is a head start, not a wall.
 

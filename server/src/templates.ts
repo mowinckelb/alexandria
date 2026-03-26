@@ -7,6 +7,15 @@ const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
 const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
 
 // ---------------------------------------------------------------------------
+// Inline SVG icons — small enough to inline, no external deps
+// ---------------------------------------------------------------------------
+
+const ICON_COPY = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+const ICON_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const ICON_DOWNLOAD = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+const ICON_INFO = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+
+// ---------------------------------------------------------------------------
 // Callback page — the first brand moment after signup
 // ---------------------------------------------------------------------------
 
@@ -37,44 +46,112 @@ export function callbackPageHtml(login: string, apiKey: string): string {
   .section { margin-bottom: 2.5rem; }
   .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin-bottom: 0.8rem; }
   .line { font-size: 1.1rem; font-weight: 400; line-height: 1.9; color: #3d3630; }
-  .link {
+  .action {
     color: #3d3630;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: #bbb4aa;
+    text-decoration: none;
     cursor: pointer;
-    transition: text-decoration-color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.15s;
   }
-  .link:hover { text-decoration-color: #3d3630; }
-  a.link { color: #3d3630; }
+  .action:hover { opacity: 0.6; }
+  .action .icon { display: inline-flex; align-items: center; color: #bbb4aa; transition: color 0.15s; }
+  .action:hover .icon { color: #3d3630; }
+  .action.done .icon { color: #3d3630; }
+  .info {
+    display: inline-flex;
+    align-items: center;
+    color: #bbb4aa;
+    cursor: pointer;
+    transition: color 0.15s;
+    vertical-align: middle;
+    margin-left: 4px;
+    position: relative;
+  }
+  .info:hover { color: #8a8078; }
+  .tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #3d3630;
+    color: #f5f0e8;
+    font-size: 0.78rem;
+    font-weight: 400;
+    line-height: 1.6;
+    padding: 10px 14px;
+    border-radius: 6px;
+    width: 260px;
+    text-align: left;
+    white-space: normal;
+    z-index: 10;
+  }
+  .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #3d3630;
+  }
+  .info.active .tooltip { display: block; }
   .closing { font-size: 1.15rem; color: #3d3630; margin-top: 2.5rem; }
-  .help { font-size: 0.78rem; color: #bbb4aa; margin-top: 2rem; }
-  .help a { color: #8a8078; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: #bbb4aa; }
+  .footer { font-size: 0.78rem; color: #bbb4aa; margin-top: 2rem; }
+  .footer .action { font-size: 0.78rem; color: #8a8078; }
+  .footer .action .icon { color: #bbb4aa; }
 </style>
 </head>
 <body>
 <div class="container">
   <div class="section">
     <p class="label">now</p>
-    <p class="line"><a class="link" onclick="copy()" id="copyLink">copy command</a>, then paste into your terminal</p>
-    <p class="line"><a class="link" href="${WEBSITE_URL}/shortcut" target="_blank">add shortcut</a>, then share to your vault</p>
+    <p class="line"><a class="action" onclick="copyCmd(this)">copy command <span class="icon">${ICON_COPY}</span></a>, then paste into your terminal</p>
+    <p class="line"><a class="action" href="${WEBSITE_URL}/shortcut" target="_blank">add shortcut <span class="icon">${ICON_DOWNLOAD}</span></a>, then share to your vault</p>
   </div>
   <div class="section">
     <p class="label">then</p>
-    <p class="line">/a &mdash; develop your thinking</p>
-    <p class="line">a. &mdash; absorb the abundance</p>
+    <p class="line">a. &mdash; absorb the abundance <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">drop voice notes, articles, podcasts — anything with signal or potential signal — into your vault. alexandria finds what actually resonates with you. the more you feed it, the more there is to work with.</span></span></p>
+    <p class="line">/a &mdash; your mental gym <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">processes your vault, absorbs what matters, lets you play with the ideas. not everything makes the cut. your constitution gets more refined every session.</span></span></p>
   </div>
   <p class="closing">welcome to alexandria.</p>
-  <p class="help"><a href="${WEBSITE_URL}/docs/setup.md">setup guide</a></p>
+  <p class="footer"><a class="action" onclick="copySetup(this)">setup.md <span class="icon">${ICON_COPY}</span></a></p>
 </div>
 <script>
-function copy() {
-  navigator.clipboard.writeText(${JSON.stringify(curlCmd)}).then(() => {
-    var el = document.getElementById('copyLink');
-    el.textContent = 'copied';
-    setTimeout(() => { el.textContent = 'copy command'; }, 2000);
+function copyCmd(el) {
+  navigator.clipboard.writeText(${JSON.stringify(curlCmd)}).then(function() {
+    el.querySelector('.icon').innerHTML = '${ICON_CHECK}';
+    el.classList.add('done');
+    setTimeout(function() {
+      el.querySelector('.icon').innerHTML = '${ICON_COPY}';
+      el.classList.remove('done');
+    }, 2000);
   });
 }
+function copySetup(el) {
+  fetch('${WEBSITE_URL}/docs/setup.md').then(function(r) { return r.text(); }).then(function(text) {
+    navigator.clipboard.writeText(text).then(function() {
+      el.querySelector('.icon').innerHTML = '${ICON_CHECK}';
+      el.classList.add('done');
+      setTimeout(function() {
+        el.querySelector('.icon').innerHTML = '${ICON_COPY}';
+        el.classList.remove('done');
+      }, 2000);
+    });
+  });
+}
+function toggleTip(el) {
+  var wasActive = el.classList.contains('active');
+  document.querySelectorAll('.info.active').forEach(function(e) { e.classList.remove('active'); });
+  if (!wasActive) el.classList.add('active');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.info')) {
+    document.querySelectorAll('.info.active').forEach(function(el) { el.classList.remove('active'); });
+  }
+});
 </script>
 </body>
 </html>`;

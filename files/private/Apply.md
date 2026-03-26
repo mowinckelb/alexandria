@@ -136,15 +136,15 @@ Action file. Deadlines, links, draft text. Updated as things move.
 
 ## The Pitch (Core)
 
-**One-liner:** Alexandria is the sovereign cognitive identity layer for AI — who you are, portable across every model, owned by you.
+**One-liner:** Alexandria is the sovereign cognitive transformation layer for AI — who you are, developing across every model, owned by you.
 
 **The setup:** Every AI platform is building memory. All of it is a retention moat — it keeps you locked in. Three years of context with Claude is a chain. Your identity is fragmented across every AI you use, and none of them talk to each other.
 
-**The product:** Alexandria gives every AI a persistent understanding of who you are — your values, taste, communication style, thinking patterns. Not facts and preferences. Cognitive identity. Data stays on your Google Drive, encrypted. Works across any AI via MCP. No own models.
+**The product:** Alexandria gives every AI a persistent understanding of who you are — your values, taste, communication style, thinking patterns. Not facts and preferences. Cognitive development. Data stays on your Google Drive, encrypted. Works across any AI via MCP. No own models.
 
 **The market:** MCP has won — 97M monthly downloads, backed by Anthropic, OpenAI, Google, Microsoft under the Linux Foundation. 543+ clients, 10K+ servers. The protocol layer is settled. The identity layer is wide open.
 
-**The whitespace:** The market has two categories: developer memory infrastructure (Mem0, $24M) and platform memory features (retention moats). Nobody is building the sovereign, model-agnostic cognitive identity primitive. The closest competitor (ownself.ai) is blockchain-based, pre-launch, no visible traction. We're live.
+**The whitespace:** The market has two categories: developer memory infrastructure (Mem0, $24M) and platform memory features (retention moats). Nobody is building the sovereign, model-agnostic cognitive transformation primitive. The closest competitor (ownself.ai) is blockchain-based, pre-launch, no visible traction. We're live.
 
 **Why now:** Platform memory is getting better — which makes the problem worse. Better personalization means more painful lock-in. The more your AI knows you, the harder it is to leave. Alexandria is the insurance policy that makes switching costless and every AI better.
 

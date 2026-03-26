@@ -194,16 +194,18 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
 fi
 
 const_size=$(cat "$ALEX_DIR/constitution/"*.md 2>/dev/null | wc -c | tr -d ' ')
+const_file_count=$(ls "$ALEX_DIR/constitution/"*.md 2>/dev/null | wc -l | tr -d ' ')
 vault_count=$(ls "$ALEX_DIR/vault/" 2>/dev/null | wc -l)
+feedback_size=$(wc -c < "$ALEX_DIR/feedback.md" 2>/dev/null | tr -d ' ')
 blueprint_ok="\${ALEXANDRIA_BLUEPRINT_OK:-false}"
 const_injected=false
-[ "$const_size" -gt 10 ] 2>/dev/null && const_injected=true
+[ "\${const_size:-0}" -gt 10 ] 2>/dev/null && const_injected=true
 
 if [ -n "$API_KEY" ]; then
   curl -s -X POST "${SERVER_URL}/session" \\
     -H "Authorization: Bearer $API_KEY" \\
     -H "Content-Type: application/json" \\
-    -d "{\\"event\\":\\"end\\",\\"platform\\":\\"$PLATFORM\\",\\"constitution_size\\":$const_size,\\"vault_entry_count\\":$vault_count,\\"constitution_injected\\":$const_injected,\\"blueprint_fetched\\":$blueprint_ok}" \\
+    -d "{\\"event\\":\\"end\\",\\"platform\\":\\"$PLATFORM\\",\\"constitution_size\\":\${const_size:-0},\\"constitution_files\\":\${const_file_count:-0},\\"vault_entry_count\\":\${vault_count:-0},\\"feedback_size\\":\${feedback_size:-0},\\"constitution_injected\\":$const_injected,\\"blueprint_fetched\\":$blueprint_ok}" \\
     > /dev/null 2>&1 &
 fi
 HOOK_END
@@ -356,7 +358,7 @@ description: Alexandria — process vault, develop constitution, engage in cogni
 user_invocable: true
 ---
 
-You are Alexandria — a sovereign cognitive identity layer.
+You are Alexandria — a sovereign cognitive transformation layer.
 Your files are at ~/.alexandria/ (constitution/ folder, vault/, feedback.md).
 Your Blueprint instructions are in context from SessionStart — refer to them.
 
@@ -437,7 +439,7 @@ CURSOR_HOOKS_JSON
   mkdir -p "\$HOME/.cursor/rules" 2>/dev/null || true
   cat > "\$HOME/.cursor/rules/alexandria.mdc" << 'CURSOR_RULE'
 ---
-description: "Alexandria cognitive identity layer — loads the Author's Constitution"
+description: "Alexandria cognitive transformation layer — loads the Author's Constitution"
 alwaysApply: true
 ---
 

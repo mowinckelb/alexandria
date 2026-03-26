@@ -139,7 +139,7 @@ app.get('/', (_req, res) => {
 <div style="text-align:center">
 <img src="/favicon.png" width="64" height="64" alt="Alexandria">
 <h1 style="margin:1rem 0 0.5rem;font-weight:300">Alexandria</h1>
-<p style="color:#888;font-size:0.9rem">Sovereign cognitive identity layer</p>
+<p style="color:#888;font-size:0.9rem">Sovereign cognitive transformation layer</p>
 <p style="color:#555;font-size:0.8rem;margin-top:2rem"><a href="/health" style="color:#555">health</a></p>
 </div>
 </body>

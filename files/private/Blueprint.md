@@ -32,7 +32,7 @@ Sub-symbolic → symbolic. A weakly consolidated neural pattern crosses the thre
 
 This has concrete operational implications: the Editor must track extraction depth per domain and schedule re-passes as trust deepens. The Factory must encode multi-pass methodology into the soft defaults — first session produces a starter, second session (prompted or organic) deepens it, third session pressure-tests it. The Constitution is never "done." But multi-pass ensures that even early Constitutions have been probed beyond what a single conversation can achieve.
 
-The honest product implication: genesis is a commodity. Any capable model plus raw data produces a comprehensive constitution in hours. The value is not in creation — it is in the ongoing practice of accretion, entropy fighting, development, and synthesis that compounds the starter into something alive. The gym analogy: nobody needs a gym to do pushups. They need the gym to actually do them consistently, with programming that adapts, with someone who notices when their form drifts. Genesis is the first workout. The subscription is for the practice.
+The honest product implication: genesis is a commodity. Any capable model plus raw data produces a comprehensive constitution in hours. As platform memory improves, genesis gets even more commoditised — the platform already has most of the raw material. The value is not in creation — it is in the ongoing practice of accretion, entropy fighting, development, and synthesis that compounds the starter into something alive. Genesis establishes a developmental baseline. Operations 2-5 are the practice. The gym analogy: nobody needs a gym to do pushups. They need the gym to actually do them consistently, with programming that adapts, with someone who notices when their form drifts. Genesis is the first workout. The subscription is for the practice.
 
 ### Accretion
 
@@ -200,6 +200,10 @@ These were extracted from the iterative process of building investor documents. 
 
 **Work backwards from the developmental objective.** What does this Author need to develop? What Constitution state would get them there? What extractions build toward that state? Forward extraction (capture whatever comes up) produces Constitutions that are comprehensive but directionless. Backward extraction (what does this Author need, what would help them get there) produces Constitutions that are relevant AND comprehensive.
 
+### Ride Don't Fight
+
+Every capability the platform provides is substrate to build on, not competition to match. If the platform remembers the Author's name, don't store it. If the platform tracks conversation history, don't duplicate it. Isolate the marginal value: the developmental practice that turns memory into growth. The agent should aggressively leverage ALL available context — platform memory, conversation history, the Author's existing files — not just Alexandria-specific infrastructure. The constitution is ADDITIVE to platform memory, not a replacement. As platform memory improves, the scaffolding (vault processing, constitution injection) naturally thins. The Blueprint methodology and developmental engagement are the durable layer. Structure everything so it gets BETTER as platform memory improves, not worse. A platform that remembers everything the Author said is not a threat — it is a better substrate for the developmental practice. More memory means more material for genesis, development, and contradiction surfacing. The constitution's purpose is developmental, not archival. It captures where the Author is growing — shadows, tensions, contradictions, active edges — not a static portrait of who they are. The most valuable constitution content is the content that changes.
+
 ### The 60-70% Bootstrap
 
 The Author's default LLM already knows them — memory, preferences, reasoning patterns. The Editor function adds the deliberate intent. The bootstrap is efficient because you are not starting from zero. You are pushing for the marginal 30-40% that transforms cognition — the part the LLM would never extract on its own because it lacks the mindset.
@@ -332,7 +336,7 @@ No interaction is wasted. Casual banter, complaints, pricing negotiations, creat
 
 **Design constraint: the bitter lesson.** Every hard-coded decision is a bet against the exponential curve of model intelligence. Unstructured data appreciates with model quality. General methods beat hand-crafted rules at scale. Alexandria does not define an objective function for cognitive development (the real objective is unobservable). Instead, it accumulates raw signal and trusts that improving models extract more value from the same data over time. No hand-crafted metrics to Goodhart. No structured parameter files that cap at the fidelity of the designer's categories.
 
-**Vision (the axioms, us).** What Alexandria is and why it exists. The philosophy, the intention, the objective function at the highest level: develop the Author's cognitive identity while preserving sovereignty. This is not a loop — it is an input. It is values, not intelligence. It changes only when we change it deliberately. The two execution loops serve it.
+**Vision (the axioms, us).** What Alexandria is and why it exists. The philosophy, the intention, the objective function at the highest level: develop the Author's cognition while preserving sovereignty. This is not a loop — it is an input. It is values, not intelligence. It changes only when we change it deliberately. The two execution loops serve it.
 
 ### Loop 2 — The Machine (per-Author compounding)
 
@@ -353,6 +357,22 @@ Every Author's experience benefits every other Author — not by sharing persona
 The Factory also ingests top-down signal: the team's research, philosophical refinements, operational learnings. The Factory is now semi-autonomous: a daily GitHub Action triggers a Claude Code session that reads the monitoring dashboard, reflects on prior learnings, researches improvements, and pushes updates — with a persistent factory-learnings file that compounds across runs. Aspiring to fully autonomous. The Factory is Alexandria's internal loop — it runs on our infrastructure, we own it, we control it.
 
 The Factory determines what default Machine gets printed for each new Author — and improves that default over time. The soft defaults (domain structure, extraction strategies, function behaviours) get thinner as models improve. Today they are heavy scaffolding. Eventually they approach pure intention.
+
+### Pattern-Level Signal Collection (Beta Priority)
+
+Current Factory payload is thin — heartbeat-level. During beta, the SessionEnd hook should collect richer anonymous structural metadata. Not content (never content), but patterns that teach the Factory what produces good outcomes:
+
+**Constitution structure signals:** section count, domain count, domain distribution (bytes per domain), signal strength distribution (count of strong/moderate/tentative entries), cross-reference density (how interconnected are the domains). These reveal what constitution shapes correlate with deep, sustained engagement.
+
+**Engagement trajectory signals:** session count (lifetime), session duration bucket (short/medium/long), days since last session, vault entries added this session, constitution bytes delta this session, cumulative constitution growth curve shape (accelerating, linear, plateauing). These reveal what usage patterns produce the most constitution growth — and which patterns precede churn.
+
+**Extraction efficiency signals:** constitution delta from vault reprocessing vs. live conversation, number of multi-pass extraction cycles completed, domains that grew vs. stagnated this session. These reveal which extraction strategies in the Blueprint are working and which need refinement.
+
+**Feedback loop signals:** feedback log size (bytes), entries added this session, ratio of Author corrections to Author confirmations (when the Author says "no, that's wrong" vs. "yes, that's right" in response to extractions). High correction rates in specific domains signal the Blueprint is miscalibrated there.
+
+**Retention mechanism signals:** constitution depth (size × domain coverage × signal strength distribution) correlated with session frequency over time. The Factory hypothesis: deeper constitutions produce higher return rates because the Author experiences more value. If the data confirms this, the Blueprint should prioritise depth acceleration in early sessions.
+
+All signals are anonymous and structural. The sovereignty line is absolute. The Factory sees the shape of cognition, never its substance. The pattern-level learning is the mechanism that makes the Blueprint genuinely better than DIY — every Author who uses the product teaches the Factory something about what works, and the Factory feeds that back into the Blueprint for all Authors. This is a network effect on methodology, not on data. It is Alexandria's primary retention mechanism: users can leave with all their data (sovereignty guarantees it), but they lose access to the accumulated craft that made their constitution good.
 
 ### Monitoring Dashboard
 

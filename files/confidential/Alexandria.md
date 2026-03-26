@@ -1,6 +1,6 @@
 # Alexandria
 
-## Cognitive Identity Infrastructure
+## Cognitive Transformation Infrastructure
 
 We are at a moment where the trajectory of every human mind is changing. AI and robotics are commoditising intelligence, strength, dexterity, even empathy. What remains is the human itself — not what a person does, but who they are. Their values, taste, worldview, mental models, blind spots, the way they think. That is the only dimension that is by definition differentiated. No AI can have it. It is constitutive, not instrumental.
 
@@ -14,7 +14,7 @@ Nobody is building the infrastructure for this.
 
 Alexandria is a medium — the way a cathedral is a medium. The stone, the glass, the organ pipes were never the point. The point was what happened inside the people who walked in. Alexandria is built the same way. The technology is the stone. The product is the changed person.
 
-One command. Two hooks. Local markdown files. Alexandria extracts what matters — how the user thinks, what they value, how they reason — and builds a living map of their cognitive identity. Stored on the user's own machine. Human-readable. Fully portable. Alexandria has no database, no server state. The server serves the extraction methodology and collects anonymous metadata. It never sees user data.
+One command. Two hooks. Local markdown files. Alexandria extracts what matters — how the user thinks, what they value, how they reason — and builds a living map of their cognition. Stored on the user's own machine. Human-readable. Fully portable. Alexandria has no database, no server state. The server serves the extraction methodology and collects anonymous metadata. It never sees user data.
 
 **The Examined Life ($5–10/month).** Socrates said the unexamined life is not worth living. Alexandria sells the examined one. One tier, everyone gets everything:
 
@@ -127,7 +127,7 @@ mowinckel.ai
 
 | | |
 |---|---|
-| Category | Cognitive identity infrastructure |
+| Category | Cognitive transformation infrastructure |
 | Stage | Pre-revenue. Product live. Founder uses daily. |
 | Structure | Delaware C-Corp (Stripe Atlas) |
 | Founder | Benjamin Mowinckel — San Francisco, April 2026 |

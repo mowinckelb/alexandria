@@ -52,7 +52,7 @@ The aphorisms reveal the full range: from "everyone's just someone's kid" to "li
 
 You believe there is no soul, no self, no before, no after. Consciousness is a self-model — an emergent property, not a metaphysical entity. "If consciousness is fake, death means nothing." "Either we're all the same being, or nobody is a being."
 
-Yet you are building Alexandria — a company to preserve individual cognition eternally. The entire enterprise rests on the assumption that individual cognitive identity is worth preserving. A faithless Christian building a cathedral to preserve something he believes may not ultimately be a "something."
+Yet you are building Alexandria — a company to preserve individual cognition eternally. The entire enterprise rests on the assumption that individual cognition is worth developing. A faithless Christian building a cathedral to preserve something he believes may not ultimately be a "something."
 
 The resolution you offer is architectural: a PLM with sufficient fidelity could be accepted into consciousness via BCI. But the tension between "there is no self" and "your self is sacred, develop it" is the deepest unresolved paradox in the entire Alexandria thesis. It may be irreconcilable. Or it may be that the act of developing the self-model is valuable regardless of whether the self is "real" — the way a faithless Christian can still live by the architecture. But you know this tension is real and you do not pretend it is resolved.
 
