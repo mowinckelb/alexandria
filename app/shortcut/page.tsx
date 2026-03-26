@@ -30,22 +30,25 @@ export default function ShortcutPage() {
       <ThemeToggle />
 
       <section className="flex flex-col items-center justify-center px-8 min-h-screen">
-        <div className="max-w-[420px] flex flex-col items-center">
+        <div className="max-w-[420px] flex flex-col items-center text-center">
 
           <a href="/" className="no-underline">
-            <p className="text-[1.3rem] sm:text-[1.5rem] font-normal leading-none tracking-tight text-center" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-[1.3rem] sm:text-[1.5rem] font-normal leading-none tracking-tight" style={{ color: 'var(--text-primary)' }}>
               alexandria.
             </p>
           </a>
 
-          <div className="mt-14 sm:mt-16 space-y-10 text-center">
+          <div className="mt-14 sm:mt-16 space-y-10">
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <p className="text-[0.6rem] tracking-widest uppercase" style={{ color: 'var(--text-ghost)', letterSpacing: '0.2em' }}>
-                vault shortcut
+                capture
               </p>
-              <p className="text-[0.85rem] sm:text-[0.9rem] tracking-wide leading-[1.9]" style={{ color: 'var(--text-secondary)' }}>
-                capture from your phone. share anything &mdash; voice memos, journal entries, articles, youtube videos, podcasts &mdash; and it lands in your vault. /a processes the rest.
+              <p className="text-[0.9rem] sm:text-[0.95rem] tracking-wide leading-[1.9]" style={{ color: 'var(--text-secondary)' }}>
+                voice memos, journals, articles, videos, podcasts
+              </p>
+              <p className="text-[0.85rem] sm:text-[0.9rem] tracking-wide leading-[1.9]" style={{ color: 'var(--text-muted)' }}>
+                tap share, tap alexandria &mdash; it lands in your vault
               </p>
             </div>
 
@@ -57,17 +60,13 @@ export default function ShortcutPage() {
               get shortcut
             </a>
 
-            <div className="space-y-5 text-[0.78rem] sm:text-[0.82rem] tracking-wide leading-[1.9]" style={{ color: 'var(--text-muted)' }}>
-              <p>uses the share sheet. tap share on anything, tap the shortcut.</p>
-              <p>voice memos get transcribed on device. urls get saved as-is &mdash; the model fetches the content when you run /a</p>
-              <p>everything syncs to <code style={{ fontSize: '0.9em', color: 'var(--text-primary)' }}>~/.alexandria/vault/</code> via iCloud.</p>
-            </div>
+            <p className="text-[0.85rem] sm:text-[0.9rem] tracking-wide leading-[1.9]" style={{ color: 'var(--text-muted)' }}>
+              /a processes the rest
+            </p>
 
-            <div className="pt-4">
-              <p className="text-[0.65rem] tracking-wide" style={{ color: 'var(--text-ghost)' }}>
-                requires iCloud Drive &middot; iOS 17+ or macOS
-              </p>
-            </div>
+            <p className="text-[0.65rem] tracking-wide" style={{ color: 'var(--text-ghost)' }}>
+              iOS &middot; macOS &middot; iCloud Drive
+            </p>
 
           </div>
         </div>
