@@ -19,13 +19,12 @@ Everything lives in `files/`. Three access levels: private (internal only), conf
 - `Blueprint.md` — The product instruction set. Five operations on the symbolic layer (genesis, accretion, entropy, development, synthesis). This is the accumulated craft that becomes MCP tool descriptions. Read for: product methodology, extraction design, mode behavior.
 
 **Founder's Constitution (lives at `~/.alexandria/constitution/` — the product, used as designed):**
-- `Constitution_Taste.md` — Creative principles, voice DNA, director's notes, hyperrealism standard. READ FIRST for any creative task.
-- `Constitution_Identity.md` — Self-concept, communication style. "The faithless Christian between two monoliths."
-- `Constitution_Values.md` — Core values and ethical framework.
-- `Constitution_Worldview.md` — How Benjamin sees the world.
-- `Constitution_Models.md` — Mental models and reasoning patterns.
-- `Constitution_Shadows.md` — Known blind spots and failure modes.
-- Repo copy (for remote triggers): `files/private/constitution/` — static snapshot, product copy at `~/.alexandria/constitution/` is the source of truth.
+- `Core.md` — The whole person. Identity, priority stack, dual mandate, people, life architecture. READ FIRST for any task.
+- `Love.md` — Love, marriage, family, romance, parenting. The deepest tensions.
+- `Power.md` — Governance, politics, geopolitics, economics, AI, civilisation.
+- `Mind.md` — Mental models, reasoning patterns, epistemology.
+- `Taste.md` — Creative principles, voice DNA, director's notes, hyperrealism standard. READ FIRST for any creative task.
+- Repo copy (for remote triggers): `files/private/constitution/` — synced from product copy at `~/.alexandria/constitution/`.
 
 **Founder's writing & thinking:**
 - `Aphorisms.md` — Compressed positions by domain. Reference for his exact position on a topic.
