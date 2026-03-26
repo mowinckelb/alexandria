@@ -248,6 +248,20 @@ export async function getDashboard(): Promise<Record<string, unknown>> {
     : null;
   const stale = hoursSinceLastEvent !== null && hoursSinceLastEvent > 24;
 
+  // Anomaly detection — make absence-of-signal visible
+  const sessionEventTypes = new Set(['prosumer_session', 'session_start', 'session_end']);
+  const sessionEvents = events.filter(e => sessionEventTypes.has(e.e));
+  const lastSessionEvent = sessionEvents.length > 0 ? sessionEvents[sessionEvents.length - 1].t : null;
+  const hoursSinceLastSession = lastSessionEvent
+    ? Math.round((Date.now() - new Date(lastSessionEvent).getTime()) / (1000 * 60 * 60) * 10) / 10
+    : null;
+
+  const now = Date.now();
+  const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
+  const smokeFailures24h = events.filter(
+    e => (e.e === 'hook_failure' || e.event === 'hook_failure') && new Date(e.t).getTime() > twentyFourHoursAgo
+  ).length;
+
   return {
     status: stale ? 'stale — no events for 24+ hours, possible silent connector failure'
       : parseErrors > 0 ? `ok — ${parseErrors} corrupted log lines skipped`
@@ -295,6 +309,12 @@ export async function getDashboard(): Promise<Record<string, unknown>> {
     },
 
     system_observations: systemObservations,
+
+    anomaly: {
+      last_session_event: lastSessionEvent,
+      hours_since_last_session: hoursSinceLastSession,
+      smoke_failures_24h: smokeFailures24h,
+    },
   };
 }
 

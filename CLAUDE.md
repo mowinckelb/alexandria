@@ -25,7 +25,7 @@ Everything lives in `files/`. Three access levels: private (internal only), conf
 - `Constitution_Worldview.md` — How Benjamin sees the world.
 - `Constitution_Models.md` — Mental models and reasoning patterns.
 - `Constitution_Shadows.md` — Known blind spots and failure modes.
-- Static backup: `files/private/constitution_backup_2026-03-26/`
+- Repo copy (for remote triggers): `files/private/constitution/` — static snapshot, product copy at `~/.alexandria/constitution/` is the source of truth.
 
 **Founder's writing & thinking:**
 - `Aphorisms.md` — Compressed positions by domain. Reference for his exact position on a topic.
@@ -87,7 +87,7 @@ Each Author's Machine compounds through usage. Constitution deepens, feedback lo
   - Stateless: encrypted Google refresh token IS the access token. No user data stored.
 - **Static assets:** `public/` (includes `public/docs/` served by website, `public/partners/` for investor artifacts).
 - **Partners:** Markdown docs (Numbers.md, Logic.md) served at `/partners/numbers` and `/partners/logic` via dynamic `[doc]` route. Sync from `files/confidential/` to `public/partners/` when content changes.
-- **Build:** `npm run build` (server/). **Deploy:** `cd server && flyctl deploy --remote-only` (Fly.io), push to main (Vercel). **Render abstract PDF:** `python scripts/generate_pdf.py <input.md> [output.pdf]` — only abstract.pdf uses this pipeline now. Verify preview PNGs before committing.
+- **Build:** `npm run build` (server/). **Deploy:** `cd server && flyctl deploy --remote-only && bash server/test/smoke.sh` (Fly.io), push to main (Vercel). **Render abstract PDF:** `python scripts/generate_pdf.py <input.md> [output.pdf]` — only abstract.pdf uses this pipeline now. Verify preview PNGs before committing.
 - **Server health:** `curl https://mcp.mowinckel.ai/health`
 - **Stack:** Vercel (website), Fly.io (MCP server), GitHub, Google Cloud (OAuth), Claude.
 
@@ -112,7 +112,15 @@ What changed about Alexandria. Not what you did — what's different now. Only f
 What's unresolved. What the next session should pick up. Ordered by priority.
 
 ### 3. Feed the Loops (silent)
-Do not report. Just do it. Save memories, update GTs, push to Blueprint, check downstream staleness, fix what you can.
+Do not report. Just do it. The agent that had the conversation IS the richest context — extract everything before it dies.
+
+**Machine loop.** If the founder revealed anything about themselves this session — opinions, stories, patterns, contradictions — update `~/.alexandria/constitution/` directly. The current conversation is richer context than the vault transcript will be. Don't wait for /a.
+
+**Meta loop.** If anything happened that teaches us about the *product* — how extraction works, what engagement patterns land, what the model gets wrong, architectural insights — write to `files/private/Blueprint.md`.
+
+**Vision loop.** If the founder developed new thinking about Alexandria, update A1/A2/A3 directly.
+
+**Founder loop.** Save CC memories for communication patterns, preferences, anti-patterns.
 
 **Downstream staleness check.** If A1, A2, or A3 changed this session, verify these artifacts still match:
 - `files/confidential/Memo.md` + `public/partners/Memo.md` (must be identical)

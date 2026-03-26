@@ -147,9 +147,10 @@ app.get('/', (_req, res) => {
 });
 
 // Serve favicon so Claude picks up the a. logo
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, existsSync, accessSync, constants as fsConstants } from 'fs';
+import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { SHARED_CONTEXT } from './modes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const faviconPng = readFileSync(join(__dirname, '..', 'favicon.png'));
@@ -274,4 +275,162 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  MCP:    ${SERVER_URL}/mcp`);
   console.log(`  Health: ${SERVER_URL}/health`);
   console.log(`  Analytics: ${SERVER_URL}/analytics`);
+  runSelfTest();
+  // Smoke check: hit live endpoints 30s after startup, then every 6 hours
+  setTimeout(runSmokeCheck, 30 * 1000);
+  setInterval(runSmokeCheck, 6 * 60 * 60 * 1000);
 });
+
+// ---------------------------------------------------------------------------
+// Smoke check — periodically hit live endpoints to verify they work
+// ---------------------------------------------------------------------------
+
+async function runSmokeCheck(): Promise<void> {
+  const base = `http://localhost:${PORT}`;
+  const results: string[] = [];
+  let failures = 0;
+
+  // 1. Health
+  try {
+    const r = await fetch(`${base}/health`);
+    const body = await r.json() as { status?: string };
+    if (r.ok && body.status === 'ok') {
+      results.push('[smoke] health OK');
+    } else {
+      results.push(`[smoke] CRITICAL: health returned ${r.status}, status=${body.status}`);
+      failures++;
+    }
+  } catch (err) {
+    results.push(`[smoke] CRITICAL: health unreachable — ${err}`);
+    failures++;
+  }
+
+  // 2. Find an API key from accounts
+  let apiKey: string | null = null;
+  try {
+    const accountsFile = join(resolve(process.env.DATA_DIR || '/data'), 'accounts.json');
+    if (existsSync(accountsFile)) {
+      const accounts = JSON.parse(readFileSync(accountsFile, 'utf-8'));
+      const first = Object.values(accounts)[0] as { api_key?: string } | undefined;
+      apiKey = first?.api_key || null;
+    }
+  } catch { /* no accounts */ }
+
+  if (!apiKey) {
+    results.push('[smoke] no accounts — skipping authenticated checks');
+  } else {
+    // 3. Blueprint
+    try {
+      const r = await fetch(`${base}/blueprint`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      if (r.ok) {
+        results.push('[smoke] blueprint OK');
+      } else {
+        results.push(`[smoke] CRITICAL: blueprint returned ${r.status}`);
+        failures++;
+      }
+    } catch (err) {
+      results.push(`[smoke] CRITICAL: blueprint unreachable — ${err}`);
+      failures++;
+    }
+
+    // 4. Session
+    try {
+      const r = await fetch(`${base}/session`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ event: 'smoke_check' }),
+      });
+      if (r.ok) {
+        results.push('[smoke] session OK');
+      } else {
+        results.push(`[smoke] CRITICAL: session returned ${r.status}`);
+        failures++;
+      }
+    } catch (err) {
+      results.push(`[smoke] CRITICAL: session unreachable — ${err}`);
+      failures++;
+    }
+  }
+
+  // Log all results
+  for (const line of results) console.log(line);
+  if (failures === 0) {
+    console.log('[smoke] all checks passed');
+  } else {
+    console.log(`[smoke] ${failures} check(s) FAILED`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Startup self-test — catch obvious deployment issues
+// ---------------------------------------------------------------------------
+
+function runSelfTest(): void {
+  let failures = 0;
+
+  // 1. DATA_DIR — exists and writable
+  const dataDir = resolve(process.env.DATA_DIR || '/data');
+  if (!existsSync(dataDir)) {
+    console.log(`[self-test] CRITICAL: DATA_DIR does not exist: ${dataDir}`);
+    failures++;
+  } else {
+    try {
+      accessSync(dataDir, fsConstants.W_OK);
+      console.log(`[self-test] DATA_DIR ok: ${dataDir}`);
+    } catch {
+      console.log(`[self-test] CRITICAL: DATA_DIR not writable: ${dataDir}`);
+      failures++;
+    }
+  }
+
+  // 2. accounts.json — parseable if present
+  const accountsFile = join(dataDir, 'accounts.json');
+  if (!existsSync(accountsFile)) {
+    console.log(`[self-test] accounts.json not found (ok for fresh deploy)`);
+  } else {
+    try {
+      const accounts = JSON.parse(readFileSync(accountsFile, 'utf-8'));
+      const count = Object.keys(accounts).length;
+      console.log(`[self-test] accounts.json ok: ${count} account(s)`);
+    } catch (err) {
+      console.log(`[self-test] CRITICAL: accounts.json exists but failed to parse: ${err}`);
+      failures++;
+    }
+  }
+
+  // 3. Required env vars — present and not MSYS-mangled
+  for (const name of ['SERVER_URL', 'ENCRYPTION_KEY'] as const) {
+    const val = process.env[name];
+    if (!val) {
+      console.log(`[self-test] CRITICAL: ${name} is not set`);
+      failures++;
+    } else if (val.includes('C:') || val.includes('Program Files')) {
+      console.log(`[self-test] CRITICAL: ${name} looks like a mangled Windows path: ${val}`);
+      failures++;
+    } else {
+      // Truncate sensitive values
+      const display = name === 'ENCRYPTION_KEY' ? `${val.slice(0, 4)}...` : val;
+      console.log(`[self-test] ${name} ok: ${display}`);
+    }
+  }
+
+  // 4. Blueprint assembly — SHARED_CONTEXT is non-empty
+  if (!SHARED_CONTEXT || SHARED_CONTEXT.trim().length === 0) {
+    console.log(`[self-test] CRITICAL: SHARED_CONTEXT (Blueprint) is empty`);
+    failures++;
+  } else {
+    console.log(`[self-test] Blueprint ok: ${SHARED_CONTEXT.length} chars`);
+  }
+
+  // Summary
+  if (failures === 0) {
+    console.log(`[self-test] All checks passed`);
+  } else {
+    console.log(`[self-test] ${failures} check(s) failed — server running degraded`);
+  }
+}

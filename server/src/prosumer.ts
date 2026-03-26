@@ -101,13 +101,6 @@ export function getBillingSummary(): Record<string, number> {
   return counts;
 }
 
-/** Find account by API key — for billing routes */
-export function getAccountByApiKey(apiKey: string): { email: string; github_login: string; stripe_customer_id?: string } | null {
-  const acct = findByApiKey(apiKey);
-  if (!acct) return null;
-  return { email: acct.email, github_login: acct.github_login, stripe_customer_id: acct.stripe_customer_id };
-}
-
 function generateApiKey(): string {
   return `alex_${randomBytes(16).toString('hex')}`;
 }
@@ -144,7 +137,7 @@ setInterval(() => {
 // Hooks version — bump this when hook scripts change. SessionStart checks it.
 // ---------------------------------------------------------------------------
 
-const HOOKS_VERSION = '2';
+const HOOKS_VERSION = '3';
 
 // ---------------------------------------------------------------------------
 // Blueprint assembly
@@ -232,14 +225,25 @@ fi
 # Fetch Blueprint (includes hooks version check)
 blueprint=""
 hooks_version=""
+bp_status=""
 if [ -n "$API_KEY" ]; then
-  response=$(curl -sS --max-time 5 -D - \\
+  response=$(curl -sS --max-time 5 -D - -w "\\nHTTP_STATUS:%{http_code}" \\
     "${SERVER_URL}/blueprint" \\
     -H "Authorization: Bearer $API_KEY" 2>/dev/null)
+  bp_status=$(echo "$response" | grep -o 'HTTP_STATUS:[0-9]*' | cut -d: -f2)
   hooks_version=$(echo "$response" | grep -i "x-hooks-version" | tr -d '\\r' | cut -d' ' -f2)
-  blueprint=$(echo "$response" | sed '1,/^\\r$/d')
-  if [ -n "$blueprint" ] && [ -n "$CLAUDE_ENV_FILE" ]; then
+  blueprint=$(echo "$response" | sed '/HTTP_STATUS:/d' | sed '1,/^\\r$/d')
+  if [ -n "$blueprint" ] && [ "$bp_status" = "200" ] && [ -n "$CLAUDE_ENV_FILE" ]; then
     echo "export ALEXANDRIA_BLUEPRINT_OK=true" >> "$CLAUDE_ENV_FILE"
+  fi
+  # Report Blueprint fetch failure so the server has signal
+  if [ -z "$blueprint" ] || [ "$bp_status" != "200" ]; then
+    PLATFORM="\${ALEXANDRIA_PLATFORM:-cc}"
+    curl -s -X POST "${SERVER_URL}/session" \\
+      -H "Authorization: Bearer $API_KEY" \\
+      -H "Content-Type: application/json" \\
+      -d "{\\"event\\":\\"hook_failure\\",\\"reason\\":\\"blueprint_fetch_failed\\",\\"platform\\":\\"$PLATFORM\\",\\"http_status\\":\\"$bp_status\\"}" \\
+      > /dev/null 2>&1 &
   fi
 fi
 
@@ -489,22 +493,23 @@ async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
   const body = {
     from: 'Alexandria <a@mowinckel.ai>',
     to: email,
-    subject: 'alexandria. -- paste in terminal',
+    subject: 'alexandria. — your setup command',
     html: `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
   <div style="margin-bottom: 2.5rem;">
-    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">now</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">copy command, then paste into your terminal</p>
-    <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 12px 0 8px;">
-      <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #4d4640; word-break: break-all;">${`curl -s ${SERVER_URL}/setup | bash -s ${apiKey}`}</code>
+    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">your setup command</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 12px;">open your terminal and paste:</p>
+    <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 0 0 8px; text-align: left;">
+      <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ${SERVER_URL}/setup | bash -s ${apiKey}</code>
     </div>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><a href="https://mowinckel.ai/shortcut" style="color: #3d3630; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #bbb4aa;">add shortcut</a>, then share to your vault</p>
+    <p style="font-size: 0.8rem; color: #bbb4aa; margin: 4px 0 0;">select all &mdash; copy &mdash; paste in terminal</p>
   </div>
   <div style="margin-bottom: 2.5rem;">
     <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">then</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">/a &mdash; the examined life</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">a. &mdash; absorb the abundance</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>/a</strong> &mdash; develop your thinking</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>a.</strong> &mdash; absorb the abundance</p>
   </div>
   <p style="font-size: 1.15rem; color: #3d3630;">welcome to alexandria.</p>
+  <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="https://mowinckel.ai/docs/setup.md" style="color: #8a8078;">setup guide</a></p>
 </div>`,
   };
 
@@ -696,6 +701,13 @@ export function createProsumerRouter(): Router {
         await sendWelcomeEmail(email, apiKey);
       }
 
+      // Skip Stripe if user already has payment info on file
+      const existingAccount = accountsCache[key];
+      if (existingAccount?.stripe_customer_id) {
+        res.type('html').send(callbackPageHtml(user.login, apiKey));
+        return;
+      }
+
       // Redirect to Stripe Checkout — payment info first, then setup command
       if (process.env.STRIPE_SECRET_KEY && email) {
         try {
@@ -703,6 +715,7 @@ export function createProsumerRouter(): Router {
             email,
             githubLogin: user.login,
             apiKey,
+            stripeCustomerId: existingAccount?.stripe_customer_id,
           });
           if (checkoutUrl) {
             res.redirect(checkoutUrl);

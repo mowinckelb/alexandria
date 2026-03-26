@@ -4,6 +4,7 @@
  */
 
 const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
+const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
 
 // ---------------------------------------------------------------------------
 // Callback page — the first brand moment after signup
@@ -46,8 +47,9 @@ export function callbackPageHtml(login: string, apiKey: string): string {
   }
   .link:hover { text-decoration-color: #3d3630; }
   a.link { color: #3d3630; }
-  .muted { font-size: 0.85rem; color: #8a8078; line-height: 1.8; margin-top: 0.4rem; }
   .closing { font-size: 1.15rem; color: #3d3630; margin-top: 2.5rem; }
+  .help { font-size: 0.78rem; color: #bbb4aa; margin-top: 2rem; }
+  .help a { color: #8a8078; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: #bbb4aa; }
 </style>
 </head>
 <body>
@@ -55,21 +57,22 @@ export function callbackPageHtml(login: string, apiKey: string): string {
   <div class="section">
     <p class="label">now</p>
     <p class="line"><a class="link" onclick="copy()" id="copyLink">copy command</a>, then paste into your terminal</p>
-    <p class="line"><a class="link" href="https://mowinckel.ai/shortcut" target="_blank">add shortcut</a>, then share to your vault</p>
+    <p class="line"><a class="link" href="${WEBSITE_URL}/shortcut" target="_blank">add shortcut</a>, then share to your vault</p>
   </div>
   <div class="section">
     <p class="label">then</p>
-    <p class="line">/a &mdash; the examined life</p>
+    <p class="line">/a &mdash; develop your thinking</p>
     <p class="line">a. &mdash; absorb the abundance</p>
   </div>
   <p class="closing">welcome to alexandria.</p>
+  <p class="help"><a href="${WEBSITE_URL}/docs/setup.md">setup guide</a></p>
 </div>
 <script>
 function copy() {
   navigator.clipboard.writeText(${JSON.stringify(curlCmd)}).then(() => {
     var el = document.getElementById('copyLink');
     el.textContent = 'copied';
-    setTimeout(() => { el.textContent = 'copy'; }, 2000);
+    setTimeout(() => { el.textContent = 'copy command'; }, 2000);
   });
 }
 </script>
