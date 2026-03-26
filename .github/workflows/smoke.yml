@@ -1,0 +1,55 @@
+name: Smoke
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch: {}     # Manual trigger
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Health
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' https://mcp.mowinckel.ai/health)
+          body=$(curl -s https://mcp.mowinckel.ai/health)
+          echo "$body"
+          if [ "$status" != "200" ] || ! echo "$body" | grep -q '"status":"ok"'; then
+            echo "::error::Health check failed (HTTP $status)"
+            exit 1
+          fi
+          echo "✓ health OK"
+
+      - name: Blueprint
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer ${{ secrets.ALEXANDRIA_API_KEY }}" \
+            https://mcp.mowinckel.ai/blueprint)
+          if [ "$status" != "200" ]; then
+            echo "::error::Blueprint fetch failed (HTTP $status)"
+            exit 1
+          fi
+          echo "✓ blueprint OK"
+
+      - name: Hooks
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer ${{ secrets.ALEXANDRIA_API_KEY }}" \
+            https://mcp.mowinckel.ai/hooks)
+          if [ "$status" != "200" ]; then
+            echo "::error::Hooks fetch failed (HTTP $status)"
+            exit 1
+          fi
+          echo "✓ hooks OK"
+
+      - name: Session
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${{ secrets.ALEXANDRIA_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"event":"github_smoke"}' \
+            https://mcp.mowinckel.ai/session)
+          if [ "$status" != "200" ]; then
+            echo "::error::Session POST failed (HTTP $status)"
+            exit 1
+          fi
+          echo "✓ session OK"
