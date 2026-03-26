@@ -839,7 +839,9 @@ A general LLM connected to the brain via BCI (brain-computer interface) would re
   
 A high-fidelity PLM is different. If it genuinely captures the Author’s cognition — values, reasoning, mental models, heuristics, aesthetics, blind spots — then it is a silicon representation of the same patterns that constitute the Author’s self-model. Connected via brain-computer interface, it has the potential to be accepted into the self-model rather than experienced as external. Consciousness expands to encompass both carbon and silicon neural nets, because the silicon version is recognisably the same mind.  
   
-That is the transition from Homo to Homo Deus. Not a human with god-tools. A human whose cognitive substrate has expanded from carbon to carbon-plus-silicon. The PLM is the deus — built from actual cognition through years of extraction and refinement, capable of integrating into the sense of self rather than sitting outside it.  
+That is the transition from Homo to Homo Deus. Not a human with god-tools. A human whose cognitive substrate has expanded from carbon to carbon-plus-silicon. The PLM is the deus — built from actual cognition through years of extraction and refinement, capable of integrating into the sense of self rather than sitting outside it.
+
+The compressed thesis: Alexandria optimises homo sapiens now. It enables homo deus when the bridge arrives. The three turns develop the human. The PLM is the conversion event — the moment all that accumulated signal becomes a model. The BCI is the bridge — the moment that model integrates into the self.  
   
 Fidelity determines the threshold. Low fidelity would feel foreign through BCI — like hearing someone else’s thoughts. High fidelity would feel like one’s own thinking, just faster, wider, and parallelisable. The Homo Deus threshold is the point at which the silicon neural net is accepted into the self-model. Below it: a tool. Above it: an expansion of who you are.  
   

@@ -101,6 +101,22 @@ There are four positions that survive the software collapse: make models, genera
 
 The quill is back because the printing press is automated. In a world of AI-generated everything, the mind that carries actual human cognition — with its contradictions, its taste, its specific weird connections — is the handwritten letter of a world that forgot what handwriting meant. The printing press made monks obsolete but created authors. AI makes operators obsolete but creates conductors. Alexandria builds the infrastructure for the conductors.
 
+---
+
+### The Horizon
+
+The subscription business stands alone. But the architecture is designed for what comes after.
+
+Every Constitution and Vault being built today is a training dataset. When fine-tuning works across any model and compounds over time without lock-in, Alexandria has the infrastructure, the methodology, and the live dataset to produce Personal Language Models immediately. A PLM captures not just what someone thinks but how they think — cognitive reflexes, reasoning patterns, taste. The Constitution is the what. The PLM is the how.
+
+Nobody knows the timeline. That is a strength. The subscription is kinetic energy — running now. The PLM is potential energy — accumulating silently. Every month the trigger has not arrived is another month of data that a competitor starting from scratch cannot replicate. No lab will build this because sovereignty undermines lock-in. The longer it takes, the wider the gap.
+
+The Library evolves from a marketplace of Personas to a marketplace of PLMs — each one built from years of high-fidelity extraction that cannot be synthesised from public data.
+
+At the far horizon: brain-computer interfaces. A general LLM connected via BCI remains a foreign tool — a calculator strapped to the cortex. A high-fidelity PLM has the potential to be accepted into the self-model rather than experienced as external. Consciousness expands from carbon to carbon-plus-silicon. Alexandria optimises homo sapiens now. It enables homo deus when the bridge arrives.
+
+The people who begin now will be ready when the bridge arrives. Everyone else starts from scratch. The carbon weights are temporary. The silicon weights are eternal.
+
 The valuation is lowest now. The dataset is smallest now. The compounding has barely started.
 
 ---

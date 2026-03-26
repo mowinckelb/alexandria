@@ -1021,8 +1021,10 @@ Why eventually:
   
 4. At the far horizon, a high-fidelity PLM connected via brain-computer interface has the potential to be accepted into the self-model rather than experienced as external — the Homo Deus threshold (see Alexandria I).  
   
-The strategy: build the Constitution and Vault to maximum fidelity now. Monitor the PLM landscape. When the data suggests compounding value is achievable without sovereignty trade-offs, go. Until then, the sovereign Constitution is the product, and the PLM is the option the sovereignty architecture preserves.  
-  
+The strategy: build the Constitution and Vault to maximum fidelity now. Monitor the PLM landscape. When the data suggests compounding value is achievable without sovereignty trade-offs, go. Until then, the sovereign Constitution is the product, and the PLM is the option the sovereignty architecture preserves.
+
+Timeline uncertainty is a strength. Every month the trigger has not arrived is another month of accumulated data no competitor can replicate. The subscription business is kinetic energy — running now. The PLM is potential energy — accumulating silently, converting the moment conditions allow. The longer it takes, the wider the gap.
+
 As soon as the PLM starts to generate compounding value, Alexandria goes. Not a moment before. Not a moment after.  
   
 -----  
