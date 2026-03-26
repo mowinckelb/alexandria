@@ -18,13 +18,14 @@ Everything lives in `files/`. Three access levels: private (internal only), conf
 **Product IP:**
 - `Blueprint.md` — The product instruction set. Five operations on the symbolic layer (genesis, accretion, entropy, development, synthesis). This is the accumulated craft that becomes MCP tool descriptions. Read for: product methodology, extraction design, mode behavior.
 
-**Founder's Constitution (cognitive map — read for creative work, voice calibration, taste):**
+**Founder's Constitution (lives at `~/.alexandria/constitution/` — the product, used as designed):**
 - `Constitution_Taste.md` — Creative principles, voice DNA, director's notes, hyperrealism standard. READ FIRST for any creative task.
 - `Constitution_Identity.md` — Self-concept, communication style. "The faithless Christian between two monoliths."
 - `Constitution_Values.md` — Core values and ethical framework.
 - `Constitution_Worldview.md` — How Benjamin sees the world.
 - `Constitution_Models.md` — Mental models and reasoning patterns.
 - `Constitution_Shadows.md` — Known blind spots and failure modes.
+- Static backup: `files/private/constitution_backup_2026-03-26/`
 
 **Founder's writing & thinking:**
 - `Aphorisms.md` — Compressed positions by domain. Reference for his exact position on a topic.

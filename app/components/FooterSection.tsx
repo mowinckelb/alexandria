@@ -7,10 +7,7 @@ export default function FooterSection() {
         <a href="/privacy" className="hover:underline">Privacy</a>
         <a href="/terms" className="hover:underline">Terms</a>
       </div>
-      <div className="mt-8 space-y-2">
-        <p className="text-[0.6rem] italic" style={{ color: 'var(--text-ghost)' }}>
-          mentes aeternae
-        </p>
+      <div className="mt-8">
         <p className="text-[0.6rem]" style={{ color: 'var(--text-ghost)' }}>
           a.
         </p>

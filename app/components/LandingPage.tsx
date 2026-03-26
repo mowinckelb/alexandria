@@ -37,10 +37,6 @@ export default function LandingPage() {
           <h1 className="text-[1.5rem] sm:text-[1.7rem] font-normal leading-none tracking-tight" style={{ color: 'var(--text-primary)' }}>
             alexandria.
           </h1>
-          <p className="mt-1.5 text-[0.65rem] tracking-wide italic" style={{ color: 'var(--text-muted)' }}>
-            droplets of grace
-          </p>
-
           <div className="mt-14 sm:mt-16">
             <a
               href="/join"

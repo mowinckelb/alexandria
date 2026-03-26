@@ -189,18 +189,29 @@ export function createBillingRouter(onAccountUpdate: AccountUpdater): Router {
         return;
       }
 
-      // Update account with Stripe customer ID
-      // In setup mode (beta): no subscription, just customer + payment method
-      // In subscription mode (post-beta): customer + subscription
-      const customerId = session.customer as string | null;
-      if (customerId) {
-        onAccountUpdate(apiKey, {
-          stripe_customer_id: customerId,
-          ...(session.subscription
-            ? { subscription_id: session.subscription as string, subscription_status: 'active' }
-            : { subscription_status: 'beta' }),
-        });
+      // Update account — always set status, link customer if available.
+      // In setup mode (beta): customer may be on session or setup_intent.
+      // In subscription mode (post-beta): customer + subscription.
+      let customerId = session.customer as string | null;
+
+      // Setup mode: customer might be on the setup_intent instead
+      if (!customerId && session.setup_intent) {
+        try {
+          const intentId = typeof session.setup_intent === 'string'
+            ? session.setup_intent : session.setup_intent;
+          const intent = await stripe.setupIntents.retrieve(intentId as string);
+          customerId = intent.customer as string | null;
+        } catch { /* proceed without customer ID */ }
       }
+
+      const billingUpdate: Partial<BillingInfo> = {
+        ...(customerId ? { stripe_customer_id: customerId } : {}),
+        ...(session.subscription
+          ? { subscription_id: session.subscription as string, subscription_status: 'active' }
+          : { subscription_status: 'beta' }),
+      };
+      onAccountUpdate(apiKey, billingUpdate);
+      logEvent('billing_checkout_completed', { mode: session.mode || 'unknown' });
 
       res.type('html').send(callbackPageHtml(login, apiKey));
     } catch (err) {
