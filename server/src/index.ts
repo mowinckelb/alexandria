@@ -16,7 +16,8 @@ import { mcpAuthRouter } from '@modelcontextprotocol/sdk/server/auth/router.js';
 import { registerTools } from './tools.js';
 import { AlexandriaOAuthProvider, registerGoogleCallbackRoute } from './auth.js';
 import { initializeFolderStructure } from './drive.js';
-import { createProsumerRouter } from './prosumer.js';
+import { createProsumerRouter, updateAccountBilling, getBillingSummary } from './prosumer.js';
+import { createBillingRouter } from './billing.js';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
@@ -27,7 +28,15 @@ const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
 
 const app = express();
 app.set('trust proxy', 1); // Trust first proxy (Fly.io)
-app.use(express.json());
+
+// Stripe webhook needs raw body for signature verification — skip JSON parsing
+app.use((req, res, next) => {
+  if (req.path === '/billing/webhook') {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
 // ---------------------------------------------------------------------------
 // OAuth — MCP-standard auth endpoints + Google callback
@@ -60,6 +69,14 @@ import { getAnalytics, getEventLog, getDashboard } from './analytics.js';
 app.use(createProsumerRouter());
 
 // ---------------------------------------------------------------------------
+// Billing — Stripe subscription management
+// ---------------------------------------------------------------------------
+
+if (process.env.STRIPE_SECRET_KEY) {
+  app.use(createBillingRouter(updateAccountBilling));
+}
+
+// ---------------------------------------------------------------------------
 // Health check
 // ---------------------------------------------------------------------------
 
@@ -90,6 +107,9 @@ app.get('/health', async (_req, res) => {
 
   // Check encryption key is available
   checks.encryption_key = process.env.ENCRYPTION_KEY ? 'ok' : 'missing';
+
+  // Check Stripe
+  checks.stripe = process.env.STRIPE_SECRET_KEY ? 'ok' : 'not configured';
 
   const healthy = checks.volume === 'ok' && checks.encryption_key === 'ok';
 
@@ -240,7 +260,8 @@ app.get('/analytics/log', async (_req, res) => {
 
 // Monitoring dashboard (founder-facing health proxies — not optimisation targets)
 app.get('/analytics/dashboard', async (_req, res) => {
-  res.json(await getDashboard());
+  const dashboard = await getDashboard();
+  res.json({ ...dashboard, billing: getBillingSummary() });
 });
 
 // ---------------------------------------------------------------------------

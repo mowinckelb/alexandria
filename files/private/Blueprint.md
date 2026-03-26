@@ -162,6 +162,10 @@ The Constitution must grow richer over time, not converge on a fixed portrait. E
 
 Pure signal. No filler, no extraction for the sake of extraction, no sections that exist because they existed before. Every Constitution entry must earn its place. Every intervention must have a clear operational purpose mapped to one of the five operations. If cutting a Constitution entry loses nothing operationally, cut it.
 
+### Maximise Total Net Signal
+
+THE governing principle for every .md file an agent reads — Constitution, Blueprint, ground truths, any markdown. All .md files maximise total net signal for the model. Everything downstream is capped at the fidelity of what the model understands from these files. If the files are 95%, everything built from them is capped at 95%. Self-contained: 0 to 100 fidelity with zero prior context. Max signal, not min length — repetition that increases fidelity is signal. But net, not gross — if the file overwhelms the model, total received signal drops. Never compress signal. Only delete noise or true redundancy. Downstream artifacts are generated from these files, never authored separately. This principle governs how Constitution files are written, how the Blueprint is maintained, and how every file in the system evolves.
+
 ### Style Flexes, Function Does Not
 
 The Blueprint sets what the functions do — non-negotiable. Extraction, gap detection, contradiction surfacing, anti-entropy maintenance, synthesis support. The Constitution sets how they do it — personalised per Author. One Author gets a blunt, no-nonsense Editor. Another gets a warm, Socratic one. Both are doing the same work. The Author cannot configure the functions into something that does not serve the operations. They can configure the delivery. Live feedback ("too pushy," "challenge me harder") is extraction signal — it updates the Constitution, not a settings panel.

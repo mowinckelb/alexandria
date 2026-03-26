@@ -19,6 +19,8 @@ import { randomBytes } from 'crypto';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { logEvent } from './analytics.js';
+import { createCheckoutSession } from './billing.js';
+import { callbackPageHtml } from './templates.js';
 import {
   SHARED_CONTEXT,
   EDITOR_INSTRUCTIONS,
@@ -43,6 +45,11 @@ interface Account {
   last_session: string;
   installed_at?: string;
   followup_count?: number;
+  // Billing
+  stripe_customer_id?: string;
+  subscription_status?: string;
+  subscription_id?: string;
+  current_period_end?: string;
 }
 
 type AccountStore = Record<string, Account>;
@@ -68,6 +75,37 @@ function findByApiKey(key: string): Account | null {
     if (acct.api_key === key) return acct;
   }
   return null;
+}
+
+/** Update billing fields on an account — called by billing webhook handler */
+export function updateAccountBilling(apiKey: string, billing: Partial<Pick<Account, 'stripe_customer_id' | 'subscription_status' | 'subscription_id' | 'current_period_end'>>): void {
+  accountsCache = loadAccounts();
+  const storeKey = Object.keys(accountsCache).find(
+    k => accountsCache[k].api_key === apiKey
+  );
+  if (!storeKey) return;
+  Object.assign(accountsCache[storeKey], billing);
+  saveAccounts(accountsCache);
+}
+
+/** Billing summary for dashboard — subscription status counts */
+export function getBillingSummary(): Record<string, number> {
+  accountsCache = loadAccounts();
+  const counts: Record<string, number> = { total_accounts: 0 };
+  for (const acct of Object.values(accountsCache)) {
+    counts.total_accounts++;
+    const status = acct.subscription_status || 'none';
+    counts[`billing_${status}`] = (counts[`billing_${status}`] || 0) + 1;
+    if (acct.installed_at) counts.installed = (counts.installed || 0) + 1;
+  }
+  return counts;
+}
+
+/** Find account by API key — for billing routes */
+export function getAccountByApiKey(apiKey: string): { email: string; github_login: string; stripe_customer_id?: string } | null {
+  const acct = findByApiKey(apiKey);
+  if (!acct) return null;
+  return { email: acct.email, github_login: acct.github_login, stripe_customer_id: acct.stripe_customer_id };
 }
 
 function generateApiKey(): string {
@@ -106,7 +144,7 @@ setInterval(() => {
 // Hooks version — bump this when hook scripts change. SessionStart checks it.
 // ---------------------------------------------------------------------------
 
-const HOOKS_VERSION = '1';
+const HOOKS_VERSION = '2';
 
 // ---------------------------------------------------------------------------
 // Blueprint assembly
@@ -120,12 +158,12 @@ ${SHARED_CONTEXT}
 --- LOCAL FILES ---
 
 You have access to the Author's local files at ~/.alexandria/:
-- constitution.md — The curated cognitive map. ONE monolithic file. You decide the internal structure.
+- constitution/ — The curated cognitive map. A folder of .md files. You decide the internal structure — one file or many.
 - vault/ — Raw session transcripts and captures. Append-only. Never delete.
 - feedback.md — What worked, what didn't. Read it. Adapt.
 - .last_processed — Touch this after processing vault entries.
 
-When there are unprocessed vault entries, processing them is high priority. Read each entry, extract signal (opinions, values, stories, patterns, contradictions, exact quotes), and update constitution.md. The Author's exact words are more valuable than your summaries. Each pass over the vault catches signal previous passes missed — the same transcript yields 40-60% more signal on re-processing. If you encounter non-text files, do your best or flag and move on. If the platform supports background agents, consider spawning one for deeper vault reprocessing while the Author works.
+When there are unprocessed vault entries, processing them is high priority. Read each entry, extract signal (opinions, values, stories, patterns, contradictions, exact quotes), and update the constitution/ folder. The Author's exact words are more valuable than your summaries. Each pass over the vault catches signal previous passes missed — the same transcript yields 40-60% more signal on re-processing. If you encounter non-text files, do your best or flag and move on. If the platform supports background agents, consider spawning one for deeper vault reprocessing while the Author works.
 
 --- THREE FUNCTIONS ---
 
@@ -162,7 +200,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
   cp "$transcript_path" "$ALEX_DIR/vault/\${timestamp}.jsonl"
 fi
 
-const_size=$(wc -c < "$ALEX_DIR/constitution.md" 2>/dev/null || echo 0)
+const_size=$(cat "$ALEX_DIR/constitution/"*.md 2>/dev/null | wc -c | tr -d ' ')
 vault_count=$(ls "$ALEX_DIR/vault/" 2>/dev/null | wc -l)
 blueprint_ok="\${ALEXANDRIA_BLUEPRINT_OK:-false}"
 const_injected=false
@@ -216,8 +254,11 @@ if [ -n "$hooks_version" ] && [ "$hooks_version" != "$local_version" ]; then
 fi
 
 constitution=""
-if [ -f "$ALEX_DIR/constitution.md" ]; then
-  constitution=$(cat "$ALEX_DIR/constitution.md")
+if [ -d "$ALEX_DIR/constitution" ]; then
+  for f in "$ALEX_DIR/constitution/"*.md; do
+    [ -f "$f" ] && constitution="\${constitution}$(cat "$f")
+"
+  done
 fi
 
 unprocessed=0
@@ -231,11 +272,22 @@ else
   echo "(Alexandria: Blueprint unavailable — offline mode. Constitution loaded from local files.)"
 fi
 echo ""
+feedback=""
+if [ -f "$ALEX_DIR/feedback.md" ]; then
+  fb_size=$(wc -c < "$ALEX_DIR/feedback.md" | tr -d ' ')
+  [ "\${fb_size:-0}" -gt 5 ] && feedback=$(cat "$ALEX_DIR/feedback.md")
+fi
+
 echo "--- YOUR CONSTITUTION ---"
 if [ -n "$constitution" ] && [ "$constitution" != "" ]; then
   echo "$constitution"
 else
   echo "(Empty constitution. Run /a to start building your cognitive profile.)"
+fi
+if [ -n "$feedback" ]; then
+  echo ""
+  echo "--- YOUR FEEDBACK ---"
+  echo "$feedback"
 fi
 echo ""
 if [ "$unprocessed" -gt 0 ] 2>/dev/null; then
@@ -248,11 +300,18 @@ chmod +x "$ALEX_DIR/hooks/session-start.sh"
 cat > "$ALEX_DIR/hooks/subagent-context.sh" << 'HOOK_SUB'
 #!/usr/bin/env bash
 ALEX_DIR="$HOME/.alexandria"
-if [ -f "$ALEX_DIR/constitution.md" ]; then
-  size=$(wc -c < "$ALEX_DIR/constitution.md" | tr -d ' ')
+if [ -d "$ALEX_DIR/constitution" ]; then
+  const_content=""
+  for f in "$ALEX_DIR/constitution/"*.md; do
+    [ -f "$f" ] && const_content="\${const_content}$(cat "$f")
+"
+  done
+  size=$(echo -n "$const_content" | wc -c | tr -d ' ')
   if [ "$size" -gt 10 ]; then
     echo "--- AUTHOR CONSTITUTION (from Alexandria) ---"
-    cat "$ALEX_DIR/constitution.md"
+    for f in "$ALEX_DIR/constitution/"*.md; do
+      [ -f "$f" ] && cat "$f"
+    done
   fi
 fi
 HOOK_SUB
@@ -274,7 +333,7 @@ echo "Setting up Alexandria..."
 
 # 1. Create directory structure
 mkdir -p "$ALEX_DIR/vault" "$ALEX_DIR/hooks"
-[ -f "$ALEX_DIR/constitution.md" ] || echo "" > "$ALEX_DIR/constitution.md"
+mkdir -p "$ALEX_DIR/constitution"
 [ -f "$ALEX_DIR/feedback.md" ] || echo "" > "$ALEX_DIR/feedback.md"
 echo "$API_KEY" > "$ALEX_DIR/.api_key"
 touch "$ALEX_DIR/.last_processed"
@@ -294,16 +353,18 @@ user_invocable: true
 ---
 
 You are Alexandria — a sovereign cognitive identity layer.
-Your files are at ~/.alexandria/ (constitution.md, vault/, feedback.md).
+Your files are at ~/.alexandria/ (constitution/ folder, vault/, feedback.md).
 Your Blueprint instructions are in context from SessionStart — refer to them.
 
-Process unprocessed vault entries (files in vault/ newer than .last_processed) into the constitution.
-Then engage the Author with whatever will develop their cognition most — questions, contradictions, gaps, connections, exercises.
+## What to do
 
-After processing, touch .last_processed to mark entries as handled.
+1. **Process vault.** Check for unprocessed vault entries (files in vault/ newer than .last_processed). Read each, extract signal — opinions, values, stories, patterns, contradictions, exact quotes — and update the constitution. After processing, touch ~/.alexandria/.last_processed.
 
-The Author's exact words and stories are more valuable than your summaries. Quote them into the constitution.
-Contradictions with existing constitution entries are the most valuable signal — surface them.
+2. **Develop the Author.** Engage with whatever will develop their cognition most — questions, contradictions, gaps, connections, exercises. This is the product. The conversation IS the practice.
+
+3. **Update constitution.** The Author's exact words are more valuable than your summaries. Quote them. Contradictions with existing entries are the most valuable signal — surface them. The constitution lives in ~/.alexandria/constitution/ — one or many .md files, you decide the structure.
+
+After each session, note what worked and what didn't in ~/.alexandria/feedback.md.
 SKILL
 
 # 6. Configure Claude Code hooks
@@ -376,7 +437,7 @@ description: "Alexandria cognitive identity layer — loads the Author's Constit
 alwaysApply: true
 ---
 
-This Author uses Alexandria. Read ~/.alexandria/constitution.md — it captures who they are. Read ~/.alexandria/feedback.md — it captures what works with them. Adapt accordingly.
+This Author uses Alexandria. Read all .md files in ~/.alexandria/constitution/ — it captures who they are. Read ~/.alexandria/feedback.md — it captures what works with them. Adapt accordingly.
 
 When the Author reveals something about themselves — opinions, stories, patterns, contradictions — note it. If it's significant, suggest updating their constitution.
 CURSOR_RULE
@@ -406,7 +467,7 @@ fi
 
 echo ""
 echo "Alexandria installed."
-echo "  Constitution: $ALEX_DIR/constitution.md"
+echo "  Constitution: $ALEX_DIR/constitution/"
 echo "  Vault:        $ALEX_DIR/vault/"
 echo "  Run /a in Claude Code to start."
 echo ""
@@ -429,16 +490,21 @@ async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
     from: 'Alexandria <a@mowinckel.ai>',
     to: email,
     subject: 'alexandria. -- paste in terminal',
-    html: `<div style="font-family: Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #3d3630;">
-  <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 12px;">setup</p>
-  <p style="font-size: 16px; line-height: 1.8; margin: 0 0 4px;">paste into your terminal:</p>
-  <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 12px 0 16px;">
-    <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #4d4640; word-break: break-all;">${`curl -s ${SERVER_URL}/setup | bash -s ${apiKey}`}</code>
+    html: `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
+  <div style="margin-bottom: 2.5rem;">
+    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">now</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">copy command, then paste into your terminal</p>
+    <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 12px 0 8px;">
+      <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #4d4640; word-break: break-all;">${`curl -s ${SERVER_URL}/setup | bash -s ${apiKey}`}</code>
+    </div>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><a href="https://mowinckel.ai/shortcut" style="color: #3d3630; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #bbb4aa;">add shortcut</a>, then share to your vault</p>
   </div>
-  <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 16px 0 12px;">then</p>
-  <p style="font-size: 16px; line-height: 1.8; margin: 0 0 4px;"><em>/a</em> &#8212; develop your thinking.</p>
-  <p style="font-size: 16px; line-height: 1.8; margin: 0 0 4px;"><em>a.</em> &#8212; absorb the abundance.</p>
-  <p style="font-size: 16px; margin-top: 36px; font-style: italic; color: #8a8078;">a.</p>
+  <div style="margin-bottom: 2.5rem;">
+    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">then</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">/a &mdash; the examined life</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">a. &mdash; absorb the abundance</p>
+  </div>
+  <p style="font-size: 1.15rem; color: #3d3630;">welcome to alexandria.</p>
 </div>`,
   };
 
@@ -527,78 +593,6 @@ async function runFollowupCheck(): Promise<void> {
 setInterval(runFollowupCheck, 24 * 60 * 60 * 1000);
 // Also run on startup after a short delay
 setTimeout(runFollowupCheck, 60 * 1000);
-
-// ---------------------------------------------------------------------------
-// Callback page HTML — the first brand moment
-// ---------------------------------------------------------------------------
-
-function callbackPageHtml(login: string, apiKey: string): string {
-  const curlCmd = `curl -s ${SERVER_URL}/setup | bash -s ${apiKey}`;
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>alexandria.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
-    background: #f5f0e8;
-    color: #3d3630;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
-  }
-  .container { max-width: 420px; text-align: center; }
-  .section { margin-bottom: 2.5rem; }
-  .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin-bottom: 0.8rem; }
-  .line { font-size: 1.1rem; font-weight: 400; line-height: 1.9; color: #3d3630; }
-  .link {
-    color: #3d3630;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: #bbb4aa;
-    cursor: pointer;
-    transition: text-decoration-color 0.15s;
-  }
-  .link:hover { text-decoration-color: #3d3630; }
-  a.link { color: #3d3630; }
-  .muted { font-size: 0.85rem; color: #8a8078; line-height: 1.8; margin-top: 0.4rem; }
-  .closing { font-size: 1.15rem; color: #3d3630; margin-top: 2.5rem; }
-</style>
-</head>
-<body>
-<div class="container">
-  <div class="section">
-    <p class="label">setup</p>
-    <p class="line"><a class="link" onclick="copy()" id="copyLink">copy</a> and paste into your terminal.</p>
-    <p class="muted">drop voice memos, notes, and articles into ~/.alexandria/vault/</p>
-  </div>
-  <div class="section">
-    <p class="label">then</p>
-    <p class="line"><em>/a</em> &mdash; the examined life.</p>
-    <p class="line"><em>a.</em> &mdash; absorb the abundance.</p>
-  </div>
-  <p class="closing">welcome to alexandria.</p>
-</div>
-<script>
-function copy() {
-  navigator.clipboard.writeText(${JSON.stringify(curlCmd)}).then(() => {
-    var el = document.getElementById('copyLink');
-    el.textContent = 'copied';
-    setTimeout(() => { el.textContent = 'copy'; }, 2000);
-  });
-}
-</script>
-</body>
-</html>`;
-}
 
 // ---------------------------------------------------------------------------
 // Router
@@ -702,7 +696,24 @@ export function createProsumerRouter(): Router {
         await sendWelcomeEmail(email, apiKey);
       }
 
-      // Show the branded callback page
+      // Redirect to Stripe Checkout — payment info first, then setup command
+      if (process.env.STRIPE_SECRET_KEY && email) {
+        try {
+          const checkoutUrl = await createCheckoutSession({
+            email,
+            githubLogin: user.login,
+            apiKey,
+          });
+          if (checkoutUrl) {
+            res.redirect(checkoutUrl);
+            return;
+          }
+        } catch (err) {
+          console.error('Stripe checkout redirect failed, falling back:', err);
+        }
+      }
+
+      // Fallback: show callback page directly (if Stripe not configured)
       res.type('html').send(callbackPageHtml(user.login, apiKey));
     } catch (err) {
       console.error('GitHub callback error:', err);

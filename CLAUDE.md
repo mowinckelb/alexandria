@@ -92,6 +92,7 @@ Each Author's Machine compounds through usage. Constitution deepens, feedback lo
 
 ## Design Constraints
 
+- **All .md files maximise total net signal for the model.** This is THE governing principle for every file an agent reads. Everything downstream is capped at file fidelity — 95% files = 95% ceiling on everything built from them. Self-contained (0 to 100 with zero prior context). Max signal, not min length (repetition that increases fidelity is signal). But net, not gross (overwhelm the model and total received signal drops). Never compress signal. Only delete noise or true redundancy. Downstream artifacts are generated from these files, never authored separately.
 - **Bitter lesson:** general methods leveraging computation beat hand-engineered solutions. No structured parameters, fixed schemas, or hand-crafted rules. Unstructured text/JSONL. Let the model figure it out.
 - **Philosophy IS the objective:** no numerical loss function or optimization target. Metrics are verification, not goals.
 - **Intelligence is downstream:** HOW belongs to the AI. Only the WHY (axioms) is hard-coded.
