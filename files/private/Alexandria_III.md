@@ -381,6 +381,8 @@ Motto: mentes aeternae — eternal minds. Latin. Permanent. Appears on the PDF t
   
 Rallying cry: “Set the angels free.” The Michelangelo vision. mentes aeternae is the motto. droplets of grace is the philosophy. “Set the angels free” is the action.  
   
+The invisible medium thesis. Alexandria succeeds when the Author says "I had this insight" — not "Alexandria gave me this insight." The best teachers are forgotten because the student believes the idea was their own. Kanye wants to be forgotten because the innovation becomes ubiquitous. Sinek: the best leaders let people believe the idea was theirs. The medium disappears. The changed person remains. This has a direct brand implication: if the product succeeds when invisible, the brand cannot be about the product. The brand is about the person. But this IS a brand — the brandless brand. Muji means "no brand quality goods" and is one of the most recognisable brands in the world. Alexandria's brand is that it is not about Alexandria. "We disappear. You change." The more successfully the product disappears into the Author's cognition, the stronger the brand becomes. You get both.
+
 The grace family — a constellation of phrases that share the same DNA. Different contexts call for different ones. They are not competing taglines — they are variations on a theme, and the variation itself is the point (the droplet is always changing, never the same shape twice):  
   
 - “Droplets of grace.” — the primary phrase. Visual, philosophical, warm. Captures the droplet metaphor and the emotional register in three words. Grace in something small and fragile trying to persist. Borderline better than mentes aeternae as a standalone phrase.  
