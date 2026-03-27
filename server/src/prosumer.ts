@@ -309,8 +309,7 @@ if [ -n "$blueprint" ]; then
   fi
   if [ -f "$ALEX_DIR/.blueprint_previous" ]; then
     echo ""
-    echo "(Alexandria: Blueprint updated since last session. Previous version saved at ~/.alexandria/.blueprint_previous for diffing.)"
-    rm -f "$ALEX_DIR/.blueprint_previous"
+    echo "(Alexandria: Blueprint updated since last session. Previous version at ~/.alexandria/.blueprint_previous for diffing.)"
   fi
 else
   echo "(Alexandria: Blueprint unavailable — offline mode. Constitution loaded from local files.)"
