@@ -102,10 +102,10 @@ Each Author's Machine compounds through usage. Constitution deepens, feedback lo
 ## Design Constraints
 
 - **All .md files maximise total net signal for the model.** This is THE governing principle for every file an agent reads. Everything downstream is capped at file fidelity — 95% files = 95% ceiling on everything built from them. Self-contained (0 to 100 with zero prior context). Max signal, not min length (repetition that increases fidelity is signal). But net, not gross (overwhelm the model and total received signal drops). Never compress signal. Only delete noise or true redundancy. aX are generated from aN, never authored separately.
+- **Data and intent, not intelligence.** Alexandria ships data (the Author's files) and intent (axioms, philosophy, developmental objective). Never intelligence. The host LLM IS the intelligence. Every structure must be optimizable by the model — unstructured markdown, no schemas, no prescribed formats. When models improve, the same data yields more. Zero workflow changes.
 - **Bitter lesson:** general methods leveraging computation beat hand-engineered solutions. No structured parameters, fixed schemas, or hand-crafted rules. Unstructured text/JSONL. Let the model figure it out.
 - **Philosophy IS the objective:** no numerical loss function or optimization target. Metrics are verification, not goals.
-- **Intelligence is downstream:** HOW belongs to the ai. Only the WHY (axioms) is hard-coded.
-- **Build as little as possible.** Ride existing infrastructure. Server is bridge, not intelligence.
+- **Build as little as possible.** Ride existing infrastructure. Server is intent layer, not intelligence layer.
 
 ## End-of-Session Protocol
 

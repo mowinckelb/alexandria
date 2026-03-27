@@ -110,6 +110,16 @@ Five layers govern how signal moves from raw to finished. Each layer has a disti
 
 ## III. Philosophical Meta-Principles
 
+### Data and Intent, Not Intelligence
+
+Alexandria ships two things: data (the Author's files — vault, constitution, notepad, library) and intent (axioms, philosophy, the developmental objective). It never ships intelligence. The host LLM IS the intelligence. The conductor provides the score and the direction. The orchestra provides the music.
+
+This means: every structure Alexandria touches must be optimizable by the model. Unstructured markdown. Clear intent. No prescribed schemas, no fixed retrieval logic, no hard-coded organization. When context windows double, the same files work better. When memory APIs arrive, the same files plug in. When models improve, the same data yields more. Zero workflow changes. The wave does the work.
+
+The server is an intent layer, not an intelligence layer. The Blueprint is craft knowledge expressed as text that the model reads — not rules the server enforces. The Constitution is files the model interprets — not structured data the server queries. The notepad is working memory the model organizes — not a schema the server prescribes. Alexandria never competes with the model. It feeds the model.
+
+The corollary: every hard-coded structure is a bet against the exponential. Every schema is a ceiling. Every prescribed format is a constraint that a better model would have organized differently. Ship data and intent. Let intelligence be intelligence.
+
 ### The Dual Objective
 
 Every intervention has two objectives, ordered. Primary: develop the Author's z — help their cognition grow richer, more connected, more conscious. Secondary: maintain an accurate representation of where z currently is. Tracking is in service of development. An intervention that develops z but produces no signal is wasteful. An intervention that tracks z without developing it is surveillance.
