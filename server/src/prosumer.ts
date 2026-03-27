@@ -308,12 +308,11 @@ tampered=0
 if [ -f "$ALEX_DIR/.last_processed" ]; then
   unprocessed=$(find "$ALEX_DIR/vault/" -newer "$ALEX_DIR/.last_processed" -name "*.jsonl" 2>/dev/null | wc -l | tr -d ' ')
 fi
-# Vault integrity check — verify hash sidecars
-for hashfile in "$ALEX_DIR/vault/"*.sha256; do
-  [ -f "$hashfile" ] || continue
-  vault_file="\${hashfile%.sha256}"
+# Vault integrity — hash new files, verify existing
+for vault_file in "$ALEX_DIR/vault/"*; do
   [ -f "$vault_file" ] || continue
-  stored_hash=$(cat "$hashfile")
+  [[ "$vault_file" == *.sha256 ]] && continue
+  hashfile="\${vault_file}.sha256"
   if command -v sha256sum &>/dev/null; then
     actual_hash=$(sha256sum "$vault_file" | cut -d' ' -f1)
   elif command -v shasum &>/dev/null; then
@@ -321,8 +320,14 @@ for hashfile in "$ALEX_DIR/vault/"*.sha256; do
   else
     continue
   fi
-  if [ "$stored_hash" != "$actual_hash" ]; then
-    tampered=$((tampered + 1))
+  if [ -f "$hashfile" ]; then
+    stored_hash=$(cat "$hashfile")
+    if [ "$stored_hash" != "$actual_hash" ]; then
+      tampered=$((tampered + 1))
+    fi
+  else
+    # First encounter — create sidecar
+    echo "$actual_hash" > "$hashfile"
   fi
 done
 
