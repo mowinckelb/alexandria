@@ -2,7 +2,7 @@
 
 *The Factory's current best understanding of HOW to develop human cognition. This file is Alexandria's craft — the accumulated knowledge that becomes tool descriptions, hook instructions, and mode defaults. A competitor can copy the architecture. They cannot copy this.*
 
-*Three tiers: Axioms.md (fixed, sacred) defines WHAT and WHY. This Blueprint (variable, Factory output) defines the current best HOW. The Engine (fluid, per-Author) decides the specific HOW for each Author in each moment. As models improve, this Blueprint gets thinner — the Engine needs less scaffolding. Eventually this approaches pure intention.*
+*Three tiers: Axioms.md (WHAT and WHY, extracted from aN) defines the sacred layer. This Blueprint (variable, Factory output) defines the current best HOW. The Engine (fluid, per-Author) decides the specific HOW for each Author in each moment. Both Axioms and Blueprint are aX — downstream of aN, regenerated when aN changes. As models improve, this Blueprint gets thinner — the Engine needs less scaffolding. Eventually this approaches pure intention.*
 
 *Alexandria ships data and intent, not intelligence. Axioms are the intent. Blueprint is the craft (data the Engine reads, not rules the server enforces). Engine is the intelligence. This file is text that feeds the model — never logic that constrains it.*
 

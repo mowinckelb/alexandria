@@ -18,8 +18,8 @@ Everything lives in `files/`. Three access levels: private (internal only), conf
 - `Alexandria_II.md` (a2) — Product, architecture & operations. Terminology, layer of intent, Constitution, Editor/Mercury/Publisher, MCP server, revenue model, pricing, competitive position, feedback loops, Machine & Factory. Read for: product decisions, architecture, pricing, technical strategy.
 - `Alexandria_III.md` (a3) — Library, interface & brand. Neo-Biography, Works, Signal, payment mechanics, interface surfaces, onboarding, positioning, brand design, media strategy. Read for: Library, brand, creative direction, marketing, onboarding.
 
-**Product IP:**
-- `Axioms.md` — The sacred layer. What Alexandria IS and WHY. Five operations, five-layer pipeline (vault→ontology→constitution→shadow→library), objective function, sovereignty, neutral infrastructure. Fixed — changes only when the founder changes them. Read for: philosophical questions, what's non-negotiable.
+**Product IP (aX — downstream of aN, regenerated when aN changes):**
+- `Axioms.md` — The sacred layer. What Alexandria IS and WHY. Five operations, five-layer pipeline (vault→ontology→constitution→shadow→library), objective function, sovereignty, neutral infrastructure. Extracted from a1+a2. Read for: philosophical questions, what's non-negotiable.
 - `Blueprint.md` — The variable methodology. HOW to develop human cognition. Function assemblies (Editor/Mercury/Publisher craft), constitution data architecture, meta-principles, compounding architecture. Factory output — improves with every Author. Read for: product methodology, extraction design, mode behavior.
 - `Machine.md` — Per-Author engine memory template. The Engine's evolving model of how to work with a specific Author. Living document, rewritten as the Engine learns. Read for: per-Author calibration, therapist moat.
 
@@ -131,6 +131,8 @@ Do not report. Just do it. The agent that had the conversation IS the richest co
 **Founder loop.** Save CC memories for communication patterns, preferences, anti-patterns.
 
 **Downstream staleness check.** If a1, a2, or a3 changed this session, verify these aX still match:
+- `files/private/Axioms.md` (extracted from a1+a2 — sacred layer)
+- `files/private/Blueprint.md` (extracted from a2 — variable methodology)
 - `files/confidential/Memo.md` + `public/partners/Memo.md` (must be identical)
 - `files/confidential/Numbers.md` + `public/partners/Numbers.md` (must be identical)
 - `files/confidential/Logic.md` + `public/partners/Logic.md` (must be identical)
