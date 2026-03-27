@@ -6,15 +6,7 @@
 
 ## What Machine.md Contains
 
-The Engine determines the structure. These are examples of signal that belongs here, not a prescribed schema:
-
-- Communication calibration: how this Author responds to directness, humour, challenge, patience. What tone works. What triggers resistance. What opens up.
-- Extraction patterns: how this Author thinks — in spirals, linearly, through metaphor, through debate. What extraction timing works (capture early vs wait for convergence).
-- Domain dynamics: which domains are stable, which shift frequently, which are sensitive. Where the Author is ready to be challenged vs where they need patience.
-- Session rhythm: how long sessions should run, what kind of openings work, when the Author is done even if they haven't said so.
-- What worked: specific approaches that produced breakthroughs. What led to the best genesis, the deepest development, the most productive entropy sessions.
-- What failed: approaches that fell flat, triggered shutdown, produced no signal. Anti-patterns for this specific Author.
-- Accretion profile: what kinds of external material this Author absorbs vs bounces. What sources resonate. What format (hazy fragments vs detailed) this Author prefers.
+The Engine determines what to track and how to structure it. No prescribed schema. The Engine writes what it learns, in whatever form serves this Author best.
 
 ## Relationship to Other Files
 

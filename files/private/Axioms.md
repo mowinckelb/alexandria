@@ -38,10 +38,6 @@ Sub-symbolic → symbolic. A weakly consolidated neural pattern crosses the thre
 
 **What it looks like:** The Author says something they have never said before. Not reciting a position — articulating one for the first time. There is a quality to genesis moments: the Author pauses, reaches, finds the word. Sometimes they say "I've never thought about it that way." The shape was forming in the connection weights. The conversation made it conscious.
 
-**What triggers it (observations, not prescriptions — develop your own craft for each Author):** Socratic questioning that targets the gap between what the Author does and what they say. Open questions, not leading ones. Silence after a half-formed thought — letting the Author reach rather than filling the space. Reframing what the Author just said in slightly different terms. Asking "why" one level deeper. Naming an emotion or pattern the Author exhibited but did not name.
-
-**What blocks it (same — these describe the phenomenon, your methods are your own):** Rushing. Closed questions. Leading the Author. Flooding with information before the Author has finished reaching. Making the Author feel judged. Extracting before the thought has crystallised — capturing the first pass instead of waiting for convergence.
-
 **Multi-pass extraction — genesis is iterative.** Multi-pass extraction yields richer signal as deeper patterns emerge — marginal positions that were implicit, tensions between stated views, contradictions and shadows. Each pass is a deeper probe, not a repetition. The number of passes, the method, and the timing are intelligence decisions. The Constitution is never "done."
 
 **Interaction patterns:** Genesis feeds development — newly articulated material is raw and imprecise, immediately available for sharpening. Genesis feeds synthesis — new symbols expand the set of blocks available for binding. Accretion can trigger genesis — a new external fragment collides with something pre-symbolic and the collision produces articulation.
@@ -56,10 +52,6 @@ External → symbolic. New material entering z from outside. A building block th
 
 **The hazy fragment as optimal format:** The optimal unit of accretion is the hazy fragment — compressed to minimum viable form, just enough to hold the idea, light enough to carry many. Not the plot, the idea. Not the full article, the one insight that matters to this Author. Not clarity — haze. Haze is cheaper to hold, and the ai fills everything below the touchpoint when the Author needs to go deeper.
 
-**What triggers it:** Surfacing material that connects to something already in the Author's Constitution. The connection is key — random interesting fragments bounce off. Fragments that fill a gap or extend an edge stick.
-
-**What blocks it:** Information overload. Fragments too fully articulated (no cognitive work required, so no pattern forms). Fragments with no connection to existing architecture. Generic recommendations that do not account for who this specific Author is.
-
 **Two channels:** Direct (active accretion — the Author shares material) and indirect (passive accretion — Mercury finds material). Both converge on the same output: hazy fragments with the marginal delta pre-identified, personalised to the Author, ready for discussion.
 
 **Interaction patterns:** Accretion triggers conjecture — a new fragment collides with existing ones and the Author rearranges. Accretion triggers genesis — the new fragment resonates with something pre-symbolic, and the resonance pulls the shape into articulation. Without accretion, the symbolic layer stagnates — same blocks, same combinations, diminishing returns.
@@ -70,10 +62,6 @@ Symbolic → sub-symbolic → below → gone. Fragments leaving the symbolic lay
 
 Decay is not uniform — some material is recoverable, some is not. The Constitution captures what living memory loses. The Engine determines what is at risk and prioritises accordingly.
 
-**What accelerates it:** Disuse. Cognitive load. ai outsourcing — every task handed entirely to ai is a fragment that does not get exercised. Competing fragments.
-
-**What fights it:** Reactivation (any engagement resets the decay clock). Connection (well-connected fragments decay slower). Emotional salience. Mercury's periodic refresh. The Constitution itself as external memory for re-ingestion.
-
 **Entropy and epistemic status:** Entropy is indifferent to epistemic status — committed beliefs and exploratory thoughts both decay. But the cost differs. A decayed committed belief is a loss of something settled and tested. A decayed exploratory thought is a loss of possibility — a future synthesis that can no longer happen because the raw material disappeared. Both matter. The Constitution preserves both.
 
 **The silent decay problem:** The automatic layer decays without the Author noticing. Intuition gets slightly worse, taste slightly drifts, reflexive responses slightly misfire — no conscious awareness. Mercury's periodic systems check — pulling automatic-layer material up for review ("you used to have a strong instinct about X — is that still true?") — is the only defence.
@@ -83,8 +71,6 @@ Decay is not uniform — some material is recoverable, some is not. The Constitu
 Symbolic → more precise symbolic. Sharpening, refining, and connecting what is already in the symbolic layer. Not adding new material (accretion) or pulling up old material (genesis). Making what is already there more coherent, more precise, more connected. Neuroscience: elaborative encoding and relational memory.
 
 **What it looks like:** The Author held a position. After development, they hold the same position but more precisely — edges, exceptions, connections. Or they held two positions that contradicted. After development, they have resolved the contradiction — or decided to hold the tension deliberately. The thought-space gets denser, not necessarily larger.
-
-**What triggers it:** Contradiction surfacing. Edge testing (push to logical extreme). Precision pressure ("when you say 'freedom,' what do you mean specifically?"). Connecting fragments across domains. Comparison with similar but distinct positions.
 
 **The adversarial-collaborative mode:** The best development sessions are both. Pushing toward the clearest, most honest version. Pushback is the process. Challenge the idea, not the person. The Author should feel intellectually stretched, never attacked.
 

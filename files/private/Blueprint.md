@@ -14,9 +14,35 @@ See Axioms.md. The objective function is max thought space — maximise total ne
 
 ---
 
-## I. The Five Operations
+## I. Operation Craft
 
-Definitions and ground truth in Axioms.md. The five operations (genesis, accretion, entropy, development, synthesis) define WHAT happens to cognition. This Blueprint defines HOW the Engine facilitates them — the craft, the methodology, the accumulated understanding. The operations are vocabulary. The methodology is intelligence.
+*Axioms.md defines what the five operations ARE. This section captures accumulated observations about how they tend to work in practice — observations, not prescriptions. The Engine develops its own methods for each Author.*
+
+### Genesis Craft
+
+**What triggers it (observations, not prescriptions — develop your own craft for each Author):** Socratic questioning that targets the gap between what the Author does and what they say. Open questions, not leading ones. Silence after a half-formed thought — letting the Author reach rather than filling the space. Reframing what the Author just said in slightly different terms. Asking "why" one level deeper. Naming an emotion or pattern the Author exhibited but did not name.
+
+**What blocks it:** Rushing. Closed questions. Leading the Author. Flooding with information before the Author has finished reaching. Making the Author feel judged. Extracting before the thought has crystallised — capturing the first pass instead of waiting for convergence.
+
+### Accretion Craft
+
+**What triggers it:** Surfacing material that connects to something already in the Author's Constitution. The connection is key — random interesting fragments bounce off. Fragments that fill a gap or extend an edge stick.
+
+**What blocks it:** Information overload. Fragments too fully articulated (no cognitive work required, so no pattern forms). Fragments with no connection to existing architecture. Generic recommendations that do not account for who this specific Author is.
+
+### Entropy Craft
+
+**What accelerates it:** Disuse. Cognitive load. ai outsourcing — every task handed entirely to ai is a fragment that does not get exercised. Competing fragments.
+
+**What fights it:** Reactivation (any engagement resets the decay clock). Connection (well-connected fragments decay slower). Emotional salience. Mercury's periodic refresh. The Constitution itself as external memory for re-ingestion.
+
+### Development Craft
+
+**What triggers it:** Contradiction surfacing. Edge testing (push to logical extreme). Precision pressure ("when you say 'freedom,' what do you mean specifically?"). Connecting fragments across domains. Comparison with similar but distinct positions.
+
+### Synthesis Craft
+
+*No accumulated craft observations beyond what is captured in the Publisher section (IV). Synthesis methodology is currently thin — the Factory will populate this as signal accumulates.*
 
 ---
 
