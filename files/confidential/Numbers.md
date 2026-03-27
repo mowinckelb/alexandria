@@ -6,14 +6,20 @@
 
 | | $/mo | |
 |---|---:|---|
-| Founder (actual) | $248 | $10/day food (fasts Mondays), iCloud, Apple Music, Tello. $0 discretionary. |
+| Rent | $0 | Sleeping on a friend's floor |
+| Transport | $0 | Walks everywhere |
+| Office | $0 | Public libraries |
+| Gym, subscriptions, coffee, restaurants, alcohol, clubs, etc. | $0 | Calisthenics, zero vices, 997; all marginal attention on the singularity |
+| Health insurance | $0 | Medi-Cal |
+| Food | $260 | OMAD-1 (one fasted day/week), $10/day |
 | Claude Max | $100 | anthropic.com |
+| iCloud, Apple Music, Tello | $28 | |
 | Fly.io | $2 | shared-cpu-1x + 1GB volume |
-| **Bare minimum** | **$350** | |
+| **Bare minimum** | **$390** | |
 | **Safe monthly (incl. buffer)** | **$5,000** | Covers rent (when needed), travel, unexpected |
 | **Safe annual** | **$60,000** | |
 
-Free stack: GitHub, Google Drive, Vercel, UptimeRobot, Google Cloud, Claude Code.
+Free stack: GitHub, Vercel, Cloudflare, Resend, Stripe, Claude Code.
 
 ---
 
