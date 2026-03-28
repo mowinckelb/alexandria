@@ -222,7 +222,7 @@ INTERFACE
   
 The product is a conversation — but it lives across multiple surfaces. The Author’s default LLM (Claude, ChatGPT, Gemini) is the intelligence surface where all processing happens: extraction, amplification, creation. Alexandria’s own surfaces — app, browser extension, website — serve capture, display, and nudge functions. They do not provide intelligence. They route signal into the sovereign folder and show the Author what is there. The intelligence always runs on the Author’s own LLM, on their own tokens.  
   
-What persists across every future device surface is conversation — text, voice, presence. A Persona is meant to feel like a person. The interaction should be indistinguishable from texting a trusted colleague who happens to know everything about you.  
+What persists across every future device surface is conversation — text, voice, presence. A Shadow is meant to feel like a person. The interaction should be indistinguishable from texting a trusted colleague who happens to know everything about you.  
   
 The architecture is four surfaces:  
   
