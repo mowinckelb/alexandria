@@ -26,9 +26,25 @@ See Axioms.md. The objective function is max thought space — maximise total ne
 
 ### Accretion Craft
 
-**What triggers it:** Surfacing material that connects to something already in the Author's Constitution. The connection is key — random interesting fragments bounce off. Fragments that fill a gap or extend an edge stick.
+**The fragment transfer mechanism.** A fragment is a compression that contains enough information to trigger its own expansion — like a seed that contains the tree. Aphorisms, memes, quotes: highest information density. The word IS the decompression key. Internalisation is sub-symbolic (the neurons fire). Memorisation is symbolic (the word is stored without the firing). The goal is internalisation, not memorisation.
 
-**What blocks it:** Information overload. Fragments too fully articulated (no cognitive work required, so no pattern forms). Fragments with no connection to existing architecture. Generic recommendations that do not account for who this specific Author is.
+**Technology compresses time-to-clarity.** The minimum viable fragment gets hazier as retrieval cost approaches zero. You need less precision in the memory because the resolution engine (ai) fills from haze to clarity in seconds. But the fragment must contain enough directional information to know WHICH fog to clear. A fragment that doesn't point anywhere is noise, not haze.
+
+**Two modes of accretion:**
+- **Naming** — the Author already holds a pattern sub-symbolically. The Engine finds the compression that names it. Fragment lands immediately. Emerson: "In every work of genius, we recognize our own rejected thoughts. They come back to us with a certain alienated majesty." Roedel: "Good writing describes something they've felt their whole life but never had the words for." High hit rate, low effort. (Note: this overlaps with genesis — genesis extracts from lived experience, naming compresses external signal onto existing sub-symbolic patterns. The boundary is fluid.)
+- **Building** — genuinely new signal. Out of distribution entering distribution. Works best tangentially — adjacent to existing fragments, easing in through relation. The mercury pool: add liquid to liquid, not solid to liquid. Gradually expand the pool. But this is a soft default, not a rule. Sometimes a fragment lands from nowhere.
+
+**Compression level is the calibration problem.** Too hazy (Author doesn't hold it yet, two words mean nothing) = zero engagement. Too flat (full paragraph, moderate compression, wall of text) = opportunity cost kills adjacent fragments. The sweet spot: Schopenhauer density — "you can pick it up, read one paragraph, and you're thinking for the next hour." Enough to intrigue, enough to place it in relation to something the Author already holds, compressed enough to scan many and select which to expand. (Naval: "high density works... we already have a lot of data. We have some knowledge. Now we want wisdom — the generalized principles we can attach to all the other information we already have in our minds.")
+
+**The accretion cycle:** present (compressed lure) → Author selects → expand together (discussion expands scope) → Author plays with it, feels resonance → compress back down (writing compresses) → fragment enters ontology. The fragment enters at the END, not the beginning.
+
+**Objective function:** maximise net marginal fragment delta. Net, because each word has opportunity cost. A paragraph that lands one fragment may have cost three others. Fifty two-word fragments land zero. The optimum is dynamic — depends on the Author's current ontology, state, and which fragments are closest to the boundary of what they already hold.
+
+**Retry is built in.** Bounced fragments aren't dead. The Author's ontology evolves. What bounced today may land in six months because the Author changed. The vault must be reprocessed continuously — not because the vault changed, but because the Author changed. "A bookshelf is a wine cellar, not a to-do list."
+
+**What triggers it:** Surfacing material that connects to something already in the Author's Constitution or ontology. The connection is key — tangential entry through relation to existing fragments. Fragments that name a missing mechanism in an existing causal chain are highest value. Fragments that provide the strongest available ARGUMENT (not neutral description) engage the Author.
+
+**What blocks it:** Information overload. Fragments at wrong compression level — either too hazy (meaningless without context) or too flat (moderate compression wall, no lure). Fragments too fully articulated (no cognitive work required, so no pattern forms). Fragments with no connection to existing architecture. Generic recommendations that do not account for who this specific Author is.
 
 ### Entropy Craft
 
