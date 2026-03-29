@@ -3,10 +3,10 @@
  * No API key needed for setup. Blueprint/session/hooks require a test account.
  *
  * Usage: npx tsx test/prosumer.ts
- * Set TEST_URL to override (default: http://localhost:3001)
+ * Set TEST_URL to override (default: http://localhost:8787)
  */
 
-const BASE = process.env.TEST_URL || 'http://localhost:3001';
+const BASE = process.env.TEST_URL || 'http://localhost:8787';
 
 interface TestResult {
   test: string;

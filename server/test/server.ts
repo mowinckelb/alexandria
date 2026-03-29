@@ -11,7 +11,7 @@
  * run test/e2e.ts — requires ANTHROPIC_API_KEY.
  */
 
-const BASE = process.env.TEST_URL || 'http://localhost:3001';
+const BASE = process.env.TEST_URL || 'http://localhost:8787';
 
 interface TestResult {
   test: string;
@@ -147,7 +147,18 @@ async function main() {
     };
   });
 
-  // Test 6: Dashboard endpoint
+  // Test 6: Analytics log endpoint
+  await test('Analytics log endpoint', async () => {
+    const res = await fetch(`${BASE}/analytics/log`);
+    const body = await res.text();
+    return {
+      test: 'Analytics log endpoint',
+      passed: res.ok && typeof body === 'string',
+      details: `HTTP ${res.status}, length: ${body.length}`,
+    };
+  });
+
+  // Test 7: Dashboard endpoint
   await test('Dashboard endpoint', async () => {
     const res = await fetch(`${BASE}/analytics/dashboard`);
     const body = await res.json();
@@ -158,7 +169,7 @@ async function main() {
     };
   });
 
-  // Test 7: Tool descriptions are substantial (>100 chars each — Anthropic best practice)
+  // Test 8: Tool descriptions are substantial (>100 chars each — Anthropic best practice)
   await test('Tool descriptions are substantial', async () => {
     const res = await fetch(`${BASE}/mcp`, {
       method: 'POST',

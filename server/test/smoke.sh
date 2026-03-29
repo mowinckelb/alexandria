@@ -8,7 +8,7 @@ BASE="https://mcp.mowinckel.ai"
 API_KEY_FILE="$HOME/.alexandria/.api_key"
 PASSED=0
 FAILED=0
-TOTAL=4
+TOTAL=5
 
 check() {
   local name="$1" status="$2"
@@ -64,6 +64,16 @@ session_out=$(curl -sS -w "\n%{http_code}" -X POST \
   "$BASE/session" 2>&1) || true
 session_status=$(echo "$session_out" | tail -1)
 check "session" "${session_status:-0}"
+
+# 5. OAuth discovery (no credentials needed)
+oauth_out=$(curl -sS -w "\n%{http_code}" "$BASE/.well-known/oauth-authorization-server" 2>&1) || true
+oauth_status=$(echo "$oauth_out" | tail -1)
+oauth_body=$(echo "$oauth_out" | sed '$d')
+if [ "$oauth_status" = "200" ] && echo "$oauth_body" | grep -q '"authorization_endpoint"'; then
+  check "oauth-discovery" 200
+else
+  check "oauth-discovery" "${oauth_status:-0}"
+fi
 
 # Summary
 echo ""

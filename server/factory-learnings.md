@@ -4,6 +4,99 @@ This file compounds across daily Factory runs. Each run reads the prior learning
 
 ---
 
+## 2026-03-29 — Meta Run 1 (weekly evolution, autonomous)
+
+### State at run start
+- 42 commits since last health run (2 days). Dominant change: **Fly.io → Cloudflare Workers migration** (commit `cce0d2d`). Also: Mercury scan system operational (daily multi-agent scans), massive philosophy evolution (Persona→Shadow rename, Library reframe, data-and-intent principle, accretion mechanics, PT metaphor), vault integrity + Blueprint integrity, stack consolidation ($102→$100/month opex).
+- Build: PASS (wrangler dry-run, 241 KiB gzipped).
+- Website types: PASS (tsc --noEmit clean).
+- Investor docs: 4/4 synced.
+- Mercury scans: Active (2026-03-27, -28, -29 in vault_intake/).
+- Server health: Cannot verify live (sandbox blocks curl to external).
+
+### What the week shows — patterns
+
+1. **Infrastructure matured.** Railway → Fly.io → Cloudflare Workers in 2 weeks. Each hop reduced complexity: Dockerfile + volume → serverless Worker + KV. Opex dropped from $102/month to $100/month (Cloudflare free tier). The server is now 241 KiB gzipped, deploys in seconds, zero idle cost. This is the bitter lesson applied to infrastructure — general compute (Workers) beats managed containers (Fly).
+
+2. **Mercury is alive.** The autonomous daily scan system is producing structured fragments in vault_intake/. Three-tier agent processing (base scan → frontier agent → archive agent). Output format is clean: Forward/Backward/Zero-delta sections, each fragment with source, marginal delta, and constitution connection. No verification mirror exists yet — adding one.
+
+3. **Philosophy velocity continues.** The founder is evolving the thesis faster than the system can track. Key moves this week: "data and intent, not intelligence" as core principle, Persona→Shadow rename, Library reframe (shadow MDs via API, accretion not inference), PT metaphor, accretion mechanics (fragment transfer, compression levels). All crystallised from a0→aN.
+
+4. **public/docs/ is NOT a symlink.** CLAUDE.md says it is, but it's a separate directory. Files had diverged — Concrete.md and Vision.md in public/docs/ still had "AI" (uppercase) and old Fly.io references. Fixed and synced this run.
+
+### What I fixed
+
+1. **Stale Fly.io references** — 5 locations across aN and aX files:
+   - a2:865 — "$102/month — Claude Max $100, Fly.io ~$2" → "$100/month — one Claude Max subscription"
+   - a1:614 — "$102/month — two paid services (Claude Max and Fly.io)" → "$100/month — one paid service (Claude Max)"
+   - a1:652 — "$102/month" → "$100/month"
+   - Memo.md:247 — "$102/month opex" ��� "$100/month opex"
+   - Concrete.md:58 — "Fly.io (server)" → "Cloudflare (server + DNS)"
+   The founder already updated a2's stack description in `fed6675` but missed these downstream instances.
+
+2. **public/docs/ sync** — Concrete.md and Vision.md copied from files/public/ to public/docs/. Both had stale content and uppercase "AI" violations.
+
+3. **public/partners/ sync** — Memo.md resynced after opex fix.
+
+4. **Test default port** — server.ts and prosumer.ts tests updated from `localhost:3001` (Express/Fly) to `localhost:8787` (wrangler dev).
+
+5. **Analytics log test** — Added Test 6 to server.ts covering `GET /analytics/log` endpoint (was the only analytics route without a test).
+
+### Verification results
+- **Server build**: PASS
+- **Website types**: PASS
+- **Investor doc sync**: 4/4 identical (post-fix)
+- **Public docs sync**: Fixed and verified
+- **Test suite**: Updated for Cloudflare Workers (port 8787, analytics/log test added)
+- **Live server**: Cannot verify (sandbox)
+- **Smoke tests**: Already target mcp.mowinckel.ai (correct post-migration)
+
+### Verification gaps identified
+
+**Routes with no automated test coverage (48% of all routes):**
+1. OAuth flow (6 routes): `.well-known`, `/authorize`, `/oauth/callback`, `/register`, `/token`, `/revoke`
+2. Billing flow (3 routes): `/billing/success`, `/billing/portal`, `/billing/webhook`
+3. Drive initialization: `POST /initialize`
+4. Cron trigger: `scheduled()` (daily follow-up email)
+5. GitHub OAuth callback: `GET /auth/github/callback`
+
+These are hard to test in isolation (require Stripe/Google/GitHub credentials). The smoke test covers the critical happy path (/health, /blueprint, /hooks, /session). OAuth and billing are exercised by real user flows. **Recommendation**: add a smoke test for `GET /.well-known/oauth-authorization-server` — it's the only OAuth route that doesn't need credentials and confirms the OAuth discovery is functional. Deferring to health trigger.
+
+**New gap — Mercury scan verification:**
+No automated check that mercury scans are running. The daily health trigger should verify vault_intake/ has a file from the last 48 hours. This is a signal that the mercury trigger is functional. Cannot implement here (file is on the founder's machine, not in the deployed server) — but the health trigger runs in the repo and CAN check git log for mercury commits.
+
+### What I learned
+
+1. **The migration cascade is real.** When infrastructure changes (Fly→Cloudflare), references scatter across aN, aX, tests, and served content. The founder updated the main stack description but missed 5 downstream references. The meta run caught them all. This validates the meta trigger's purpose — health verifies, meta evolves.
+
+2. **public/docs/ symlink claim in CLAUDE.md is false.** It's a regular directory. Either it was a symlink that got dereferenced, or the intent was never implemented. Either way, the files drift. **Recommendation**: either make it an actual symlink or add a sync check to the health trigger. Making it a symlink is cleaner but may break Vercel's static file serving (needs investigation).
+
+3. **SUGGESTIONS in modes.ts are stable.** 3 locations (Editor, Mercury, Publisher) with 15 total suggestion bullets. Still insufficient real-world usage data to thin. The philosophy is explicitly "As models improve, these thin and eventually disappear." No action this run — but the meta run should evaluate thinning quarterly based on any feedback events in the dashboard.
+
+4. **The server codebase is remarkably clean.** Zero TODO/FIXME comments. Zero technical debt in comment form. The philosophy-as-objective approach means there's no backlog — just the philosophy and its implementation.
+
+5. **Mercury scans are a new compounding surface.** Daily structured fragments flowing into vault_intake/, connected to Constitution domains, with explicit zero-delta tracking. This is the indirect channel described in the Blueprint. No verification mirror exists for it yet.
+
+### Trigger proposals
+
+1. **Update both trigger descriptions**: change infrastructure references from "Railway"/"Fly.io" to "Cloudflare Workers." The meta trigger (trig_016JnsH1uWgmmSBsHKKjQme9) SYSTEM section says "Pushing to main auto-deploys server (Fly.io)" — should say "Pushing to main auto-deploys server (Cloudflare Workers)." Same for health trigger (trig_015ApYg8MYDKUND1oWcM9iju). Proposed change:
+   - Trigger: `trig_016JnsH1uWgmmSBsHKKjQme9` (meta), field: `SYSTEM`, value: replace "Fly.io" with "Cloudflare Workers"
+   - Trigger: `trig_015ApYg8MYDKUND1oWcM9iju` (health), field: `SYSTEM`, value: replace "Railway" and/or "Fly.io" with "Cloudflare Workers"
+
+2. **Add mercury freshness check to health trigger.** The daily health run should check `git log --oneline --since='48 hours ago' --grep='mercury:'` and flag if no mercury commits are found. This is a thin mirror for the mercury scan system. Proposed addition to health trigger instructions.
+
+3. **Add public/docs sync check to health trigger.** Compare `files/public/*.md` against `public/docs/*.md` and flag any drift. Or better: investigate making public/docs/ an actual symlink.
+
+4. **Add OAuth discovery smoke test.** `GET /.well-known/oauth-authorization-server` should return valid JSON with `authorization_endpoint` and `token_endpoint`. No credentials needed. Add to smoke.sh and smoke.yml.
+
+### Open questions for next meta run
+- Is public/docs/ supposed to be a symlink? If Vercel serves from it, a symlink might not work (Vercel may need the actual files). Investigate.
+- Are the GitHub Actions smoke tests passing? The health trigger noted this as a gap in runs 4 and 5. Can we check workflow run results via the GitHub MCP tools?
+- Should we thin any SUGGESTIONS yet? Need feedback event data first.
+- The cron trigger for follow-up emails — is it firing? No verification path exists. Consider adding a KV key that the cron writes (e.g., `last_cron_run`) and checking it in `/health`.
+
+---
+
 ## 2026-03-27 — CTO Run 5 (daily health, autonomous)
 
 ### State at run start
