@@ -88,12 +88,13 @@ Each Author's Machine compounds through usage. Constitution deepens, feedback lo
 - **MCP server:** `server/src/` (Hono + @modelcontextprotocol/sdk, Cloudflare Workers).
   - Key files: `worker.ts` (entry), `tools.ts` (axioms + soft defaults), `modes.ts` (mode defaults), `drive.ts` (Drive I/O via raw fetch), `analytics.ts` (Factory events → KV), `auth.ts` (OAuth), `crypto.ts` (encryption), `kv.ts` (KV persistence), `google.ts` (Google API wrapper).
   - 5 tools: update_constitution, read_constitution, activate_mode, update_notepad, log_feedback.
-  - Stateless: encrypted Google refresh token IS the access token. No user data stored. KV for accounts/events only.
+  - Stateless server. No private user data stored. KV for accounts/events, D1 for Library metadata, R2 for published Library content. Encrypted Google refresh token IS the access token.
 - **Static assets:** `public/` (includes `public/docs/` served by website, `public/partners/` for investor artifacts).
 - **Partners:** Markdown docs (Numbers.md, Logic.md) served at `/partners/numbers` and `/partners/logic` via dynamic `[doc]` route. Sync from `files/confidential/` to `public/partners/` when content changes.
 - **Build:** `cd server && npx wrangler deploy --dry-run --outdir=dist` (server). **Deploy:** `cd server && npx wrangler deploy && bash server/test/smoke.sh` (Cloudflare Workers), push to main (Vercel). **Render abstract PDF:** `python scripts/generate_pdf.py <input.md> [output.pdf]` — only abstract.pdf uses this pipeline now. Verify preview PNGs before committing.
 - **Server health:** `curl https://mcp.mowinckel.ai/health`
-- **Stack:** Vercel (website), Cloudflare (DNS + server + KV storage + email via MailChannels), GitHub (code + OAuth), Google Cloud (OAuth), Stripe (billing), Mercury (banking, API), Claude (intelligence). All hybrid (CLI or API-controllable). Zero external dependencies. Dependency alarm: max internal, min hybrid, zero external.
+- **Stack:** Vercel (website), Cloudflare (DNS + server + KV storage + D1 database + R2 object storage + email via MailChannels), GitHub (code + OAuth), Google Cloud (OAuth), Stripe (billing), Mercury (banking, API), Claude (intelligence). All hybrid (CLI or API-controllable). Zero external dependencies. Dependency alarm: max internal, min hybrid, zero external.
+- **Storage architecture:** Stateless server, sovereign private storage (Author's Drive), thin persistence for collective Library (D1 for metadata/discovery, R2 for published shadow/works content, KV for accounts/events). Alexandria stores what Authors publish, never what they think.
 
 ## Style
 

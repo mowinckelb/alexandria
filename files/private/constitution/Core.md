@@ -56,6 +56,8 @@ The combination is not a compromise. It is the dual mandate as a person: high lo
 
 **The advanced hedonism resolution.** Without God, life is logically nihilism or hedonism. P1 is conceded. So the game is P2-P5: family, personal satisfaction, friendships, helping strangers. This IS advanced hedonism — time-horizon-aware utility maximisation within a self-selected priority stack. Not a dodge. The honest name for what a faithless Christian who cannot make the leap actually does.
 
+**The Epicurean happiness function.** The lottery answer reveals the actual utility function: C1 and family in rotation, ideally as roommates, worst case nearby. Just sitting with them, doing nothing. "I have lots of people to do things with, but nobody to do nothing with." The company is the vehicle that buys the couch. Solo founder, location independent, minimal overhead — the idiot index of 1 as a life principle, not just a business principle. Minimum structure, maximum presence.
+
 ---
 
 ## The Dual Mandate

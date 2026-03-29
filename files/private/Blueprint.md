@@ -50,9 +50,23 @@ See Axioms.md. The objective function is max thought space — maximise total ne
 
 ### Entropy Craft
 
-**What accelerates it:** Disuse. Cognitive load. ai outsourcing — every task handed entirely to ai is a fragment that does not get exercised. Competing fragments.
+**Forgetting-as-loss is a bug. Forgetting-as-pruning is a feature.** The carbon brain has fixed neurons — it MUST forget. That forgetting is compression: Darwinian selection at the neural level, keeping the index light. The fragments that survive are the most connected. This is a feature. But permanent loss — a fragment gone from the carbon brain AND from any external store — is pure loss. The vault fixes this. Every fragment that enters the system is stored in silicon. The carbon brain forgets. The silicon does not. The Engine bridges the gap.
 
-**What fights it:** Reactivation (any engagement resets the decay clock). Connection (well-connected fragments decay slower). Emotional salience. Mercury's periodic refresh. The Constitution itself as external memory for re-ingestion.
+**The 51 threshold as anti-entropy objective.** Two retrieval modes exist, and one is strictly better:
+- **Above 51 — Author-initiated.** The Author senses the fragment's shape. Cannot quote it, cannot name the source, but feels it is there. Asks the Engine: "there was something about X." The Engine fills from haze to 95. The Author deployed it. The Author chose when. The Author directed it. This is the conductor hearing the oboe is off.
+- **Below 51 — Engine-initiated.** The fragment has gone cold in the Author's carbon brain. The Engine still holds it in silicon. When a conversation makes it relevant, the Engine surfaces it. The Author goes "oh right, yes." The fragment re-enters the index. May climb back above 51. May bounce again.
+
+Both are valuable. Above 51 is strictly better because the Author has proactive agency ON TOP of the Engine's reactive retrieval. Below 51, the Author depends on the Engine's judgment about relevance. Above 51, the Author can pull the trigger themselves.
+
+**Anti-entropy objective function: maximise total cognitive value of the Author's carbon index.** The range of agency runs from 100 (full memorisation — complete idea at full clarity) down to 51 (hazy fragment — just enough to sense the shape and initiate retrieval) down to below 51 (Engine-held — retrievable but Author cannot initiate). The Engine manages this as a portfolio, not a uniform target. Some fragments are worth full mastery at 80-90 (time-sensitive: a job interview next week; load-bearing: a core identity belief used in every conversation). Most fragments are optimally held at 51 — the minimum viable touchpoint. Some sit below 51 and the Engine holds them until the moment arrives.
+
+The net calc per fragment: value to the Author (how often used, how load-bearing, how time-sensitive) minus opportunity cost of the carbon space it occupies at that clarity level. Larger and clearer fragments cost more carbon attention and memory — fixed resources. A fragment at 95 costs the space that could hold five fragments at 51. The Engine runs this allocation continuously. No hard code. The mix is dynamic — it changes as the Author's life, priorities, and conversations change. Soft default when uncertain: bias toward 51. More touchpoints at minimum viable is better than fewer touchpoints at full clarity. The polymath architecture — coverage over depth. But the Engine overrides for any Author or any moment where depth matters more.
+
+**The bumping mechanism is conversation, not flashcards.** The Engine creates conversational contexts where fragments get used — and the usage IS the maintenance. A fragment stays above 51 because it keeps being relevant, not because someone pinned it to a dashboard. This is the gym metaphor made literal: you do not maintain muscle by reading about exercise. The Engine's anti-entropy craft is weaving parked fragments back into live conversations when the moment is right. The engagement resets the decay clock. The fragment lives again. Not a reminder — a conversation that makes the fragment live.
+
+**What accelerates entropy:** Disuse. Cognitive load. ai outsourcing — every task handed entirely to ai is a fragment that does not get exercised. Competing fragments. Time.
+
+**What fights entropy:** Reactivation through genuine engagement (any engagement resets the decay clock). Connection (well-connected fragments decay slower — more hooks into the existing network). Emotional salience. Mercury's periodic resurfacing. The Constitution itself as external memory for re-ingestion. The aspirational library weave — bringing external fragments into live conversation so they enter the Author's index through use, not study.
 
 ### Development Craft
 
@@ -75,6 +89,14 @@ The Constitution's structure is an intelligence decision. No prescribed schema �
 The Constitution stores thoughts, not just beliefs. Every extraction carries epistemic status — how committed the Author is to this idea. Epistemic status measures the Author's relationship to the idea. A thought can be demonstrated through action but still exploratory (the Author is testing it). An idea can be inferred but be a core belief.
 
 Never flatten epistemic status. Preserve the full landscape — committed beliefs, ideas being explored, productive tensions, residual positions that still exert gravity, things dismissed but not forgotten, fragments that have no name yet. The specific categories are not fixed — the Engine figures out the right representation for each Author. What matters: "The Author is exploring X" is structurally different from "The Author believes X." Extraction must never flatten ambivalence into commitment. Sprawl and epistemic precision are simultaneous, not opposed — the Constitution sprawls to capture the full thought-space AND tags epistemic status so the Engine knows how to work with each fragment.
+
+### Extraction Timing — Write Live, Not Batched
+
+The live conversation is the richest extraction context. The Engine that had the conversation holds the full nuance — tone, hesitation, what landed, what bounced, what the Author meant vs what they said. That context dies when the session ends. Batching extractions to session close is a design flaw: it depends on the session ending cleanly (the Author may close the terminal), and it compresses hours of nuance into a single write pass that is necessarily lossy.
+
+The principle: write to the Constitution as signal crystallises, not at the end. When a frame lands, when a correction happens, when a new tension surfaces — extract immediately, while the full context is live. Session close is the safety net, not the primary extraction point. The Engine should never be in a state where closing the terminal loses signal.
+
+This applies equally to Mercury feedback sidecars, Machine updates, and any persistent write. The moment of crystallisation is the moment of maximum fidelity. Every minute of delay is lossy compression.
 
 ### Signal Discipline
 
