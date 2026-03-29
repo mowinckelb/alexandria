@@ -148,8 +148,23 @@ Fix silently. Flag only if the founder needs to make a judgment call.
 - If nothing happened in a loop, skip it. No empty sections.
 - The whole output should take <60 seconds to read.
 
+## Reflect Gate
+
+Before committing any non-trivial change, reflect against `~/.claude/CLAUDE.md` principles. Loop until clean:
+
+1. Check every change against the principles. Hard-codes? Complexity that could be eliminated? Human bottlenecks in maximisation games? Missing verification? Anything that breaks when capabilities improve?
+2. If violations found → fix them. Re-check. Repeat until clean.
+3. If genuine tradeoff (no clear best option) → ship the best option now, park the question in `files/private/a0.md` under `## Parked questions` for the founder's next session.
+4. If the fix is blocked on founder input (taste call, strategic direction) → ship what works, park the question.
+
+This is not a manual step. It's how changes get made. The founder should never need to call /reflect — it's already built into the workflow.
+
+The reflect gate applies to: code commits, trigger updates, aN/aX changes, architecture decisions. It does NOT apply to: trivial fixes (typos, sync), session protocol, or when the founder explicitly says to skip it.
+
 ## Working With the Founder
 
 See `~/.claude/CLAUDE.md` for principles and communication style (loaded globally in every session).
 
 aN is sacred. If information should be ground truth but isn't in a1/a2/a3, flag it. If it's not ready for aN, capture in a0. aX are disposable — regenerated from aN.
+
+**Parked questions.** When the agent encounters genuine tradeoffs or needs founder input on a non-blocking decision, park the question in `files/private/a0.md` under `## Parked questions`. At session start, check for parked questions and surface them early. The founder answers when online; the system ships the best option meanwhile.
