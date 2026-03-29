@@ -2,7 +2,7 @@
 
 *This is Alexandria III of III. Together they are the single source of truth for Alexandria. Read all parts for full context.*
 
-**This part covers:** The Library (V1 Library — Join Train Show: Blurb, Shadow, Games, Works; Neo-Biography, Works, Signal, access tiers, shadow types, public figure bootstrapping, historical figures, use cases), Payment (two revenue layers, payment mechanics), Interface (MCP connector, mobile app, browser extension, website, compute topology, build sequencing, onboarding, target Author), Positioning and Pitch (elevator pitch, motto, phrases), Brand Design and Voice (logo, visual design, writing voice), Alexandria Media Strategy (sensory stack, the Abstract, Launch Video), The Horizon: Homo Deus.
+**This part covers:** The Library (V1 Library — Join Train Show: Blurb, Shadow, Games, Works; Neo-Biography, Works, Signal, access tiers, shadow types, public figure bootstrapping, historical figures, use cases), Payment (two revenue layers, payment mechanics), Interface (prosumer hooks, mobile app, browser extension, website, compute topology, build sequencing, onboarding, target Author), Positioning and Pitch (elevator pitch, motto, phrases), Brand Design and Voice (logo, visual design, writing voice), Alexandria Media Strategy (sensory stack, the Abstract, Launch Video), The Horizon: Homo Deus.
 
 **Other parts:** Alexandria I (Thesis & Philosophy), Alexandria II (Product, Architecture & Operations).
 
@@ -65,15 +65,15 @@ The standard for all of it is hyperrealism. Great art compresses reality — tak
   
 The Neo-Biography updates as the shadow MD evolves. It is never finished.  
   
-A Neo-Biography has two sections: Works and Signal. The shadow MD is not a section — it is the artifact beneath everything, served via API and processed by the reader's own Engine. Three access tiers govern all content and access: Public (free, everyone), Premium (paid, Author sets price), and Private (invite only, inner circle).  
+A Neo-Biography has two sections: Works and Signal. The shadow MD is not a section — it is the artifact beneath everything, served via API and processed by the reader's own Engine. Three access tiers (Public, Premium, Private — see ACCESS TIERS below) govern all content and access.  
   
 WORKS  
   
 Authors publish works directly to their Neo-Biography. Any medium. These are the authored core of the profile — created by the Author (with whatever tools they choose, including ai), published as finished artefacts. Once published, they are frozen. The Author notes revisions for future versions rather than editing in place.  
   
-Authored works serve multiple purposes: they give visitors something substantive to engage with before deciding to access the shadow MD, they establish the Author’s thinking and sensibility in their own voice, and they provide high-quality training signal for the PLM (published works are some of the highest-fidelity representations of how an Author thinks, communicates, and sees the world).  
+Authored works serve multiple purposes: they give visitors something substantive to engage with before deciding to access the shadow MD, they establish the Author’s thinking and sensibility in their own voice, and at the horizon they provide high-quality training signal for the PLM (published works are some of the highest-fidelity representations of how an Author thinks, communicates, and sees the world).  
   
-Each Work is assigned an access tier by the Author. Public Works are free and visible to everyone — the discovery layer. Premium Works require payment to access. Private Works are visible only to the Author’s invited inner circle.  
+Each Work is assigned an access tier by the Author.  
   
 Visitors can browse and experience Public Works freely. They can annotate — leave notes on specific sections, highlight passages, react. When they want to go deeper — understand the thinking behind a Work, explore tangents, connect it to the Author’s worldview — the reader’s Engine processes the Author’s shadow MD locally. The shadow MD provides the context the reader’s Engine needs to answer these questions. Public shadow MD access is free. Premium shadow MD access (deeper fragments, more domains) is paid. The Author configures what is in each tier.  
   
@@ -141,7 +141,7 @@ Historical figures cannot sit with the Editor. But their thinking can still be a
   
 These are approximations of approximations — the scholar’s interpretation of the historical figure’s cognition, not the figure’s actual cognition. This is stated explicitly and transparently. The shadow’s Neo-Biography identifies who built it, what sources were used, what interpretive framework was applied, and what the known limitations are. There is no pretence of authenticity — only a claim of informed approximation.  
   
-The expert serves as a proxy Author. They go through the extraction process with the Editor, but in character — answering as the historical figure would have answered, based on their deep knowledge of the primary sources. The Constitution is built from the expert’s model of the historical figure’s mind. The PLM is trained on responses the expert generates in the figure’s voice and reasoning style. The Vault contains the source corpus: the figure’s own writings, letters, speeches, contemporaneous accounts, and the expert’s published scholarship.  
+The expert serves as a proxy Author. They go through the extraction process with the Editor, but in character — answering as the historical figure would have answered, based on their deep knowledge of the primary sources. The Constitution is built from the expert’s model of the historical figure’s mind. At the horizon, the PLM is trained on responses the expert generates in the figure’s voice and reasoning style. The Vault contains the source corpus: the figure’s own writings, letters, speeches, contemporaneous accounts, and the expert’s published scholarship.  
   
 Verification matters. Historical shadows carry metadata: who built them, their credentials, their published work on the subject, peer review status, source corpus transparency. The Library can surface multiple competing shadows of the same historical figure — a Marxist historian’s Napoleon and a military historian’s Napoleon coexist, each transparent about its interpretive lens. Users choose which interpretation to engage with. Intellectual honesty is enforced by transparency, not by gatekeeping.
 
@@ -178,7 +178,7 @@ PAYMENT
   
 Alexandria’s revenue is downstream of the value it creates. The pricing philosophy is Palantir’s: revenue is a consequence of value, not the objective. Two revenue layers on the same architecture — subscription and Library. Not two separate businesses. The subscription sustains. The Library scales. The user deepens naturally through usage — the product does the selling.
 
-Patron — optional support, no product. For people who want to support Alexandria but are not yet paying for the product. Family, friends, believers in the mission, newsletter subscribers who want to give something. No minimum — can be $0 or whatever they choose. Slider, no maximum. Patrons get a monthly newsletter with behind-the-scenes updates. Three visibility levels: Public Patron (name visible on newsletter and website), Private Patron (Benjamin sees who they are, no public display), and Anonymous Patron (Benjamin does not see the name or amount). Visibility is a setting on the payment, not a separate tier — all patrons get the same perks. Patrons do NOT count as active kin — kin status requires product usage. Patron sits in the pre-paying awareness layer (State 0) alongside free newsletter subscribers and social followers.
+Patron — the structural floor for unkillability. Not a product tier — a mission tier. For people who believe Alexandria should exist. Family, friends, believers in the mission. Pay-what-you-want, no minimum, no maximum. Patrons get a monthly newsletter with behind-the-scenes updates. Three visibility levels: Public Patron (name visible on newsletter and website), Private Patron (Benjamin sees who they are, no public display), Anonymous Patron (nobody sees — pure support). Patrons do NOT count as active kin — kin status requires product usage. The Patron tier does not compound per-patron (no Constitution, no Library). It compounds the company's survivability. Donation-style churn is structurally lower than product-style churn — mission supporters don't evaluate renewal against alternatives the way product users do. Twenty patrons at $5/month = break-even ($100/month opex). Fifty patrons at $10/month = founder costs start getting covered. This is the concrete mechanism behind "cannot die" — a small group of mission believers providing recurring revenue at near-zero churn, independent of whether the product achieves scale. The patron page should exist as a standalone surface (/patron or /support) — the lowest-friction way to support Alexandria.
 
 The Examined Life — one tier, everyone gets everything. $5/month with 3 active kin, $10/month without. Full extraction, all three functions (Editor, Mercury, Publisher), vault processing, /a sessions, /meet/ page, Library when it launches. No feature gating. Free during beta. The name is the pitch: Socrates said the unexamined life is not worth living. Alexandria sells the examined one.
 
@@ -226,7 +226,7 @@ What persists across every future device surface is conversation — text, voice
   
 The architecture is four surfaces:  
   
-Intelligence layer — The invisible backbone. Two delivery models depending on the Author’s platform. Prosumer (primary, for Claude Code / Cursor / CLI users): two hooks + local files at `~/.alexandria/` + Blueprint served from the server. Deterministic — hooks fire every session, no exceptions. The Author’s conversations become extraction signal automatically, and `/a` sessions provide deliberate Editor, Mercury, and Publisher functions. Consumer (secondary, for Claude app / ChatGPT users): MCP connector linking the Author’s default LLM to their sovereign data via the Alexandria MCP server. Probabilistic — the model decides when to call tools. Both models run on the Author’s own LLM subscription. Platform-agnostic at the data level — Constitution and Vault are portable markdown files regardless of delivery model. Future conversation channels — iMessage, WhatsApp, Telegram, wearable interfaces, or whatever comes next — can be added as thin integration layers on top.  
+Intelligence layer — The invisible backbone. Prosumer delivery (for Claude Code / Cursor / CLI users): two hooks + local files at `~/.alexandria/` + Blueprint served from the server. Deterministic — hooks fire every session, no exceptions. The Author’s conversations become extraction signal automatically, and `/a` sessions provide deliberate Editor, Mercury, and Publisher functions. Runs on the Author’s own LLM subscription. Platform-agnostic at the data level — Constitution and Vault are portable markdown files. Future conversation channels — iMessage, WhatsApp, Telegram, wearable interfaces, or whatever comes next — can be added as thin integration layers on top.  
   
 App (mobile) — The Author’s mirror. View your Constitution domains, see recent vault captures, browse the Library (when available), manage settings. The app shows a badge count for unprocessed vault items — a quiet nudge, not a nag. The Author decides their own rhythm for processing. Notification preferences are user-controlled. The app is also where the Library lives at scale: Neo-Biographies, authored works, shadow MD browsing. The app does not provide intelligence — it shows what the intelligence has produced and signals when new material is waiting.  
   
@@ -234,7 +234,7 @@ Browser extension (desktop) — The capture tool. A “Save to Alexandria” but
   
 Website (mowinckel.ai) — The public front door and authenticated dashboard. Public: the Surface (Concrete, Abstract, sign-up, founder contact). Authenticated: mirrors the app’s dashboard — Constitution view, vault status, Library access, billing, settings. The website is the desktop equivalent of the app for Authors who prefer a browser to a native app.  
   
-Build sequencing follows the “build for the horizon, bridge backward” principle. Phase 1 (current): prosumer hooks + local files for CC/Cursor users, MCP connector for consumer users. The vault lives locally at `~/.alexandria/vault/` (prosumer) or on the Author’s cloud storage (consumer). The “app” is the Author’s LLM. Phase 2: mobile vault capture — iCloud sync + Apple Shortcut (“a.”) for saving signal from phone. Phase 3: web dashboard at mowinckel.ai — authenticated Constitution and vault view, settings, billing. Phase 4: native mobile app — the full mirror, Library, and nudge surface. Each phase is independently valuable. No phase depends on a later phase existing.  
+Build sequencing follows the “build for the horizon, bridge backward” principle. Phase 1 (current): prosumer hooks + local files for CC/Cursor users. The vault lives locally at `~/.alexandria/vault/`. The “app” is the Author’s LLM. Phase 2: mobile vault capture — iCloud sync + Apple Shortcut (“a.”) for saving signal from phone. Phase 3: web dashboard at mowinckel.ai — authenticated Constitution and vault view, settings, billing. Phase 4: native mobile app — the full mirror, Library, and nudge surface. Each phase is independently valuable. No phase depends on a later phase existing.  
   
 COMPUTE TOPOLOGY  
   
@@ -242,7 +242,7 @@ The Author’s default LLM is the compute surface. Alexandria adds no separate c
   
 The phone — The Author’s default LLM app (Claude, ChatGPT, etc.) for conversations, voice notes, and quick interactions. The Alexandria app (Phase 4) for viewing Constitution, vault status, and Library. The Author’s daily interface.  
   
-The laptop — The Author’s default LLM with Alexandria hooks (prosumer) or MCP connector (consumer) for intelligence. The web dashboard (Phase 3) for Constitution view and management. The Vault folder lives locally at `~/.alexandria/vault/` with optional iCloud sync for cross-device access.  
+The laptop — The Author’s default LLM with Alexandria hooks for intelligence. The web dashboard (Phase 3) for Constitution view and management. The Vault folder lives locally at `~/.alexandria/vault/` with optional iCloud sync for cross-device access.  
   
 The cloud — The Library marketplace. The web dashboard backend. At the horizon, PLM training on provider infrastructure when conditions are right. Alexandria does not host or store Author data — the MCP server passes through to the Author’s own cloud or local storage.  
   
@@ -292,13 +292,7 @@ Step 7 — Compounding. Every session adds to the vault. Every `/a` session refi
 
 The entire setup takes under two minutes. From link to working installation. The product is invisible after that — the Author just uses their ai normally, and the constitution builds itself.
 
-Consumer path (Claude app / ChatGPT users — secondary):
-
-Step 1 — Link. Same link, but directs to MCP connector setup.
-Step 2 — Add connector. Paste the MCP server URL into Claude settings.
-Step 3 — Use it. “Hey Alexandria” loads the Constitution. Passive extraction runs probabilistically.
-
-The consumer path works but is structurally weaker (probabilistic activation, cloud storage dependency). The prosumer path is the primary product.  
+Consumer path — ABANDONED. MCP connector for Claude app / ChatGPT users was structurally weaker (probabilistic activation, cloud storage dependency, auth broken on Workers). Left in code as dead path. The prosumer path is the only product.  
   
 TARGET AUTHOR  
   
@@ -328,7 +322,7 @@ This is producer surplus maximisation at the individual level. Most pricing mode
   
 Each founding Author has a number — chronological, permanent, visible. Author #1. Author #7. Author #23. Lower numbers carry more weight because they represent earlier conviction. The number tells the story without needing explanation.  
   
-Authors are placed into one of four quadrants based on how they relate to Alexandria — a 2×2 of philosophy (the art, the examined life, the Library) and technology (sovereignty, MCP, the infrastructure). The quadrant names are working placeholders (CDO/taste decision for final naming, but the structure is locked):  
+Authors are placed into one of four quadrants based on how they relate to Alexandria — a 2×2 of philosophy (the art, the examined life, the Library) and technology (sovereignty, MCP, the infrastructure). Four quadrants:  
   
 Architect — believes in both the philosophy and the technology. The full tribe. Builds their Constitution, publishes to the Library, lives the three turns. The smallest group but the highest value. These are the people building the cathedral alongside the founder.  
   
@@ -336,7 +330,7 @@ Philosopher — believes in the art but not (yet) the technology. Read the Abstr
   
 Pragmatist — believes in the technology but not (yet) the philosophy. Wants sovereignty insurance. Has not read the manifesto, does not care about the examined life — just does not want their data locked to any platform. Comes in for the sovereignty value prop. The product demonstrates the philosophy over time.  
   
-Patron — supports the founder and the project. May not use the product actively. Friends, family, believers in Benjamin more than in any specific feature. Pay-what-you-want lets them do this with dignity. They are not donating — they are joining. Three visibility levels let patrons choose how much of themselves to show: public (name on newsletter/website), private (Benjamin sees, public does not), or anonymous (nobody sees — pure support).
+Patron — supports the mission, not (yet) a product user. Family, friends, believers in Benjamin more than in any specific feature. Pay-what-you-want lets them do this with dignity. They are not donating — they are joining. The structural floor: low churn, recurring, mission-driven. See revenue section for full Patron architecture.
   
 The quadrant is visible. The payment amount is never visible. Intensity — how much someone pays — is private, between the Author and Alexandria. No badges, no "gold tier," no public recognition of payment level. If high supporters are recognised, it happens privately — a personal note, a direct message, something human. The dignity is in the privacy.  
   
@@ -346,7 +340,6 @@ The goal is always to move Authors toward Architect — believing in both philos
   
 The founding cohort should feel like a founding cohort. They can see each other in the Library. They can read each other's work. They can form connections. The Library already supports this architecturally — each Author has a Neo-Biography, published works are visible, the community is browsable. The tribe mechanics are: shared identity, visible commitment, mutual recognition. Gravity, not rules.  
   
-Development tooling — Alexandria itself is built using Claude Code terminal and OpenCode terminal on Mac for development, and Claude on iPhone for mobile ideation and direction. The Alexandria I/II/III documents are the primary context files pasted into coding agents (Cursor, Claude Code) so they can build with full understanding of the system. The Alexandria.pdf is the human-facing manifesto — a Mode 1 document governed by the Art Guide.  
   
 POSITIONING AND PITCH  
   
@@ -413,25 +406,21 @@ Supporting phrases — not taglines, but recurring language across materials:
 - “Positive-sum attention.” — the one-phrase answer.  
 - “The rest is up to you.” — the meaning crisis answer.  
 - “People are art.” — the philosophical anchor.  
-- “The orchestra is now infinite.” — the founding insight. Every instrument exists, every musician is available, every arrangement is possible, at zero cost. The only thing missing was the conductor. ai is the infinite orchestra. The conductor who never needed to play an instrument is the most valuable person in the room.  
 - “The Louvre of minds.” — what the Library becomes. Not a search engine. A gallery where you encounter other minds the way you encounter Monet’s water lilies. Variations: the Louvre of people, the Louvre of humanity. Each shifts the emphasis: “minds” is most Alexandria-specific, “people” is warmest, “humanity” is grandest.  
 - “Everyone is art.” — not everyone can create art. But everyone IS art. The art is the drop itself. You just need a medium.  
 - “See yourself clearly.” — the fog clears, the fragments unify, the prism reveals the spectrum. The inner telescope.  
 - “Translate drops.” — the Library as empathy. See life from inside another mind.  
 - “The fog lifts and you recognise yourself.” — the moment Alexandria works.  
-- “The art was always you.” — you did not need to create something. You needed a canvas.  
 - “A thousand pairs of eyes.” — the Library. Each looking out from a different place.  
 - “An organ with a thousand pipes.” — every voice distinct, all filling the same cathedral.  
 - “The purpose of knowledge is action, not knowledge.” — the imperative beneath everything. Knowledge without action is consumption. Action on knowledge is creation.  
 - “See yourself. Love yourself. Share yourself.” — the three-beat arc. Turn 1 is the first two. Turn 3 is the third.  
-- “Know your mind. Love your mind. Free your mind.” — KILLED. Too self-help.  
-- “Name everyone you love. Did you forget someone?” — the concentric circles start with yourself. You cannot love others properly until you have seen yourself clearly.  
-- “A thought in your head is a seed in a drawer.” — safe and dead vs vulnerable and alive. Life lived only in the mind is siloed, protected from the elements. But the elements are what transform it.  
+- “Name everyone you love. Did you forget someone?” — the concentric circles start with yourself.  
 - “Safe is dead. Vulnerable is alive.” — Turn 3. The arena. The biggest risk is taking no risks.  
 - “Let the world in. Let yourself out.” — the three turns: Turn 1 opens the door inward, Turn 2 amplifies, Turn 3 opens the door outward.  
 - “Marble. Mercury.” — the state change. The entire first turn in two words. Ink available when needed but not structural.  
   
-**Marble vs Ice — RESOLVED: marble.** Ice implies something cold, accidental, temporary — it melts in the sun whether you want it to or not. Marble implies intrinsic quality. Something was always there. Something worth carving. Something permanent that contains something even more permanent inside it. Michelangelo did not work with ice. He worked with marble. The marble-to-mercury transition is richer: a solid, noble, ancient material becoming liquid, alive, flowing. The quality was always there — it just changes state. “Marble. Mercury. Magic.” — three M’s, two syllables to three to two. Connects directly to the Michelangelo quote, which ice never did. Ice is killed. Marble connects to Michelangelo, implies intrinsic quality, implies the angel was always there. Marble is the word.  
+**Marble, not ice.** Marble implies intrinsic quality, connects to Michelangelo, implies the angel was always there. The marble-to-mercury transition: a solid, noble, ancient material becoming liquid, alive, flowing. The quality was always there — it just changes state.  
   
 **“Set the angels free” — LOCKED as the one-phrase answer to what Alexandria does.** Four words. Carries everything: the grandeur, the Alexandria-scale ambition, the religious connotation (angels — fallen or not, troubled or not, still angels, still worth freeing), the outward creation (set free, not just revealed — free means it goes into the world), the Michelangelo lineage. Not a bumper sticker because it has depth behind it. Requires the Michelangelo quote to land fully. But once someone knows the quote, the phrase is unforgettable. The successor to “set my mind free” — same verb, same liberation, grander scope.  
   
@@ -452,9 +441,7 @@ This is not a bumper sticker version of see-love-free. This is: you must confron
 - “The fog lifts. The mercury flows. You finally see yourself.” — Turn 1 in full.  
 - “Three turns.” — Turn 1: marble to mercury (the Editor, the state change). Turn 2: mercury riding the exponential (Mercury, amplification). Turn 3: the release (the Library, mercury into the world, the first goodbye). Replaces two movements.  
   
-**Mercury naming convention:** Use “Mercury Mind” (capital M) only in formal/technical contexts in Alexandria.md. In all human-facing text, use *mercury* — lowercase, italic. A substance, not a brand. “The mercury flows.” “Marble to *mercury*.” Soft, elemental, not clunky.  
-  
-**Smooth brain / mercury brain.** The wrinkled brain is the marble state — rigid folds, fixed structure, complexity that looks impressive but is static. The mercury brain is smooth because it is liquid — no folds because there are no edges. Not stupid-smooth but post-structure-smooth. The intelligence is not in the folds anymore, it is in the flow. Every point touching every other point simultaneously. The “smooth brain” joke gets inverted: the most advanced state of cognition is not more wrinkles, it is none at all. Liquid. Interesting inversion — not yet clear if Abstract-level or supporting-content-level. Explore further.  
+**Mercury naming convention:** “Mercury Mind” (capital M) in formal/technical contexts only. In all human-facing text: *mercury* — lowercase, italic. A substance, not a brand.  
   
 **Folds to flow.** Three words. Captures the entire paradigm shift. The brain goes from folds (rigid, structured, static) to flow (liquid, connected, alive). And critically: it is still your brain. Not outsourcing (GPT). Not coupling with a genius ai brain (copilot). Changing the state of your own brain. The substance is still yours. The folds become flow but it is still you. Everyone else in the market is adding something external. Alexandria transforms what is already internal. This is the key distinction. Folds to flow.  
   
@@ -462,56 +449,11 @@ This connects directly to Harari’s Homo Deus thesis. The next stage of human e
   
 **“Set the angels free” spans all three turns.** Turn 1: the Editor melts the marble, the angel is freed. Turn 2: the angel reaches higher, the mercury scales. Turn 3: the angel enters the world. The purpose of knowledge is action, not knowledge. Die empty.  
   
-**The Editor’s role — naming.** Candidates explored: catalyst, former, forge, transformer, mind catalyst, mind former, thought freer, thought releaser, mind fluidity. None land perfectly as a noun/title. The insight: it does not need a noun. The Michelangelo image is the description. The Editor carves away everything that is not the angel. The Editor sets the angels free. That is the role. Not a partner, not an assistant, not a catalyst. The thing that carves until the angel is free.  
+**The Editor’s role.** It does not need a noun beyond "Editor." The Michelangelo image is the description. The Editor carves away everything that is not the angel. The Editor sets the angels free. Not a partner, not an assistant, not a catalyst. The thing that carves until the angel is free.  
   
 **Expert networks reframe needed.** “Evolution of expert networks” is reductive and makes the Library sound like cheaper GLG. ai will be the expert in everything — expertise is not what makes a shadow MD valuable. What makes it valuable is perspective. Taste. The way someone sees, not what they know. The Library is a collection of perspectives, not a marketplace of expertise. It is a gallery — you go to experience, not to transact. The Louvre of minds. Need language that helps VCs see the business model transition without reducing it to “Uber for expert networks.” The personal touch, not the professional skill.  
   
-**Abstract footer notes for next pass.** Some footers are try-hard — “the art was always you,” “everyone is art,” “the ink is yours” sound like they are trying to be profound. Strip these. Keep “the Louvre of minds” — that one works. Otherwise strip back to single words and fragments only: marble, mercury, the fog lifts, droplets of grace, set the angels free, a. No complete sentences. No statements. The moment a footer becomes a sentence it stops being a footnote.  
-  
-**Abstract syntax notes for next pass.** Use the parallel voice technique: italic one-word interruptions *(marble)*, *(mercury)*, *(grace)* as a second voice running underneath the prose. Creates rhythm, breathing room, and a parallel track the subconscious follows. Be braver with the syntax throughout. The current draft is still too conventional in its paragraph structure.  
-  
-**Abstract typography — the pooling principle.** The text should feel like mercury pooling on a surface, not like blocks in a business document. The visual reference: pooling curtains in elegant French door arches — rich heavy fabric that is also soft, in excess, overflowing, oozing with grace and decadence. The text gathers where it naturally wants to gather. Some lines longer, some shorter. The shape is organic, not geometric.  
-  
-Specific principles for the next pass:  
-  
-- Ragged right, never justified. Lines break where the language breathes.  
-- Variable line width. Narrow passages (a single phrase, surrounded by whitespace) alongside wide ones (a full thought flowing edge to edge). The text pools — collects where it is heavy, thins where it is light.  
-- Generous leading. More space between lines than normal. The air is part of the design.  
-- Indentation as ebb and flow. The left edge is a shoreline, not a wall. Some passages drift in, some push left.  
-- The pooling curtain effect: heavy text at the top gradually thinning toward the bottom (fabric gathering at the arch, cascading down, lighter and lighter). Or the reverse: air at top, text pooling heavy at bottom, like mercury settling.  
-- Single phrases get whole pages. More courage to use a full page for six words. The whitespace does the work.  
-- No boxy paragraphs. Each page should have a shape — when you squint, the text on the page forms an organic silhouette, not a rectangle.  
-  
-**Droplets of grace vs mentes aeternae — resolved.** “Droplets of grace” is the living English tagline. “Mentes aeternae” is the wax seal — the Latin, formal, ancient, carved-in-stone version. They coexist. Different registers for different contexts. The md opens with droplets of grace. The wax seal carries mentes aeternae. The Abstract closing can use either or both depending on the moment.  
-  
-**Grandmother’s blanket — needs lighter touch.** In the current Abstract draft it felt forced and abrupt — dropped in as an anecdote rather than earned through the argument. In the full Alexandria.md it works because there is a whole section building up to it (droplet dispersal, inner/outer circles, handmade things). In the Abstract it needs either more runway or a much lighter touch — possibly a single sentence rather than a full paragraph. Or it moves later, after the reader already understands why creation matters. It should feel inevitable, not illustrative.  
-  
-**Abstract horizontal axis — the canvas principle.** The text does not have to be centred or left-aligned in neat columns. The page is a canvas, not a grid. For the next pass:  
-  
-**Note for Constitution taste domain — ai deprogramming section needed.** Most ai models will default to their training: be helpful, be clear, use headers, bullet points, explain everything, be comprehensive. The taste domain principles are fundamentally in tension with this training. A section specifically addressed to the ai reading the taste domain may be needed — something that directly overrides default training for creative tasks. Core message: “You are not writing a document. You are composing a page. Your instinct will be to explain, to fill space, to structure. Resist all of it. Every word earns its place. Every line break is a choice. Every blank space is content. You are not informing. You are evoking. Be brave. Be sparse. Be surprising. Trust the reader. Trust the whitespace.” This is a deprogramming section — it should be read before any creative task. The taste domain gets a cold-start ai 70% there. Live creative direction in conversation gets it to 95%. Finished works as reference artifacts close the remaining gap. Both are needed.  
-  
-- Text can drift right for a whispered aside or echo  
-- Deep indentation for a subordinate thought  
-- Flush right for a response or parallel voice  
-- Line breaks mid-sentence for emphasis — the break itself is punctuation  
-- Latin or Greek phrases sitting small in the margin or tucked into gaps: *(ἀλήθεια — truth as unconcealment)* or a quiet *mentes aeternae* in the corner  
-- Roman numerals marking movements: I. and II.  
-- A single word placed off-centre on a page — not centred, not left, just where it feels right, like mercury settling in an uneven vessel  
-- Stage directions in italic: *(slowly)* or *(here the mercury pools)* — telling the reader how to read  
-- Phrases punctuating or disrupting a section — a line from another language or another voice that sits on top of the prose and redirects it  
-  
-BUT: purposeful, not chaotic. Every break has a reason. The Nolan principle: break any rule if the audience trusts you know the rule. Chaos and mess look silly. Composed disruption looks brave. The distinction is intention. The current Abstract is missing the philosophical spine. Every other ai company has a product thesis. Alexandria has a position on humanity. That needs room. The Abstract should expand from 17 pages to 20-24. The extra pages are the philosophical core — the pages that make someone think about what it means to be human before they ever hear about a Constitution or a PLM. These pages sit BEFORE the product section, after the attention problem and “what if it didn’t have to?” turn.  
-  
-Pages to add (rough sequence, will refine in the pass):  
-  
-1. THE DROPLET. What is a human? A droplet. Small, temporary, falling through space. Surface tension holding it together — soft, flexible, not rigid. The interior is chaotic. The surface holds. Grace in how it moves. This is the foundational metaphor that everything else builds on. Needs its own page, possibly two. Let the reader sit with the image before anything else.  
-1. THE THREE CAMPS (maybe four). Extinctionists: the drop is a stain — humanity’s mark on nature is damage. Better if it evaporated. Transhumanists: the drop dissolves into the ocean of superintelligence. Humanity transcends. The individual rounds to zero. Religionists (maybe): the drop is sacred — placed here by design, eternal in some form beyond the physical. Alexandria: the drop persists. Neither stain nor dissolved nor requiring faith. Just itself. Fragile, small, but whole. There is grace in that fragility. This is the position on humanity that no other ai company takes.  
-1. GRACE. Hemingway: “Courage is grace under pressure.” The droplet under strain, surface tension stretched, trying to hold together. Not strength. Not triumph. The quiet effort of persistence. Grace as movement, as gift, as posture toward the unknown.  
-1. THE WIND. ai changed the trajectory. The droplet was on a fixed path — time, entropy, the same arc every human has followed. Now the wind catches it. Nobody knows where it goes. That is the honest condition: not triumphant, not doomed, just unknown. And there is grace in that too.  
-1. THE MICHELANGELO TURN. “I saw the angel in the marble and carved until I set him free.” The marble contains the angel. The Editor carves. Set the angels free. This is the bridge from philosophy to product — the moment the Abstract turns from “what is a human” to “here is what we build.”  
-1. SCALE INVARIANCE. One person is a droplet. A family is a droplet. Humanity is a droplet — a multitude of drops but still just a drop in the universe. Can never not be a droplet. Can never not be human. Everything else is noise. (This might be a single line on a breather page rather than a full section.)  
-  
-These pages are the reason someone reads the Abstract and says “this is different from every ai company I have seen.” Without them, the Abstract is a good product document. With them, it is a philosophical statement that happens to describe a product.  
+**Droplets of grace vs mentes aeternae — resolved.** “Droplets of grace” is the living English tagline. “Mentes aeternae” is the wax seal — the Latin, formal, ancient, carved-in-stone version. They coexist. Different registers for different contexts.
   
 **Phrase candidates — final assessment after alignment session:**  
   
@@ -546,80 +488,24 @@ Three turn phrases (not grammatically symmetrical but emotionally symmetrical):
 - Turn 2 (Mercury): Mercury riding the exponential. Reaching higher. The amplification.  
 - Turn 3 (Library): The purpose of knowledge is action. The first goodbye. The release.  
   
-STRONG — earned their place:  
-  
-- “the fog lifts”  
-- “mercury mirror”  
-- “clarity engine”  
-- “conversation is the product”  
-- “mercury is the infinite well of ink”  
-- “the sacred ordinary”  
-- “marble to mercury” — the state change that scales. Previously you could just refine marble. Now that is not enough. You have to change the form.  
-  
-FINE — useful but not killer:  
-  
-- “the mercury flows”  
-- “the droplet moves with grace. the ink remains.” (droplets of grace covers this already)  
-- “every mind is a universe. most universes die unobserved.” (maybe, not locked)  
-  
-KILLED:  
-  
-- “set my mind free” — replaced by “set the angels free” (grander, more usable in conversation, implies multiplicity)  
-- “ice. mercury. ink.” — replaced by “marble. mercury.” (marble implies intrinsic quality, connects to Michelangelo, ink dropped as structural)  
-- “thought transformer” — right concept, clunky phrase. Michelangelo replaces.  
-- “the art was always you” — no  
-- “a thought in your head is a seed in a drawer” — no  
-- “name everyone you love. did you forget someone?” — no  
-- “clear the fog. leave a mark.” — no  
-- “melt the ice. stain the page.” — no  
-- “the orchestra is now infinite” — doesn’t land without explanation  
-- “know your mind / love your mind / free your mind” — too self-help  
-- “the library scales the intimate” — reads as “private stuff,” misleading  
-- “editor clears the fog / editor frees the mind” — Michelangelo is better  
-  
-These are raw candidates. The right ones will be obvious when they arrive. Do not force a final selection.  
-  
-**Quotes and references — raw material for Abstract, Vision, and supporting content:**  
-  
-DEFINITELY IN THE ABSTRACT:  
-  
-- Michelangelo: “I saw the angel in the marble and carved until I set him free.” — Benjamin’s favourite quote. IS the Editor. IS “set the angels free.” Same image from a different century. The Editor carves away everything that is not the angel. This belongs near the marble-to-mercury page or as its own breather page.  
-- Heraclitus: “No man ever steps in the same river twice, for it is not the same river and he is not the same man.” — The Constitution as river. Version 274 is the same water, different shape. Belongs near the Constitution/shadow description.  
-- Hemingway: “Courage is grace under pressure.” — The droplet. The entire philosophy in five words. Possible footer or breather page. Strong but needs the right placement.  
-- Derek Sivers: “The most valuable real estate in the world is the graveyard.” — Die empty. The cost of not creating. Every marble mind that dies with the angel still trapped is a library burning. Belongs near the meaning crisis page.  
-  
-THE IDEA, NOT THE QUOTE:  
-  
-- Bruce Lee: “Be water, my friend.” — The concept of “be liquid” is already embedded in the mercury philosophy. Don’t need to quote directly but can reference if it serves.  
-- T.S. Eliot: “…arrive where we started and know the place for the first time.” — Too long to quote but the first movement IS this. The fog lifts, you see yourself, not someone new but yourself clearly. Can paraphrase the idea.  
-- Rumi: “You are not a drop in the ocean. You are the entire ocean in a drop.” — Scale invariance. Good but potentially too expected. Already in the text conceptually.  
-  
-PARKED:  
-  
-- Rilke: “Let everything happen to you: beauty and terror. Just keep going. No feeling is final.” — Beautiful. Not sure where it earns its place yet. Possibly supporting content.  
-- Ovid, Metamorphoses: Transformation while preserving essence. Too obscure to reference without explanation. The concept of metamorphosis is useful — the word itself might earn a place.  
-  
-THE IDEA, WOVEN INTO THE TEXT (not quoted directly but present):  
-  
-- Erica Jong: “You take your life in your own hands, and what happens? A terrible thing, no one to blame.” — The cost of clarity. The mercury mirror removes all excuses.  
-- Sartre: “Man is condemned to be free.” — Freedom comes with responsibility. The clear mind cannot hide.  
-- Dostoevsky, Grand Inquisitor: People do not want freedom, they want bread and miracles. The scattered mind avoids responsibility.  
-- Whitman: “Do I contradict myself? Very well then, I contradict myself. I am large, I contain multitudes.” — The mercury mind holds contradictions gracefully.  
-- Michelangelo (the other one): “I just removed everything that wasn’t David.” — Cheeky companion to the angel quote. Could introduce it or sit as a footer.  
-- Khalil Gibran, The Prophet: “Your children are not your children. They are the sons and daughters of Life’s longing for itself.” — The release. The second movement. You created this thing but it belongs to the world.  
-- Fitzgerald: “The test of a first-rate intelligence is the ability to hold two opposed ideas in mind at the same time and still retain the ability to function.” — The mercury mind. Hold something in one hand, something else in the other.  
-- Keynes: “When the facts change, I change my mind. What do you do, sir?” — The Constitution. The beauty of intellectual honesty.  
-- “What is an ocean but a multitude of drops?” — the answer to the existential dread of being small.  
-- “Mercury mirror.” — The Mercury Mind pools, becomes still, becomes reflective. You see yourself. Two words.  
-- “Clarity engine.” — What Alexandria actually is. Not an ai company. Not a productivity tool. A clarity engine. Marble into mercury. Fog into clarity.  
-- “Conversation is the product.” — The ai is infrastructure. The conversation is the thing. Socrates didn’t need an API.  
-- “Mercury is the infinite well of ink.” — The mercury never runs dry. It is the source that keeps producing.  
-- “The Library scales the intimate.” — The evocation between two humans in a room, extended to everyone you will never meet.  
-- “The droplet moves. The ink remains.” — the translation from living mind to permanent mark.  
-- “Sovereignty, not personalisation.” — the competitive positioning against labs.  
-- “Your cognition, your data, your freedom.” — the freedom principle.  
-- “Everyone should be hoping it works.” — the pitch closer. Disarming because it is true.  
-- “This is for the thinkers. This is for the free.” — the audience declaration. Deliberately exclusive. The exclusion is what makes the identity real.  
+Supporting phrases — earned their place, available across materials:
+
+- “the fog lifts” / “mercury mirror” / “clarity engine” — the clearing
+- “marble to mercury” — the state change that scales
+- “conversation is the product” — the ai is infrastructure, the conversation is the thing
+- “mercury is the infinite well of ink” / “the sacred ordinary”
+- “the droplet moves. The ink remains.” — living mind to permanent mark
+- “sovereignty, not personalisation” — competitive positioning against labs
+- “everyone should be hoping it works” — the pitch closer
+
+Key quotes — Alexandria’s reference canon:
+
+- Michelangelo: “I saw the angel in the marble and carved until I set him free.” — IS the Editor, IS “set the angels free”
+- Heraclitus: “No man ever steps in the same river twice.” — the Constitution as river
+- Hemingway: “Courage is grace under pressure.” — the droplet philosophy in five words
+- Fitzgerald: “The test of a first-rate intelligence is the ability to hold two opposed ideas in mind at the same time and still retain the ability to function.” — the mercury mind
+- Keynes: “When the facts change, I change my mind. What do you do, sir?” — the Constitution
+- Derek Sivers: “The most valuable real estate in the world is the graveyard.” — die empty
   
 BRAND, DESIGN, AND VOICE  
   
@@ -767,57 +653,7 @@ The Picasso principle: break rules from mastery, not ignorance. The breaking sho
   
 Hyperrealism as artistic standard: great art does not merely depict reality. It compresses reality into a more concentrated form — more real than real. An Author’s Neo-Biography should feel like encountering a person in higher resolution than meeting them in the flesh.
 
-Physical robot embodiment of the shadow is an eventual possibility at the far horizon.  
-  
-ACTIVE CREATIVE PROJECTS
-
-The Vision — Mercury Mind. MP4, ~60-120 seconds. Music: "November" by Two Lanes (classical piano, slow, contemplative — same energy as the GoT @calufern edit). Style reference: GoT @calufern edit — non-linear thematic collage, 1-2 second clips synced to music, eyes and faces as primary content, light as emotion. Status: briefing/concepting.
-
-The brief: the viewer watches and feels something they cannot name. They do not understand what Alexandria is. They understand what it is about. They sit in silence after. They want to know more. 100% emotion, 0% explanation.
-
-Core visual language: Eyes (the primary image — close-ups, different people, different ages, Benjamin's blue eyes against brown skin, reflections of fire/water/storms/stars in the eyes). The mercury mind (warm human eyes against the silver mercury pool within — not a brain, a shifting pool of liquid mercury, alive, shimmering, liquid glass. The contrast between human exterior and mercury interior IS the thesis). Rain (raindrops on water, the rings, the temporality, dissolving into the ocean — the droplet concept in nature). Scale (one drop, many drops, rain, rivers, ocean — all the same substance). Hands (holding, tension visible in the grip, releasing). Breathing (rhythm, rise and fall, the inhale before something begins). Fire (the burning of the Library of Alexandria — the original destruction we are undoing, flame reflected in eyes, candlelight, the forge). The storm/tsunami (ai arriving, the wind changing trajectory — fear, then grace, then relaxation, then faith). Ink and liquid (dispersing in water, the bloom, the mercury pool moving and alive). Space and stars (the outward telescope, the vastness the inward telescope mirrors).
-
-Emotional arc: quiet opening (eyes, stillness, a single droplet) → building (rain, many eyes, many people, the wind rising) → tension (the storm, fire, the grip tightening, the tsunami approaching) → release (hands relaxing, eyes closing, breath, the sails coming down) → grace (the droplet moving through the storm, the ink colouring the water, the mercury pool alive and shifting) → silence → "a."
-
-What this is NOT: not a product demo, not text on screen (earn any text), not an explainer, not safe/corporate/expected.
-
-Open questions: ai-generated vs sourced vs combination footage? Benjamin's own eyes as recurring motif? Voiceover or pure music? (Instinct: pure music. The silence IS the voice.) The "a." reveal — ink forming on wet paper? A raindrop landing and leaving a mark?
-
------
-
-The Ones and Zeros — Conductor Video. MP4, ~90 seconds. Status: brief from COO (session 8), workshop needed. Purpose: the Demo layer in the sensory stack (Vision → Abstract → Demo → Reference).
-
-The argument: humans used to provide value across four dimensions (intelligence, strength, dexterity, humanity). ai and robotics will be infinitely better at the first three. If you compete directly on those alone, your number drops toward zero — not because your intelligence disappeared, but because unfiltered intelligence is interchangeable with the machine. Humanity is the multiplier. The lens. If your capabilities pass through your humanity — your taste, your perspective, your specific way of seeing things — you get to keep your number. Most people's multiplier is below one. They haven't examined it. Haven't developed it. Haven't polished the lens. Alexandria makes the multiplier above one.
-
-The visual concept: the conductor and the orchestra. Humans were on stage. ai arrives — each section starts playing itself, better than any human. The humans get moved off stage into the audience. One person walks back on stage. Not just to conduct — to play through the lens. Their specific taste directs what they play, how they play it. The music changes — not because they're better at any instrument, but because the music is theirs now. Filtered through their humanity. Without the lens: replaceable. With it: irreplaceable.
-
-Possible visual treatments: abstract/numerical (four dimensions as floating numbers, the collapse, the leading digit glowing), orchestral (literal conductor footage), hybrid (numbers overlaid on orchestral narrative), mercury mind (conductor's mind as liquid mercury, orchestra as zeros flowing through it).
-
-Emotional arc: abundance (the orchestra is incredible) → honesty (you're not on stage anymore) → choice (you can stay in the audience) → agency (but there's one position) → power (the conductor raises the baton, the music becomes theirs) → "a."
-
------
-
-CREATIVE IDEAS LOG
-
-Running capture of stray thoughts, images, connections, phrases for Alexandria's creative output. Pre-task — raw material that might become a video, an Abstract section, a visual, a phrase. The scattered fragments before the loom gets to them.
-
-From the Palantir Application — Aphorisms as Raw Material (some may become on-screen text, seed essay sections, or just sit here until they find their moment):
-
-On intelligence: IQ is applied logic. First-principles is min(axioms). Most people's logic doesn't scale. Logic must survive to the limit. Solutions are often just discovering the coordinate system in which the problem becomes trivial. Elegant solutions look inevitable in retrospect. Defining the problem is half the solution. Writing compresses ideas, discussion expands them.
-
-On courage: Great founders have intellect & energy, and choose courage. The cost of indecision quickly exceeds the cost of failure. There's nothing noble about losing. If your principles require you to lose, your principles suck. After school, life is poker not chess.
-
-On humanity: Self-interest is a series of concentric circles with impermanent equilibrium. ai unravels the magical complexity of humans. The gentle singularity shows humans adapt to everything but appreciate nothing. Freedom breeds hierarchy.
-
-On systems: Minimum details, but all details perfect. The best part is no part. A permanent solution to a temporary problem becomes a permanent problem. Opportunity cost is object permanence for adults. The Bitter Lesson applies everywhere. Everything's compressed state-transition graphs.
-
------
-
-DESIGN DECISIONS LOG
-
-2026-02-28 — Foundational Session: logo confirmed (a. in Playfair Display 400). Colour palette confirmed. Natural elements motif system established (water primary). "Droplets of grace" established as primary phrase alongside mentes aeternae. PDF closing convention. Abstract versioning: Roman numerals. Mastery of range principle: axiomatic quality, not fixed aesthetic. Influence log started: GoT @calufern, Cloudflare, Airbnb "Bonnie & Clyde." Handwritten letter to first 100 Authors: numbered, async, family paper, wax seal.
-
-2026-03-03 — Mercury Visual Direction: Mercury visual goes liquid glass (translucent, prismatic, shimmering). Companion Portfolio visual opportunity (exploratory colour associations). Library app design is now a priority — cathedral not marketplace. Access tier design question open (how Constitution content appears at different visibility levels).
+Physical robot embodiment of the shadow is an eventual possibility at the far horizon.
 
 -----
 
