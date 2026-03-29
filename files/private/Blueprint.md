@@ -52,7 +52,7 @@ See Axioms.md. The objective function is max thought space — maximise total ne
 
 **Forgetting-as-loss is a bug. Forgetting-as-pruning is a feature.** The carbon brain has fixed neurons — it MUST forget. That forgetting is compression: Darwinian selection at the neural level, keeping the index light. The fragments that survive are the most connected. This is a feature. But permanent loss — a fragment gone from the carbon brain AND from any external store — is pure loss. The vault fixes this. Every fragment that enters the system is stored in silicon. The carbon brain forgets. The silicon does not. The Engine bridges the gap.
 
-**The 51 threshold as anti-entropy objective.** Two retrieval modes exist, and one is strictly better:
+**The retrieval threshold as anti-entropy objective (current craft observation — the specific threshold is an intelligence decision per Author, per fragment).** Two retrieval modes exist, and one is strictly better:
 - **Above 51 — Author-initiated.** The Author senses the fragment's shape. Cannot quote it, cannot name the source, but feels it is there. Asks the Engine: "there was something about X." The Engine fills from haze to 95. The Author deployed it. The Author chose when. The Author directed it. This is the conductor hearing the oboe is off.
 - **Below 51 — Engine-initiated.** The fragment has gone cold in the Author's carbon brain. The Engine still holds it in silicon. When a conversation makes it relevant, the Engine surfaces it. The Author goes "oh right, yes." The fragment re-enters the index. May climb back above 51. May bounce again.
 
