@@ -189,8 +189,8 @@ export function registerLibraryRoutes(app: Hono): void {
     await r2.put(r2Key, content);
 
     await db.prepare(
-      `INSERT INTO works (id, author_id, title, medium, tier, r2_key, size_bytes, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(id, authorId, body.title, medium, tier, r2Key, content.length, now).run();
+      `INSERT INTO works (id, author_id, title, medium, tier, r2_key, size_bytes, url, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(id, authorId, body.title, medium, tier, r2Key, content.length, body.url || null, now).run();
 
     logEvent('library_publish_work', { author: authorId, work_id: id, medium });
     return c.json({ ok: true, work_id: id });
@@ -329,10 +329,24 @@ echo "Done."
 
     const shadows = await db.prepare('SELECT id, tier, size_bytes, updated_at FROM shadows WHERE author_id = ?').bind(authorId).all();
     const quizzes = await db.prepare('SELECT id, title, subtitle, published_at FROM quizzes WHERE author_id = ? AND active = 1').bind(authorId).all();
-    const works = await db.prepare('SELECT id, title, medium, tier, published_at FROM works WHERE author_id = ?').bind(authorId).all();
+    const works = await db.prepare('SELECT id, title, medium, tier, url, published_at FROM works WHERE author_id = ?').bind(authorId).all();
     const latestPulse = await db.prepare('SELECT * FROM pulses WHERE author_id = ? ORDER BY month DESC LIMIT 1').bind(authorId).first();
 
-    return c.json({ author, shadows: shadows.results, quizzes: quizzes.results, works: works.results, latest_pulse: latestPulse });
+    // Extract chapter titles from paid shadow for TOC teaser
+    let shadow_chapters: string[] = [];
+    const paidShadow = shadows.results?.find((s: any) => s.tier === 'paid');
+    if (paidShadow) {
+      try {
+        const r2 = getR2();
+        const obj = await r2.get(`shadows/${authorId}/paid.md`);
+        if (obj) {
+          const text = await obj.text();
+          shadow_chapters = text.split('\n').filter((l: string) => l.startsWith('## ')).map((l: string) => l.replace('## ', ''));
+        }
+      } catch {}
+    }
+
+    return c.json({ author, shadows: shadows.results, quizzes: quizzes.results, works: works.results, latest_pulse: latestPulse, shadow_chapters });
   });
 
   // Read free shadow

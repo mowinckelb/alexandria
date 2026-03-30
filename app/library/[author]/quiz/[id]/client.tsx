@@ -170,7 +170,7 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
               }}
               style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', cursor: 'pointer' }}
             >
-              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>read his shadow</span>
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>read the shadow</span>
               <span style={{ fontSize: '0.68rem', color: 'var(--text-whisper)' }}>$</span>
             </div>
             <span

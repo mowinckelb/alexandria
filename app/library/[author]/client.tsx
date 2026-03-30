@@ -39,8 +39,9 @@ interface AuthorData {
   author: { id: string; display_name: string | null; bio: string | null; settings: string };
   shadows: Array<{ id: string; tier: string; size_bytes: number; updated_at: string }>;
   quizzes: Array<{ id: string; title: string; subtitle?: string; published_at: string }>;
-  works: Array<{ id: string; title: string; medium: string; tier: string; published_at: string }>;
+  works: Array<{ id: string; title: string; medium: string; tier: string; url?: string; published_at: string }>;
   latest_pulse: { month: string } | null;
+  shadow_chapters: string[];
 }
 
 export default function AuthorPageClient({ params }: { params: Promise<{ author: string }> }) {
@@ -136,13 +137,12 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           </section>
         )}
 
-        {data.works.filter(w => !w.title.toLowerCase().includes('love')).length > 0 && (
+        {data.works.length > 0 && (
           <section style={{ margin: '4rem 0' }}>
             <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>works</p>
-            {data.works.filter(w => !w.title.toLowerCase().includes('love')).map(work => {
+            {data.works.map(work => {
               const isLocked = work.tier === 'private';
               const isPaid = work.tier === 'paid';
-              const isPdf = work.title === 'droplets of grace';
               return (
                 <div
                   key={work.id}
@@ -151,7 +151,12 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                     el.style.animation = 'none';
                     void el.offsetHeight;
                     el.style.animation = 'shake 0.4s ease';
-                  } : isPdf ? () => window.open('/docs/abstract.pdf', '_blank') : !isLocked ? () => window.open(`${SERVER_URL}/library/${authorId}/work/${work.id}`, '_blank') : undefined}
+                  } : isPaid ? (e) => {
+                    const el = e.currentTarget;
+                    el.style.animation = 'none';
+                    void el.offsetHeight;
+                    el.style.animation = 'shake 0.4s ease';
+                  } : () => window.open(work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`, '_blank')}
                   style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', transition: 'opacity 0.15s' }}
                   className="hover:opacity-60"
                 >
@@ -183,8 +188,8 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              {['The Space Between Two Monoliths', 'Killer, Incompressible', 'The Faithless Christian Building a Cathedral', 'The Dark Knight Gets Zero Credit', 'The Grief Beneath the Positions', 'The Polymath Conductor', 'The Framework-as-Cage Shadow', 'The Priority Stack, Honestly'].map((title, i) => (
-                <span key={i} style={{ fontSize: '0.88rem', color: 'var(--text-ghost)', opacity: 1 - (i * 0.08) }}>{title}</span>
+              {(data.shadow_chapters || []).map((title, i) => (
+                <span key={i} style={{ fontSize: '0.88rem', color: 'var(--text-ghost)', opacity: Math.max(0.3, 1 - (i * 0.08)) }}>{title}</span>
               ))}
             </div>
             <div
