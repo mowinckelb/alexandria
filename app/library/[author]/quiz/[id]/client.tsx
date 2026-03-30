@@ -27,7 +27,7 @@ interface QuizData {
   quiz_id: string;
   author_id: string;
   title: string;
-  questions: Array<{ id: string; text: string; options: string[] }>;
+  questions: Array<{ id: string; question: string; text?: string; options: string[] }>;
   result_tiers?: Array<{ min_pct: number; label: string; message: string }>;
   [key: string]: unknown; // flexible format
 }
@@ -168,7 +168,7 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
 
         {/* the question */}
         <p style={{ fontSize: '1.1rem', color: 'var(--text-primary)', lineHeight: 1.8, margin: '0 0 2rem' }}>
-          {q.text}
+          {q.question || q.text}
         </p>
 
         {/* options */}
