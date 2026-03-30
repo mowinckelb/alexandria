@@ -4,3 +4,4 @@ dist-worker/
 .env
 data/
 .wrangler/
+.vercel
