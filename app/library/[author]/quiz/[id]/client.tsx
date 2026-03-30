@@ -160,21 +160,36 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
         </div>
 
         <div style={{ margin: '3rem 0 0', display: 'flex', flexDirection: 'column', gap: '1.2rem', alignItems: 'center' }}>
-          <div
-            onClick={(e) => {
-              const el = e.currentTarget;
-              el.style.animation = 'none';
-              void el.offsetHeight;
-              el.style.animation = 'shake 0.4s ease';
-            }}
-            style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', cursor: 'pointer' }}
-          >
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>read the shadow</span>
-            <span style={{ fontSize: '0.68rem', color: 'var(--text-whisper)' }}>$</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div
+              onClick={(e) => {
+                const el = e.currentTarget;
+                el.style.animation = 'none';
+                void el.offsetHeight;
+                el.style.animation = 'shake 0.4s ease';
+              }}
+              style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', cursor: 'pointer' }}
+            >
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>read his shadow</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-whisper)' }}>$</span>
+            </div>
+            <span
+              onClick={() => {
+                const el = document.getElementById('shadow-info');
+                if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+              }}
+              style={{ fontSize: '0.55rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}
+            >ⓘ</span>
           </div>
+          <p id="shadow-info" style={{ display: 'none', fontSize: '0.7rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: 0, lineHeight: 1.6, maxWidth: '280px' }}>
+            the shadow is a published mind — a file that maps how someone actually thinks. each chapter is a different dimension.
+          </p>
           <a href="/signup" style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.78rem', transition: 'opacity 0.15s' }} className="hover:opacity-60">
             make your own
           </a>
+        </div>
+
+        <div style={{ marginTop: '4rem', textAlign: 'center' }}>
           <a href="/" style={{ color: 'var(--text-whisper)', textDecoration: 'none', fontSize: '0.72rem', transition: 'opacity 0.15s' }} className="hover:opacity-60">
             alexandria.
           </a>
