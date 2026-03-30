@@ -93,9 +93,14 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
       <ThemeToggle />
       <main style={{ maxWidth: '640px', margin: '0 auto', padding: '6rem 2rem 4rem', fontFamily: 'var(--font-eb-garamond)' }}>
 
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: '0 0 0.3rem', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-          {displayName}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', margin: '0 0 0.3rem' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+            {displayName}
+          </h1>
+          {settings.library_id && (
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-whisper)', letterSpacing: '0.05em' }}>{settings.library_id}</span>
+          )}
+        </div>
         {author.bio && (
           <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.8, margin: '0' }}>
             {author.bio}
