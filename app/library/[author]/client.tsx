@@ -105,7 +105,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           <section style={{ margin: '4rem 0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1.5rem' }}>
               <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>games</p>
-              <span title="generated from his constitution — the file that holds how he actually thinks. not buzzfeed. here's the actual product: mowinckel.ai/join" style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'help', opacity: 0.5 }}>ⓘ</span>
+              <span title="these exist because ai mapped how this person actually thinks. a side effect of something much bigger." style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'help', opacity: 0.5 }}>ⓘ</span>
             </div>
             {data.quizzes.map(quiz => (
               <a
@@ -122,10 +122,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
 
         {data.works.filter(w => !w.title.toLowerCase().includes('love')).length > 0 && (
           <section style={{ margin: '4rem 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1.5rem' }}>
-              <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>works</p>
-              <span title="finished pieces — essays, abstracts, creative work. published from the constitution." style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'help', opacity: 0.5 }}>ⓘ</span>
-            </div>
+            <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>works</p>
             {data.works.filter(w => !w.title.toLowerCase().includes('love')).map(work => {
               const isLocked = work.tier === 'private';
               const isPaid = work.tier === 'paid';
@@ -160,7 +157,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           <section style={{ margin: '4rem 0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1.5rem' }}>
               <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>shadow</p>
-              <span title="a published projection of this person's constitution — how they think, what they believe, what they've resolved and what remains unresolved. each chapter is a window into a different part of the mind." style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'help', opacity: 0.5 }}>ⓘ</span>
+              <span title="the full mind, published as a file. each chapter is a different dimension of how this person thinks. the file is the product." style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'help', opacity: 0.5 }}>ⓘ</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               {['The Space Between Two Monoliths', 'Killer, Incompressible', 'The Faithless Christian Building a Cathedral', 'The Dark Knight Gets Zero Credit', 'The Grief Beneath the Positions', 'The Polymath Conductor', 'The Framework-as-Cage Shadow', 'The Priority Stack, Honestly'].map((title, i) => (
@@ -182,10 +179,9 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           </section>
         )}
 
-        <footer style={{ margin: '6rem 0 0', textAlign: 'center' }}>
-          <p style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginTop: '3rem' }}>
-            <a href="/library" style={{ color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">a.</a>
-          </p>
+        <footer style={{ margin: '6rem 0 0', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+          <a href="/library" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">library</a>
+          <a href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">a.</a>
         </footer>
 
       </main>
