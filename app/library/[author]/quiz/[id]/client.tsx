@@ -63,13 +63,29 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
     });
   }, [params]);
 
+  const [revealed, setRevealed] = useState<string | null>(null);
+  const [skipped, setSkipped] = useState<Set<string>>(new Set());
+
+  const skipQuestion = () => {
+    if (revealed) return;
+    setSkipped(prev => new Set(prev).add(quiz!.questions[currentQ].id));
+    if (quiz && currentQ < quiz.questions.length - 1) {
+      setCurrentQ(prev => prev + 1);
+    }
+  };
+
   const selectAnswer = (questionId: string, optionIndex: number) => {
+    if (revealed) return; // prevent double-tap during reveal
     const letter = ['A', 'B', 'C', 'D'][optionIndex];
     setAnswers(prev => ({ ...prev, [questionId]: letter }));
-    // Auto-advance after a beat
-    if (quiz && currentQ < quiz.questions.length - 1) {
-      setTimeout(() => setCurrentQ(prev => prev + 1), 400);
-    }
+    setRevealed(questionId);
+    // Show correct answer, then auto-advance
+    setTimeout(() => {
+      setRevealed(null);
+      if (quiz && currentQ < quiz.questions.length - 1) {
+        setCurrentQ(prev => prev + 1);
+      }
+    }, 1200);
   };
 
   const submit = async () => {
@@ -79,7 +95,7 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
       const res = await fetch(`${SERVER_URL}/library/${authorId}/quiz/${quizId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers }),
+        body: JSON.stringify({ answers, skipped: Array.from(skipped) }),
       });
       setResult(await res.json());
     } catch {
@@ -160,7 +176,7 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
 
   // The quiz — one question at a time, intimate
   const q = quiz.questions[currentQ];
-  const allAnswered = quiz.questions.every(question => answers[question.id]);
+  const allAnswered = quiz.questions.every(question => answers[question.id] || skipped.has(question.id));
   const isLast = currentQ === quiz.questions.length - 1;
 
   return (
@@ -182,6 +198,10 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
           {q.options.map((option, i) => {
             const letter = ['A', 'B', 'C', 'D'][i];
             const selected = answers[q.id] === letter;
+            const isRevealed = revealed === q.id;
+            const isCorrect = letter === (q as any).correct;
+            const wasWrong = isRevealed && selected && !isCorrect;
+            const showAsCorrect = isRevealed && isCorrect;
             return (
               <button
                 key={i}
@@ -189,16 +209,17 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: selected ? '1px solid var(--text-primary)' : '1px solid transparent',
-                  cursor: 'pointer',
-                  color: selected ? 'var(--text-primary)' : 'var(--text-muted)',
+                  borderBottom: showAsCorrect ? '1px solid var(--text-primary)' : wasWrong ? '1px solid var(--text-whisper)' : selected && !isRevealed ? '1px solid var(--text-primary)' : '1px solid transparent',
+                  cursor: isRevealed ? 'default' : 'pointer',
+                  color: showAsCorrect ? 'var(--text-primary)' : wasWrong ? 'var(--text-whisper)' : selected ? 'var(--text-primary)' : 'var(--text-muted)',
                   fontSize: '0.95rem',
                   padding: '0.7rem 0',
                   fontFamily: 'var(--font-eb-garamond)',
                   textAlign: 'left',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.3s',
+                  opacity: isRevealed && !showAsCorrect && !wasWrong ? 0.3 : 1,
                 }}
-                className="hover:opacity-70"
+                className={isRevealed ? '' : 'hover:opacity-70'}
               >
                 {option}
               </button>
@@ -218,6 +239,18 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
             className="hover:opacity-60"
           >
             back
+          </span>
+
+          <span
+            onClick={!revealed && !answers[q.id] ? skipQuestion : undefined}
+            style={{
+              color: !revealed && !answers[q.id] ? 'var(--text-whisper)' : 'transparent',
+              fontSize: '0.75rem', cursor: !revealed && !answers[q.id] ? 'pointer' : 'default',
+              transition: 'opacity 0.15s',
+            }}
+            className="hover:opacity-60"
+          >
+            skip
           </span>
 
           {/* progress — dots not numbers */}

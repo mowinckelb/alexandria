@@ -493,14 +493,8 @@ echo "Done."
     const data = await obj.text();
     const parsed = JSON.parse(data);
 
-    // Strip scoring data from response (don't reveal answers to quiz taker)
-    const clientData = JSON.parse(JSON.stringify(parsed));
-    if (clientData.questions) {
-      for (const q of clientData.questions) { delete q.correct; delete q.answer; delete q.scoring; }
-    }
-    delete clientData.scoring;
-
-    return c.json({ quiz_id: quizId, author_id: quiz.author_id, ...clientData });
+    // Keep correct answers — quiz reveals in real-time, not a secure exam
+    return c.json({ quiz_id: quizId, author_id: quiz.author_id, ...parsed });
   });
 
   // Submit quiz answers
