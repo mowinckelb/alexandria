@@ -112,32 +112,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           </section>
         )}
 
-        {shadow && (
-          <section style={{ margin: '4rem 0' }}>
-            <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>
-              shadow
-            </p>
-            <article className="pdoc pdoc-longform">
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{shadow}</ReactMarkdown>
-            </article>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '2rem 0 0' }}>
-              {hasPaid && paidPriceCents ? (
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-ghost)', margin: 0, fontStyle: 'italic' }}>
-                  there is more. <span style={{ color: 'var(--text-whisper)' }}>${(paidPriceCents / 100).toFixed(0)}</span>
-                </p>
-              ) : <span />}
-              <a
-                href={`${SERVER_URL}/library/${authorId}/shadow/free`}
-                download={`${authorId}_shadow.md`}
-                style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none', transition: 'opacity 0.15s' }}
-                className="hover:opacity-60"
-              >
-                .md
-              </a>
-            </div>
-          </section>
-        )}
-
         {data.quizzes.length > 0 && (
           <section style={{ margin: '4rem 0' }}>
             <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>
@@ -157,12 +131,12 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           </section>
         )}
 
-        {data.works.length > 0 && (
+        {data.works.filter(w => !w.title.toLowerCase().includes('love')).length > 0 && (
           <section style={{ margin: '4rem 0' }}>
             <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>
               works
             </p>
-            {data.works.map(work => {
+            {data.works.filter(w => !w.title.toLowerCase().includes('love')).map(work => {
               const isLocked = work.tier === 'private';
               const isPaid = work.tier === 'paid';
               return (
@@ -191,6 +165,35 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                 </div>
               );
             })}
+          </section>
+        )}
+
+        {shadow && (
+          <section style={{ margin: '4rem 0' }}>
+            <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>
+              shadow
+            </p>
+            <div
+              onClick={(e) => {
+                const el = e.currentTarget;
+                el.style.animation = 'none';
+                void el.offsetHeight;
+                el.style.animation = 'shake 0.4s ease';
+              }}
+              style={{ cursor: 'pointer' }}
+              className="hover:opacity-60"
+            >
+              <div style={{ position: 'relative', maxHeight: '4.5em', overflow: 'hidden' }}>
+                <article className="pdoc pdoc-longform">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{shadow}</ReactMarkdown>
+                </article>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '2.5em', background: 'linear-gradient(to bottom, transparent, var(--bg-primary))' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: '0.75rem' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-ghost)' }}>{authorId}.md</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)' }}>$</span>
+              </div>
+            </div>
           </section>
         )}
 
