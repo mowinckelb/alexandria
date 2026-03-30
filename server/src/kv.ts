@@ -17,7 +17,7 @@ export function setKV(kv: KVNamespace): void {
   _kv = kv;
 }
 
-function getKV(): KVNamespace {
+export function getKV(): KVNamespace {
   if (!_kv) throw new Error('KV not initialized — setKV() must be called first');
   return _kv;
 }

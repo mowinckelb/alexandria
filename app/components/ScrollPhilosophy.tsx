@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import PhilosophyFiveWays from './PhilosophyFiveWays';
 
 function Fade({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -155,23 +156,7 @@ export default function ScrollPhilosophy() {
             >
               try now
             </a>
-            <div className="flex flex-col gap-3 text-[0.72rem] tracking-wide">
-              <span style={{ color: 'var(--text-ghost)' }}>still not convinced?</span>
-              <div className="flex flex-col gap-2">
-                <p style={{ color: 'var(--text-muted)' }}>
-                  <a href="/join" className="no-underline transition-opacity hover:opacity-40" style={{ color: 'var(--text-primary)' }}>pitch</a>
-                  {' '}&mdash; what it is in one page
-                </p>
-                <p style={{ color: 'var(--text-muted)' }}>
-                  <a href="/vision" className="no-underline transition-opacity hover:opacity-40" style={{ color: 'var(--text-primary)' }}>vision</a>
-                  {' '}&mdash; the philosophy in plain English
-                </p>
-                <p style={{ color: 'var(--text-muted)' }}>
-                  <a href="/docs/abstract.pdf" target="_blank" rel="noopener noreferrer" className="no-underline transition-opacity hover:opacity-40" style={{ color: 'var(--text-primary)' }}>abstract</a>
-                  {' '}&mdash; the philosophy as written art
-                </p>
-              </div>
-            </div>
+            <PhilosophyFiveWays current="frame" />
           </div>
         </Fade>
 

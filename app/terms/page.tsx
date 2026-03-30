@@ -19,7 +19,7 @@ export default function Terms() {
 
       <section style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: 400 }}>What this is</h2>
-        <p>Alexandria is a service that connects your AI conversations to a personal cognitive profile stored on your Google Drive. These terms govern your use of the Alexandria MCP server and website at mowinckel.ai.</p>
+        <p>Alexandria is a service that connects your AI conversations to a personal cognitive profile stored on your Google Drive. These terms govern your use of the Alexandria server and website at mowinckel.ai.</p>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
