@@ -95,8 +95,8 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <span className="text-[0.6rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>curious?</span>
-            <a href="/library" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>the library</a>
+            <span className="text-[0.6rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>see it working</span>
+            <a href="/library" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>a published mind</a>
           </div>
 
         </div>
