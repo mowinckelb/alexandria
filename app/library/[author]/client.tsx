@@ -48,6 +48,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   const [data, setData] = useState<AuthorData | null>(null);
   const [shadow, setShadow] = useState<string>('');
   const [pulse, setPulse] = useState<string>('');
+  const [openInfo, setOpenInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   useEffect(() => {
@@ -103,9 +104,16 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
 
         {data.quizzes.length > 0 && (
           <section style={{ margin: '4rem 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1.5rem' }}>
-              <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>games</p>
-              <span title="these exist because ai mapped how this person actually thinks. a side effect of something much bigger." style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'help', opacity: 0.5 }}>ⓘ</span>
+            <div style={{ margin: '0 0 1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>games</p>
+                <span onClick={() => setOpenInfo(openInfo === 'games' ? null : 'games')} style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}>ⓘ</span>
+              </div>
+              {openInfo === 'games' && (
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0.5rem 0 0', lineHeight: 1.6 }}>
+                  these exist because ai mapped how this person actually thinks. a side effect of something much bigger.
+                </p>
+              )}
             </div>
             {data.quizzes.map(quiz => (
               <a
@@ -155,9 +163,16 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
 
         {shadow && (
           <section style={{ margin: '4rem 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1.5rem' }}>
-              <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>shadow</p>
-              <span title="the full mind, published as a file. each chapter is a different dimension of how this person thinks. the file is the product." style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'help', opacity: 0.5 }}>ⓘ</span>
+            <div style={{ margin: '0 0 1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>shadow</p>
+                <span onClick={() => setOpenInfo(openInfo === 'shadow' ? null : 'shadow')} style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}>ⓘ</span>
+              </div>
+              {openInfo === 'shadow' && (
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0.5rem 0 0', lineHeight: 1.6 }}>
+                  the full mind, published as a file. each chapter is a different dimension of how this person thinks.
+                </p>
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               {['The Space Between Two Monoliths', 'Killer, Incompressible', 'The Faithless Christian Building a Cathedral', 'The Dark Knight Gets Zero Credit', 'The Grief Beneath the Positions', 'The Polymath Conductor', 'The Framework-as-Cage Shadow', 'The Priority Stack, Honestly'].map((title, i) => (
