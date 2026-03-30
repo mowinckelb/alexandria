@@ -312,7 +312,7 @@ echo "Done."
   app.get('/library/authors', async (c) => {
     const db = getDB();
     const { results } = await db.prepare(
-      `SELECT a.id, a.display_name, a.bio, a.published_at, a.updated_at,
+      `SELECT a.id, a.display_name, a.bio, a.settings, a.published_at, a.updated_at,
               (SELECT COUNT(*) FROM shadows WHERE author_id = a.id) as shadow_count,
               (SELECT COUNT(*) FROM quizzes WHERE author_id = a.id AND active = 1) as quiz_count,
               (SELECT COUNT(*) FROM works WHERE author_id = a.id) as work_count

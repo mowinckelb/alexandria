@@ -27,6 +27,7 @@ interface Author {
   id: string;
   display_name: string | null;
   bio: string | null;
+  settings: string | null;
   shadow_count: number;
   quiz_count: number;
   work_count: number;
@@ -77,9 +78,12 @@ export default function LibraryPage() {
                 style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 2.5rem', transition: 'opacity 0.15s' }}
                 className="hover:opacity-60"
               >
-                <p style={{ fontSize: '1.05rem', fontWeight: 400, margin: 0, color: 'var(--text-primary)' }}>
-                  {author.display_name || author.id}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                  <p style={{ fontSize: '1.05rem', fontWeight: 400, margin: 0, color: 'var(--text-primary)' }}>
+                    {author.display_name || author.id}
+                  </p>
+                  {(() => { try { const s = JSON.parse(author.settings || '{}'); return s.library_id ? <span style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', letterSpacing: '0.05em' }}>{s.library_id}</span> : null; } catch { return null; } })()}
+                </div>
                 {author.bio && (
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.7, margin: '0.3rem 0 0' }}>
                     {author.bio}
