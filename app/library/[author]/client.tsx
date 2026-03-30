@@ -162,21 +162,34 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>
               works
             </p>
-            {data.works.map(work => (
-              <div key={work.id} style={{ margin: '0 0 1rem' }}>
-                <span style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{work.title}</span>
-                {work.tier === 'paid' && (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginLeft: '0.4rem' }}>$</span>
-                )}
-                {work.tier === 'private' && (
-                  <svg width="9" height="11" viewBox="0 0 9 11" fill="none" style={{ marginLeft: '0.4rem', verticalAlign: 'middle', opacity: 0.3 }}>
-                    <rect x="0.5" y="5" width="8" height="5.5" rx="1" stroke="currentColor" strokeWidth="0.8" />
-                    <path d="M2.5 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" strokeWidth="0.8" fill="none" />
-                  </svg>
-                )}
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginLeft: '0.8rem' }}>{work.medium}</span>
-              </div>
-            ))}
+            {data.works.map(work => {
+              const isLocked = work.tier === 'private';
+              const isPaid = work.tier === 'paid';
+              return (
+                <div
+                  key={work.id}
+                  onClick={isLocked ? (e) => {
+                    const el = e.currentTarget;
+                    el.style.animation = 'none';
+                    void el.offsetHeight;
+                    el.style.animation = 'shake 0.4s ease';
+                  } : undefined}
+                  style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: isLocked ? 'default' : 'pointer' }}
+                >
+                  <span style={{ fontSize: '0.95rem', color: isLocked ? 'var(--text-ghost)' : 'var(--text-primary)' }}>{work.title}</span>
+                  {isPaid && (
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)' }}>$</span>
+                  )}
+                  {isLocked && (
+                    <svg width="9" height="11" viewBox="0 0 9 11" fill="none" style={{ opacity: 0.25, flexShrink: 0 }}>
+                      <rect x="0.5" y="5" width="8" height="5.5" rx="1" stroke="currentColor" strokeWidth="0.8" />
+                      <path d="M2.5 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" strokeWidth="0.8" fill="none" />
+                    </svg>
+                  )}
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)' }}>{work.medium}</span>
+                </div>
+              );
+            })}
           </section>
         )}
 

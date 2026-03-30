@@ -13,6 +13,23 @@ import { logEvent } from './analytics.js';
 import { extractApiKey, findByApiKey } from './prosumer.js';
 
 // ---------------------------------------------------------------------------
+// CORS-safe R2 response (Hono middleware headers don't carry through new Response)
+// ---------------------------------------------------------------------------
+
+function r2Response(body: ReadableStream | null, contentType: string, cache?: string): Response {
+  const allowed = ['https://mowinckel.ai', 'https://www.mowinckel.ai'];
+  const headers: Record<string, string> = {
+    'Content-Type': contentType,
+    'Access-Control-Allow-Origin': allowed.join(', '),
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Vary': 'Origin',
+  };
+  if (cache) headers['Cache-Control'] = cache;
+  return new Response(body, { headers });
+}
+
+// ---------------------------------------------------------------------------
 // Access logging
 // ---------------------------------------------------------------------------
 
@@ -334,9 +351,7 @@ echo "Done."
     recordAccess('shadow_view', authorId, accessorKey, shadow.id, 'free');
     logEvent('library_shadow_view', { author: authorId, tier: 'free' });
 
-    return new Response(obj.body, {
-      headers: { 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'public, max-age=300' },
-    });
+    return r2Response(obj.body, 'text/markdown; charset=utf-8', 'public, max-age=300');
   });
 
   // Read paid shadow (requires auth + payment)
@@ -356,9 +371,7 @@ echo "Done."
       if (accessor && accessor.github_login === authorId) {
         const obj = await r2.get(shadow.r2_key);
         if (!obj) return c.json({ error: 'Shadow content not found' }, 404);
-        return new Response(obj.body, {
-          headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-        });
+        return r2Response(obj.body, 'text/markdown; charset=utf-8');
       }
 
       // Authenticated Author — add to billing tab
@@ -384,9 +397,7 @@ echo "Done."
         recordAccess('shadow_view', authorId, accessor.github_login, shadow.id, 'paid');
         logEvent('library_paid_access', { author: authorId, accessor: accessor.github_login, artifact_type: 'shadow', amount_cents: String(priceCents) });
 
-        return new Response(obj.body, {
-          headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-        });
+        return r2Response(obj.body, 'text/markdown; charset=utf-8');
       }
     }
 
@@ -424,9 +435,7 @@ echo "Done."
     recordAccess('pulse_view', authorId, extractApiKey(c), null, null);
     logEvent('library_pulse_view', { author: authorId });
 
-    return new Response(obj.body, {
-      headers: { 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'public, max-age=300' },
-    });
+    return r2Response(obj.body, 'text/markdown; charset=utf-8', 'public, max-age=300');
   });
 
   // Read delta (Author-only)
@@ -453,9 +462,7 @@ echo "Done."
     const obj = await r2.get(pulse.r2_key_delta);
     if (!obj) return c.json({ error: 'Delta content not found' }, 404);
 
-    return new Response(obj.body, {
-      headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
-    });
+    return r2Response(obj.body, 'text/markdown; charset=utf-8');
   });
 
   // List author's active quizzes
@@ -621,9 +628,7 @@ echo "Done."
     recordAccess('work_view', authorId, extractApiKey(c), workId, work.tier);
     logEvent('library_work_view', { author: authorId, work_id: workId, tier: work.tier });
 
-    return new Response(obj.body, {
-      headers: { 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'public, max-age=300' },
-    });
+    return r2Response(obj.body, 'text/markdown; charset=utf-8', 'public, max-age=300');
   });
 
   // Author earnings summary
