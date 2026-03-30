@@ -38,7 +38,7 @@ const mdComponents = {
 interface AuthorData {
   author: { id: string; display_name: string | null; bio: string | null; settings: string };
   shadows: Array<{ id: string; tier: string; size_bytes: number; updated_at: string }>;
-  quizzes: Array<{ id: string; title: string; published_at: string }>;
+  quizzes: Array<{ id: string; title: string; subtitle?: string; published_at: string }>;
   works: Array<{ id: string; title: string; medium: string; tier: string; published_at: string }>;
   latest_pulse: { month: string } | null;
 }
@@ -124,10 +124,13 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               <a
                 key={quiz.id}
                 href={`/library/${authorId}/quiz/${quiz.id}`}
-                style={{ textDecoration: 'none', color: 'var(--text-primary)', display: 'block', margin: '0 0 1rem', transition: 'opacity 0.15s' }}
+                style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 1.2rem', transition: 'opacity 0.15s' }}
                 className="hover:opacity-60"
               >
-                <span style={{ fontSize: '0.95rem' }}>{quiz.title}</span>
+                <span style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{quiz.title}</span>
+                {quiz.subtitle && (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-ghost)', marginLeft: '0.6rem' }}>{quiz.subtitle}</span>
+                )}
               </a>
             ))}
           </section>

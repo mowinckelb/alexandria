@@ -155,12 +155,11 @@ export function registerLibraryRoutes(app: Hono): void {
     const now = new Date().toISOString();
 
     const r2Key = `quizzes/${authorId}/${id}.json`;
-    const quizData = JSON.stringify({ title: body.title, questions: body.questions, result_tiers: body.result_tiers || [] });
-    await r2.put(r2Key, quizData);
+    await r2.put(r2Key, JSON.stringify(body));
 
     await db.prepare(
-      `INSERT INTO quizzes (id, author_id, title, r2_key, published_at) VALUES (?, ?, ?, ?, ?)`
-    ).bind(id, authorId, body.title, r2Key, now).run();
+      `INSERT INTO quizzes (id, author_id, title, subtitle, r2_key, published_at) VALUES (?, ?, ?, ?, ?, ?)`
+    ).bind(id, authorId, body.title, body.subtitle || null, r2Key, now).run();
 
     logEvent('library_publish_quiz', { author: authorId, quiz_id: id, question_count: String(body.questions.length) });
     return c.json({ ok: true, quiz_id: id, url: `/library/${authorId}/quiz/${id}` });
@@ -329,7 +328,7 @@ echo "Done."
     if (!author) return c.json({ error: 'Author not found' }, 404);
 
     const shadows = await db.prepare('SELECT id, tier, size_bytes, updated_at FROM shadows WHERE author_id = ?').bind(authorId).all();
-    const quizzes = await db.prepare('SELECT id, title, published_at FROM quizzes WHERE author_id = ? AND active = 1').bind(authorId).all();
+    const quizzes = await db.prepare('SELECT id, title, subtitle, published_at FROM quizzes WHERE author_id = ? AND active = 1').bind(authorId).all();
     const works = await db.prepare('SELECT id, title, medium, tier, published_at FROM works WHERE author_id = ?').bind(authorId).all();
     const latestPulse = await db.prepare('SELECT * FROM pulses WHERE author_id = ? ORDER BY month DESC LIMIT 1').bind(authorId).first();
 
