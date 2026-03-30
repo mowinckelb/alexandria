@@ -10,17 +10,15 @@ binding = "DATA"
 id = "7f1153cbddfd49239a51f07d98cee37a"
 
 # D1 database — Library metadata, access log, billing tab
-# Uncomment when R2 is enabled on the Cloudflare account
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "alexandria-library"
-# database_id = "d76e2219-dbcc-43da-b618-1b0ae0095db8"
+[[d1_databases]]
+binding = "DB"
+database_name = "alexandria-library"
+database_id = "d76e2219-dbcc-43da-b618-1b0ae0095db8"
 
 # R2 bucket — published artifacts (shadows, pulses, quizzes, works)
-# Uncomment when R2 is enabled on the Cloudflare account
-# [[r2_buckets]]
-# binding = "ARTIFACTS"
-# bucket_name = "alexandria-artifacts"
+[[r2_buckets]]
+binding = "ARTIFACTS"
+bucket_name = "alexandria-artifacts"
 
 # Route-based binding — intercepts when DNS record is proxied
 [[routes]]
@@ -41,3 +39,4 @@ fallthrough = false
 BETA_MODE = "true"
 SERVER_URL = "https://mcp.mowinckel.ai"
 WEBSITE_URL = "https://mowinckel.ai"
+LIBRARY_CUT_PERCENT = "50"

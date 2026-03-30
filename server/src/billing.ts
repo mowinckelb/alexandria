@@ -1,7 +1,9 @@
 /**
- * Billing — Stripe subscription management
+ * Billing — Stripe subscription management + Library payment
  *
- * Two prices: $5/mo (with 3+ active kin) and $10/mo (without).
+ * Subscription: $5/mo (with 3+ active kin), $10/mo (without). Slider open above floor.
+ * Library: monthly tab billing (micro-transactions settled monthly via Stripe Billing Meters).
+ * Non-Author: instant payment via Stripe Checkout.
  * Free during beta — billing infra is ready but not gating.
  */
 
@@ -253,6 +255,51 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
       switch (event.type) {
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session;
+
+          // Library one-time purchase (non-Author)
+          if (session.metadata?.library_purchase === 'true') {
+            const amountCents = session.amount_total || 0;
+            const authorId = session.metadata?.author_id || '';
+            const artifactType = session.metadata?.artifact_type || 'shadow';
+            const alexandriaCut = Math.round(amountCents * 0.20);
+            const authorCut = amountCents - alexandriaCut;
+
+            try {
+              const { getDB } = await import('./db.js');
+              const db = getDB();
+              await db.prepare(
+                `INSERT INTO billing_tab (accessor_id, author_id, artifact_type, amount_cents, alexandria_cut_cents, author_cut_cents, month, settled, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`
+              ).bind(
+                session.customer_email || 'anonymous',
+                authorId, artifactType, amountCents, alexandriaCut, authorCut,
+                new Date().toISOString().slice(0, 7),
+                new Date().toISOString()
+              ).run();
+            } catch (e) {
+              console.error('[billing] Library purchase tab entry failed:', e);
+            }
+
+            // Store access grant in KV (TTL 30 days)
+            // Access keyed by session ID so the success redirect can serve content
+            try {
+              const { getKV } = await import('./kv.js');
+              const kv = getKV();
+              await kv.put(`library:access:${session.id}`, JSON.stringify({
+                author_id: authorId,
+                artifact_type: artifactType,
+                artifact_id: session.metadata?.artifact_id || '',
+                granted_at: new Date().toISOString(),
+              }), { expirationTtl: 30 * 24 * 60 * 60 });
+            } catch (e) {
+              console.error('[billing] Library access grant failed:', e);
+            }
+
+            logEvent('library_purchase', { author: authorId, artifact_type: artifactType, amount_cents: String(amountCents) });
+            break;
+          }
+
+          // Regular subscription checkout
           const apiKey = session.metadata?.api_key;
           if (apiKey && session.customer && session.subscription) {
             await onAccountUpdate(apiKey, {
@@ -322,4 +369,102 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
 
     return c.json({ received: true });
   });
+}
+
+// ---------------------------------------------------------------------------
+// Library — one-time checkout for non-Authors
+// ---------------------------------------------------------------------------
+
+export async function createLibraryCheckout(opts: {
+  authorId: string;
+  authorDisplayName: string;
+  artifactType: string;
+  artifactId: string;
+  priceCents: number;
+}): Promise<string> {
+  const stripe = getStripe();
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+
+  const session = await stripe.checkout.sessions.create({
+    mode: 'payment',
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: `${opts.authorDisplayName}'s Shadow — Paid Tier`,
+          metadata: { author_id: opts.authorId, artifact_type: opts.artifactType },
+        },
+        unit_amount: opts.priceCents,
+      },
+      quantity: 1,
+    }],
+    metadata: {
+      library_purchase: 'true',
+      author_id: opts.authorId,
+      artifact_type: opts.artifactType,
+      artifact_id: opts.artifactId,
+    },
+    success_url: `${WEBSITE_URL}/library/${opts.authorId}?access=granted&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${WEBSITE_URL}/library/${opts.authorId}`,
+  });
+  return session.url || '';
+}
+
+// ---------------------------------------------------------------------------
+// Library — monthly tab settlement (called from cron)
+// ---------------------------------------------------------------------------
+
+export async function settleMonthlyTabs(): Promise<void> {
+  try {
+    const { getDB } = await import('./db.js');
+    const db = getDB();
+
+    // Settle previous month
+    const now = new Date();
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonth = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+
+    const { results } = await db.prepare(
+      `SELECT accessor_id, SUM(amount_cents) as total_cents
+       FROM billing_tab WHERE month = ? AND settled = 0
+       GROUP BY accessor_id`
+    ).bind(lastMonth).all<{ accessor_id: string; total_cents: number }>();
+
+    if (!results || results.length === 0) return;
+
+    // For each accessor, look up their Stripe customer ID and report usage
+    const { getAccounts } = await import('./kv.js');
+    const accounts = await getAccounts();
+
+    for (const tab of results) {
+      // Find account by github_login
+      const account = Object.values(accounts).find((a: any) => a.github_login === tab.accessor_id);
+      if (!account || !(account as any).stripe_customer_id) {
+        console.warn(`[billing] Cannot settle tab for ${tab.accessor_id} — no Stripe customer`);
+        continue;
+      }
+
+      try {
+        // Create an invoice item on their next invoice
+        const stripe = getStripe();
+        await stripe.invoiceItems.create({
+          customer: (account as any).stripe_customer_id,
+          amount: tab.total_cents,
+          currency: 'usd',
+          description: `Library access — ${lastMonth}`,
+        });
+
+        // Mark as settled
+        await db.prepare(
+          `UPDATE billing_tab SET settled = 1 WHERE accessor_id = ? AND month = ? AND settled = 0`
+        ).bind(tab.accessor_id, lastMonth).run();
+
+        logEvent('billing_tab_settled', { accessor: tab.accessor_id, month: lastMonth, amount_cents: String(tab.total_cents) });
+      } catch (e) {
+        console.error(`[billing] Settlement failed for ${tab.accessor_id}:`, e);
+      }
+    }
+  } catch (e) {
+    console.error('[billing] settleMonthlyTabs error:', e);
+  }
 }

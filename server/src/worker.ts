@@ -40,6 +40,16 @@ app.use('*', async (c, next) => {
   await next();
 });
 
+// CORS for Library API (website at mowinckel.ai calls server at mcp.mowinckel.ai)
+app.use('/library/*', async (c, next) => {
+  const origin = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  c.header('Access-Control-Allow-Origin', origin);
+  c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (c.req.method === 'OPTIONS') return c.text('', 204);
+  await next();
+});
+
 // ---------------------------------------------------------------------------
 // Prosumer API — hooks + local files + Blueprint
 // ---------------------------------------------------------------------------

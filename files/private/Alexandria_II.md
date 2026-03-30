@@ -702,7 +702,7 @@ V1 has zero inference cost per Library interaction. Shadow MDs are static artifa
 
 Library access: Authors browse all free-tier shadows included in subscription. Non-Authors see free-tier shadows (acquisition funnel) and can pay for paid-tier access (revenue for Authors). Authors can also pay for other Authors' paid-tier shadows — discount is an intelligence decision. The Library is open to the world: Authors are incentivised to publish because their audience is unlimited, not just other Authors.
 
-Alexandria takes 20% on paid shadow access. Stripe takes ~3%. Author keeps ~77%. The percentage must be high enough that Stripe fees don't eat the margin, low enough that Authors feel fairly compensated. 20% is the starting point — intelligence decision to adjust based on data.
+Alexandria takes 50% on paid shadow access. Stripe takes ~3%. Author keeps ~47%. The justification: Alexandria is the infrastructure that makes the shadow exist. Without Alexandria, no constitution, no shadow, no quiz, no Library. This is not a commodity pipe taking a toll — this is the platform that created the value. 50% is defensible because the switching cost is the constitution depth (the therapist moat), not the cut. Starting at 50%, adjustable via config (`LIBRARY_CUT_PERCENT`). If publishing rates or Author sentiment signal it's too high, lower it. Intelligence decision.
 
 Monthly tab billing: all micro-transactions (paid shadow access, quiz conversions, Library browsing) accumulate on a monthly tab. Settled as a single Stripe charge alongside the subscription. One transaction = Stripe takes 2.9% + $0.30 on the total, not $0.30 per micro-purchase. Non-Author instant payment is the exception — they don't have a billing relationship yet, so they pay per access.
 

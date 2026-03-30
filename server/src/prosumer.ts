@@ -98,7 +98,7 @@ function generateApiKey(): string {
 // Auth helper
 // ---------------------------------------------------------------------------
 
-function extractApiKey(c: { req: { header: (name: string) => string | undefined; query: (name: string) => string | undefined } }): string | null {
+export function extractApiKey(c: { req: { header: (name: string) => string | undefined; query: (name: string) => string | undefined } }): string | null {
   const auth = c.req.header('authorization');
   if (auth && auth.startsWith('Bearer alex_')) {
     return auth.slice(7);

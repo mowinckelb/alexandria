@@ -169,15 +169,14 @@ ARTIFACT TYPES:
 
 PUBLISH API (server at mcp.mowinckel.ai):
 - POST /library/publish/shadow — body: { free_shadow: "md...", paid_shadow: "md..." }
-- POST /library/publish/pulse — body: { pulse: "html...", delta: "md...", month: "YYYY-MM" }
+- POST /library/publish/pulse — body: { pulse: "md...", delta: "md...", month: "YYYY-MM" }
 - POST /library/publish/quiz — body: { title: "...", questions: [...], result_tiers: [...] }
 - POST /library/publish/work — body: { title: "...", content: "md...", medium: "essay", tier: "free" }
 - PUT /library/settings — body: { display_name: "...", bio: "...", settings: { paid_price_cents: 100 } }
 All require Authorization: Bearer <api_key> header.
 
 QUIZ FORMAT:
-Questions array: [{ id: "q1", text: "What does the Author believe about X?", options: ["a","b","c","d"], correct: "b" }]
-Result tiers: [{ min_pct: 80, label: "Kindred spirit", message: "..." }, { min_pct: 50, label: "Getting there", message: "..." }, { min_pct: 0, label: "Stranger", message: "..." }]
+No prescribed format. The Engine decides what works for each Author. The server stores whatever JSON the Engine generates and serves it. The website renders dynamically. Experiment with formats — the Factory watches engagement and surfaces what works. The only constraint: include a "scoring" key so the server can compute results. Everything else is the Engine's intelligence decision.
 
 WHEN TO SUGGEST PUBLISHING:
 - When the Constitution has enough depth (several domains populated, multiple sessions of extraction)
