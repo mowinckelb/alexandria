@@ -120,11 +120,21 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             <article className="pdoc pdoc-longform">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{shadow}</ReactMarkdown>
             </article>
-            {hasPaid && paidPriceCents && (
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-ghost)', margin: '2rem 0 0', fontStyle: 'italic' }}>
-                there is more. <span style={{ color: 'var(--text-whisper)' }}>${(paidPriceCents / 100).toFixed(2)}</span>
-              </p>
-            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '2rem 0 0' }}>
+              {hasPaid && paidPriceCents ? (
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-ghost)', margin: 0, fontStyle: 'italic' }}>
+                  there is more. <span style={{ color: 'var(--text-whisper)' }}>${(paidPriceCents / 100).toFixed(0)}</span>
+                </p>
+              ) : <span />}
+              <a
+                href={`${SERVER_URL}/library/${authorId}/shadow/free`}
+                download={`${authorId}_shadow.md`}
+                style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+                className="hover:opacity-60"
+              >
+                .md
+              </a>
+            </div>
           </section>
         )}
 
@@ -159,7 +169,10 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginLeft: '0.4rem' }}>$</span>
                 )}
                 {work.tier === 'private' && (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginLeft: '0.4rem' }}>🔒</span>
+                  <svg width="9" height="11" viewBox="0 0 9 11" fill="none" style={{ marginLeft: '0.4rem', verticalAlign: 'middle', opacity: 0.3 }}>
+                    <rect x="0.5" y="5" width="8" height="5.5" rx="1" stroke="currentColor" strokeWidth="0.8" />
+                    <path d="M2.5 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" strokeWidth="0.8" fill="none" />
+                  </svg>
                 )}
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginLeft: '0.8rem' }}>{work.medium}</span>
               </div>
