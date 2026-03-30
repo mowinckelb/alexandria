@@ -44,7 +44,7 @@ function CopyConcreteButton({ ghost }: { ghost?: boolean }) {
   );
 }
 
-type Way = 'frame' | 'pitch' | 'concrete' | 'vision' | 'abstract';
+type Way = 'frame' | 'pitch' | 'concrete' | 'vision' | 'abstract' | 'library';
 
 export default function PhilosophyFiveWays({ current }: { current?: Way }) {
   const linkStyle = (way: Way) => ({
@@ -54,7 +54,7 @@ export default function PhilosophyFiveWays({ current }: { current?: Way }) {
 
   return (
     <div className="flex flex-col gap-3 text-[0.72rem] tracking-wide">
-      <span style={{ color: 'var(--text-ghost)' }}>the philosophy, five ways</span>
+      <span style={{ color: 'var(--text-ghost)' }}>the philosophy, six ways</span>
       <div className="flex flex-col gap-2">
         <p style={{ color: 'var(--text-muted)' }}>
           <a href="/#philosophy" className={linkClass} style={linkStyle('frame')}>frame</a>
@@ -75,6 +75,10 @@ export default function PhilosophyFiveWays({ current }: { current?: Way }) {
         <p style={{ color: 'var(--text-muted)' }}>
           <a href="/docs/abstract.pdf" target="_blank" rel="noopener noreferrer" className={linkClass} style={linkStyle('abstract')}>abstract</a>
           {' '}&mdash; one breath
+        </p>
+        <p style={{ color: 'var(--text-muted)' }}>
+          <a href="/library" className={linkClass} style={linkStyle('library')}>library</a>
+          {' '}&mdash; in action
         </p>
       </div>
     </div>
