@@ -92,9 +92,13 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
       <ThemeToggle />
       <main style={{ maxWidth: '640px', margin: '0 auto', padding: '6rem 2rem 4rem', fontFamily: 'var(--font-eb-garamond)' }}>
 
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: '0 0 0.3rem', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-          {displayName}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', margin: '0 0 0.3rem' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+            {displayName}
+          </h1>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-whisper)' }}>.md</span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-whisper)' }}>$</span>
+        </div>
         {author.bio && (
           <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.8, margin: '0' }}>
             {author.bio}
@@ -173,16 +177,24 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                 el.style.animation = 'shake 0.4s ease';
               }}
               style={{ cursor: 'pointer' }}
-              className="hover:opacity-60"
             >
-              <div style={{ position: 'relative', maxHeight: '8em', overflow: 'hidden' }}>
-                <article className="pdoc pdoc-longform">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{shadow}</ReactMarkdown>
-                </article>
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3em', background: 'linear-gradient(to bottom, transparent, var(--bg-primary))' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {['The Space Between Two Monoliths', 'Killer, Incompressible', 'The Faithless Christian Building a Cathedral', 'The Dark Knight Gets Zero Credit', 'The Grief Beneath the Positions', 'The Polymath Conductor', 'The Framework-as-Cage Shadow', 'The Priority Stack, Honestly'].map((title, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: '0.88rem',
+                      color: 'var(--text-ghost)',
+                      transition: 'opacity 0.15s',
+                      opacity: 1 - (i * 0.08),
+                    }}
+                  >
+                    {title}
+                  </span>
+                ))}
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', marginTop: '0.75rem' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-ghost)' }}>{authorId}.md</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', marginTop: '1.5rem' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)' }}>{authorId}.md</span>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)' }}>$</span>
               </div>
             </div>
