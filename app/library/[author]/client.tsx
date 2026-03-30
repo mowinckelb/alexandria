@@ -155,6 +155,12 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             {data.works.map(work => (
               <div key={work.id} style={{ margin: '0 0 1rem' }}>
                 <span style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{work.title}</span>
+                {work.tier === 'paid' && (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginLeft: '0.4rem' }}>$</span>
+                )}
+                {work.tier === 'private' && (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginLeft: '0.4rem' }}>🔒</span>
+                )}
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginLeft: '0.8rem' }}>{work.medium}</span>
               </div>
             ))}

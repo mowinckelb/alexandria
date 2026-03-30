@@ -63,8 +63,9 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
     });
   }, [params]);
 
-  const selectAnswer = (questionId: string, option: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: option }));
+  const selectAnswer = (questionId: string, optionIndex: number) => {
+    const letter = ['A', 'B', 'C', 'D'][optionIndex];
+    setAnswers(prev => ({ ...prev, [questionId]: letter }));
     // Auto-advance after a beat
     if (quiz && currentQ < quiz.questions.length - 1) {
       setTimeout(() => setCurrentQ(prev => prev + 1), 400);
@@ -174,11 +175,12 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
         {/* options */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '3rem' }}>
           {q.options.map((option, i) => {
-            const selected = answers[q.id] === option;
+            const letter = ['A', 'B', 'C', 'D'][i];
+            const selected = answers[q.id] === letter;
             return (
               <button
                 key={i}
-                onClick={() => selectAnswer(q.id, option)}
+                onClick={() => selectAnswer(q.id, i)}
                 style={{
                   background: 'none',
                   border: 'none',
