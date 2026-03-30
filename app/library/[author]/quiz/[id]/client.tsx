@@ -250,7 +250,7 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
             }}
             className="hover:opacity-60"
           >
-            skip
+            boring
           </span>
 
           {/* progress — dots not numbers */}
