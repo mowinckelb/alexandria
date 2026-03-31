@@ -481,7 +481,14 @@ echo "Done."
         const obj = await r2.get(shadow.r2_key);
         if (!obj) return c.json({ error: 'Shadow content not found' }, 404);
         recordAccess('shadow_view', authorId, token, shadow.id, 'paid');
-        return r2Response(obj.body, 'text/markdown; charset=utf-8', c.req.header('Origin'), 'no-store');
+        // Token IS the auth — allow any origin so AI tools (GPT, Claude, etc.) can fetch
+        return new Response(obj.body, {
+          headers: {
+            'Content-Type': 'text/markdown; charset=utf-8',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'no-store',
+          },
+        });
       }
       return c.json({ error: 'Invalid or revoked token' }, 401);
     }
