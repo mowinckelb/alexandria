@@ -529,7 +529,7 @@ echo "Done."
       if (existing) {
         return c.json({
           token: existing.token,
-          api_url: `${process.env.SERVER_URL || 'https://mcp.mowinckel.ai'}/library/${authorId}/shadow/paid?token=${existing.token}`,
+          api_url: `${process.env.AI_SERVER_URL || 'https://alexandria-server.benjamin-d31.workers.dev'}/library/${authorId}/shadow/paid?token=${existing.token}`,
         });
       }
 
@@ -544,7 +544,7 @@ echo "Done."
       logEvent('shadow_token_created', { author: authorId });
       return c.json({
         token,
-        api_url: `${process.env.SERVER_URL || 'https://mcp.mowinckel.ai'}/library/${authorId}/shadow/paid?token=${token}`,
+        api_url: `${process.env.AI_SERVER_URL || 'https://alexandria-server.benjamin-d31.workers.dev'}/library/${authorId}/shadow/paid?token=${token}`,
       });
     } catch (e) {
       console.error('[library] Token generation failed:', e);
