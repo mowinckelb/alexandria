@@ -563,7 +563,9 @@ echo "Done."
     if (!author) return c.json({ error: 'Author not found' }, 404);
 
     const settings = JSON.parse(author.settings || '{}');
-    let minCents = settings.paid_price_cents || 2000;
+    const floorCents = settings.paid_price_cents || 2000;
+    const requestedCents = (body as any)?.amount_cents;
+    let amountCents = requestedCents && requestedCents >= floorCents ? requestedCents : floorCents;
 
     const shadow = await db.prepare('SELECT id FROM shadows WHERE author_id = ? AND tier = ?').bind(authorId, 'paid').first<{ id: string }>();
     if (!shadow) return c.json({ error: 'No paid shadow' }, 404);
@@ -592,7 +594,7 @@ echo "Done."
           return c.json({ url: `${WEBSITE_URL}/library/${authorId}?access=granted&session_id=${fakeSessionId}` });
         }
         // Partial discount
-        minCents = Math.round(minCents * (1 - promo.discount_pct / 100));
+        amountCents = Math.round(amountCents * (1 - promo.discount_pct / 100));
         await db.prepare('UPDATE promo_codes SET uses_remaining = uses_remaining - 1 WHERE id = ?').bind(promo.id).run();
         logEvent('promo_code_redeemed', { author: authorId, code: promoCode, discount: String(promo.discount_pct) });
       }
@@ -605,7 +607,7 @@ echo "Done."
         authorDisplayName: author.display_name || authorId,
         artifactType: 'shadow',
         artifactId: shadow.id,
-        minCents: Math.max(minCents, 100), // Stripe minimum $1
+        minCents: Math.max(amountCents, 100), // Stripe minimum $1
       });
       return c.json({ url });
     } catch (e) {
