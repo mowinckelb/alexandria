@@ -71,13 +71,22 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         .then(r => { if (r.ok) return r.text(); return ''; })
         .then(text => setPulse(text))
         .catch(() => {});
-      // Check for paid access via session_id — get API token
+      // Check for paid access via session_id — get API token + shadow content
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       if (sessionId) {
         fetch(`${SERVER_URL}/library/${author}/access?session_id=${sessionId}`)
           .then(r => { if (r.ok) return r.json(); return null; })
-          .then(data => { if (data?.token) setAccessToken(data); })
+          .then(data => {
+            if (data?.token) {
+              setAccessToken(data);
+              // Fetch shadow content for clipboard fallback
+              fetch(data.api_url)
+                .then(r => { if (r.ok) return r.text(); return ''; })
+                .then(text => { if (text) setPaidShadow(text); })
+                .catch(() => {});
+            }
+          })
           .catch(() => {});
       }
     });
@@ -202,9 +211,28 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                   </code>
                 </div>
                 <p id="url-copied" style={{ fontSize: '0.68rem', color: 'var(--text-ghost)', margin: '0 0 1.5rem' }}>click to copy</p>
-                <p style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', margin: '0', lineHeight: 1.7, fontStyle: 'italic' }}>
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', margin: '0 0 1.5rem', lineHeight: 1.7, fontStyle: 'italic' }}>
                   paste the url into any ai chat. it will read the shadow and know this person. the token is yours — rate-limited, logged, revocable. always serves the latest version.
                 </p>
+                {paidShadow && (
+                  <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1rem' }}>
+                    <span
+                      onClick={() => {
+                        navigator.clipboard.writeText(paidShadow);
+                        const el = document.getElementById('shadow-copied');
+                        if (el) { el.textContent = 'copied'; setTimeout(() => { el.textContent = 'copy shadow to clipboard'; }, 2000); }
+                      }}
+                      id="shadow-copied"
+                      style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', cursor: 'pointer', transition: 'opacity 0.15s' }}
+                      className="hover:opacity-60"
+                    >
+                      copy shadow to clipboard
+                    </span>
+                    <p style={{ fontSize: '0.65rem', color: 'var(--text-whisper)', margin: '0.4rem 0 0', fontStyle: 'italic' }}>
+                      if your ai can't fetch urls (gpt, gemini), paste the shadow directly into the chat instead.
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <>
