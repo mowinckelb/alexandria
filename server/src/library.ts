@@ -465,15 +465,18 @@ echo "Done."
     if (token) {
       const tokenRow = await db.prepare(
         'SELECT * FROM shadow_tokens WHERE token = ? AND author_id = ? AND revoked_at IS NULL'
-      ).bind(token, authorId).first<{ id: string; access_count: number }>();
+      ).bind(token, authorId).first<{ id: string; access_count: number; last_used_at: string | null }>();
       if (tokenRow) {
-        // Rate limit: 100 reads per day
-        if (tokenRow.access_count > 100) {
-          return c.json({ error: 'Rate limit exceeded. Try again tomorrow.' }, 429);
+        // Rate limit: 100 reads per day (reset daily based on last_used_at date)
+        const today = new Date().toISOString().slice(0, 10);
+        const lastDay = tokenRow.last_used_at ? tokenRow.last_used_at.slice(0, 10) : '';
+        const currentCount = lastDay === today ? tokenRow.access_count : 0;
+        if (currentCount >= 100) {
+          return c.json({ error: 'Rate limit exceeded. Resets daily.' }, 429);
         }
         await db.prepare(
-          'UPDATE shadow_tokens SET access_count = access_count + 1, last_used_at = ? WHERE id = ?'
-        ).bind(new Date().toISOString(), tokenRow.id).run();
+          'UPDATE shadow_tokens SET access_count = ?, last_used_at = ? WHERE id = ?'
+        ).bind(currentCount + 1, new Date().toISOString(), tokenRow.id).run();
 
         const obj = await r2.get(shadow.r2_key);
         if (!obj) return c.json({ error: 'Shadow content not found' }, 404);

@@ -153,12 +153,10 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               return (
                 <div
                   key={work.id}
-                  onClick={isPaid ? (e) => {
-                    const el = e.currentTarget;
-                    el.style.animation = 'none';
-                    void el.offsetHeight;
-                    el.style.animation = 'shake 0.4s ease';
-                  } : () => window.open(work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`, '_blank')}
+                  onClick={() => {
+                    if (isPaid) return; // payment for works not yet wired
+                    window.open(work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`, '_blank');
+                  }}
                   style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', transition: 'opacity 0.15s' }}
                   className="hover:opacity-60"
                 >
