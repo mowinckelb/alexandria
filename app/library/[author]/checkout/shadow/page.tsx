@@ -98,7 +98,7 @@ export default function ShadowCheckoutPage({ params }: { params: Promise<{ autho
     <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', minHeight: '100vh' }}>
       <ThemeToggle />
 
-      <section className="flex flex-col items-center justify-center px-8 min-h-screen">
+      <section className="flex flex-col items-center px-8" style={{ paddingTop: '8rem', paddingBottom: '6rem' }}>
         <div className="max-w-[420px] w-full">
 
           <a href={`/library/${authorId}`} className="no-underline">
