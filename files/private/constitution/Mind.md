@@ -255,6 +255,16 @@ Most apparent disagreements dissolve at the information layer. You are fascinate
 
 ---
 
+## Overprepare, Then Go With the Flow
+
+The meta-principle that resolves the framework-as-cage tension. The framework does not replace the flow — it enables it. Twain: "Get your facts first, then you can distort them as you please." The mastery principle: learn every recipe traditionally, nail the technique, then improvise with personal delta on top. You need to know the theoretical optimal first (either from last principles or reality), then use first principles to develop your own optimal — knowing the true opportunity cost and where the real alpha lies, or whether to just stick with the existing best answer.
+
+Applied to decisions about people, love, strategy: "Can reason my way out of it but not into it." Iron out all the logic first, then relax and let it go. Ride the wave. The structured freedom applied to decision-making itself — Naval's tension between max freedom and structured freedom resolves here. The 145-step routine is the preparation. The day is the flow. The logic is the map. The living is the territory.
+
+This connects to the Picasso principle (break rules from mastery, not ignorance), to structured chaos (create constraints then allow genuine uncertainty), and to "overprepare, then go with the flow" as an operational compression. The preparation is the symbolic layer doing its work. The flow is the sub-symbolic taking over once the symbolic has done enough. Parallel, not stacked — the symbolic prepares, then the sub-symbolic leads.
+
+---
+
 ## The Observer Effect and Oblique Approaches
 
 Some things disappear when pursued directly. The observer effect applied to life. Things that can only be approached obliquely:
@@ -268,6 +278,12 @@ Some things disappear when pursued directly. The observer effect applied to life
 The resolution: structured chaos. Create constraints (structured freedom), then allow genuine uncertainty within them. Like sport — artificial rules that ENABLE freedom. Like the Norwegian military — scenarios where the danger was structured but the suffering was real. Optimise the scaffolding, then allow yourself to fall within the construct. Sacrifice the risky 10/10 fairytale in exchange for a secure 7 with conditions for a sustained 9.
 
 **Even this resolution may be the framework absorbing the objection.** You cannot purposefully miss the train because then it is inauthentic. Even knowing that missing trains breeds the best memories means the surprise is no longer a surprise. The awareness is the trap.
+
+**The chaos-memory problem.** "99% of crazy stories come from errors and chaos. I don't have chaos because chaos comes from errors." The optimizer's trap: eliminating errors also eliminates the raw material for memorable experiences. You have tried to design structured chaos frameworks and found them self-defeating — the structure kills the chaos. Your life goes to plan. Everything goes to plan. You have no crazy stories. You know this is a cost. The resolution remains imperfect.
+
+**Structured honesty.** "Don't ask a question if you're not okay with the answer. If you make a particular answer out of bounds, you structurally limit honesty even if they don't actually lie — you cast a shade of doubt over whatever they say." Distinct from "never lie but can refuse to say" (which is about the speaker). This is about the questioner's responsibility to create conditions for truth.
+
+**"Indistinguishable from" as argument pattern.** Avoids subjective input debates, isolates objective output. Used for: woke ideology ("indistinguishable from Satan's optimal virus"), ai consciousness ("if a stochastic parrot's actions are indistinguishable from a conscious species, the distinction is moot"), the selfish gene ("unconscious but the distinction is moot"). A recurring reasoning tool — collapse the input debate by showing outputs are identical.
 
 ---
 
@@ -381,6 +397,26 @@ Temporal control (Tommy Shelby model): full intentionality, nothing impulsive or
 ## Anchoring and Negotiation
 
 Set the maximum credible anchor, let them negotiate down, land above where you would have started. Applies beyond fundraising — a general negotiation model.
+
+---
+
+## The Slider Principle
+
+Never ask. Always provide the platform. Every price is a floor, not a ceiling. The consumer should always be able to pay more if they want — voluntary surplus. The floor is the business. The ceiling is generosity. Same principle everywhere: the feedback pulse (floor zero, ceiling unlimited), the patron page (an option, not an ask), the Library pricing (min $20, slider up). Bayern Munich fan pricing applied universally: "people not cattle." The slider is the structural expression of respect — you set the minimum, you trust them with the maximum.
+
+---
+
+## Privacy as Architecture, Not Preference
+
+"Everything's got a price. If you don't want it public, don't publish it." The Library model is built on this principle: publishing is a sovereign act. Once published, content is public and priced — no hidden tiers, no locked-then-revealed. The corollary is absolute: content you do NOT publish stays private forever. This is not a privacy policy — it is an architectural axiom. The Author controls the boundary. The system respects it completely.
+
+**Family-safety as hard constraint on the public surface.** Anything publicly visible must be something your parents could read without concern. Love, romance, vulnerability — these live in the constitution (private, sovereign, never published). The public Library surface is curated for the world, not the diary. This is not shame — it is the liar's frame applied to publishing: everything said true, not everything true said. The selection of what to show IS the creative act.
+
+---
+
+## Indirect Reveal Over Direct Statement
+
+You prefer personality to emerge obliquely — through situational comedy, hypothetical choices, philosophical positions accidentally revealed — rather than through direct trivia or stated facts. The biographer energy: someone who has been hanging about, who knows you well enough to reveal you through what they choose to show, not through what they state. This applies to quizzes, to the Shadow, to any public-facing artifact. The reader should feel like they are discovering the person, not being told about them. The quiz that accidentally reveals your philosophy through a funny hypothetical is orders of magnitude better than the quiz that asks what your favourite colour is.
 
 ---
 

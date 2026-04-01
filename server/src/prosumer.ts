@@ -10,7 +10,7 @@
 import { randomBytes, createHash } from 'crypto';
 import type { Hono } from 'hono';
 import { logEvent, getDashboard } from './analytics.js';
-import { createCheckoutSession } from './billing.js';
+import { createCheckoutSession, createPortalSession } from './billing.js';
 import { callbackPageHtml } from './templates.js';
 import { loadAccounts, saveAccounts, getKV } from './kv.js';
 import {
@@ -103,8 +103,6 @@ export function extractApiKey(c: { req: { header: (name: string) => string | und
   if (auth && auth.startsWith('Bearer alex_')) {
     return auth.slice(7);
   }
-  const q = c.req.query('key');
-  if (q && q.startsWith('alex_')) return q;
   return null;
 }
 
@@ -118,7 +116,7 @@ const pendingStates = new Map<string, { created: number }>();
 // Hooks version — bump this when hook scripts change
 // ---------------------------------------------------------------------------
 
-const HOOKS_VERSION = '8';
+const HOOKS_VERSION = '9';
 
 // ---------------------------------------------------------------------------
 // Blueprint assembly
@@ -263,6 +261,7 @@ if [ "$bp_pinned" = "false" ] && [ -n "$API_KEY" ]; then
   bp_status=$(echo "$response" | grep -o 'HTTP_STATUS:[0-9]*' | cut -d: -f2)
   hooks_version=$(echo "$response" | grep -i "x-hooks-version" | tr -d '\\r' | cut -d' ' -f2)
   bp_hash=$(echo "$response" | grep -i "x-blueprint-hash" | tr -d '\\r' | cut -d' ' -f2)
+  acct_status=$(echo "$response" | grep -i "x-account-status" | tr -d '\\r' | cut -d' ' -f2)
   blueprint=$(echo "$response" | sed '/HTTP_STATUS:/d' | sed '1,/^$/d')
   if [ -n "$blueprint" ] && [ "$bp_status" = "200" ]; then
     if [ -n "$CLAUDE_ENV_FILE" ]; then
@@ -372,8 +371,20 @@ if [ "$unprocessed" -gt 0 ] 2>/dev/null; then
   echo "Alexandria: $unprocessed new vault entries since last /a."
 fi
 echo "Alexandria: if the Author reveals anything about themselves this session — opinions, preferences, corrections, patterns — write it to ~/.alexandria/constitution/. You don't need /a to update who they are. Before the session ends, review what you learned and write anything you missed."
+echo "Alexandria: if the Author asks about billing, cancellation, or account management, they can visit ${SERVER_URL}/account (requires API key auth) to access the Stripe billing portal."
 echo ""
-echo "Open a second terminal, run /a, come back to it between tasks."
+acct_label=""
+if [ -n "$acct_status" ]; then
+  case "$acct_status" in
+    active|trialing) acct_label=" (active)" ;;
+    past_due) acct_label=" (past due — update payment at ${SERVER_URL}/account)" ;;
+    canceled) acct_label=" (canceled)" ;;
+    beta) acct_label=" (beta)" ;;
+    none) acct_label="" ;;
+    *) acct_label=" ($acct_status)" ;;
+  esac
+fi
+echo "alexandria\${acct_label}: /a in a new tab. work on yourself between tasks."
 
 # --- Self-check: verify what actually loaded ---
 bp_len=\${#blueprint}
@@ -926,13 +937,36 @@ export function registerProsumerRoutes(app: Hono) {
     const blueprint = await assembleBlueprint();
     const blueprintHash = createHash('sha256').update(blueprint).digest('hex').slice(0, 16);
 
-    return new Response(blueprint, {
-      headers: {
-        'Content-Type': 'text/plain',
-        'X-Hooks-Version': HOOKS_VERSION,
-        'X-Blueprint-Hash': blueprintHash,
-      },
-    });
+    const headers: Record<string, string> = {
+      'Content-Type': 'text/plain',
+      'X-Hooks-Version': HOOKS_VERSION,
+      'X-Blueprint-Hash': blueprintHash,
+      'X-Account-Status': account.subscription_status || 'none',
+    };
+    if (account.current_period_end) {
+      headers['X-Account-Until'] = account.current_period_end;
+    }
+
+    return new Response(blueprint, { headers });
+  });
+
+  // --- Account management (redirects to Stripe portal) ---
+
+  app.get('/account', async (c) => {
+    const key = extractApiKey(c);
+    if (!key) return c.text('Missing API key.', 401);
+    const account = await findByApiKey(key);
+    if (!account) return c.text('Invalid API key.', 401);
+    if (!account.stripe_customer_id) {
+      return c.text('No billing account found. Complete signup at https://mowinckel.ai/signup', 400);
+    }
+    try {
+      const url = await createPortalSession(account.stripe_customer_id);
+      return c.redirect(url);
+    } catch (err) {
+      console.error('Portal error:', err);
+      return c.text('Failed to create billing portal session.', 500);
+    }
   });
 
   // --- Hook scripts (for auto-update) ---

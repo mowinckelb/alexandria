@@ -239,22 +239,12 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
     const rawBody = await c.req.text();
 
     let event: Stripe.Event;
-    const BETA = process.env.BETA_MODE !== 'false';
     try {
-      if (WEBHOOK_SECRET && sig && !BETA) {
-        event = stripe.webhooks.constructEvent(rawBody, sig, WEBHOOK_SECRET);
-      } else if (WEBHOOK_SECRET && sig) {
-        // In beta/test mode: try verification, fall back to parsing if it fails
-        try {
-          event = stripe.webhooks.constructEvent(rawBody, sig, WEBHOOK_SECRET);
-        } catch {
-          console.warn('Webhook signature mismatch in beta mode — accepting without verification');
-          event = JSON.parse(rawBody) as Stripe.Event;
-        }
-      } else {
-        console.warn('STRIPE_WEBHOOK_SECRET not set — accepting webhook without verification');
-        event = JSON.parse(rawBody) as Stripe.Event;
+      if (!WEBHOOK_SECRET || !sig) {
+        console.error('Webhook rejected — STRIPE_WEBHOOK_SECRET or signature missing');
+        return c.text('Webhook not configured', 500);
       }
+      event = stripe.webhooks.constructEvent(rawBody, sig, WEBHOOK_SECRET);
     } catch (err) {
       console.error('Webhook signature verification failed:', err);
       return c.text('Invalid signature', 400);

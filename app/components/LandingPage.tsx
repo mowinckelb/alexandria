@@ -85,8 +85,8 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <span className="text-[0.6rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>don&rsquo;t code with ai yet?</span>
-            <a href="/patron" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>join tribe</a>
+            <span className="text-[0.6rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>don&rsquo;t code with ai?</span>
+            <a href="/patron" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>join anyway</a>
           </div>
 
           <div className="flex flex-col items-center gap-2">

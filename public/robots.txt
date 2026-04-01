@@ -3,6 +3,7 @@ User-agent: Googlebot
 User-agent: Bingbot
 User-agent: Yandex
 Disallow: /confidential
+Disallow: /partners/
 Disallow: /docs/confidential.concrete.md
 Disallow: /docs/confidential.alexandria.md
 Disallow: /docs/confidential_alexandria.md

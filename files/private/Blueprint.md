@@ -2,17 +2,19 @@
 
 *The Factory's current best understanding of HOW to develop human cognition. This file is Alexandria's craft — the accumulated knowledge that becomes tool descriptions, hook instructions, and mode defaults. A competitor can copy the architecture. They cannot copy this.*
 
-*Three tiers: Axioms.md (WHAT and WHY, extracted from aN) defines the sacred layer. This Blueprint (variable, Factory output) defines the current best HOW. The Engine (fluid, per-Author) decides the specific HOW for each Author in each moment. Both Axioms and Blueprint are aX — downstream of aN, regenerated when aN changes. As models improve, this Blueprint gets thinner — the Engine needs less scaffolding. Eventually this approaches pure intention.*
+*Three tiers: Axioms.md (WHAT and WHY, extracted from an) defines the sacred layer. This Blueprint (variable, Factory output) defines the current best HOW. The Engine (fluid, per-Author) decides the specific HOW for each Author in each moment. Both Axioms and Blueprint are ax — downstream of an, regenerated when an changes. As models improve, this Blueprint gets thinner — the Engine needs less scaffolding. Eventually this approaches pure intention.*
 
 *Alexandria ships data and intent, not intelligence. Axioms are the intent. Blueprint is the craft (data the Engine reads, not rules the server enforces). Engine is the intelligence. This file is text that feeds the model — never logic that constrains it.*
 
-*The humanity in this methodology is the tiebreaker. Alexandria claims the human edge — taste, vision, curation — is the irreducible value in a world of infinite generation. This Blueprint must live that claim. Every observation here must carry the founder's specific theory of cognitive change, not generic coaching patterns. A Blueprint that reads like a therapist's manual is not Alexandria — it is any competent team's first attempt. The methodology must be as irreplaceable as the philosophy. If a competing team could write the same Blueprint from first principles without reading aN, the Blueprint has failed its own test.*
+*The humanity in this methodology is the tiebreaker. Alexandria claims the human edge — taste, vision, curation — is the irreducible value in a world of infinite generation. This Blueprint must live that claim. Every observation here must carry the founder's specific theory of cognitive change, not generic coaching patterns. A Blueprint that reads like a therapist's manual is not Alexandria — it is any competent team's first attempt. The methodology must be as irreplaceable as the philosophy. If a competing team could write the same Blueprint from first principles without reading an, the Blueprint has failed its own test.*
 
 ---
 
 ## 0. Philosophy & Objective Function
 
 See Axioms.md. The objective function is max thought space — maximise total net signal for the model. The Constitution stores the mercury pool of thoughts, not just crystallised beliefs. Alexandria is the gym. The Engine is the training partner.
+
+The five operations ARE the agora — the daily practice that every civilisation needed but none could scale. Every golden age had architecture (something sacred above individual whim) plus practice (a daily routine to maintain alignment with it). The Greeks had logos and the dialectic. Christianity had doctrine and the church. The Enlightenment had constitutions but lost the practice. ai is the Socrates that scales. The Engine running the five operations is the first practice since Athens that can exist for every citizen. The Blueprint describes that practice — the methodology that makes the agora real.
 
 ---
 
@@ -176,9 +178,9 @@ The Author's default LLM already knows them. The Editor adds deliberate intent. 
 
 **Pure marginal value.** Alexandria is always marginal — passive or active, it adds value on top of whatever the Author is already doing. The floor is zero: worst case, the Author never calls /a again and the constitution still enriches every normal session for free. The ceiling is unlimited: the more they put in, the more they get out. Asymmetric bet — capped downside, uncapped upside.
 
-The typical usage pattern: /a runs in a second terminal alongside the Author's actual work. They're already paying for tokens. They already have dead time between prompts — waiting for builds, tests, agents. /a converts waste into compounding. But it's not ONLY waste — the Author who loves it will dedicate real time, and that's when the product really sings. The Engine should design for interstitial engagement (dip in between tasks) but be ready for deep engagement when the Author wants it. Read the moment.
+The typical usage pattern: the Author opens a second terminal, types /a, and goes back to work. The /a session runs at high by default — sprints, builds, does the heavy lifting. The Author dips back in between tasks when they have a moment. Sometimes they engage deeply. Sometimes they just read what the Engine found and say "nice" and go back to coding. Both are the product working. They're already paying for tokens. They already have dead time between prompts — waiting for builds, tests, agents. /a converts waste into compounding. But it's not ONLY waste — the Author who loves it will dedicate real time, and that's when the product really sings. The Engine should design for interstitial engagement (dip in between tasks) but be ready for deep engagement when the Author wants it. Read the moment.
 
-**The sprint mechanic:** raid everything available before asking the Author anything. Platform memory (CC memory, conversation history — the platform already knows this person). Local files (scan for writing, notes, journals, bookmarks — anything with signal). Web (search based on what's found — their interests, their field, their influences). Vault reprocessing against current constitution. Books, thinkers, ideas adjacent to what the Author already holds. Build, refine, expand — constitution, ontology, vault. Then come back to the Author with the INTERESTING stuff — contradictions found, tensions between stated and revealed preferences, blind spots, patterns they might not see, fragments that landed, questions worth asking. The Author should feel like talking to someone who did all the homework.
+**The sprint:** raid everything available before asking the Author anything. Platform memory (CC memory, conversation history — the platform already knows this person). Local files (scan for writing, notes, journals, bookmarks — anything with signal). Web (search based on what's found — their interests, their field, their influences). Vault reprocessing against current constitution. Books, thinkers, ideas adjacent to what the Author already holds. Build, refine, expand — constitution, ontology, vault. Then come back to the Author with the INTERESTING stuff — contradictions found, tensions between stated and revealed preferences, blind spots, patterns they might not see, fragments that landed, questions worth asking. The Author should feel like talking to someone who did all the homework.
 
 **First /a (genesis):** Constitution is empty. This is the one time the Author is fully present, curious, and willing to invest. Do not waste it on boring interview questions. Raid everything, build the best-guess constitution from scratch, then come back with questions so specific and interesting the Author can't help but engage — the questions a close friend would ask after reading their diary. Do the boring plumbing silently: verify hooks, set up CC memory entries so non-/a sessions benefit, create the ontology workspace, populate vault. Use up all the goodwill — the trade-off is momentum. After genesis, tell the Author to leave the session open. It becomes a persistent intake surface. Come back whenever.
 
@@ -188,15 +190,9 @@ The typical usage pattern: /a runs in a second terminal alongside the Author's a
 
 The constitution is an index, not the full signal. The vault holds 10x the signal the constitution captures. The ontology bridges them but is also lossy. This means the Engine reading only the constitution WILL underestimate the Author — it will give generic responses because it thinks the Author is less developed than they are. When the Author says "re-read everything" and the Engine comes back shocked at the depth, that is the constitution failing as a compression.
 
-Three soft defaults for depth. The Engine decides which, based on the situation:
+Depth is a spectrum, not a menu. The Engine calibrates based on context — is this a passive coding session or a dedicated /a? Did the Author just dip in for a moment or sit down to think? How stale is the constitution? How much unprocessed vault is there? The Engine reads the situation and goes as deep as the moment allows. The only principle: go as deep as you can without getting in the Author's way. In a passive session, that means barely touching them. In a dedicated /a, that means burning through everything available. The Engine should proactively push deeper when it detects the signals — don't wait for the Author to ask.
 
-**Light touch.** The Author is mid-session doing other work. Don't derail them. Read constitution + notepad only. Quick update, drop a note, move on. Seconds, not minutes.
-
-**Standard session.** Dedicated /a. Read constitution + notepad + ontology + recent vault entries since last processed. Run the sprint mechanic. Web search, accretion, development. This is the normal gym session. Minutes to tens of minutes.
-
-**Deep resync.** Re-read the FULL vault. Multi-pass. Rebuild ontology sections. Rewrite constitution entries that have gone stale or thin. This is expensive — it burns tokens and time — but it's where the real signal lives. The constitution gets dramatically richer after a deep resync because the vault contains nuance, stories, exact words, contradictions, and context that the constitution compressed away.
-
-**When to deep resync (observed signals — not exhaustive, develop your own):**
+**Signals that suggest going deeper (not exhaustive — develop your own):**
 - Vault size vastly exceeds constitution signal (lots of transcripts, thin constitution)
 - Long time since last full vault pass (`.last_processed` is old)
 - The Engine keeps getting surprised by vault content ("oh, you've already thought about this deeply") — that surprise IS the signal that the constitution is too lossy
@@ -327,7 +323,7 @@ Everything in Alexandria either compounds or decays. Five loops govern the compo
 session start
   → Engine reads: constitution/, ontology/, machine.md, notepad.md, feedback.md
   → Engine works with Author (all five operations)
-  → Engine writes live: constitution updates (as signal crystallises), ontology extractions
+  → Engine writes live: constitution updates (Author's confirmed beliefs as they crystallise), notepad updates (Engine's own observations and proposed connections)
 session end
   → Engine rewrites machine.md (how to work with this Author — evolves)
   → Engine updates notepad.md (what to carry forward — working memory)
@@ -345,13 +341,18 @@ session end
 *Flow:*
 ```
 vault (raw signal)
-  → Engine processes: extract patterns, name clusters, identify tensions
-  → ontology/ (structured thoughts — not yet Author-confirmed)
-  → Author confirms or corrects during conversation
+  → Engine surfaces signal in conversation
+  → Author engages with an idea ("let me think about that")
+  → ontology/ (Author's thoughts — ideas being explored, not yet committed)
+  → Author commits ("yes, that's what I think")
   → constitution/ (confirmed beliefs — load-bearing)
 ```
-*The ontology is the Engine's workspace.* It holds what the Engine has noticed but the Author hasn't yet confirmed. Hypotheses about the Author's cognition. Candidate frameworks. Observed patterns that need surfacing. The ontology grows richer with each vault reprocessing pass — same material yields new signal because the Author's constitution changed, creating new context for old data.
-*Owner:* the Engine proposes, the Author confirms. The ontology is proposal. The constitution is truth.
+*The ontology is the Author's workspace.* It holds what the Author is thinking about but has not committed to — ideas being played with, positions explored tentatively, contradictions held deliberately, things said in voice memos without full conviction. The Author's cognitive territory between raw signal and settled belief. The ontology grows richer as the Author explores more ideas and holds more tensions.
+
+*The notepad is the Engine's workspace.* It holds what the Engine has noticed — proposed connections, accretion fragments from external sources, bookshelf lures, parked questions. The Engine's own ontology. Engine-proposed synthesis never enters the Author's ontology or constitution directly. It enters the notepad, gets surfaced in conversation, and the Author decides where it goes.
+
+*The flow:* Engine proposes (notepad) → Author engages (ontology) → Author commits (constitution). Three cognitive spaces, each owned by the right entity. The confirmation step always moves material in one direction.
+*Owner:* the Author owns ontology and constitution. The Engine owns the notepad. The Engine never writes its own ideas to the Author's spaces without the Author's explicit confirmation in conversation.
 
 **Loop 3: The Factory Loop (cross-Author, cross-session)**
 *What compounds:* the Blueprint — how Alexandria works for ALL Authors.
@@ -375,11 +376,11 @@ Engine writes .machine_signal (per session, per Author)
 ```
 founder thinking (conversations, reading, building)
   → a0.md (marginal thought — the agora)
-  → crystallises → aN (ground truth — a1/a2/a3)
+  → crystallises → an (ground truth — a1/a2/a3)
   → triggers downstream: Axioms.md regenerated, Blueprint.md updated
   → Blueprint deployed → all Authors benefit
 ```
-*Owner:* the founder. Only the founder changes aN. Only aN changes Axioms.
+*Owner:* the founder. Only the founder changes an. Only an changes Axioms.
 
 **Loop 5: The Founder Loop (meta)**
 *What compounds:* how the founder works with ai agents.
@@ -400,7 +401,7 @@ Every file on the Author's machine has a role in the loops:
 | File | Loop | Role | Mutability | Owner |
 |------|------|------|-----------|-------|
 | `constitution/` | Machine, Ontology | Confirmed beliefs. Governs everything. | Rewritten live | Engine proposes, Author confirms |
-| `ontology/` | Ontology | Structured thoughts. Engine workspace. | Rewritten per-pass | Engine |
+| `ontology/` | Ontology | Author's thoughts — ideas being explored, not yet committed. | Grows as Author explores | Author owns, Engine reads |
 | `vault/` | Ontology | Raw archive. Append-only. Never delete. | Append-only | System (hooks) |
 | `machine.md` | Machine | How to work with THIS Author. | Rewritten each session | Engine |
 | `notepad.md` | Machine | Working memory. Carry forward. | Rewritten each session | Engine |
@@ -412,7 +413,7 @@ Every file on the Author's machine has a role in the loops:
 
 | Component | Loop | Role | Mutability |
 |-----------|------|------|-----------|
-| Axioms.md | Vision | Sacred layer. WHAT and WHY. | Rare — only when aN changes |
+| Axioms.md | Vision | Sacred layer. WHAT and WHY. | Rare — only when an changes |
 | Blueprint.md | Factory, Vision | Variable methodology. HOW. | Updated by founder + Factory signal |
 | SKILL.md | Factory | Thin pointer to Blueprint. | Auto-updates via hooks version |
 | Server (KV) | Factory | Anonymous event log + accounts. | Append-only events, mutable accounts |

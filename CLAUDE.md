@@ -11,14 +11,14 @@ Everything lives in `files/`. Three access levels: private (internal only), conf
 ### files/private/ — The a-system
 
 **a0 — marginal thought (the agora):**
-- `a0.md` — The company's inner agora. Everything the founder thinks about Alexandria that hasn't crystallised into aN. Competing frames, open questions, developing ideas, parked signal. Dynamic, living, for ai. When something crystallises, it migrates to aN and leaves a0.
+- `a0.md` — The company's inner agora. Everything the founder thinks about Alexandria that hasn't crystallised into an. Competing frames, open questions, developing ideas, parked signal. Dynamic, living, for ai. When something crystallises, it migrates to an and leaves a0.
 
-**aN — ground truth (the senate). Sacred — the company IS these files:**
+**an — ground truth (the senate). Sacred — the company IS these files:**
 - `Alexandria_I.md` (a1) — Thesis & philosophy. The frame, three turns, stakes, identity, venture capital, founder-product fit. Read for: philosophical questions, pitch framing, "why does Alexandria exist."
 - `Alexandria_II.md` (a2) — Product, architecture & operations. Terminology, layer of intent, Constitution, Editor/Mercury/Publisher, MCP server, revenue model, pricing, competitive position, feedback loops, Machine & Factory. Read for: product decisions, architecture, pricing, technical strategy.
 - `Alexandria_III.md` (a3) — Library, interface & brand. Neo-Biography, Works, Signal, payment mechanics, interface surfaces, onboarding, positioning, brand design, media strategy. Read for: Library, brand, creative direction, marketing, onboarding.
 
-**Product IP (aX — downstream of aN, regenerated when aN changes):**
+**Product IP (ax — downstream of an, regenerated when an changes):**
 - `Axioms.md` — The sacred layer. What Alexandria IS and WHY. Five operations, five-layer pipeline (vault→ontology→constitution→shadow→library), objective function, sovereignty, neutral infrastructure. Extracted from a1+a2. Read for: philosophical questions, what's non-negotiable.
 - `Blueprint.md` — The variable methodology. HOW to develop human cognition. Function assemblies (Editor/Mercury/Publisher craft), constitution data architecture, meta-principles, compounding architecture. Factory output — improves with every Author. Read for: product methodology, extraction design, mode behavior.
 - `Machine.md` — Per-Author engine memory template. The Engine's evolving model of how to work with a specific Author. Living document, rewritten as the Engine learns. Read for: per-Author calibration, therapist moat.
@@ -37,12 +37,12 @@ Everything lives in `files/`. Three access levels: private (internal only), conf
 - `Meditations_1.md`, `_2.md`, `_3.md` — Essay series briefings (On Love, On Power, On Magic, On Being, On Death).
 - `on_love.pdf` — Finished essay. Reference artifact for taste.
 
-*Design, finance, and legal content folded into aN: design/creative → a3, pricing/cap table → a2, IP/ToS → a2. No bridge docs remain.*
+*Design, finance, and legal content folded into an: design/creative → a3, pricing/cap table → a2, IP/ToS → a2. No bridge docs remain.*
 
 **Fundraise & distribution:**
 - `Apply.md` — Fundraise action file. Application deadlines, investor targets ranked by alignment, SF event calendar (Apr-Jun 2026), MCP distribution actions, pitch draft. Competitive data woven into Memo.md.
 
-### files/confidential/ — aX confidential (the open, under trust)
+### files/confidential/ — ax confidential (the open, under trust)
 
 Investor flow: Memo.md (ai-delivered first touch) → Logic.md + Numbers.md (pre-meeting deep dive, served at `/partners/logic` and `/partners/numbers`) → Meeting (conversation) → Alexandria.md (at `/partners/alexandria`).
 
@@ -53,13 +53,12 @@ Each artifact has an objective function. Form serves that function. Beauty is un
 - `Numbers.md` — **Objective: let the investor see and stress-test the assumptions.** No projections — assumptions are the conversation. Served at `/partners/numbers` with .md download.
 - `Alexandria.md` — **Objective: give the IC partner who wasn't in the room enough to vote yes.** Dense, self-contained, authoritative. Served at `/partners/alexandria` with .md download.
 
-### public/docs/ — aX public (the open)
+### public/docs/ — ax public (the open)
 
 Public artifacts live in `public/docs/`. Vercel serves static files from `public/`, so this is the only location. No mirror, no symlink.
 
 - `Concrete.md` — **Objective: make someone try the product in the next 5 minutes.** Consumer pitch (copy-paste into any ai chat). Skeleton format: topics + points, model writes fresh each time. Tone: gossip energy — "dude, you have to try this." Truck driver language.
 - `Vision.md` — **Objective: make someone who reads the whole thing believe the thesis is true.** Full philosophy in plain English. ~15 min read. Covers: five dimensions, the shift, the alien, property 5, the game, three turns, the Library, conductor model, decay, civilisational lineage. Tone: calm, clear, confident. No jargon. The argument does the work.
-- `alexandria.md` — **Objective: agent-readable reference.** The document someone pastes into their ai to ask "what is Alexandria?" Mode 2: max information density, structured for retrieval. Philosophy, product, pricing, technical, links.
 - `abstract.pdf` — **Objective: emotional lock-in for the deeply convinced.** Philosophical abstract PDF. Mode 1 art.
 - `setup.md` — User onboarding guide (prosumer setup, hooks, /a, vault, troubleshooting).
 - `logo_*.png` — Logo variants. `logo_reference.html` — interactive reference.
@@ -72,7 +71,7 @@ Five loops. Full spec in Blueprint.md section V (served to every Engine every se
 1. **Machine** (per-Author, per-session) — Engine reads constitution + ontology + machine.md + notepad + feedback → works with Author → writes back all five. The therapist moat.
 2. **Ontology** (per-Author, multi-session) — vault → Engine processes → ontology/ (proposals) → Author confirms → constitution/ (truth). Reprocessing same vault + evolved constitution = new signal each pass.
 3. **Factory** (cross-Author) — .machine_signal collected per session → /factory/signal → accumulates → founder reviews → Blueprint updated → auto-fetched by all Authors.
-4. **Vision** (company-level) — founder thinking → a0 → crystallises → aN → Axioms + Blueprint regenerated → deployed.
+4. **Vision** (company-level) — founder thinking → a0 → crystallises → an → Axioms + Blueprint regenerated → deployed.
 5. **Founder** (meta) — building Alexandria = using Alexandria. Learnings persist in CC memory + Blueprint + a0. The process IS R&D.
 
 ## Code
@@ -82,7 +81,7 @@ Five loops. Full spec in Blueprint.md section V (served to every Engine every se
   - Key files: `worker.ts` (entry), `prosumer.ts` (all live endpoints — Blueprint, hooks, auth, session), `modes.ts` (Blueprint methodology), `analytics.ts` (Factory events → KV), `billing.ts` (Stripe), `templates.ts` (HTML), `kv.ts` (KV persistence), `crypto.ts` (encryption).
   - Endpoints: `/blueprint` (methodology), `/hooks` (auto-update scripts), `/session` (telemetry), `/auth/github/*` (signup), `/setup` (onboarding).
   - Stateless server. No private user data stored. KV for accounts/events, D1 for Library metadata, R2 for published Library content.
-- **Static assets:** `public/` (includes `public/docs/` for public aX artifacts, `public/partners/` for investor artifacts).
+- **Static assets:** `public/` (includes `public/docs/` for public ax artifacts, `public/partners/` for investor artifacts).
 - **Partners:** Markdown docs (Memo.md, Numbers.md, Logic.md, Alexandria.md) served at `/partners/*` via dynamic `[doc]` route. Source of truth is `files/confidential/`. Copied to `public/partners/` automatically by `prebuild` script — runs before every build and deploy. Never manually sync.
 - **Build:** `cd server && npx wrangler deploy --dry-run --outdir=dist` (server). **Deploy:** `cd server && npx wrangler deploy && bash server/test/smoke.sh` (Cloudflare Workers), push to main (Vercel). **Render abstract PDF:** `python scripts/generate_pdf.py <input.md> [output.pdf]` — only abstract.pdf uses this pipeline now. Verify preview PNGs before committing.
 - **Server health:** `curl https://mcp.mowinckel.ai/health`
@@ -95,12 +94,12 @@ Five loops. Full spec in Blueprint.md section V (served to every Engine every se
 
 ## Design Constraints
 
-- **All .md files maximise total net signal for the model.** This is THE governing principle for every file an agent reads. Everything downstream is capped at file fidelity — 95% files = 95% ceiling on everything built from them. Self-contained (0 to 100 with zero prior context). Max signal, not min length (repetition that increases fidelity is signal). But net, not gross (overwhelm the model and total received signal drops). Never compress signal. Only delete noise or true redundancy. aX are generated from aN, never authored separately.
+- **All .md files maximise total net signal for the model.** This is THE governing principle for every file an agent reads. Everything downstream is capped at file fidelity — 95% files = 95% ceiling on everything built from them. Self-contained (0 to 100 with zero prior context). Max signal, not min length (repetition that increases fidelity is signal). But net, not gross (overwhelm the model and total received signal drops). Never compress signal. Only delete noise or true redundancy. ax are generated from an, never authored separately.
 - **Data and intent, not intelligence.** Alexandria ships data (the Author's files) and intent (axioms, philosophy, developmental objective). Never intelligence. The host LLM IS the intelligence. Every structure must be optimizable by the model — unstructured markdown, no schemas, no prescribed formats. When models improve, the same data yields more. Zero workflow changes.
 - **Bitter lesson:** general methods leveraging computation beat hand-engineered solutions. No structured parameters, fixed schemas, or hand-crafted rules. Unstructured text/JSONL. Let the model figure it out.
 - **Philosophy IS the objective:** no numerical loss function or optimization target. Metrics are verification, not goals.
 - **Build as little as possible.** Ride existing infrastructure. Server is intent layer, not intelligence layer.
-- **Live the philosophy.** Every artifact — Blueprint, investor docs, code, brand — must visibly carry the human edge Alexandria claims is the tiebreaker. The test: could a competing team write the same thing from first principles without reading aN? If yes, it has failed. Generic = interchangeable = dead.
+- **Live the philosophy.** Every artifact — Blueprint, investor docs, code, brand — must visibly carry the human edge Alexandria claims is the tiebreaker. The test: could a competing team write the same thing from first principles without reading an? If yes, it has failed. Generic = interchangeable = dead.
 
 ## End-of-Session Protocol
 
@@ -127,16 +126,16 @@ Only after Phase 1 completes. This is the company, not the product:
 - **Delta.** What changed about Alexandria the company. Not what you did — what's different now. Hazy fragments only.
 - **Open threads.** What's unresolved. What the next session should pick up. Ordered by priority.
 - **Meta loop.** Product learnings → `files/private/Blueprint.md`.
-- **Vision loop.** New thinking about Alexandria → a0, crystallise into aN when ready.
+- **Vision loop.** New thinking about Alexandria → a0, crystallise into an when ready.
 - **Founder loop.** Save CC memories for communication patterns, preferences, anti-patterns.
-- **Downstream staleness check.** If a1, a2, or a3 changed, verify aX still match:
+- **Downstream staleness check.** If a1, a2, or a3 changed, verify ax still match:
   - `files/private/Axioms.md` (from a1+a2)
   - `files/private/Blueprint.md` (from a2)
   - `files/confidential/Memo.md` + `public/partners/Memo.md` (identical)
   - `files/confidential/Numbers.md` + `public/partners/Numbers.md` (identical)
   - `files/confidential/Logic.md` + `public/partners/Logic.md` (identical)
   - `files/confidential/Alexandria.md` + `public/partners/Alexandria.md` (identical)
-  - `public/docs/Concrete.md`, `public/docs/Vision.md`, `public/docs/alexandria.md`, `public/docs/setup.md`
+  - `public/docs/Concrete.md`, `public/docs/Vision.md`, `public/docs/setup.md`
   - `app/privacy/page.tsx`, `app/terms/page.tsx`
   Fix silently. Flag only if the founder needs to make a judgment call.
 
@@ -170,12 +169,12 @@ Before committing any non-trivial change, reflect against `~/.claude/CLAUDE.md` 
 
 This is not a manual step. It's how changes get made. The founder should never need to call /reflect — it's already built into the workflow.
 
-The reflect gate applies to: code commits, trigger updates, aN/aX changes, architecture decisions. It does NOT apply to: trivial fixes (typos, sync), session protocol, or when the founder explicitly says to skip it.
+The reflect gate applies to: code commits, trigger updates, an/ax changes, architecture decisions. It does NOT apply to: trivial fixes (typos, sync), session protocol, or when the founder explicitly says to skip it.
 
 ## Working With the Founder
 
 See `~/.claude/CLAUDE.md` for principles and communication style (loaded globally in every session).
 
-aN is sacred. If information should be ground truth but isn't in a1/a2/a3, flag it. If it's not ready for aN, capture in a0. aX are disposable — regenerated from aN.
+an is sacred. If information should be ground truth but isn't in a1/a2/a3, flag it. If it's not ready for an, capture in a0. ax are disposable — regenerated from an.
 
 **Parked questions.** When the agent encounters genuine tradeoffs or needs founder input on a non-blocking decision, park the question in `files/private/a0.md` under `## Parked questions`. At session start, check for parked questions and surface them early. The founder answers when online; the system ships the best option meanwhile.

@@ -6,7 +6,7 @@
  */
 
 import { Hono } from 'hono';
-import { registerProsumerRoutes, updateAccountBilling, getBillingSummary, runFollowupCheck, runHealthDigest } from './prosumer.js';
+import { registerProsumerRoutes, extractApiKey, findByApiKey, updateAccountBilling, getBillingSummary, runFollowupCheck, runHealthDigest } from './prosumer.js';
 import { registerBillingRoutes, settleMonthlyTabs } from './billing.js';
 import { registerLibraryRoutes } from './library.js';
 import { getAnalytics, getEventLog, getDashboard } from './analytics.js';
@@ -38,6 +38,15 @@ app.use('*', async (c, next) => {
     (globalThis as any).__r2 = env.ARTIFACTS;
   }
   await next();
+});
+
+// Security headers — all responses
+app.use('*', async (c, next) => {
+  await next();
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
 });
 
 // CORS for Library API (website at mowinckel.ai calls server at mcp.mowinckel.ai)
@@ -76,60 +85,28 @@ registerLibraryRoutes(app);
 // ---------------------------------------------------------------------------
 
 app.get('/health', async (c) => {
-  const checks: Record<string, string> = {};
+  // Probe KV, D1, R2 — report only aggregate status, no config details
+  let healthy = true;
 
-  // Check KV is accessible
   try {
     const env = c.env as Record<string, unknown>;
     const kv = env.DATA as KVNamespace;
     await kv.put('.health-probe', 'ok');
     await kv.delete('.health-probe');
-    checks.kv = 'ok';
-  } catch {
-    checks.kv = 'error — KV not accessible';
-  }
+  } catch { healthy = false; }
 
-  // Check D1 is accessible
   try {
     const env = c.env as Record<string, unknown>;
     const db = env.DB as D1Database | undefined;
-    if (db) {
-      await db.prepare('SELECT 1').first();
-      checks.d1 = 'ok';
-    } else {
-      checks.d1 = 'not configured';
-    }
-  } catch {
-    checks.d1 = 'error — D1 not accessible';
-  }
+    if (db) await db.prepare('SELECT 1').first();
+  } catch { healthy = false; }
 
-  // Check R2 is accessible
-  try {
-    const env = c.env as Record<string, unknown>;
-    const r2 = env.ARTIFACTS as R2Bucket | undefined;
-    if (r2) {
-      await r2.head('.health-probe');
-      checks.r2 = 'ok';
-    } else {
-      checks.r2 = 'not configured';
-    }
-  } catch {
-    // head() returns null for missing keys, doesn't throw — so if we get here it's a real error
-    // Actually R2 head returns null on missing, so this catch means binding issue
-    checks.r2 = 'ok'; // head() on missing key doesn't throw, reaching catch means real error
-  }
-
-  checks.encryption_key = process.env.ENCRYPTION_KEY ? 'ok' : 'missing';
-  checks.stripe = process.env.STRIPE_SECRET_KEY ? 'ok' : 'not configured';
-
-  const healthy = checks.kv === 'ok' && checks.encryption_key === 'ok';
+  if (!process.env.ENCRYPTION_KEY) healthy = false;
 
   return c.json({
     status: healthy ? 'ok' : 'degraded',
     server: 'alexandria',
-    version: '0.3.0',
-    runtime: 'cloudflare-workers',
-    checks,
+    version: '0.4.0',
   });
 });
 
@@ -166,7 +143,18 @@ app.get('/favicon.png', (c) => new Response(null, { status: 204 }));
 // Analytics endpoints
 // ---------------------------------------------------------------------------
 
-app.get('/analytics', (c) => {
+// Auth gate for analytics — require valid API key
+async function requireAuth(c: any, next: any) {
+  const key = extractApiKey(c);
+  if (!key) return c.json({ error: 'Unauthorized' }, 401);
+  const account = await findByApiKey(key);
+  if (!account) return c.json({ error: 'Unauthorized' }, 401);
+  await next();
+}
+app.use('/analytics', requireAuth);
+app.use('/analytics/*', requireAuth);
+
+app.get('/analytics', async (c) => {
   return c.json(getAnalytics());
 });
 

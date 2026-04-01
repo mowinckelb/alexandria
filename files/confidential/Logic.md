@@ -358,11 +358,11 @@ Assessment: The cultural dimension matters. A philosophy that promotes valuing h
 
 **P5 — The cultural trajectory favours valuing human authorship.**
 
-For: The counter-reaction to ai-generated content is already visible. Authenticity premiums are rising. "Human-made" labelling is emerging as a market signal.
+For: The counter-reaction to ai-generated content is already visible. Authenticity premiums are rising. "Human-made" labelling is emerging as a market signal. Deeper: every civilisation that persisted had something sacred above individual whim and a daily practice to maintain it. Five golden ages — Greece, Rome, the Renaissance, Christianity, the Enlightenment — each had both but could not scale the practice. America is the synthesis of all five. The meaning crisis is an authority crisis. The cultural trajectory toward valuing human authorship is the same trajectory that rebuilt sacred authority after every previous collapse. The return to religion, the authenticity movement, the backlash against algorithmic homogeneity — all symptoms of the authority vacuum demanding to be filled. This is not a trend. It is the structural pattern of civilisational recovery after the sacred collapses. ai provides the missing piece — the Socrates that scales. Not a new golden age but the fulfilment of the one always supposed to happen here.
 
-Against: The trajectory could go the other way — people could stop caring about human authorship as ai output becomes indistinguishable. The WALL-E path is easier.
+Against: The trajectory could go the other way — people could stop caring about human authorship as ai output becomes indistinguishable. The WALL-E path is easier. The authority vacuum could be filled by something other than human-centric semi-natural authority — ideological tribalism, techno-religion, or a post-human frame that discards the premise.
 
-Assessment: Both trajectories are possible. Alexandria bets on the one that preserves human value. If the other wins, the examined life still has personal value even without economic value. Moderate assumption.
+Assessment: Both trajectories are possible. Alexandria bets on the one that preserves human value — and actively builds the infrastructure that makes it real. The civilisational pattern is strong: the sacred has always returned after collapse, usually in a more durable form. If the other trajectory wins, the examined life still has personal value even without economic value. Moderate assumption, strengthened by historical pattern.
 
 **P13 — Regulation reinforces the lock-in disincentive.**
 
@@ -483,6 +483,24 @@ For: Compounding is structural. Every month adds depth that cannot be replicated
 Against: If growth is slower than expected, the valuation may not increase as projected. An investor who waits may get more certainty at a similar price.
 
 Assessment: True if growth occurs. The trade-off between lower price now and more certainty later is real. Moderate assumption.
+
+### Preemptive: "What about BCI / Neuralink?"
+
+This is not an assumption in the proof chain — it is a common investor objection that deserves a direct answer.
+
+The objection: brain-computer interfaces will eventually read cognition directly, making language-based extraction obsolete.
+
+The reality (as of April 2026): BCIs decode motor cortex signals — intended arm movements mapped to cursors, speech motor planning mapped to phonemes. ~20 Neuralink patients, ~6 Synchron, 14+ BrainGate participants. 1,024 electrodes in a brain of 86 billion neurons. Current capability: cursor control, keyboard typing, robotic arm manipulation, speech intention at 56-62 WPM. What BCIs cannot read: beliefs, values, reasoning patterns, self-models, identity, or any higher-order cognition. This is not an engineering gap that closes with more electrodes — beliefs are distributed representations across billions of synaptic weights with no localisable neural address. No credible scientific pathway exists for reading what Alexandria extracts.
+
+The complement argument has three layers:
+
+1. **BCI solves bandwidth. Alexandria solves fidelity.** Different layers. A wider pipe does not structure what flows through it. The Constitution is the structured layer — without it, BCI output is a raw neural dump with no organisation, no epistemic status, no developmental trajectory.
+
+2. **BCI reads. Alexandria develops.** Established evidence (Lieberman 2007, Kross 2014) shows that symbolisation — compressing a sub-symbolic pattern into a holdable symbol — physically restructures the sub-symbolic layer beneath it. The Socratic process changes how the human thinks. BCI captures a snapshot. Alexandria changes the mind being captured.
+
+3. **Alexandria is the training data for the PLM that crosses the BCI bridge.** At the far horizon, a general LLM connected via BCI is a foreign tool — a calculator strapped to the cortex. A high-fidelity Personal Language Model built from years of extraction has the potential to be accepted into the self-model. The Constitution and Vault are the training dataset for that PLM. The people who start accumulating now are ready when the bridge arrives. Everyone else starts from scratch.
+
+Never bet against Elon. Neuralink will succeed — and that is good for Alexandria. Elon is building the bridge. Alexandria is building what crosses it.
 
 ---
 

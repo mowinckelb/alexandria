@@ -296,9 +296,13 @@ Consumer path — ABANDONED. MCP connector for Claude app / ChatGPT users was st
   
 TARGET AUTHOR  
   
-Alexandria is not for consumers. It is not for enterprises. It is for prosumers — the professional consumer. People who use frontier ai as a thinking partner, not a search engine. People who pay for quality and expect taste. Innovators and early adopters, not the early majority.  
+Alexandria is not for consumers. It is not for enterprises. It is for prosumers — the professional consumer. Builders. People who use frontier ai as a thinking partner, not a search engine. People who pay for quality and expect taste. Innovators and early adopters, not the early majority.  
   
-The archetype: iPhone and Mac users who already use Claude or ChatGPT daily as cognitive extensions. Technically sophisticated. Willing to pay a premium. Already bought into the idea that ai extends cognition rather than just automating tasks. Already embedded in the Apple ecosystem. People who live at the intersection of art and technology — not as a slogan but as a daily practice.  
+The archetype: builders who already use Claude or ChatGPT daily as cognitive extensions. Coders, founders, creatives — people who make things. Technically sophisticated. Willing to pay a premium. Already bought into the idea that ai extends cognition rather than just automating tasks. People who live at the intersection of art and technology — not as a slogan but as a daily practice.  
+  
+These people are busy. Their attention is zero-sum. The opportunity cost of reading all the new papers, coding tips, ai workflow tricks, old books people reference, articles, podcasts — it is too high. They know there is probably marginal value in all of it. They wish they had the time. They do not. Alexandria is positive-sum attention: not another thing competing for their bandwidth, but an amplifier of what the Author already does. The constitution makes their existing work transition from generic to personal signal — increasingly valuable as the tiebreaker thesis plays out. Alexandria is not an extra commitment. It is pure marginal value on top of whatever the Author is already doing. The more the constitution develops, the better the Author's actual work gets. The gym does not care what sport you play. It makes you stronger for all of them.  
+  
+The accretion mechanic is structurally better than raw consumption. Sharing a paper, a podcast, a book to /a is not a time-saving shortcut — it is a superior method. The Engine processes the material against the Author's constitution, extracts the marginal fragments that are actually new relative to what the Author already knows, and integrates them in context. Naval's observation applies: advice is meaningless without personal context. Raw reading is generic. Accretion through /a is personalised. It compounds. Raw reading does not.  
   
 Everyone is art — but to varying scale. Everyone is someone's child, someone's friend, someone's world. The Middlemarch principle: the growing good of the world is partly dependent on unhistoric acts — people who lived faithfully a hidden life and rest in unvisited tombs. You never know who will produce something that resonates beyond their concentric circle. The Neo-Biography serves all scales: the Author whose shadow is visited by millions and the Author whose shadow is visited only by their children. Both are real. Both matter. The Library is not just for the "interesting" — it is for everyone who takes the examined life seriously enough to publish. The gravity of the space and the depth required to produce a meaningful shadow naturally filter for quality. No gatekeeping needed. The tone does the work.  
   
@@ -349,7 +353,11 @@ One-phrase answer (“What are you building?”):
   
 Three words. Immediately understood. No translation needed. This is the instant answer that makes someone lean in and ask more. But it is the downstream answer — the mechanism, not the mission. The deeper answer is: “I’m setting the angels free.” The deepest answer is the motto: mentes aeternae.  
   
+Tagline: “We help builders build.” The positioning statement. Not what Alexandria is — what it does for people. Prosumers hear this and know it is for them. It signals: not an extra thing you do on the side or instead of your work, but an amplifier of what you already do. The builder identity is the American spirit — a nation of builders, and Alexandria carries that energy. Not a constraint on the audience (anyone can build anything anywhere), but the spirit of the company: we make things, we help people who make things.  
+  
 Rallying cry: “Set the angels free.” The Michelangelo vision. What does Alexandria do? It sets the angels free. mentes aeternae is the Latin, carved-in-stone version. droplets of grace is the philosophy. “Set the angels free” is the action.  
+  
+Turn 3 is conceptual. The Publisher function helps the Author create and ship — but what they ship is whatever they are already building. A coder's Turn 3 is their codebase. A founder's Turn 3 is their company. An artist's Turn 3 is their art. The Library is the Alexandria-native expression of Turn 3 (publish your mind), but it is not the only one. The product works even if the Author never touches the Library — because the Publisher function is already making their actual work carry more personal signal. We do not care what you build. We make you better at it.  
   
 Elevator pitch (~90 seconds, spoken naturally):  
   
