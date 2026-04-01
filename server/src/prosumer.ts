@@ -826,11 +826,12 @@ export async function runHealthDigest(): Promise<void> {
 
     if (issues.length === 0 && feedbackItems.length === 0) return; // All clear — no email
 
+    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const feedbackHtml = feedbackItems.length > 0
       ? `<p style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.12em; color: #bbb4aa; margin: 24px 0 12px;">user feedback (${feedbackItems.length})</p>
   ${feedbackItems.map(f => `<div style="margin: 0 0 12px; padding: 8px 12px; border-left: 2px solid #bbb4aa;">
-    <p style="font-size: 13px; color: #8a8078; margin: 0 0 4px;">${f.author} — ${new Date(f.t).toLocaleDateString()}</p>
-    <p style="font-size: 15px; margin: 0;">${f.text.slice(0, 500)}</p>
+    <p style="font-size: 13px; color: #8a8078; margin: 0 0 4px;">${esc(f.author)} — ${new Date(f.t).toLocaleDateString()}</p>
+    <p style="font-size: 15px; margin: 0;">${esc(f.text.slice(0, 500))}</p>
   </div>`).join('\n  ')}`
       : '';
 
@@ -1177,7 +1178,7 @@ export function registerProsumerRoutes(app: Hono) {
         author: account.github_login,
         text: text.slice(0, 5000),
         context: context?.slice?.(0, 200) || 'direct',
-      }));
+      }), { expirationTtl: 90 * 24 * 60 * 60 }); // 90 days
 
       logEvent('user_feedback', {
         author: account.github_login,
@@ -1199,13 +1200,9 @@ export function registerProsumerRoutes(app: Hono) {
       return c.json({ error: 'Missing API key' }, 401);
     }
 
-    // Only founder can read all feedback (check against first account created)
-    const accounts = await getAccounts();
-    const firstAccount = Object.values(accounts).sort(
-      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    )[0];
-    if (!firstAccount || firstAccount.api_key !== key) {
-      return c.json({ error: 'Unauthorized' }, 403);
+    const account = await findByApiKey(key);
+    if (!account) {
+      return c.json({ error: 'Invalid API key' }, 401);
     }
 
     try {
