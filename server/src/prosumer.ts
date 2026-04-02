@@ -33,6 +33,9 @@ interface Account {
   last_session: string;
   installed_at?: string;
   followup_count?: number;
+  last_engagement_email?: string;
+  engagement_interval_days?: number;
+  engagement_opt_out?: boolean;
   stripe_customer_id?: string;
   subscription_status?: string;
   subscription_id?: string;
@@ -765,6 +768,60 @@ export async function runFollowupCheck(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Engagement emails — nudge installed users who go quiet
+// ---------------------------------------------------------------------------
+
+const DEFAULT_ENGAGEMENT_DAYS = 3;
+
+async function sendEngagementEmail(email: string, apiKey: string): Promise<void> {
+  const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
+
+  await sendEmail(email, 'open /a, feed a. — alexandria.',
+    `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
+  <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 2rem;">open /a in new tab. think between tasks; feed a. on breaks</p>
+  <p style="font-size: 1rem; line-height: 1.9; color: #8a8078; font-style: italic; margin: 0 0 2rem;">&ldquo;We are what we repeatedly do. Excellence, then, is not an act, but a habit.&rdquo;</p>
+  <p style="font-size: 1.15rem; color: #3d3630; margin: 0 0 2.5rem;">a.</p>
+  <p style="font-size: 0.72rem; color: #bbb4aa; margin: 0;">
+    <a href="${SERVER_URL}/email/less?key=${apiKey}" style="color: #8a8078;">send less often</a>
+    &nbsp;&middot;&nbsp;
+    <a href="${SERVER_URL}/email/stop?key=${apiKey}" style="color: #8a8078;">stop</a>
+  </p>
+</div>`);
+}
+
+/** Run engagement check — called by Cron Trigger */
+export async function runEngagementCheck(): Promise<void> {
+  const accounts = await loadAccounts<AccountStore>();
+  let changed = false;
+  const now = Date.now();
+  let sent = 0;
+
+  for (const [key, account] of Object.entries(accounts)) {
+    if (!account.installed_at || !account.email) continue;
+    if (account.engagement_opt_out) continue;
+
+    const intervalDays = account.engagement_interval_days || DEFAULT_ENGAGEMENT_DAYS;
+    const intervalMs = intervalDays * 24 * 60 * 60 * 1000;
+
+    const lastActive = new Date(account.last_session || account.installed_at).getTime();
+    if (now - lastActive < intervalMs) continue;
+
+    if (account.last_engagement_email) {
+      const lastEmail = new Date(account.last_engagement_email).getTime();
+      if (now - lastEmail < intervalMs) continue;
+    }
+
+    await sendEngagementEmail(account.email, account.api_key);
+    accounts[key].last_engagement_email = new Date().toISOString();
+    changed = true;
+    sent++;
+  }
+
+  if (sent > 0) console.log(`engagement: sent ${sent} emails`);
+  if (changed) await saveAccounts(accounts);
+}
+
+// ---------------------------------------------------------------------------
 // Health digest — daily anomaly check, email founder if anything is wrong
 // ---------------------------------------------------------------------------
 
@@ -1228,6 +1285,37 @@ export function registerProsumerRoutes(app: Hono) {
       console.error('Feedback read failed:', err);
       return c.json({ feedback: [] });
     }
+  });
+
+  // --- Email preferences ---
+
+  app.get('/email/less', async (c) => {
+    const key = c.req.query('key');
+    if (!key) return c.text('missing key', 400);
+    const accounts = await loadAccounts<AccountStore>();
+    const storeKey = Object.keys(accounts).find(k => accounts[k].api_key === key);
+    if (!storeKey) return c.text('not found', 404);
+    const current = accounts[storeKey].engagement_interval_days || DEFAULT_ENGAGEMENT_DAYS;
+    accounts[storeKey].engagement_interval_days = current * 2;
+    await saveAccounts(accounts);
+    return c.html(`<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 80px auto; padding: 20px; color: #3d3630; text-align: center;">
+  <p style="font-size: 1.1rem; line-height: 1.9;">done. next email in ${current * 2} days.</p>
+  <p style="font-size: 0.85rem; color: #8a8078; margin-top: 1rem;">a.</p>
+</div>`);
+  });
+
+  app.get('/email/stop', async (c) => {
+    const key = c.req.query('key');
+    if (!key) return c.text('missing key', 400);
+    const accounts = await loadAccounts<AccountStore>();
+    const storeKey = Object.keys(accounts).find(k => accounts[k].api_key === key);
+    if (!storeKey) return c.text('not found', 404);
+    accounts[storeKey].engagement_opt_out = true;
+    await saveAccounts(accounts);
+    return c.html(`<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 80px auto; padding: 20px; color: #3d3630; text-align: center;">
+  <p style="font-size: 1.1rem; line-height: 1.9;">stopped. we&rsquo;ll be here when you&rsquo;re ready.</p>
+  <p style="font-size: 0.85rem; color: #8a8078; margin-top: 1rem;">a.</p>
+</div>`);
   });
 
   // --- Setup script ---

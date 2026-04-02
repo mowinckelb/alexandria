@@ -6,7 +6,7 @@
  */
 
 import { Hono } from 'hono';
-import { registerProsumerRoutes, extractApiKey, findByApiKey, updateAccountBilling, getBillingSummary, runFollowupCheck, runHealthDigest } from './prosumer.js';
+import { registerProsumerRoutes, extractApiKey, findByApiKey, updateAccountBilling, getBillingSummary, runFollowupCheck, runEngagementCheck, runHealthDigest } from './prosumer.js';
 import { registerBillingRoutes, settleMonthlyTabs } from './billing.js';
 import { registerLibraryRoutes } from './library.js';
 import { getAnalytics, getEventLog, getDashboard, logEvent } from './analytics.js';
@@ -264,7 +264,7 @@ export default {
     }
 
     // Daily cron (0 9 * * *) + monthly settlement (0 2 1 * *)
-    // Settlement is idempotent so running on every cron trigger is safe
-    ctx.waitUntil(Promise.all([runFollowupCheck(), runHealthDigest(), settleMonthlyTabs()]))
+    // Settlement + engagement are idempotent so running on every cron trigger is safe
+    ctx.waitUntil(Promise.all([runFollowupCheck(), runEngagementCheck(), runHealthDigest(), settleMonthlyTabs()]))
   },
 };
