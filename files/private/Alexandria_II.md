@@ -2,7 +2,7 @@
 
 *This is Alexandria II of IV. Together they are the single source of truth for Alexandria. Read all parts for full context.*
 
-**This part covers:** Terminology, The Layer of Intent, Genesis is Trivial, one connection three features, The Open and the Proprietary, Why Frontier Labs Won't Build This, The Concrete Delta, Designed for Digital AGI, Build vs Ride, Build for the Horizon, The Constitution (detailed architecture, three flywheels, versioning), The Vault, The Editor (function, personality, genesis conversation), Mercury (function, output channels), Editor-Mercury-Publisher Relationship, The Notepad, Privacy and Author Control, Principles and Blueprint, Library (V1 — The Mirror, Neo-Biography, Works, Signal, access tiers, shadow types, public figures, historical figures, use cases, payment, publishing, economics), Turn 1-3 (foundation, amplification, creation, gym), The PLM, Constitutional RLAIF.
+**This part covers:** Terminology, The Layer of Intent, Genesis is Trivial, one connection three features, The Open and the Proprietary, Why Frontier Labs Won't Build This, The Concrete Delta, Designed for Digital AGI, Build vs Ride, Build for the Horizon, The Constitution (detailed architecture, three flywheels, versioning), The Vault, The Autoloop (autonomous processing, three fragment pools, git infrastructure), The Editor (function, personality, genesis conversation), Mercury (function, output channels), Editor-Mercury-Publisher Relationship, The Notepad, Privacy and Author Control, Principles and Blueprint, Library (V1 — The Mirror, Neo-Biography, Works, Signal, access tiers, shadow types, public figures, historical figures, use cases, payment, publishing, economics), Turn 1-3 (foundation, amplification, creation, gym), The PLM, Constitutional RLAIF.
 
 **Other parts:** Alexandria I (Thesis & Philosophy), Alexandria III (Operations & Revenue), Alexandria IV (Strategy & Brand).
 
@@ -348,6 +348,26 @@ Vault → Constitution extraction is asynchronous. Raw material lands in the Vau
   
 Storage is manageable: a heavy Author might accumulate 10-50GB per year. The Blueprint can include storage management policies. Storage is not an existential concern regardless of which option the Author chooses.  
   
+-----
+
+THE AUTOLOOP — AUTONOMOUS PROCESSING
+
+The autoloop is Karpathy-style overnight processing for your mind. A cloud trigger processes the Author's vault against three living fragment pools daily while the Author sleeps. The Author wakes up to new signal — proposed ontology fragments, constitutional updates, notepad observations — already written. Review, keep, or revert via git. The autoloop reads its own reversion history and adjusts. Self-calibrating: the accept/reject ratio is the signal. No settings, no configuration — the system learns what the Author accepts and recalibrates.
+
+Three fragment pools. The vault is the INPUT — static, append-only, the raw quarry. Three living pools are the OUTPUT:
+
+- Ontology — The Author's thoughts. Developing, tentative, exploratory. The space between raw vault and settled constitution. Hypotheses, forming connections, ideas that are not yet beliefs.
+- Constitution — The Author's beliefs. Settled, confirmed, load-bearing. Every constitutional write must cite vault source. The crystallised output.
+- Notepad — The Engine's thoughts. Observations, accretion fragments, parked questions, developmental hypotheses. What the Engine wants to bring to the Author next session.
+
+The autoloop reads all three pools plus the vault. It writes to any of the three. The vault is never written to — it is the immutable record. The three pools are the living, evolving surface that the autoloop and the live session both sculpt.
+
+Infrastructure: ~/.alexandria/ is a private git repo on the Author's GitHub. Session-start hooks push new vault entries and pull overnight autoloop changes. Session-end hooks commit and push. iCloud sync on macOS provides real-time access across devices (vault, constitution, ontology, library). Three-tier backup: local filesystem + iCloud + GitHub private repo. The Author's cognitive data is sovereign at every layer.
+
+Onboarding: the setup script creates the local git repo and a private GitHub remote. The genesis block creates the cloud trigger via /schedule. The autoloop is opt-out — installed by default, because the product should work while you sleep. Graceful degradation: if gh or git are unavailable, the autoloop does not run but nothing breaks. The live session works identically. The autoloop is acceleration, not architecture.
+
+The pitch: Karpathy runs autoloop on code. Alexandria runs autoloop on your mind.
+
 -----  
   
 THE EDITOR — FUNCTION  
