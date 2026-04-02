@@ -232,9 +232,9 @@ P37. Both layers are the same product, same architecture, same user at different
 
 (Settled. The structure is architectural.)
 
-P38. The cost base is near-zero. Solo founder. All employees are ai agents. Company opex: $100/month — one Claude subscription. Everything else is free tier. Six dependencies, all CLI-controllable by ai agents. The entire company runs autonomously — deploys, DNS, monitoring, email, billing — with zero human intervention. As models improve, every function of the company improves.
+P38. The cost base is near-zero. Solo founder. Every operational function is either automated via ai agents or handled by the founder. Company opex: $100/month — one Claude subscription. Everything else is free tier. Six dependencies, all CLI-controllable by ai agents. The entire company runs autonomously — deploys, DNS, monitoring, email, billing — with zero human intervention. As models improve, every function of the company improves. Hiring is a cost that would need to justify itself: a hire is a fixed cost that does not compound. An ai agent is a variable cost that compounds. The burden of proof is on the claim that a hire is needed, not on the founder to preemptively plan toward headcount.
 
-(Settled. Factual.)
+(Settled. Factual. The founder is not opposed to hiring — the structural argument is that no function currently justifies it, and the list of functions that might is shrinking as models improve.)
 
 P39. Break-even at approximately 21 subscribers at $5/month. The company cannot die from cost pressure.
 
@@ -254,7 +254,7 @@ P41. Each risk has a price tag. Rung 1 (~$50K) answers all four existential ques
 
 (Settled. The structure is factual. Whether the answers are positive is the experiment.)
 
-P42. The company does not need the money. $100/month opex. The founder builds regardless. Capital accelerates the experiment, it does not enable the company.
+P42. The company does not need the money. $100/month opex. The founder builds regardless — he built this because he needed it to exist, he uses it, he loves it, he gets value from it. He has no other income. Revenue is oxygen, not growth. Capital accelerates the demand experiment, it does not enable the company.
 
 (Settled. Factual.)
 
@@ -264,7 +264,7 @@ C11: **Each rung purchases the next tier of de-risking. The investor chooses whe
 
 ### 12. The founder
 
-P43. The company itself is the proof of concept. Every employee is an ai agent. The founder directs. The ai executes. Ground truth documents are the single source of truth — everything downstream is regenerated from them. The system compounds — every session starts from a higher baseline because the methodology itself improves. Building the company IS R&D for the product.
+P43. The company itself is the proof of concept. The founder directs. ai agents execute. Ground truth documents are the single source of truth — everything downstream is regenerated from them. The system compounds — every session starts from a higher baseline because the methodology itself improves. Building the company IS R&D for the product.
 
 (Settled. Factual. You are reading a document produced by this operating model.)
 
@@ -278,7 +278,7 @@ C12: **The founder is the frame. The company is the proof of concept. The ai-nat
 
 ### 13. The return
 
-P45. The downside is a small, profitable business at near-zero cost. The founder loves building it. There is no scenario where the investment goes to zero — the company cannot die and the founder will not stop.
+P45. The downside is a small, profitable business at near-zero cost. The founder loves building it and uses it daily — this is his product before it is anyone else's. He has no other income and will build regardless. There is no scenario where the investment goes to zero — the company cannot die and the founder will not stop.
 
 (Settled. Follows from the cost structure and the founder's commitment.)
 

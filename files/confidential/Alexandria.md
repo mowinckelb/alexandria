@@ -30,7 +30,7 @@ Five dimensions of human value: intelligence, strength, dexterity, empathy, and 
 
 Four positions survive the software collapse: make models, generate live data, gatekeep permissions, own atoms. Everything else gets absorbed by the next frontier release. Alexandria is position two — generate live data. Each Constitution is live, unique, private, unsynthesizable. Better models make the extraction deeper, which makes the data more valuable. The company improves with every model release.
 
-The idiot index is 1. $100/month opex. One Claude subscription. No payroll, no compute, no storage, no database. Six dependencies, all CLI-controllable. The entire company runs autonomously from the terminal. Zero overhead between the intelligence and the product. The exponential is underneath the company, not in front of it.
+The idiot index is 1. $100/month opex. One Claude subscription. No payroll, no compute, no storage, no database. Six dependencies, all CLI-controllable. The entire company runs autonomously from the terminal. Zero overhead between the intelligence and the product. The exponential is underneath the company, not in front of it. Hiring is a cost that would need to justify itself — a hire is a fixed cost that does not compound, an ai agent is a variable cost that compounds. The question is what a hire would do that a better model won't do better in six months. That list is shrinking.
 
 Most ai investments cannot make this structural claim. The terminal value question is whether a company occupies one of the four positions. Alexandria does.
 
@@ -78,6 +78,8 @@ Three distribution channels: local (founder in SF, founding seeds, high-touch), 
 
 No technical credentials. No track record. The hard part is not technical — a lab could rebuild the stack in a week. The hard part is philosophical: seeing the question, understanding what to build, knowing what to extract. The entire product was built by one human directing ai agents.
 
+He built Alexandria because he needed it to exist. He uses it every day. He gets value from it. He will build it regardless. He has no other income — revenue is oxygen, not growth. The only question is whether enough other people get enough value to let him do this full-time.
+
 The proof is the company. In eight weeks: built a sovereign extraction product, pivoted three times, shipped Library v1 with full payment infrastructure, deployed to Cloudflare Workers (251 KiB), built an autonomous CTO, wrote a formal proof chain (51 premises, 14 conclusions), maintained 24 API endpoints and 4 test suites. $100/month. One human with ai leverage operating at funded-team velocity. The company IS the thesis proven.
 
 The circle — all Princeton, all under 27, all at the frontier of their fields: one runs the RL company Anthropic uses for computer use agents. One is among the youngest global macro pod leaders at Millennium. One is at Bain Capital. One is starting an Oxford PhD with the Larry Ellison Institute on biotech and gene editing. One leads the Norway branch of a US defence company. One is in the US Army tracking for Ranger School.
@@ -96,7 +98,7 @@ The product is built. Technical risk is zero. Four risks remain: demand, kin mec
 
 ~$1M+ is Library for Labs pilot and distribution at scale.
 
-The founder builds regardless. Capital accelerates the demand experiment. The entry price is lowest now.
+The founder builds regardless — he uses the product, loves the product, and will keep building whether or not anyone invests. Capital accelerates the demand experiment. The entry price is lowest now.
 
 ---
 
