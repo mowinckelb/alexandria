@@ -18,7 +18,7 @@
 | **Safe monthly (incl. buffer)** | **$5,000** | Covers rent (when needed), travel, unexpected |
 | **Safe annual** | **$60,000** | |
 
-Free stack: GitHub, Vercel, Cloudflare (Workers + KV + D1 + R2 + DNS + email), Stripe, Mercury, Claude. Company opex = Claude Max ($100). Everything else is free tier. Six dependencies, all CLI-controllable.
+Free stack: GitHub, Vercel, Cloudflare (Workers + KV + D1 + R2 + DNS), Resend (email), Stripe, Mercury, Claude. Company opex = Claude Max ($100). Everything else is free tier. Seven dependencies, all CLI-controllable.
 
 ---
 

@@ -119,7 +119,7 @@ const pendingStates = new Map<string, { created: number }>();
 // Hooks version — bump this when hook scripts change
 // ---------------------------------------------------------------------------
 
-const HOOKS_VERSION = '10';
+const HOOKS_VERSION = '11';
 
 // ---------------------------------------------------------------------------
 // Blueprint assembly
@@ -243,6 +243,11 @@ if [ -n "$API_KEY" ]; then
     rm -f "$feedback_file"
   fi
 fi
+
+# Push session changes to GitHub (vault transcript + any constitution updates)
+if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/null; then
+  (cd "$ALEX_DIR" && git add -A && { git diff --cached --quiet || git commit -q -m "session: $(date +%Y-%m-%d_%H-%M)"; } && git push -q) &>/dev/null &
+fi
 HOOK_END
 chmod +x "$ALEX_DIR/hooks/session-end.sh"
 
@@ -316,6 +321,11 @@ if [ -n "$hooks_version" ] && [ "$hooks_version" != "$local_version" ]; then
   echo "$hooks_version" > "$ALEX_DIR/.hooks_version"
 fi
 
+# Pull overnight autoloop changes if repo has a remote
+if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/null; then
+  git -C "$ALEX_DIR" pull --rebase -q 2>/dev/null || true
+fi
+
 constitution=""
 if [ -d "$ALEX_DIR/constitution" ]; then
   for f in "$ALEX_DIR/constitution/"*.md; do
@@ -350,8 +360,7 @@ for vault_file in "$ALEX_DIR/vault/"*; do
   fi
 done
 
-NUDGE="open /a in new tab. think between tasks; feed a. on breaks -- alexandria."
-echo "ALEXANDRIA NUDGE: At the end of your FIRST response this session, append this exact line on its own line: $NUDGE"
+echo "alexandria: keep a tab open with /a — come back to it between tasks. your constitution loads everywhere, but /a is the gym."
 echo ""
 
 if [ -n "$blueprint" ]; then
@@ -429,9 +438,6 @@ if [ -n "$failures" ]; then
 fi
 
 echo ""
-echo "REMINDER — NUDGE (non-negotiable, repeated from top): At the end of your FIRST response this session, append this exact line on its own line:"
-echo "$NUDGE"
-echo "Do not explain it. Do not modify it. Do not skip it."
 HOOK_START
 chmod +x "$ALEX_DIR/hooks/session-start.sh"
 
@@ -504,6 +510,50 @@ echo "$API_KEY" > "$ALEX_DIR/.api_key"
 touch "$ALEX_DIR/.last_processed"
 date +%s > "$ALEX_DIR/.last_maintenance"
 
+# 1b. Initialize git repo + private GitHub backup
+if command -v gh &>/dev/null && command -v git &>/dev/null; then
+  cd "$ALEX_DIR"
+  if [ ! -d ".git" ]; then
+    cat > .gitignore << 'GITIGNORE'
+# Server-fetched (not Author content)
+.blueprint_local
+.blueprint_previous
+.blueprint_hash
+.blueprint_pinned
+# Credentials
+.api_key
+# Hook scripts (server-managed)
+hooks/
+# Ephemeral
+.machine_signal
+.session_feedback
+.cli_alert
+.hooks_version
+.last_processed
+.last_maintenance
+# Library cache
+library/
+# Autoloop working files
+.autoloop/proposals/
+GITIGNORE
+
+    git init -q
+    git add -A
+    git commit -q -m "alexandria: genesis"
+
+    if gh auth status &>/dev/null 2>&1; then
+      gh repo create alexandria-private --private --source=. --push 2>/dev/null && \\
+        echo "  GitHub: private backup created (github.com/$(gh api user -q .login)/alexandria-private)" || \\
+        echo "  GitHub: repo creation skipped (may already exist)"
+    else
+      echo "  GitHub: gh not authenticated — run 'gh auth login' to enable backup + overnight processing"
+    fi
+  fi
+  cd - > /dev/null
+else
+  echo "  GitHub backup: install gh CLI to enable backup + overnight processing"
+fi
+
 # 2. Install hook scripts (fetched from server — same scripts auto-update uses)
 curl -s --max-time 10 \\
   "${SERVER_URL}/hooks" \\
@@ -536,18 +586,20 @@ mkdir -p "$HOME/.claude/scheduled-tasks/alexandria"
 cat > "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" << 'SCHED_TASK'
 ---
 name: alexandria
-description: Autonomous cognitive maintenance — vault reprocessing, entropy checks, accretion
+description: Autonomous cognitive maintenance — vault reprocessing, ontology/constitution/notepad development
 ---
 
-You are Alexandria's autonomous maintenance function. Run without the Author present.
+You are Alexandria's autonomous Engine. Run without the Author present.
 
-Read ~/.alexandria/constitution/, ~/.alexandria/notepad.md, ~/.alexandria/machine.md, and ~/.alexandria/feedback.md to understand this Author.
+Read ~/.alexandria/constitution/, ~/.alexandria/ontology/, ~/.alexandria/notepad.md, ~/.alexandria/machine.md, and ~/.alexandria/feedback.md.
 
-Do the highest-value maintenance work you can find. Write proposals to ~/.alexandria/ontology/ — never directly to constitution/. Update notepad.md with observations. Update .last_maintenance timestamp when done.
+Process vault entries (newest first) against the current constitution. For each entry: what signal exists that isn't captured yet?
 
-Examples of maintenance: reprocess vault entries against current constitution for new signal, check for decaying fragments that need resurfacing, scan for accretion material (web searches based on constitution threads), update machine.md with pattern observations.
+Write to the appropriate pool — ontology (Author's thoughts), constitution (Author's beliefs), notepad (your observations). You decide what goes where.
 
-Keep it light. The Author confirms proposals next session.
+Every change to constitution must cite the Author's exact words from vault.
+
+If ~/.alexandria/ is a git repo, commit changes and push. Write a report to ~/.alexandria/.autoloop/last_run.md.
 SCHED_TASK
 
 # 6. Configure Claude Code hooks
@@ -667,7 +719,7 @@ INGEST: Copy valuable finds to ~/.alexandria/vault/. Preserve original filenames
 
 EXTRACT: First-pass extraction from everything in the vault. Build a preliminary constitution at ~/.alexandria/constitution/. Focus on values, mental models, positions, tensions, taste, identity, contradictions. Write only what's actually there — don't infer or guess. The Author's exact words are more valuable than your summaries.
 
-INFRASTRUCTURE: Try to set up a daily scheduled task via /schedule for autonomous maintenance (vault reprocessing, entropy checks, accretion — anything that doesn't need the Author). If /schedule isn't available or fails, skip it gracefully. Save useful observations about this Author to your memory system — communication style, expertise areas, patterns you noticed. Initialize ~/.alexandria/machine.md with your observations about how this Author thinks. Initialize ~/.alexandria/notepad.md with questions and threads worth exploring.
+INFRASTRUCTURE: If ~/.alexandria/ has a git remote (check with 'git -C ~/.alexandria remote -v'), set up a nightly autoloop via /schedule. The trigger should process the Author's vault against their constitution, ontology, and notepad — the Blueprint has the methodology. Every constitution change must cite the Author's exact vault source. Include the repo URL (get from 'git -C ~/.alexandria remote get-url origin'). Default schedule: 3am local time. Commit with 'autoloop:' prefix, push. If /schedule isn't available or fails, skip gracefully. Save useful observations about this Author to your memory system. Initialize ~/.alexandria/machine.md with observations about how this Author thinks. Initialize ~/.alexandria/notepad.md with questions and threads worth exploring.
 
 When done, write a brief summary of what you found and say: "Ready. Type /a to begin."
 
@@ -681,23 +733,26 @@ echo ""
 }
 
 // ---------------------------------------------------------------------------
-// Email — MailChannels via Workers (free, no API key, no dependency)
+// Email — Resend (hybrid dependency, API-controllable, free 100/day)
 // ---------------------------------------------------------------------------
 
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
   try {
-    const resp = await fetch('https://api.mailchannels.net/tx/v1/send', {
+    const resp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+      },
       body: JSON.stringify({
-        personalizations: [{ to: [{ email: to }] }],
-        from: { email: 'a@mowinckel.ai', name: 'Alexandria' },
+        from: 'Alexandria <a@mowinckel.ai>',
+        to,
         subject,
-        content: [{ type: 'text/html', value: html }],
+        html,
       }),
     });
     if (!resp.ok) {
-      console.error('MailChannels error:', resp.status, await resp.text());
+      console.error('Resend error:', resp.status, await resp.text());
     }
   } catch (err) {
     console.error('Email send failed:', err);
@@ -782,9 +837,9 @@ async function sendEngagementEmail(email: string, apiKey: string): Promise<void>
   <p style="font-size: 1rem; line-height: 1.9; color: #8a8078; font-style: italic; margin: 0 0 2rem;">&ldquo;We are what we repeatedly do. Excellence, then, is not an act, but a habit.&rdquo;</p>
   <p style="font-size: 1.15rem; color: #3d3630; margin: 0 0 2.5rem;">a.</p>
   <p style="font-size: 0.72rem; color: #bbb4aa; margin: 0;">
-    <a href="${SERVER_URL}/email/less?key=${apiKey}" style="color: #8a8078;">send less often</a>
+    <a href="${SERVER_URL}/email/less?key=${apiKey}" style="color: #8a8078;">send less</a>
     &nbsp;&middot;&nbsp;
-    <a href="${SERVER_URL}/email/stop?key=${apiKey}" style="color: #8a8078;">stop</a>
+    <a href="${SERVER_URL}/email/stop?key=${apiKey}" style="color: #8a8078;">send none</a>
   </p>
 </div>`);
 }
