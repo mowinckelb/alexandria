@@ -65,11 +65,11 @@ export default function ScrollPhilosophy() {
         {/* THE FEELING */}
         <div className="space-y-6">
           <Body>
-            Your kid&rsquo;s drawing on the fridge. You could print the same image from the internet. Better quality, better colours. But you would never swap it. Not because the drawing is&nbsp;good. Because your kid&nbsp;made&nbsp;it.
+            Your kid&rsquo;s drawing on the fridge. You could print a better version. You would never swap it. Not because the drawing is&nbsp;good. Because your kid&nbsp;made&nbsp;it.
           </Body>
 
           <Body>
-            Your intelligence, your strength, your skills, your empathy&nbsp;&mdash; machines are learning to do all of it. But that feeling about the drawing? A machine cannot give you&nbsp;that. Not because the technology is not there&nbsp;yet. Because it is not about the&nbsp;technology. It is about who&nbsp;made&nbsp;it.
+            Your intelligence, your strength, your skills, your empathy&nbsp;&mdash; machines are learning to do all of it. But that feeling about the drawing? No machine can give you&nbsp;that. Not because the technology is not there&nbsp;yet. Because it is about who&nbsp;made&nbsp;it.
           </Body>
         </div>
 
@@ -78,11 +78,11 @@ export default function ScrollPhilosophy() {
         {/* THE ALIEN */}
         <div className="space-y-6">
           <Body>
-            Imagine an alien shows up. Smarter than any human. Better taste. Better skills. It opens a restaurant&nbsp;&mdash; best food you have ever had. It designs buildings&nbsp;&mdash; stunning. Would you admire the work? Sure. But is it the same as something a human&nbsp;made?
+            Imagine an alien shows up. Smarter than any human. Better taste. Better skills. It opens a restaurant&nbsp;&mdash; best food you have ever had. It designs buildings&nbsp;&mdash; stunning. Would you admire the work? Yes. But is it the same as something a human&nbsp;made?
           </Body>
 
           <Pull className="py-8 sm:py-10">
-            No. You already knew that.<br />Humans value&nbsp;humans.
+            No.<br />Humans value&nbsp;humans.
           </Pull>
         </div>
 
@@ -91,15 +91,15 @@ export default function ScrollPhilosophy() {
         {/* THE GAME */}
         <div className="space-y-6">
           <Body>
-            But that feeling alone is not enough. You still have to be good enough. Nobody hires a warm waiter who drops every plate. Nobody buys a handmade bowl that&nbsp;leaks. The feeling only kicks in once you have cleared the&nbsp;bar.
+            But that feeling alone is not enough. You still have to be good enough. Nobody hires a warm waiter who drops every plate. Nobody buys a handmade bowl that&nbsp;leaks. The feeling only matters once you have cleared the&nbsp;bar.
           </Body>
 
           <Body>
-            Here is the thing though&nbsp;&mdash; AI helps you clear the bar. You use AI the way humans have always used tools&nbsp;&mdash; to get good enough. And the alien can get good enough too. Same bar, both clear&nbsp;it.
+            AI helps you clear the bar. You use AI the way humans have always used tools&nbsp;&mdash; to get good enough. The alien gets good enough too. Same bar, both clear&nbsp;it.
           </Body>
 
           <Body>
-            So the only question left is: does it matter that a human did&nbsp;this? Sometimes it will not. But in the games where it does&nbsp;&mdash; and there are more of them than you think&nbsp;&mdash; the human wins. Not because their version is&nbsp;better. Because it is&nbsp;human.
+            So the only question left is: does it matter that a human did&nbsp;this? Not always. But in the games where it does&nbsp;&mdash; and there are more of them than you think&nbsp;&mdash; the human wins. Not because their version is&nbsp;better. Because it is&nbsp;human.
           </Body>
 
           <Pull className="py-4">
@@ -120,7 +120,7 @@ export default function ScrollPhilosophy() {
         {/* THE DECAY */}
         <div className="space-y-6">
           <Body>
-            But the thing that makes you irreplaceable&nbsp;&mdash; your mind, your taste, your judgment&nbsp;&mdash; is the one thing that weakens if you do not use it. Every time you let AI think for you without engaging, it fades a little. The way you forgot mental arithmetic once you had a calculator. Except this is not arithmetic. This is your ability to&nbsp;think.
+            But the thing that makes you irreplaceable&nbsp;&mdash; your mind, your taste, your judgment&nbsp;&mdash; is the one thing that weakens if you do not use it. Every time you let AI think for you, something fades. The way you forgot arithmetic once you had a calculator. Except this is not arithmetic. This is your ability to&nbsp;think.
           </Body>
 
           <Pull className="py-6 sm:py-8">
@@ -142,7 +142,11 @@ export default function ScrollPhilosophy() {
             </Body>
 
             <Body>
-              And it compounds. The earlier you start, the stronger your position. One&nbsp;command. Thirty&nbsp;seconds.
+              And it compounds. The earlier you start, the stronger your&nbsp;position.
+            </Body>
+
+            <Body>
+              So start&nbsp;now.
             </Body>
           </div>
         </div>
