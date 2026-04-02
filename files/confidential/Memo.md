@@ -110,7 +110,9 @@ I could be wrong about all of this. I don't think I am. Perhaps. The company cos
 
 ## The Numbers
 
-$100/month. No payroll, no compute, no storage, no database. Six dependencies, all CLI-controllable by ai agents. Break-even at 21 subscribers. The Patron tier (mission supporters, pay-what-you-want) makes this concrete — twenty patrons = break-even, independent of product traction. Hiring is a cost that would need to justify itself — every function that would normally require a hire is either already automated or handled by the founder at sufficient quality. A hire is a fixed cost that does not compound. An ai agent is a variable cost that compounds. The question is not "will you hire" but "what would a hire do that a better model won't do better, cheaper, and faster in six months?"
+$100/month. No payroll, no compute, no storage, no database. Six dependencies, all CLI-controllable by ai agents. Break-even at 21 subscribers. The Patron tier (mission supporters, pay-what-you-want) makes this concrete — twenty patrons = break-even, independent of product traction.
+
+A hire is a fixed cost that does not compound. An ai agent is a variable cost that compounds. The question is not "will you hire" but "what would a hire do that a better model won't do better, cheaper, and faster in six months?" That list is shrinking.
 
 The product is built. Technical risk is zero. Four risks remain:
 
