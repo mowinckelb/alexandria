@@ -59,7 +59,7 @@ export default function JoinPage() {
                 try now
               </a>
               <p className="mt-2 text-[0.65rem] tracking-wide" style={{ color: 'var(--text-ghost)' }}>
-                free in beta
+                free in beta &middot; claude code, cursor &amp; codex
               </p>
             </div>
 

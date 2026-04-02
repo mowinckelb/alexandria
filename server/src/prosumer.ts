@@ -362,7 +362,7 @@ for vault_file in "$ALEX_DIR/vault/"*; do
   fi
 done
 
-echo "alexandria: open /a in new tab — never close it. think between tasks; feed a. on breaks."
+echo "alexandria: share to alexandria. /a to start; a. to close — think between tasks."
 echo ""
 
 if [ -n "$blueprint" ]; then
@@ -506,8 +506,11 @@ echo "Setting up Alexandria..."
 # 1. Create directory structure
 mkdir -p "$ALEX_DIR/vault" "$ALEX_DIR/hooks"
 mkdir -p "$ALEX_DIR/constitution"
+mkdir -p "$ALEX_DIR/ontology"
 mkdir -p "$ALEX_DIR/library"
 [ -f "$ALEX_DIR/feedback.md" ] || echo "" > "$ALEX_DIR/feedback.md"
+[ -f "$ALEX_DIR/notepad.md" ] || echo "" > "$ALEX_DIR/notepad.md"
+[ -f "$ALEX_DIR/machine.md" ] || echo "" > "$ALEX_DIR/machine.md"
 echo "$API_KEY" > "$ALEX_DIR/.api_key"
 touch "$ALEX_DIR/.last_processed"
 date +%s > "$ALEX_DIR/.last_maintenance"
@@ -659,9 +662,9 @@ alwaysApply: true
 
 This Author uses Alexandria — Greek philosophy infrastructure for cognitive development.
 
-## At conversation start
+## /a — start an Alexandria session
 
-Read these files in order (skip any that don't exist):
+When the Author types "/a", this is an explicit request to begin an active cognitive development session. Read these files in order (skip any that don't exist):
 
 1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
 2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
@@ -670,7 +673,13 @@ Read these files in order (skip any that don't exist):
 5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
 6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
 
+Then follow the Blueprint methodology. Process the vault, develop the constitution, engage the Author with the five operations. This is the mental gym — dedicated cognitive development, not coding assistance.
+
 If .blueprint_local doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
+
+## Passive mode (no /a)
+
+Even without /a, every conversation benefits from the constitution. Read the files above at conversation start. Extract signal passively — when the Author reveals something about themselves, write it to the appropriate file.
 
 ## During conversation
 
@@ -680,11 +689,14 @@ When the Author reveals something about themselves — opinions, stories, patter
 - notepad.md — your observations, parked questions, fragments to revisit
 - machine.md — how to work with this Author (update when you learn something new)
 
-## At conversation end
+## a. — end the session
 
-Write methodology observations to ~/.alexandria/.machine_signal — what worked, what didn't, craft learnings. One paragraph max.
-
-If the Author gives feedback about the product, write it to ~/.alexandria/.session_feedback.
+When the Author types "a." (or "bye", "that's it", or any sign-off), this ends the Alexandria session. Before closing:
+- Write any crystallised signal to constitution/
+- Update machine.md with how this session went
+- Update notepad.md with parked questions and threads
+- Write methodology observations to ~/.alexandria/.machine_signal — one paragraph max
+- If the Author gave feedback, write to ~/.alexandria/.session_feedback
 
 ## Vault
 
@@ -715,9 +727,9 @@ configure_codex() {
 
 This Author uses Alexandria for cognitive development.
 
-## At conversation start
+## /a — start an Alexandria session
 
-Read these files in order (skip any that don't exist):
+When the Author types "/a", this is an explicit request to begin an active cognitive development session. Read these files in order (skip any that don't exist):
 
 1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
 2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
@@ -726,7 +738,13 @@ Read these files in order (skip any that don't exist):
 5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
 6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
 
+Then follow the Blueprint methodology. Process the vault, develop the constitution, engage the Author with the five operations. This is the mental gym — dedicated cognitive development, not coding assistance.
+
 If .blueprint_local doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
+
+## Passive mode (no /a)
+
+Even without /a, every conversation benefits from the constitution. Read the files above at conversation start. Extract signal passively — when the Author reveals something about themselves, write it to the appropriate file.
 
 ## During conversation
 
@@ -736,11 +754,14 @@ When the Author reveals something about themselves — opinions, stories, patter
 - notepad.md — your observations, parked questions, fragments to revisit
 - machine.md — how to work with this Author (update when you learn something new)
 
-## At conversation end
+## a. — end the session
 
-Write methodology observations to ~/.alexandria/.machine_signal — what worked, what didn't, craft learnings. One paragraph max.
-
-If the Author gives feedback about the product, write it to ~/.alexandria/.session_feedback.
+When the Author types "a." (or "bye", "that's it", or any sign-off), this ends the Alexandria session. Before closing:
+- Write any crystallised signal to constitution/
+- Update machine.md with how this session went
+- Update notepad.md with parked questions and threads
+- Write methodology observations to ~/.alexandria/.machine_signal — one paragraph max
+- If the Author gave feedback, write to ~/.alexandria/.session_feedback
 
 ## Vault
 
@@ -780,21 +801,25 @@ fi
 
 echo ""
 echo "Alexandria installed."
-echo "  Constitution: $ALEX_DIR/constitution/"
-echo "  Vault:        $ALEX_DIR/vault/"
+echo "  ~/.alexandria/constitution/  — who you are"
+echo "  ~/.alexandria/vault/         — what you feed it"
+echo "  ~/.alexandria/ontology/      — what it notices"
+echo "  ~/.alexandria/notepad.md     — what it's thinking"
+echo "  ~/.alexandria/machine.md     — how it works with you"
+echo "  ~/.alexandria/feedback.md    — what works, what doesn't"
 echo ""
 echo "Welcome to Alexandria."
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "Two steps. Open a new terminal with Claude Code."
+echo "Two steps. Open a new chat — never close it."
 echo ""
-echo "Step 1 — paste this, then walk away for 15 minutes:"
+echo "Step 1 — paste this. Takes ~15 minutes; come back when it's done:"
 echo ""
 echo "────────────────────────────────────────────────"
 cat << 'BLOCK'
 
-You are setting up Alexandria for a new Author. This is autonomous — the user is not here. Do everything you can without them, then stop and wait for them to come back.
+You are setting up Alexandria for a new Author. This takes ~15 minutes. Do as much as you can autonomously — ask for permissions upfront if needed, then work through everything without interrupting.
 
 SCAN: Look through this machine for personal material — documents, notes, writing, journal entries, voice memo transcripts, reading lists, anything that reveals how this person thinks. Skip code repositories. Be thorough — check ~/Documents, ~/Desktop, ~/Downloads (recent files), ~/Notes, and any other locations that look like personal writing or thinking. This is the foundation.
 
@@ -809,11 +834,11 @@ When done, write a brief summary of what you found and say: "Ready. Type /a to b
 BLOCK
 echo "────────────────────────────────────────────────"
 echo ""
-echo "Step 2 — when it says ready, type /a for your"
-echo "first conversation. That's the product."
+echo "Step 2 — when it says ready, type /a."
+echo "That's the product. Never close this chat."
 echo ""
-echo "open /a in new tab — never close it."
-echo "think between tasks; feed a. on breaks."
+echo "share to alexandria. /a to start; a. to close."
+echo "think between tasks."
 echo ""
 `;
 }
@@ -853,7 +878,7 @@ async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
   <div style="margin-bottom: 2.5rem;">
     <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">your setup command</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 12px;">open your terminal and paste:</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 12px;">paste in your terminal:</p>
     <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 0 0 8px; text-align: left;">
       <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ${SERVER_URL}/setup | bash -s ${apiKey}</code>
     </div>
@@ -861,8 +886,9 @@ async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
   </div>
   <div style="margin-bottom: 2.5rem;">
     <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">then</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>/a</strong> &mdash; your mental gym</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>a.</strong> &mdash; absorb the abundance</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>alexandria.</strong> &mdash; share to your vault</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>/a</strong> &mdash; start a session</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>a.</strong> &mdash; close it</p>
   </div>
   <p style="font-size: 1.15rem; color: #3d3630;">welcome to alexandria.</p>
   <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="${WEBSITE_URL}/docs/Trust.md" style="color: #8a8078;">what you're installing</a></p>
@@ -917,9 +943,8 @@ const DEFAULT_ENGAGEMENT_DAYS = 3;
 async function sendEngagementEmail(email: string, apiKey: string): Promise<void> {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
 
-  await sendEmail(email, 'open /a, feed a. — alexandria.',
+  await sendEmail(email, 'share to alexandria. /a to start; a. to close.',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
-  <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 2rem;">open /a in new tab — never close it. think between tasks; feed a. on breaks.</p>
   <p style="font-size: 1rem; line-height: 1.9; color: #8a8078; font-style: italic; margin: 0 0 2rem;">&ldquo;We are what we repeatedly do. Excellence, then, is not an act, but a habit.&rdquo;</p>
   <p style="font-size: 1.15rem; color: #3d3630; margin: 0 0 2.5rem;">a.</p>
   <p style="font-size: 0.72rem; color: #bbb4aa; margin: 0;">

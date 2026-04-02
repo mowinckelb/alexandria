@@ -82,7 +82,7 @@ FACTORY PAYLOAD
 
 The SessionEnd hook POSTs anonymous metadata to the server. This is the Factory's raw signal — cross-Author learning that improves the Blueprint for everyone.
 
-Payload (SessionEnd): `event` (end), `platform` (cc/cursor/unknown — detected via env var, not hard-coded), `constitution_size` (current constitution file size in bytes), `vault_entry_count` (number of vault files), `constitution_injected` (boolean — was Constitution >10 bytes at session end?), `blueprint_fetched` (boolean — did SessionStart successfully fetch Blueprint from server?).
+Payload (SessionEnd): `event` (end), `platform` (cc/cursor/codex/unknown — detected via env var, not hard-coded), `constitution_size` (current constitution file size in bytes), `vault_entry_count` (number of vault files), `constitution_injected` (boolean — was Constitution >10 bytes at session end?), `blueprint_fetched` (boolean — did SessionStart successfully fetch Blueprint from server?).
 
 The heartbeat signals (`constitution_injected`, `blueprint_fetched`) are the mirror on the hook system itself. If the Factory sees a user with zero successful Blueprint fetches across 10 sessions, the hooks are broken. If constitution_injected is always false, the product isn't working. This is verification that the delivery mechanism works, not just the product.
 
@@ -128,7 +128,7 @@ Browser extension (desktop) — The capture tool. A "Save to Alexandria" button 
 
 Website (mowinckel.ai) — The public front door and authenticated dashboard. Public: the Surface (Concrete, Abstract, sign-up, founder contact). Authenticated: mirrors the app's dashboard — Constitution view, vault status, Library access, billing, settings. The website is the desktop equivalent of the app for Authors who prefer a browser to a native app.  
 
-Build sequencing follows the "build for the horizon, bridge backward" principle. Phase 1 (current): prosumer hooks + local files for CC/Cursor users. The vault lives locally at `~/.alexandria/vault/`. The "app" is the Author's LLM. Phase 2: mobile vault capture — iCloud sync + Apple Shortcut ("a.") for saving signal from phone. Phase 3: web dashboard at mowinckel.ai — authenticated Constitution and vault view, settings, billing. Phase 4: native mobile app — the full mirror, Library, and nudge surface. Each phase is independently valuable. No phase depends on a later phase existing.  
+Build sequencing follows the "build for the horizon, bridge backward" principle. Phase 1 (current): prosumer hooks + local files for CC/Cursor/Codex users. The vault lives locally at `~/.alexandria/vault/`. The "app" is the Author's LLM. Phase 2: mobile vault capture — iCloud sync + Apple Shortcut ("a.") for saving signal from phone. Phase 3: web dashboard at mowinckel.ai — authenticated Constitution and vault view, settings, billing. Phase 4: native mobile app — the full mirror, Library, and nudge surface. Each phase is independently valuable. No phase depends on a later phase existing.  
 
 COMPUTE TOPOLOGY  
 
@@ -168,13 +168,13 @@ ONBOARDING
 
 Two paths, same destination. Both should feel effortless.
 
-Prosumer path (CC/Cursor users — primary):
+Prosumer path (CC/Cursor/Codex users — primary):
 
 Step 1 — Link. The Author receives a link. They tap it. `mowinckel.ai/signup`. Single call to action: "Sign up with GitHub."
 
 Step 2 — Auth. GitHub OAuth (FaceID if on phone with GitHub mobile app). Three taps.
 
-Step 3 — Welcome. Branded callback page: two setup actions (copy curl command, add the shortcut for mobile saving) and two ongoing practices (`/a` — the examined life, `a.` — absorb the abundance). The same information is emailed to them for the phone-to-laptop handoff.
+Step 3 — Welcome. Branded callback page: two setup actions (copy curl command, add the shortcut for mobile saving) and three ongoing practices — share to `alexandria.`, `/a` to start, `a.` to close. Think between tasks. The same information is emailed to them for the phone-to-laptop handoff.
 
 Step 4 — Install. The Author opens their terminal and pastes the curl command. Under 10 seconds. Creates `~/.alexandria/`, installs hooks, installs `/a` skill, auto-syncs vault to iCloud on Mac.
 

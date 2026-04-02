@@ -39,7 +39,7 @@ export default function LandingPage() {
           </h1>
           <div className="mt-14 sm:mt-16 flex flex-col items-center gap-2">
             <span className="text-[0.65rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>
-              cc/cursor user?
+              code with ai?
             </span>
             <a
               href="/join"
@@ -80,7 +80,7 @@ export default function LandingPage() {
         <div className="max-w-[520px] mx-auto flex flex-col items-center gap-12 text-center">
 
           <div className="flex flex-col items-center gap-2">
-            <span className="text-[0.6rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>cc/cursor user?</span>
+            <span className="text-[0.6rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>code with ai?</span>
             <a href="/join" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>try now</a>
           </div>
 

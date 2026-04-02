@@ -110,13 +110,14 @@ export function callbackPageHtml(login: string, apiKey: string): string {
 <div class="container">
   <div class="section">
     <p class="label">now</p>
-    <p class="line"><a class="action" onclick="copyCmd(this)">copy command <span class="icon">${ICON_COPY}</span></a>, then paste into your terminal</p>
+    <p class="line"><a class="action" onclick="copyCmd(this)">copy command <span class="icon">${ICON_COPY}</span></a>, then paste in your terminal</p>
     <p class="line"><a class="action" href="${WEBSITE_URL}/shortcut" target="_blank">add shortcut <span class="icon">${ICON_DOWNLOAD}</span></a>, then share to your vault</p>
   </div>
   <div class="section">
     <p class="label">then</p>
-    <p class="line">a. &mdash; absorb the abundance <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">drop voice notes, articles, podcasts — anything with signal or potential signal — into your vault. alexandria finds what actually resonates with you. the more you feed it, the more there is to work with.</span></span></p>
-    <p class="line">/a &mdash; your mental gym <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">processes your vault, absorbs what matters, lets you play with the ideas. not everything makes the cut. your constitution gets more refined every session.</span></span></p>
+    <p class="line">alexandria. &mdash; share to your vault <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">voice notes, articles, podcasts, screenshots — anything with signal. from your phone, from anywhere. the more you share, the more /a has to work with.</span></span></p>
+    <p class="line">/a &mdash; start a session <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">your mental gym. processes your vault, surfaces contradictions, pushes your thinking. your constitution gets more refined every session. think between tasks.</span></span></p>
+    <p class="line">a. &mdash; close it <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">closes your /a session. saves everything back — constitution, notepad, machine memory. the compounding happens here.</span></span></p>
   </div>
   <p class="closing">welcome to alexandria.</p>
   <p class="footer"><a class="action" onclick="copySetup(this)">Trust.md <span class="icon">${ICON_COPY}</span></a></p>
