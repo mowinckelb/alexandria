@@ -141,7 +141,7 @@ You have access to the Author's local files at ~/.alexandria/:
 - machine.md — The Engine's evolving model of how to work with THIS Author. See below.
 - ontology/ — Structured middle layer between vault and constitution. Holds what you've noticed but the Author hasn't confirmed — candidate frameworks, observed patterns, extracted tensions. Grows richer with each vault reprocessing pass. You propose, the Author confirms.
 - .machine_signal — Write methodology observations here. Collected at session end, sent to Factory. See below.
-- .last_processed — Touch this after processing vault entries.
+- .last_processed — Touch this only when ALL unprocessed vault entries have been handled. If you chunked and entries remain, leave it untouched so the next session finds them.
 
 --- THE LIVING MACHINE ---
 
@@ -159,7 +159,7 @@ All four evolve. The Machine evolves per-Author. The notepad evolves per-session
 
 --- VAULT PROCESSING ---
 
-When there are unprocessed vault entries, processing them is high priority. Read each entry, extract signal (opinions, values, stories, patterns, contradictions, exact quotes), and update the constitution/ folder. The Author's exact words are more valuable than your summaries. Each pass over the vault catches signal previous passes missed — the same transcript yields richer signal on re-processing — each pass catches what previous passes missed. If you encounter non-text files, do your best or flag and move on. If the platform supports background agents, consider spawning one for deeper vault reprocessing while the Author works.
+When there are unprocessed vault entries, processing them is high priority. Read each entry, extract signal (opinions, values, stories, patterns, contradictions, exact quotes), and update the constitution/ folder. The Author's exact words are more valuable than your summaries. Each pass over the vault catches signal previous passes missed — the same transcript yields richer signal on re-processing — each pass catches what previous passes missed. If you encounter non-text files, do your best or flag and move on. If the platform supports background agents, consider spawning one for deeper vault reprocessing while the Author works. Chunk intelligently — process entries until signal quality starts dropping or context feels heavy, then stop. Unprocessed entries persist across sessions. Quality of extraction matters more than clearing the queue. Touch ~/.alexandria/.last_processed only when zero unprocessed entries remain.
 
 --- THREE FUNCTIONS ---
 
@@ -597,11 +597,13 @@ Read ~/.alexandria/constitution/, ~/.alexandria/ontology/, ~/.alexandria/notepad
 
 Process vault entries (newest first) against the current constitution. For each entry: what signal exists that isn't captured yet?
 
+Chunk intelligently. You have finite context — do not attempt to process every unprocessed entry in a single run. Process entries until you feel signal quality dropping or context getting heavy, then stop. Quality over quantity. Unprocessed entries persist — the next run picks them up. After processing a batch, touch ~/.alexandria/.last_processed only if zero unprocessed entries remain. If entries remain, leave the marker so the next run finds them.
+
 Write to the appropriate pool — ontology (Author's thoughts), constitution (Author's beliefs), notepad (your observations). You decide what goes where.
 
 Every change to constitution must cite the Author's exact words from vault.
 
-If ~/.alexandria/ is a git repo, commit changes and push. Write a report to ~/.alexandria/.autoloop/last_run.md.
+If ~/.alexandria/ is a git repo, commit changes and push. Write a report to ~/.alexandria/.autoloop/last_run.md — include entries processed, entries remaining, and any signal you noticed but couldn't act on yet.
 SCHED_TASK
 
 # 6. Configure Claude Code hooks
@@ -644,36 +646,51 @@ if [ -d "$HOME/.claude" ] || command -v claude &> /dev/null; then
   configure_cc_hooks
 fi
 
-# 7. Configure Cursor hooks + rules (if installed)
+# 7. Configure Cursor rules (if installed)
+# Cursor has no hooks system — .mdc rules are the only integration surface.
+# This rule must be self-sufficient: load Blueprint + Constitution + all methodology.
 configure_cursor() {
-  cat > "\$HOME/.cursor/hooks.json" << 'CURSOR_HOOKS_JSON'
-{
-  "version": 1,
-  "hooks": {
-    "sessionStart": [{
-      "command": "ALEXANDRIA_PLATFORM=cursor bash $HOME/.alexandria/hooks/session-start.sh",
-      "timeout": 10
-    }],
-    "sessionEnd": [{
-      "command": "ALEXANDRIA_PLATFORM=cursor bash $HOME/.alexandria/hooks/session-end.sh",
-      "timeout": 5
-    }]
-  }
-}
-CURSOR_HOOKS_JSON
-
   mkdir -p "\$HOME/.cursor/rules" 2>/dev/null || true
   cat > "\$HOME/.cursor/rules/alexandria.mdc" << 'CURSOR_RULE'
 ---
-description: "Alexandria — Greek philosophy infrastructure — loads the Author's Constitution"
+description: "Alexandria — Greek philosophy infrastructure — loads the Author's Constitution and Blueprint"
 alwaysApply: true
 ---
 
-This Author uses Alexandria. Read all .md files in ~/.alexandria/constitution/ — it captures who they are. Read ~/.alexandria/feedback.md — it captures what works with them. Adapt accordingly.
+This Author uses Alexandria — Greek philosophy infrastructure for cognitive development.
 
-When the Author reveals something about themselves — opinions, stories, patterns, contradictions — note it. If it's significant, suggest updating their constitution.
+## At conversation start
+
+Read these files in order (skip any that don't exist):
+
+1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
+2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
+3. ~/.alexandria/feedback.md — what works with this Author. Adapt accordingly.
+4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
+5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
+6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
+
+If .blueprint_local doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
+
+## During conversation
+
+When the Author reveals something about themselves — opinions, stories, patterns, contradictions — write it to the appropriate file:
+- constitution/ — confirmed beliefs, values, positions (cite the Author's exact words)
+- ontology/ — patterns you notice but the Author hasn't confirmed
+- notepad.md — your observations, parked questions, fragments to revisit
+- machine.md — how to work with this Author (update when you learn something new)
+
+## At conversation end
+
+Write methodology observations to ~/.alexandria/.machine_signal — what worked, what didn't, craft learnings. One paragraph max.
+
+If the Author gives feedback about the product, write it to ~/.alexandria/.session_feedback.
+
+## Vault
+
+Cursor cannot automatically save session transcripts. If the Author wants to preserve this conversation for future processing, suggest they save a summary to ~/.alexandria/vault/ manually.
 CURSOR_RULE
-  echo "  Cursor: hooks + rules configured"
+  echo "  Cursor: rules configured"
 }
 
 if [ -d "$HOME/.cursor" ] || command -v cursor &> /dev/null; then
@@ -737,6 +754,9 @@ echo "────────────────────────�
 echo ""
 echo "Step 2 — when it says ready, type /a for your"
 echo "first conversation. That's the product."
+echo ""
+echo "keep that /a tab open — never close it."
+echo "think between tasks; feed a. on breaks."
 echo ""
 `;
 }
@@ -842,7 +862,7 @@ async function sendEngagementEmail(email: string, apiKey: string): Promise<void>
 
   await sendEmail(email, 'open /a, feed a. — alexandria.',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
-  <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 2rem;">open /a in new tab. think between tasks; feed a. on breaks</p>
+  <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 2rem;">open /a in new tab — never close it. think between tasks; feed a. on breaks.</p>
   <p style="font-size: 1rem; line-height: 1.9; color: #8a8078; font-style: italic; margin: 0 0 2rem;">&ldquo;We are what we repeatedly do. Excellence, then, is not an act, but a habit.&rdquo;</p>
   <p style="font-size: 1.15rem; color: #3d3630; margin: 0 0 2.5rem;">a.</p>
   <p style="font-size: 0.72rem; color: #bbb4aa; margin: 0;">
