@@ -403,7 +403,7 @@ export async function createLibraryCheckoutWithSlider(opts: {
       artifact_type: opts.artifactType,
       artifact_id: opts.artifactId,
     },
-    success_url: `${WEBSITE_URL}/library/${opts.authorId}?access=granted&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${WEBSITE_URL}/library/${opts.authorId}?access=granted&session_id={CHECKOUT_SESSION_ID}&artifact_type=${opts.artifactType}&artifact_id=${opts.artifactId}`,
     cancel_url: `${WEBSITE_URL}/library/${opts.authorId}`,
   });
   return session.url || '';
@@ -438,7 +438,7 @@ export async function createLibraryCheckout(opts: {
       artifact_type: opts.artifactType,
       artifact_id: opts.artifactId,
     },
-    success_url: `${WEBSITE_URL}/library/${opts.authorId}?access=granted&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${WEBSITE_URL}/library/${opts.authorId}?access=granted&session_id={CHECKOUT_SESSION_ID}&artifact_type=${opts.artifactType}&artifact_id=${opts.artifactId}`,
     cancel_url: `${WEBSITE_URL}/library/${opts.authorId}`,
   });
   return session.url || '';
