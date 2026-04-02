@@ -242,6 +242,8 @@ You have a 145-step daily routine, a weekly schedule, a yearly calendar — all 
 
 The Calibration document — a daily self-administered recalibration system — suggests awareness that you drift from appreciation and presence and need explicit prompts to return. "Nothing external actually matters, it's all internal" paired with "So just decide to be happy" reads as a corrective against a tendency toward dissatisfaction or external validation seeking. "Today might be the best day of your life if you look for it" — implies the default mode is NOT looking for it. The framework that produces daily gratitude through a 145-step routine is itself evidence of the cage: genuine gratitude would not need a checklist.
 
+**Global maxima optimizer.** You are not a satisficer. You are not even a local optimizer. You are a global maxima optimizer — you find the genuinely best option on Earth, not the best option in the nearest store. The modules list and the 145-step routine are infrastructure for this: every detail in your life is a decision, and every decision is classified by game type. Maximisation games (towels, tweezers, stretches) get the world's best — genuine global maxima, researched and selected. Threshold games (bed frame) get the best value at the bar — IKEA wins because bed frame is threshold, so reliability, global access, and value-for-money IS the optimal answer. Minimisation games get deleted entirely. Most people are local optimizers by default — they pick the best of what's in front of them. That is dumb. The global upbringing (born in England, educated across continents, lived everywhere, no single "local") may be why you even see this as an option — you have no local store. Your store is the world. "Min details, all details perfect" is not perfectionism — it is the recognition that every object and service in your life is either global maxima, threshold-optimal, or deleted. There is no fourth category.
+
 **Dopamine baseline protocol:** 9-9 split. Rigid body inputs (run, cold exposure, sunlight, real food) in the body window. Fluid mind inputs (social environments, music, creative work) in the mind window. Avoid stacking dopamine, effortless reward, and anything that crashes the baseline.
 
 ---
@@ -277,6 +279,18 @@ The logic was sound: $10K had expected marginal value to your life that rounded 
 "I could not live with myself if I didn't bet and it had happened. Because then I'd be weak. Mentally weak." The framework didn't fail to catch the bet — the framework IS the bet. Play to win. Follow your logic to the limit. Own it. Fight and lose in the arena. Live by the sword, die by the sword. The exhibitionist gladiator in the financial arena. Zero regrets. Would do nothing differently.
 
 Honesty in positioning is non-negotiable and instinctive. You catch overclaims instantly and treat them as credibility-destroying. The asymmetry: overclaiming gains nothing (the honest version is usually stronger) and risks everything (one broken claim makes the reader question all claims).
+
+---
+
+## Deep Respect for Every Dollar
+
+You have basically no money in your own accounts. Verdane paid almost nothing, and since leaving you have had no income. You live on your parents' money and are intensely careful not to spend a cent more than necessary. The family is fine — three properties, real wealth, no financial stress in aggregate. But the personal position breeds deep intentionality with every dollar.
+
+This is not desperation. It is philosophical alignment. Your entire routine, your modules list, your life architecture — hardly any of it requires money. You love that. The global maxima optimizer does not optimise for expensive things. It optimises for the best things, and the best things are often cheap or free. Economy flights. Groceries. Calisthenics over gym memberships. IKEA bed frames. The 145-step routine costs almost nothing to run.
+
+The forward view reinforces this: ai and robotics will make most goods and services insanely cheap. Homeschooling eliminates private school fees. Healthy food delivery will be commodity-priced. Travel is economy class and not that expensive. The list of things that actually cost real money shrinks to nearly nothing. So you genuinely do not need much.
+
+**The self-deception flag.** You are aware this could be rationalisation — the broke founder convincing himself he does not need money to avoid confronting that he should be earning it. The honest position: it is probably mostly true (the life architecture genuinely runs cheap, the future cost curve genuinely bends down), but it needs to be held with open hands. The day the modules list starts quietly dropping items because they cost too much is the day the rationalisation has won. The test is whether the low-spend life is chosen or forced. Right now it is both — chosen in architecture, forced in circumstance. When the circumstance changes (income arrives), the architecture should hold. If it does, it was real. If spending inflates, it was cope.
 
 ---
 

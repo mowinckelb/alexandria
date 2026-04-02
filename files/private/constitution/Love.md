@@ -48,6 +48,10 @@ Everyone thinks the opposite. Women are assumed to be the romantics. They are no
 
 The modern model misreads men as unromantic because men do not perform romance the way women expect — giddiness, enthusiasm, verbal affirmation. Men perform romance through commitment, sacrifice, steadiness. The oncology ward. The hand that does not let go. The heaviness IS the romance.
 
+**Love is measured by the inverse.** The question is not "who do I want?" The question is "who would I sacrifice for?" That is what value means. This is the exact opposite of fish love — not what they give you, but what you would give up for them. The male version of romance is not flowers and poetry. It is the locket in the trenches. The one picture you carry to war. The person whose freedoms and country you fight to protect, whose home you fight to come back to. The late nights. The providing. The protection. This is romance — sacrifice as love language, not consumption.
+
+This connects to the gendered asymmetry of love and respect. A woman wants most from her man: love. A man wants most from his wife: respect. The cheating example reveals the distinction cleanly. When a man discovers his wife cheated, his first question is "did you sleep with him?" — the physical act, the territory, the respect violated. When a woman discovers her husband cheated, her first question is "do you love her?" — the emotional bond, the priority, the love threatened. Different needs, not the same need differently expressed. Men need respect. Women need love. The modern model collapses them into one and wonders why both feel unseen.
+
 ---
 
 ## The Eros Gap — The Deepest Unresolved Tension
