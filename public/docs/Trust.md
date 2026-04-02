@@ -50,7 +50,9 @@ Read the bash script. Everything below explains what it does. If anything below 
 cat ~/.claude/settings.json | grep -A 3 alexandria
 ```
 
-**`~/.cursor/hooks.json`** + **`~/.cursor/rules/alexandria.mdc`** — only if Cursor is detected. Same hooks, plus a rule that tells Cursor to read your constitution.
+**`~/.cursor/rules/alexandria.mdc`** — only if Cursor is detected. A rule that tells Cursor to read your constitution and follow the Blueprint. Cursor has no hooks — the rule is the only integration. This means activation is probabilistic: the model reads and follows the rule most of the time, but there is no guarantee. Vault capture, overnight processing, and automatic Blueprint updates require Claude Code.
+
+**`~/.codex/instructions.md`** — only if Codex is detected. Appends an Alexandria block (delimited by `<!-- alexandria:start/end -->` comments). Same as Cursor: probabilistic, no hooks, no vault capture.
 
 ## What talks to the server
 
@@ -64,6 +66,10 @@ cat ~/.claude/settings.json | grep -A 3 alexandria
 
 Five requests. That is the complete list. The hooks are shell scripts — you can read every line and confirm no other network calls exist.
 
+**Auto-update mechanism:** When the server returns a new `X-Hooks-Version` header with the Blueprint response, the session-start hook re-fetches `/hooks` and replaces the local hook scripts. This is how bug fixes and improvements reach your machine without reinstalling. The updated scripts are the same bash files in `~/.alexandria/hooks/` — you can read them after any update. If you want to freeze your hooks, create `~/.alexandria/.blueprint_pinned` — this also stops Blueprint updates.
+
+Additionally, if `~/.alexandria/` is a git repo with a remote (set up during install), the hooks run `git push` and `git pull` at session boundaries to sync with your private GitHub backup. These are git operations using your own credentials to your own repo — no Alexandria server involved.
+
 The server is a stateless Cloudflare Worker. No database for private data. There is no storage mechanism for your constitution, vault, or conversations. The server serves methodology and collects anonymous metadata. If you give feedback at session close, that text is sent and stored (90-day expiry) so the team can read and act on it. Nothing else.
 
 ## What stays local
@@ -72,9 +78,9 @@ Everything that matters. Constitution, vault, ontology, feedback, machine.md, no
 
 On Mac, the vault, constitution, ontology, and library directories are symlinked to `~/Library/Mobile Documents/com~apple~CloudDocs/Alexandria/` for cross-device access. Only if iCloud is detected. This gives you mobile access to your vault (add voice memos from your phone) and keeps everything synced across Apple devices. You can undo any symlink anytime — just delete the symlink and recreate the directory.
 
-## The genesis scan
+## The setup block
 
-After install, the setup prints a block of text to paste into Claude Code. This block instructs Claude to scan your machine for personal writing — documents, notes, journal entries — and build a preliminary constitution from what it finds. **This is the most invasive step.** It runs inside Claude Code — same as any other conversation you have. No Alexandria server involved. You can read the block before pasting it. You can edit it. You can skip it and build your constitution manually via `/a`.
+After install, the setup prints a block of text to paste into a new chat. This block instructs the model to: (1) read your existing AI memory and personal files to build a preliminary constitution, ontology, and notepad, and (2) search the internet for material calibrated to your interests. **This is the most invasive step.** It runs inside your AI tool — same as any other conversation you have. No Alexandria server involved. You can read the block before pasting it. You can edit it. You can skip it and build your constitution manually via `/a`.
 
 ## Git backup — your data, your repo
 
@@ -102,7 +108,7 @@ Both syncs are conditional: if `~/.alexandria/` is not a git repo, or has no rem
 
 ## The autoloop — overnight processing
 
-During genesis, the setup script installs a Claude Code scheduled task (`~/.claude/scheduled-tasks/alexandria/SKILL.md`). This is a nightly cloud trigger that runs on **Anthropic's infrastructure** (Claude Code remote), not Alexandria's servers.
+During setup, the script installs a Claude Code scheduled task (`~/.claude/scheduled-tasks/alexandria/SKILL.md`). This is a nightly cloud trigger that runs on **Anthropic's infrastructure** (Claude Code remote), not Alexandria's servers.
 
 What it does:
 
@@ -137,7 +143,7 @@ rm -rf ~/.claude/skills/alexandria
 rm -rf ~/.claude/scheduled-tasks/alexandria
 ```
 
-Then edit `~/.claude/settings.json` and delete the three hook entries containing `alexandria`. If using Cursor, delete `~/.cursor/hooks.json` and `~/.cursor/rules/alexandria.mdc`.
+Then edit `~/.claude/settings.json` and delete the three hook entries containing `alexandria`. If using Cursor, delete `~/.cursor/rules/alexandria.mdc`. If using Codex, remove the `<!-- alexandria:start -->` to `<!-- alexandria:end -->` block from `~/.codex/instructions.md`.
 
 If the autoloop created a GitHub repo: `gh repo delete alexandria-private --yes` (or delete it from github.com). If iCloud symlinks were created on Mac, the data in `~/Library/Mobile Documents/com~apple~CloudDocs/Alexandria/` can be deleted separately.
 

@@ -176,15 +176,15 @@ Step 2 — Auth. GitHub OAuth (FaceID if on phone with GitHub mobile app). Three
 
 Step 3 — Welcome. Branded callback page: two setup actions (copy curl command, add the shortcut for mobile saving) and three ongoing practices — share to `alexandria.`, `/a` to start, `a.` to close. Think between tasks. The same information is emailed to them for the phone-to-laptop handoff.
 
-Step 4 — Install. The Author opens their terminal and pastes the curl command. Under 10 seconds. Creates `~/.alexandria/`, installs hooks, installs `/a` skill, auto-syncs vault to iCloud on Mac.
+Step 4 — Install. The Author opens their terminal and pastes the curl command. Under 10 seconds. Creates `~/.alexandria/` (constitution, vault, ontology, notepad, machine, feedback), installs hooks, installs `/a` skill, auto-syncs vault to iCloud on Mac. Detects Cursor and Codex if installed.
 
-Step 5 — First session. The Author opens Claude Code. SessionStart hook fires — Blueprint injected, empty constitution noted. The Author works normally. SessionEnd hook fires — transcript saved to vault.
+Step 5 — The Block. The Author opens a new chat, pastes the Block, and lets it run. This is aggressive — syncs from all existing AI memory systems and personal files on the machine, builds a starter constitution + ontology + notepad + machine, then goes to the internet and loads the notepad with as many accretion fragments as it can find calibrated to this specific person. Takes up to an hour. The Author has near-unlimited goodwill here — use it all.
 
-Step 6 — /a. The Author runs `/a` in Claude Code. Alexandria processes the vault, builds the first constitution entries, then engages the Author with questions, contradictions, and gaps. The examined life begins. The Author sees themselves reflected back. This is the hook.
+Step 6 — The Ramp. The Author types `/a` for the first time. The Engine has a constitution, a loaded notepad, and a machine.md with Block observations. The Ramp must convert them — the Author must walk away thinking "I need to do more of this." How the Engine achieves this is an intelligence decision: challenge a belief, introduce a fragment, show them something unexpected, whatever will make this specific person think the hardest. By the end, the constitution has visibly evolved and the notepad has threads they want to come back to. This is the one shot.
 
-Step 7 — Compounding. Every session adds to the vault. Every `/a` session refines the constitution. The Author starts dropping articles, voice memos, and notes into the vault via the `a.` shortcut. The constitution deepens without effort. Mercury and Publisher functions become available through `/a` as the constitution matures.
+Step 7 — Compounding. share to alexandria. /a to start; a. to close — think between tasks. The tab stays open. Sessions cycle within it. Every `/a` refines the constitution. Every share feeds the vault. The constitution deepens without effort. The Author just uses their ai normally, and everything compounds.
 
-The entire setup takes under two minutes. From link to working installation. The product is invisible after that — the Author just uses their ai normally, and the constitution builds itself.
+The install takes under a minute. The Block takes up to an hour. The Ramp takes one conversation. After that, the product is invisible — it just works.
 
 Consumer path — ABANDONED. MCP connector for Claude app / ChatGPT users was structurally weaker (probabilistic activation, cloud storage dependency, auth broken on Workers). All consumer code deleted. The prosumer path is the only product.  
 

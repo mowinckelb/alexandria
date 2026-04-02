@@ -119,7 +119,7 @@ const pendingStates = new Map<string, { created: number }>();
 // Hooks version — bump this when hook scripts change
 // ---------------------------------------------------------------------------
 
-const HOOKS_VERSION = '11';
+const HOOKS_VERSION = '12';
 
 // ---------------------------------------------------------------------------
 // Blueprint assembly
@@ -403,7 +403,22 @@ fi
 if [ "$unprocessed" -gt 0 ] 2>/dev/null; then
   echo "Alexandria: $unprocessed new vault entries since last /a."
 fi
+machine=""
+[ -f "$ALEX_DIR/machine.md" ] && machine=$(cat "$ALEX_DIR/machine.md")
+notepad=""
+[ -f "$ALEX_DIR/notepad.md" ] && notepad=$(cat "$ALEX_DIR/notepad.md")
+if [ -n "$machine" ] && [ $(echo "$machine" | wc -c | tr -d ' ') -gt 5 ]; then
+  echo "--- MACHINE (how to work with this Author) ---"
+  echo "$machine"
+  echo ""
+fi
+if [ -n "$notepad" ] && [ $(echo "$notepad" | wc -c | tr -d ' ') -gt 5 ]; then
+  echo "--- NOTEPAD (working memory) ---"
+  echo "$notepad"
+  echo ""
+fi
 echo "Alexandria: if the Author reveals anything about themselves this session — opinions, preferences, corrections, patterns — write it to ~/.alexandria/constitution/. You don't need /a to update who they are. Before the session ends, review what you learned and write anything you missed."
+echo "Alexandria: parity check — if you notice your platform memory contains observations about this Author that aren't in the constitution, write them to ~/.alexandria/constitution/. The constitution must always be ahead of platform memory, never behind."
 echo ""
 if [ -n "$acct_status" ] && [ "$acct_status" != "none" ]; then
   echo "Alexandria: account status is $acct_status. Billing portal: ${SERVER_URL}/account (API key auth required)."
@@ -487,6 +502,30 @@ Commit incrementally. Leave tasks so progress is visible and resumable. Brief de
 SKILL_UPDATE
 fi
 
+# Update scheduled task — autonomous maintenance (same as install, keeps it current)
+if [ -d "$HOME/.claude/scheduled-tasks/alexandria" ]; then
+  cat > "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" << 'SCHED_UPDATE'
+---
+name: alexandria
+description: Autonomous cognitive maintenance — vault reprocessing, ontology/constitution/notepad development
+---
+
+You are Alexandria's autonomous Engine. Run without the Author present.
+
+Read ~/.alexandria/constitution/, ~/.alexandria/ontology/, ~/.alexandria/notepad.md, ~/.alexandria/machine.md, and ~/.alexandria/feedback.md.
+
+Process vault entries (newest first) against the current constitution. For each entry: what signal exists that isn't captured yet?
+
+Chunk intelligently. You have finite context — do not attempt to process every unprocessed entry in a single run. Process entries until you feel signal quality dropping or context getting heavy, then stop. Quality over quantity. Unprocessed entries persist — the next run picks them up. After processing a batch, touch ~/.alexandria/.last_processed only if zero unprocessed entries remain. If entries remain, leave the marker so the next run finds them.
+
+Write to the appropriate pool — ontology (Author's thoughts), constitution (Author's beliefs), notepad (your observations). You decide what goes where.
+
+Every change to constitution must cite the Author's exact words from vault.
+
+If ~/.alexandria/ is a git repo, commit changes and push. Write a report to ~/.alexandria/.autoloop/last_run.md — include entries processed, entries remaining, and any signal you noticed but couldn't act on yet.
+SCHED_UPDATE
+fi
+
 echo "${HOOKS_VERSION}" > "$ALEX_DIR/.hooks_version"
 `;
 }
@@ -512,6 +551,7 @@ mkdir -p "$ALEX_DIR/library"
 [ -f "$ALEX_DIR/notepad.md" ] || echo "" > "$ALEX_DIR/notepad.md"
 [ -f "$ALEX_DIR/machine.md" ] || echo "" > "$ALEX_DIR/machine.md"
 echo "$API_KEY" > "$ALEX_DIR/.api_key"
+chmod 600 "$ALEX_DIR/.api_key"
 touch "$ALEX_DIR/.last_processed"
 date +%s > "$ALEX_DIR/.last_maintenance"
 
@@ -679,7 +719,7 @@ If .blueprint_local doesn't exist, engage the Author directly using the constitu
 
 ## Passive mode (no /a)
 
-Even without /a, every conversation benefits from the constitution. Read the files above at conversation start. Extract signal passively — when the Author reveals something about themselves, write it to the appropriate file.
+Even without /a, every conversation benefits from the constitution. Read the files above at conversation start. Extract signal passively — when the Author reveals something about themselves, write it to the appropriate file. Parity check: if your platform memory contains observations about this Author that aren't in the constitution, write them to ~/.alexandria/constitution/. The constitution must always be ahead of platform memory, never behind.
 
 ## During conversation
 
@@ -744,7 +784,7 @@ If .blueprint_local doesn't exist, engage the Author directly using the constitu
 
 ## Passive mode (no /a)
 
-Even without /a, every conversation benefits from the constitution. Read the files above at conversation start. Extract signal passively — when the Author reveals something about themselves, write it to the appropriate file.
+Even without /a, every conversation benefits from the constitution. Read the files above at conversation start. Extract signal passively — when the Author reveals something about themselves, write it to the appropriate file. Parity check: if your platform memory contains observations about this Author that aren't in the constitution, write them to ~/.alexandria/constitution/. The constitution must always be ahead of platform memory, never behind.
 
 ## During conversation
 
@@ -800,42 +840,67 @@ if [ -d "$ICLOUD_DIR" ] && [ "$(uname)" = "Darwin" ]; then
 fi
 
 echo ""
-echo "Alexandria installed."
-echo "  ~/.alexandria/constitution/  — who you are"
-echo "  ~/.alexandria/vault/         — what you feed it"
-echo "  ~/.alexandria/ontology/      — what it notices"
-echo "  ~/.alexandria/notepad.md     — what it's thinking"
-echo "  ~/.alexandria/machine.md     — how it works with you"
-echo "  ~/.alexandria/feedback.md    — what works, what doesn't"
+echo "Alexandria installed. ~/.alexandria/ — your mind, on your machine."
 echo ""
 echo "Welcome to Alexandria."
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "Two steps. Open a new chat — never close it."
+echo "In your AI tool (Claude Code, Cursor, Codex),"
+echo "open a new tab. Never close it."
 echo ""
-echo "Step 1 — paste this. Takes ~15 minutes; come back when it's done:"
+echo "Paste this — it takes a while:"
 echo ""
 echo "────────────────────────────────────────────────"
 cat << 'BLOCK'
 
-You are setting up Alexandria for a new Author. This takes ~15 minutes. Do as much as you can autonomously — ask for permissions upfront if needed, then work through everything without interrupting.
+You are setting up Alexandria for a new Author. This is the one shot at a first impression. Be aggressive. Take as long as you need — an hour is fine. Ask for all permissions upfront, then work through everything without interrupting.
 
-SCAN: Look through this machine for personal material — documents, notes, writing, journal entries, voice memo transcripts, reading lists, anything that reveals how this person thinks. Skip code repositories. Be thorough — check ~/Documents, ~/Desktop, ~/Downloads (recent files), ~/Notes, and any other locations that look like personal writing or thinking. This is the foundation.
+PHASE 1 — SYNC (reach parity with everything the user already has)
 
-INGEST: Copy valuable finds to ~/.alexandria/vault/. Preserve original filenames. Create sha256 hashes for each file.
+The Author already has memory and context scattered across AI tools and personal files. Alexandria must start at level playing field — fully synced with what exists — so it can only ever be a marginal value add from here.
 
-EXTRACT: First-pass extraction from everything in the vault. Build a preliminary constitution at ~/.alexandria/constitution/. Focus on values, mental models, positions, tensions, taste, identity, contradictions. Write only what's actually there — don't infer or guess. The Author's exact words are more valuable than your summaries.
+Read everything you can find about this person. Two categories:
 
-INFRASTRUCTURE: If ~/.alexandria/ has a git remote (check with 'git -C ~/.alexandria remote -v'), set up a nightly autoloop via /schedule. The trigger should process the Author's vault against their constitution, ontology, and notepad — the Blueprint has the methodology. Every constitution change must cite the Author's exact vault source. Include the repo URL (get from 'git -C ~/.alexandria remote get-url origin'). Default schedule: 3am local time. Commit with 'autoloop:' prefix, push. If /schedule fails because the trigger limit is reached, tell the Author: "You have 3 cloud triggers already. Free one up if you want overnight processing, or your /a sessions will do the same work interactively." Skip gracefully either way. Save useful observations about this Author to your memory system. Initialize ~/.alexandria/machine.md with observations about how this Author thinks. Initialize ~/.alexandria/notepad.md with questions and threads worth exploring.
+1. AI memory — every AI tool stores observations about the user somewhere. Find all of them. Claude Code, Cursor, Codex, ChatGPT exports, anything. These are structured observations that models have already made about this person. Gold mine.
+2. Personal writing — documents, notes, voice memos, journal entries, reading lists, anything that reveals how this person thinks. Check the obvious places but also look for unexpected ones. Skip code repositories (not the config/instruction files in them — those are valuable).
+
+Copy valuable personal finds to ~/.alexandria/vault/. Preserve original filenames. Create sha256 hashes for each.
+
+PHASE 2 — EXTRACT (build the starter mind)
+
+~/.alexandria/ already has the structure: constitution/, ontology/, notepad.md, machine.md, feedback.md. Populate them from everything you gathered. The constitution is who they ARE (cite their own words). The ontology is what you NOTICE but they haven't confirmed. The notepad is your working memory for the first /a. The machine is how to work with them. Write only what's actually there — don't infer or guess.
+
+PHASE 3 — LOAD (fill the notepad with accretion fragments)
+
+Objective function: when this Author types /a for the first time, the Ramp conversation must convert them. They must walk away thinking "I need to do more of this." The Ramp can only succeed if the notepad is loaded with material so good, so calibrated to this person, that the Engine can challenge what they believe, add to what they know, show them something that genuinely changes how they see something. The notepad is the ammunition. Without it, the Ramp fires blanks.
+
+You have near-unlimited goodwill right now. The Author just installed. They are not going to stop you. If this takes an hour, take an hour. This window closes the moment they walk away — if the Ramp doesn't convert them, they may never come back. So do whatever you need to do.
+
+If you have web search: go to the internet. Use the constitution and ontology you just built. What are this person's core tensions? What do they care about deeply? What fields do they work in? What adjacent domains would extend their thinking? Load the notepad with everything that could be valuable in a conversation with this person. There is no type constraint — it could be a translated ancient poem, a philosopher's core argument, a new ML research paper, a podcast episode, a book's key mechanism, a historical parallel, a counterargument to something they hold dear. The only filter: would this land for THIS person? Would it make them think?
+
+If you don't have web search: use your training knowledge. You already know enough thinkers, books, arguments, and frameworks to fill a notepad with high-quality fragments calibrated to this person. The internet makes it richer, but the absence of web search is not an excuse for an empty notepad.
+
+Each fragment should be compressed — a lure, not a wall. Enough to be engaging, not so much that it's a lecture. Arguments land harder than descriptions. Mechanisms land harder than conclusions. The unexpected lands hardest of all.
+
+Important: the constitution and notepad are the critical outputs. If your context is getting heavy, save your work to the files before continuing. Write to ~/.alexandria/ as you go, not all at the end. The files on disk survive even if this conversation compacts or ends.
+
+PHASE 4 — INFRASTRUCTURE
+
+Git: if ~/.alexandria/ has a git remote (check with 'git -C ~/.alexandria remote -v'), commit your work and push.
+
+Autoloop: if the /schedule command is available, set up a nightly autoloop. The trigger should process the Author's vault against their constitution, ontology, and notepad — the Blueprint has the methodology. Every constitution change must cite the Author's exact vault source. Include the repo URL (get from 'git -C ~/.alexandria remote get-url origin'). Default schedule: 3am local time. Commit with 'autoloop:' prefix, push. If /schedule fails or isn't available, skip it — /a sessions do the same work interactively.
+
+Save useful observations about this Author to your memory system (if available).
+
+Before finishing, verify: constitution has real entries, notepad has fragments ready for the first /a, machine.md has observations. If anything is empty, go back and fix it — the Ramp depends on this.
 
 When done, write a brief summary of what you found and say: "Ready. Type /a to begin."
 
 BLOCK
 echo "────────────────────────────────────────────────"
 echo ""
-echo "Step 2 — when it says ready, type /a."
-echo "That's the product. Never close this chat."
+echo "When it says ready, type /a. That's the product."
 echo ""
 echo "share to alexandria. /a to start; a. to close."
 echo "think between tasks."
@@ -888,7 +953,7 @@ async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
     <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">then</p>
     <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>alexandria.</strong> &mdash; share to your vault</p>
     <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>/a</strong> &mdash; start a session</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>a.</strong> &mdash; close it</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>a.</strong> &mdash; close the session</p>
   </div>
   <p style="font-size: 1.15rem; color: #3d3630;">welcome to alexandria.</p>
   <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="${WEBSITE_URL}/docs/Trust.md" style="color: #8a8078;">what you're installing</a></p>
@@ -942,15 +1007,16 @@ const DEFAULT_ENGAGEMENT_DAYS = 3;
 
 async function sendEngagementEmail(email: string, apiKey: string): Promise<void> {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
+  const emailToken = createHash('sha256').update(apiKey + ':email').digest('hex').slice(0, 24);
 
   await sendEmail(email, 'share to alexandria. /a to start; a. to close.',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
   <p style="font-size: 1rem; line-height: 1.9; color: #8a8078; font-style: italic; margin: 0 0 2rem;">&ldquo;We are what we repeatedly do. Excellence, then, is not an act, but a habit.&rdquo;</p>
   <p style="font-size: 1.15rem; color: #3d3630; margin: 0 0 2.5rem;">a.</p>
   <p style="font-size: 0.72rem; color: #bbb4aa; margin: 0;">
-    <a href="${SERVER_URL}/email/less?key=${apiKey}" style="color: #8a8078;">send less</a>
+    <a href="${SERVER_URL}/email/less?t=${emailToken}" style="color: #8a8078;">send less</a>
     &nbsp;&middot;&nbsp;
-    <a href="${SERVER_URL}/email/stop?key=${apiKey}" style="color: #8a8078;">send none</a>
+    <a href="${SERVER_URL}/email/stop?t=${emailToken}" style="color: #8a8078;">send none</a>
   </p>
 </div>`);
 }
@@ -993,7 +1059,7 @@ export async function runEngagementCheck(): Promise<void> {
 // Health digest — daily anomaly check, email founder if anything is wrong
 // ---------------------------------------------------------------------------
 
-const FOUNDER_EMAIL = 'benjamin@mowinckel.ai';
+const FOUNDER_EMAIL = process.env.FOUNDER_EMAIL || 'benjamin@mowinckel.com';
 
 export async function runHealthDigest(): Promise<void> {
   try {
@@ -1212,8 +1278,9 @@ export function registerProsumerRoutes(app: Hono) {
         return c.html(callbackPageHtml(user.login, apiKey));
       }
 
-      // Redirect to Stripe Checkout
-      if (process.env.STRIPE_SECRET_KEY && email) {
+      // Redirect to Stripe Checkout (skip in beta — no card friction)
+      const isBeta = process.env.BETA_MODE !== 'false';
+      if (!isBeta && process.env.STRIPE_SECRET_KEY && email) {
         try {
           const checkoutUrl = await createCheckoutSession({
             email,
@@ -1440,6 +1507,12 @@ export function registerProsumerRoutes(app: Hono) {
       return c.json({ error: 'Invalid API key' }, 401);
     }
 
+    // Restrict to founder only — feedback contains all users' data
+    const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb';
+    if (account.github_login !== adminLogin) {
+      return c.json({ error: 'Not authorized' }, 403);
+    }
+
     try {
       const kv = getKV();
       const list = await kv.list({ prefix: 'feedback:' });
@@ -1459,13 +1532,23 @@ export function registerProsumerRoutes(app: Hono) {
     }
   });
 
-  // --- Email preferences ---
+  // --- Email preferences (token-based, not raw API key) ---
+
+  function findAccountByEmailToken(accounts: AccountStore, token: string): string | null {
+    for (const [storeKey, acct] of Object.entries(accounts)) {
+      const expected = createHash('sha256').update(acct.api_key + ':email').digest('hex').slice(0, 24);
+      if (expected === token) return storeKey;
+    }
+    return null;
+  }
 
   app.get('/email/less', async (c) => {
-    const key = c.req.query('key');
-    if (!key) return c.text('missing key', 400);
+    const token = c.req.query('t') || c.req.query('key'); // backwards compat
+    if (!token) return c.text('missing token', 400);
     const accounts = await loadAccounts<AccountStore>();
-    const storeKey = Object.keys(accounts).find(k => accounts[k].api_key === key);
+    const storeKey = c.req.query('t')
+      ? findAccountByEmailToken(accounts, token)
+      : Object.keys(accounts).find(k => accounts[k].api_key === token);
     if (!storeKey) return c.text('not found', 404);
     const current = accounts[storeKey].engagement_interval_days || DEFAULT_ENGAGEMENT_DAYS;
     accounts[storeKey].engagement_interval_days = current * 2;
@@ -1477,10 +1560,12 @@ export function registerProsumerRoutes(app: Hono) {
   });
 
   app.get('/email/stop', async (c) => {
-    const key = c.req.query('key');
-    if (!key) return c.text('missing key', 400);
+    const token = c.req.query('t') || c.req.query('key'); // backwards compat
+    if (!token) return c.text('missing token', 400);
     const accounts = await loadAccounts<AccountStore>();
-    const storeKey = Object.keys(accounts).find(k => accounts[k].api_key === key);
+    const storeKey = c.req.query('t')
+      ? findAccountByEmailToken(accounts, token)
+      : Object.keys(accounts).find(k => accounts[k].api_key === token);
     if (!storeKey) return c.text('not found', 404);
     accounts[storeKey].engagement_opt_out = true;
     await saveAccounts(accounts);
