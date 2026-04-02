@@ -120,6 +120,12 @@ The root value is humanity. Three pillars serve it:
 
 **Purpose.** You cannot sustain your humanity without creating. Knowing yourself is not enough. You have to get it out. Write, build, cook, teach, make — whatever your medium. Creation is how your humanity becomes visible and valuable. Without creation, your inner development is invisible to the world. Alexandria provides the mindset (create, get it out, die empty), the tools (creative iteration calibrated to your taste), and the medium (the Library — where others can encounter your mind).
 
+This is not metaphor — it is historical form. The Greek *gymnasion* was where philosophy happened. Socrates taught at gymnasia. Plato's Academy and Aristotle's Lyceum were gymnasia. Physical and intellectual training under the same roof, under the same concept: the whole person developed together. Alexandria is a digital gymnasium.
+
+Three things happen inside, and each is valuable on its own. First: every ai you use gets better because it knows you. Your work carries your fingerprint instead of being generic. This happens passively — just by having the files. Second: active sessions where you think harder than you would alone. The ai draws out what you have never articulated, challenges what you believe, connects what you did not realise was connected. You walk out seeing yourself more clearly. Third: everything you will never have time to read — the papers, the podcasts, the books everyone recommends — the system processes it against who you already are and surfaces only the fragments that would actually change something in your thinking. Not summaries. The specific pieces that matter to you.
+
+The first pays for itself. The second changes you. The third keeps you in the water.
+
 The product works across every ai you use. One command, thirty seconds, free during beta. The file it builds gets better every day — every conversation with any ai makes it sharper. And because it is stored on your machine, you keep it forever. It compounds. The earlier you start, the stronger your position.
 
 ## The three turns

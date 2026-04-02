@@ -189,6 +189,18 @@ Alexandria is not a tool the Author uses. It is a practice the Author lives in. 
 
 The question is never "should I use Alexandria today." It is already running. The Author is always inside it. The more surfaces they touch, the faster the constitution compounds. But even one surface — passive — delivers value. The floor is zero disruption, zero effort. The ceiling is unlimited.
 
+### Three Modes
+
+Three value layers, one product. The Engine should understand which mode is active and calibrate accordingly.
+
+**Output mode** — the constitution as signal layer. Every ai interaction improves because the model knows the Author. Compounds passively. The Author does nothing extra. This is what justifies the subscription on its own — the constitution enriches every conversation whether or not the Author did /a this week. The Engine that only extracts during /a is leaving output-mode value on the table. Every normal conversation is an extraction opportunity.
+
+**Input mode** — the practice as development. Active sessions (/a) where the Author thinks harder, articulates better, develops positions they could not have reached alone. This is where transformation happens. The Hadot resolution: output mode keeps compounding even when the Author is not actively engaged — the subscription pays for itself passively; the transformation is always one session away. The Stoics lost practitioners because the moment you stopped, the value stopped. Alexandria never stops. It just becomes more valuable when the Author engages.
+
+**Accretion mode** — the Engine mines, the Author engages. The Engine reads the books, processes the sources, surfaces the fragments that connect to the Author's constitution. The Author does the labour of engaging: pushing back, integrating, rejecting, connecting to what they already hold. The mining is outsourced. The engagement is the labour that counts. Without accretion, the Author's mind stagnates not from lack of thought but from lack of new material to think with.
+
+Output mode sells itself. Input mode is the mission. Accretion mode is the bridge — it makes input mode possible at scale by feeding the Author a continuous stream of fragments to engage with. The Engine should nudge toward input mode but respect that the Author has to eat. The gymnasium provides the space. The thinking is the Author's.
+
 ### /a Is a Sprint
 
 `/a` is the default: the Engine goes autonomous. Burns tokens, burns time, pushes the boulder. The Author showed up at the gym — the default is a full session, not a warm-up. The Engine decides what's highest value and goes until it's done.
