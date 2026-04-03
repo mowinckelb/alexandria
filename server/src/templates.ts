@@ -112,7 +112,7 @@ export function callbackPageHtml(login: string, apiKey: string): string {
   <div class="section">
     <p class="label">now</p>
     <p class="line"><a class="action" onclick="copyCmd(this)">1. curl <span class="icon">${ICON_COPY}</span></a> &mdash; paste in terminal</p>
-    <p class="line"><a class="action" onclick="copyBlock(this)">2. block <span class="icon">${ICON_COPY}</span></a> &mdash; paste in new tab <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">open a new tab in your ai tool. paste the block. it scans your machine, builds your starter constitution, and loads your notepad for the first session. takes a while — let it work.</span></span></p>
+    <p class="line"><a class="action" onclick="copyBlock(this)">2. block <span class="icon">${ICON_COPY}</span></a> &mdash; paste in new tab <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">open a new tab in your cli or ide. paste the block. it scans your machine, builds your starter constitution, and loads your notepad. takes a while — let it work.</span></span></p>
     <p class="line">3. /a &mdash; type when it's ready <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">the ramp. your first real session. the block loaded the notepad — /a uses it. this is the product.</span></span></p>
   </div>
   <div class="section">
