@@ -39,6 +39,7 @@ export default function WorkCheckoutPage({ params }: { params: Promise<{ author:
   const [promoCode, setPromoCode] = useState('');
   const [promoStatus, setPromoStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
@@ -80,6 +81,7 @@ export default function WorkCheckoutPage({ params }: { params: Promise<{ author:
 
   const handleCheckout = async () => {
     setLoading(true);
+    setError('');
     try {
       const body: Record<string, unknown> = { work_id: workId, amount_cents: amount * 100 };
       if (promoCode) body.promo_code = promoCode;
@@ -90,8 +92,11 @@ export default function WorkCheckoutPage({ params }: { params: Promise<{ author:
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch {}
+      if (data.url) { window.location.href = data.url; return; }
+      setError(data.error || 'checkout failed');
+    } catch {
+      setError('could not reach server');
+    }
     setLoading(false);
   };
 
@@ -178,6 +183,7 @@ export default function WorkCheckoutPage({ params }: { params: Promise<{ author:
             >
               {loading ? '...' : `${workTitle || 'work'} — $${amount}`}
             </button>
+            {error && <p className="mt-3 text-[0.75rem]" style={{ color: 'var(--text-whisper)' }}>{error}</p>}
           </div>
 
           {/* Footer */}
