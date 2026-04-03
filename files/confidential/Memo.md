@@ -125,6 +125,8 @@ The product is built. Technical risk is zero. Four risks remain:
 | Brand does not land | Creative, positioning, SF presence |
 | Founder cannot sustain | Living costs buffer |
 
+The demand risk deserves special attention — it is the only existential question, and the structure of the ask collapses it. Alexandria asks for marginal everything: marginal money (the price of a coffee, on top of the $20 already spent on Claude), marginal time (between tasks, not instead of tasks), marginal tokens (leftover context), marginal attention (thoughts the user is already having). The downside is not low — it is zero. Local files, delete whenever, nothing to lose. Every objection dissolves on contact. The acquisition problem is not "convince someone this matters" — it is "make not-trying feel irrational." The product handles the rest. Once the constitution compounds, leaving feels like loss. Two jobs, clean separation: the pitch makes saying no silly, the product makes leaving hard.
+
 **~$50K** answers all four. **~$200K–500K** scales what works. **~$1M+** is Library for Labs and distribution at scale.
 
 The company does not need the money. The founder builds regardless. Capital accelerates the only experiment that matters. The entry price is lowest now and it is never coming back.
@@ -179,6 +181,8 @@ mowinckel.ai
 *- Karpathy validation: "Andrej Karpathy just described this exact architecture — raw data compiled into structured markdown, incrementally enhanced, queries that compound. He's doing it for research with duct-taped scripts. We built the product for the self. The guy who coined Software 2.0 independently validated the mechanism."*
 
 *- Marginal value: "You are not betting on this product. You are betting the current answer is already good and only changes upward. The thesis is permanent. The packaging is disposable."*
+
+*- Marginal everything: "The ask is marginal everything — marginal money (coffee price on top of the real spend), marginal time (between tasks), marginal tokens (leftover), marginal attention (thoughts they're already having). Downside is zero, not low. Local files, delete whenever. Every objection dissolves. The acquisition problem is making not-trying feel irrational. The product handles retention — once the constitution compounds, leaving feels like loss. This is why demand risk collapses: you're not competing for budget or attention, you're competing for scraps. And scraps compound."*
 
 *- Process-as-proof: "Zero track record. The proof is the company. Eight weeks. 24 endpoints. 4 test suites. Library shipped with payment. $100/month. One human."*
 
