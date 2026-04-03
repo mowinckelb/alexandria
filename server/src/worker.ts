@@ -124,7 +124,7 @@ app.get('/', (c) => {
 <head>
 <meta charset="utf-8">
 <title>Alexandria</title>
-<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/png" href="https://mowinckel.ai/favicon.png">
 </head>
 <body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0a0a0a;color:#fff">
 <div style="text-align:center">
