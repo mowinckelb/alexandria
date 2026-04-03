@@ -5,137 +5,265 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 const MONO = "'SF Mono', Monaco, Consolas, monospace";
 
 interface Block {
+  prefix?: string;
   text: string;
-  style: 'prompt' | 'body' | 'path' | 'diff';
+  style: 'prompt' | 'engine' | 'path' | 'diff';
   delay: number;
+  typing?: boolean;
 }
 
 const script: Block[] = [
-  { text: '> /a', style: 'prompt', delay: 300 },
+  { prefix: '> ', text: '/a', style: 'prompt', delay: 400, typing: true },
   {
-    text: 'Twelve entries call yourself a \u201cfirst principles thinker.\u201d But your decisions split \u2014 first principles for technical problems, authority for people decisions. Three times this month you deferred to someone\u2019s track record over your own reasoning.',
-    style: 'body',
-    delay: 1200,
-  },
-  {
-    text: 'Not a contradiction. First principles is expensive. You\u2019re running an implicit cost-benefit on when to think from scratch vs when to trust.',
-    style: 'body',
+    text: 'Something shifted in your vault. Three months ago \u2014 rough edges, contradictions, half-formed ideas, sentences that trail off. Last few weeks \u2014 everything\u2019s clean. Polished. Resolved.',
+    style: 'engine',
     delay: 2000,
   },
-  { text: 'constitution/Mind.md', style: 'path', delay: 1200 },
   {
-    text: 'First principles is a tool, not an identity. Deployed selectively based on stakes and reversibility.',
+    prefix: '> ',
+    text: 'isn\u2019t that... better?',
+    style: 'prompt',
+    delay: 4500,
+    typing: true,
+  },
+  {
+    text: 'It\u2019s smoother. But the rough edges were where you were actually thinking. The recent entries read like you already knew the answer before you started writing.',
+    style: 'engine',
+    delay: 2000,
+  },
+  {
+    prefix: '> ',
+    text: 'yeah. i\u2019ve been letting ai draft more and more',
+    style: 'prompt',
+    delay: 5000,
+    typing: true,
+  },
+  {
+    text: 'Keats had a term for what you\u2019re losing \u2014 \u201cnegative capability.\u201d The ability to stay in uncertainty without reaching for resolution. Your early vault is full of it. Questions you hold without answering. Tensions you let breathe. The recent entries resolve everything by the second sentence.',
+    style: 'engine',
+    delay: 2000,
+  },
+  {
+    text: 'You don\u2019t feel yourself getting less original. You feel yourself getting more efficient. But those are different muscles \u2014 and you\u2019re only training one.',
+    style: 'engine',
+    delay: 7000,
+  },
+  {
+    prefix: '> ',
+    text: 'so what do i do',
+    style: 'prompt',
+    delay: 5000,
+    typing: true,
+  },
+  {
+    text: 'You don\u2019t stop using ai. You protect the space where you think without it. That\u2019s what this is.',
+    style: 'engine',
+    delay: 2000,
+  },
+  { text: 'constitution/Mind.md', style: 'path', delay: 4000 },
+  {
+    text: 'Currently over-resolving \u2014 reaching for answers before sitting with questions. When this person brings a tension, don\u2019t resolve it. Ask another question. Let ideas stay half-formed longer. Rough edges are signal, not noise.',
     style: 'diff',
     delay: 400,
   },
+  {
+    prefix: '> ',
+    text: '...huh. ok i have a meeting. a.',
+    style: 'prompt',
+    delay: 6000,
+    typing: true,
+  },
+  {
+    text: 'See you. Left a thread in notepad: Keats\u2019 letter to his brothers, 1817. The negative capability passage. Worth a slow read.',
+    style: 'engine',
+    delay: 2000,
+  },
 ];
 
-const HOLD = 3500;
+const HOLD = 5000;
 const FADE = 800;
 
 export default function SessionDemo() {
   const [visible, setVisible] = useState(0);
+  const [typed, setTyped] = useState<Record<number, number>>({});
+  const [typingIdx, setTypingIdx] = useState(-1);
   const [fading, setFading] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const outerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const runId = useRef(0);
 
-  const clear = useCallback(() => {
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
+  const scroll = useCallback(() => {
+    requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    });
   }, []);
 
-  const play = useCallback(() => {
-    clear();
-    setVisible(0);
-    setFading(false);
+  const play = useCallback(async () => {
+    const id = ++runId.current;
 
-    let t = 0;
-    script.forEach((block, i) => {
-      t += block.delay;
-      timers.current.push(setTimeout(() => setVisible(i + 1), t));
-    });
+    const w = (ms: number) =>
+      new Promise<void>((resolve, reject) =>
+        setTimeout(() => (runId.current === id ? resolve() : reject()), ms),
+      );
 
-    timers.current.push(setTimeout(() => setFading(true), t + HOLD));
-    timers.current.push(setTimeout(() => play(), t + HOLD + FADE + 600));
-  }, [clear]);
+    try {
+      while (runId.current === id) {
+        setFading(false);
+        setVisible(0);
+        setTyped({});
+        setTypingIdx(-1);
+        if (scrollRef.current) scrollRef.current.scrollTop = 0;
+
+        for (let i = 0; i < script.length; i++) {
+          const block = script[i];
+          await w(block.delay);
+          setVisible(i + 1);
+          scroll();
+
+          if (block.typing) {
+            setTypingIdx(i);
+            setTyped(prev => ({ ...prev, [i]: 0 }));
+            for (let c = 1; c <= block.text.length; c++) {
+              await w(25 + Math.random() * 25);
+              setTyped(prev => ({ ...prev, [i]: c }));
+              if (c % 10 === 0) scroll();
+            }
+            setTypingIdx(-1);
+            scroll();
+          }
+        }
+
+        await w(HOLD);
+        setFading(true);
+        await w(FADE + 400);
+      }
+    } catch {
+      /* cancelled */
+    }
+  }, [scroll]);
 
   useEffect(() => {
-    const el = ref.current;
+    const el = outerRef.current;
     if (!el) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setVisible(script.length);
+      const all: Record<number, number> = {};
+      script.forEach((b, i) => { if (b.typing) all[i] = b.text.length; });
+      setTyped(all);
       return;
     }
 
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { play(); obs.disconnect(); } },
-      { threshold: 0.3 },
-    );
-    obs.observe(el);
-    return () => { obs.disconnect(); clear(); };
-  }, [play, clear]);
+    play();
+    return () => { ++runId.current; };
+  }, [play]);
 
   return (
-    <div
-      ref={ref}
-      style={{
-        fontFamily: MONO,
-        fontSize: '0.73rem',
-        lineHeight: 1.8,
-        opacity: fading ? 0 : 1,
-        transition: `opacity ${FADE}ms ease`,
-        minHeight: '10rem',
-        padding: '1.2rem 0',
-      }}
-    >
-      {script.map((block, i) => {
-        const shown = i < visible;
-        const base: React.CSSProperties = {
-          opacity: shown ? 1 : 0,
-          transform: shown ? 'none' : 'translateY(5px)',
-          transition: 'opacity 0.5s ease, transform 0.5s ease',
-        };
+    <div ref={outerRef} style={{ position: 'relative' }}>
+      {/* Top fade */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '2rem',
+          background: 'linear-gradient(to bottom, var(--bg-primary), transparent)',
+          zIndex: 1,
+          pointerEvents: 'none',
+          borderRadius: '2px 2px 0 0',
+        }}
+      />
+      {/* Bottom fade */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '2rem',
+          background: 'linear-gradient(to top, var(--bg-primary), transparent)',
+          zIndex: 1,
+          pointerEvents: 'none',
+          borderRadius: '0 0 2px 2px',
+        }}
+      />
+      <div
+        ref={scrollRef}
+        className="demo-scroll"
+        style={{
+          fontFamily: MONO,
+          fontSize: '0.73rem',
+          lineHeight: 1.8,
+          height: '16rem',
+          padding: '2rem 0',
+          opacity: fading ? 0 : 1,
+          transition: `opacity ${FADE}ms ease`,
+        }}
+      >
+        {script.map((block, i) => {
+          const shown = i < visible;
+          const chars = typed[i] ?? (block.typing ? 0 : block.text.length);
+          const isTyping = typingIdx === i;
+          const text = block.typing ? block.text.slice(0, chars) : block.text;
 
-        if (block.style === 'prompt') {
-          return (
-            <p key={i} style={{ ...base, margin: 0, color: 'var(--text-primary)' }}>
-              {block.text}
-            </p>
-          );
-        }
+          const base: React.CSSProperties = {
+            margin: 0,
+            padding: 0,
+            opacity: shown ? 1 : 0,
+          };
 
-        if (block.style === 'body') {
-          return (
-            <p key={i} style={{ ...base, margin: '0.7em 0 0', color: 'var(--text-secondary)' }}>
-              {block.text}
-            </p>
-          );
-        }
+          if (block.typing) {
+            base.transition = 'opacity 0.1s';
+          } else {
+            base.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            base.transform = shown ? 'none' : 'translateY(4px)';
+          }
 
-        if (block.style === 'path') {
-          return (
-            <p key={i} style={{ ...base, margin: '1.1em 0 0', color: 'var(--text-ghost)', fontSize: '0.68rem' }}>
-              {block.text}
-            </p>
-          );
-        }
-
-        return (
-          <p
-            key={i}
-            style={{
-              ...base,
-              margin: '0.2em 0 0',
-              padding: '0.3em 0 0.3em 0.9em',
-              borderLeft: '2px solid var(--border-dashed)',
-              color: 'var(--text-primary)',
-            }}
-          >
-            {block.text}
-          </p>
-        );
-      })}
+          switch (block.style) {
+            case 'prompt':
+              return (
+                <p key={i} style={{ ...base, color: 'var(--text-primary)', marginTop: i > 0 ? '0.6em' : 0 }}>
+                  <span style={{ color: 'var(--text-ghost)' }}>{block.prefix}</span>
+                  {text}
+                  {isTyping && <span className="demo-cursor" />}
+                </p>
+              );
+            case 'engine':
+              return (
+                <p key={i} style={{ ...base, color: 'var(--text-secondary)', marginTop: '0.6em' }}>
+                  {text}
+                </p>
+              );
+            case 'path':
+              return (
+                <p key={i} style={{ ...base, color: 'var(--text-ghost)', marginTop: '0.9em', fontSize: '0.68rem' }}>
+                  {text}
+                </p>
+              );
+            case 'diff':
+              return (
+                <p
+                  key={i}
+                  style={{
+                    ...base,
+                    color: 'var(--text-primary)',
+                    marginTop: '0.15em',
+                    paddingLeft: '0.9em',
+                    paddingTop: '0.2em',
+                    paddingBottom: '0.2em',
+                    borderLeft: '2px solid var(--border-dashed)',
+                  }}
+                >
+                  {text}
+                </p>
+              );
+            default:
+              return null;
+          }
+        })}
+      </div>
     </div>
   );
 }

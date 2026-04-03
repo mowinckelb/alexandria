@@ -83,7 +83,7 @@ export async function getEventLog(): Promise<string> {
 /**
  * Monitoring dashboard — verification signals.
  */
-export async function getDashboard(): Promise<Record<string, unknown>> {
+export async function getDashboard(): Promise<Record<string, unknown> & { _events?: Record<string, string>[] }> {
   let events: Record<string, string>[] = [];
   let parseErrors = 0;
   try {
@@ -108,78 +108,13 @@ export async function getDashboard(): Promise<Record<string, unknown>> {
     return { status: 'no data', message: 'No events logged yet.' };
   }
 
-  // 1. Extraction survival rate
-  const extractions = events.filter(e => e.e === 'extraction').length;
-  const corrections = events.filter(e => e.e === 'feedback' && e.feedback_type === 'correction').length;
-  const extractionSurvivalRate = extractions > 0
-    ? Math.round((1 - corrections / extractions) * 100) / 100
-    : null;
-
-  const extractionsByDomain: Record<string, number> = {};
-  for (const e of events.filter(ev => ev.e === 'extraction')) {
-    const d = e.domain || e.d || 'unknown';
-    extractionsByDomain[d] = (extractionsByDomain[d] || 0) + 1;
-  }
-
-  const extractionsByStrength: Record<string, number> = {};
-  for (const e of events.filter(ev => ev.e === 'extraction')) {
-    const s = e.strength || e.s || 'unknown';
-    extractionsByStrength[s] = (extractionsByStrength[s] || 0) + 1;
-  }
-
-  const extractionsByTarget: Record<string, number> = {};
-  for (const e of events.filter(ev => ev.e === 'extraction')) {
-    const t = e.target || 'unknown';
-    extractionsByTarget[t] = (extractionsByTarget[t] || 0) + 1;
-  }
-
-  // 2. Constitution depth
-  const domainsCovered = Object.keys(extractionsByDomain).filter(d => d !== 'unknown').length;
-  const strongRatio = extractions > 0
-    ? Math.round((extractionsByStrength['strong'] || 0) / extractions * 100) / 100
-    : null;
-
-  // 3. Return rate
+  // 1. Session count (gap-based: >1h between events = new session)
   let sessionCount = events.length > 0 ? 1 : 0;
   for (let i = 1; i < events.length; i++) {
     const prev = new Date(events[i - 1].t).getTime();
     const curr = new Date(events[i].t).getTime();
     if (curr - prev > 60 * 60 * 1000) sessionCount++;
   }
-
-  // 4. Feedback sentiment
-  const feedbackByType: Record<string, number> = {};
-  for (const e of events.filter(ev => ev.e === 'feedback')) {
-    const ft = e.feedback_type || e.f || 'unknown';
-    feedbackByType[ft] = (feedbackByType[ft] || 0) + 1;
-  }
-  const totalFeedback = Object.values(feedbackByType).reduce((a, b) => a + b, 0);
-  const positiveRatio = totalFeedback > 0
-    ? Math.round((feedbackByType['positive'] || 0) / totalFeedback * 100) / 100
-    : null;
-
-  // 5. Mode activations
-  const modeActivations: Record<string, number> = {};
-  for (const e of events.filter(ev => ev.e === 'mode')) {
-    const m = e.mode || e.m || 'unknown';
-    modeActivations[m] = (modeActivations[m] || 0) + 1;
-  }
-
-  // 6. Vault intake
-  const vaultIntakeEvents = events.filter(e => e.e === 'vault_intake');
-  const vaultIntakeTotal = vaultIntakeEvents.reduce(
-    (sum, e) => sum + (parseInt(e.count) || 0), 0
-  );
-  const vaultTrackerErrors = events.filter(e => e.e === 'vault_tracker_error').length;
-  const vaultListErrors = events.filter(e => e.e === 'vault_intake_error').length;
-
-  // 7. Drive errors
-  const driveWriteErrors = events.filter(e => e.e === 'drive_write_error').length;
-  const droppedWrites = events.filter(e => e.e === 'write_dropped').length;
-  const authErrors = events.filter(e => e.e === 'auth_error').length;
-  const systemObservations = events.filter(
-    e => e.e === 'feedback' && e.feedback_type === 'pattern'
-  ).length;
 
   // Time range + staleness
   const firstEvent = events[0]?.t || null;
@@ -190,8 +125,7 @@ export async function getDashboard(): Promise<Record<string, unknown>> {
   const stale = hoursSinceLastEvent !== null && hoursSinceLastEvent > 24;
 
   // Anomaly detection
-  const sessionEventTypes = new Set(['prosumer_session', 'session_start', 'session_end']);
-  const sessionEvents = events.filter(e => sessionEventTypes.has(e.e));
+  const sessionEvents = events.filter(e => e.e === 'prosumer_session');
   const lastSessionEvent = sessionEvents.length > 0 ? sessionEvents[sessionEvents.length - 1].t : null;
   const hoursSinceLastSession = lastSessionEvent
     ? Math.round((Date.now() - new Date(lastSessionEvent).getTime()) / (1000 * 60 * 60) * 10) / 10
@@ -200,7 +134,7 @@ export async function getDashboard(): Promise<Record<string, unknown>> {
   const now = Date.now();
   const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
   const smokeFailures24h = events.filter(
-    e => (e.e === 'hook_failure' || e.event === 'hook_failure') && new Date(e.t).getTime() > twentyFourHoursAgo
+    e => e.event === 'hook_failure' && new Date(e.t).getTime() > twentyFourHoursAgo
   ).length;
 
   // Cron execution status
@@ -246,44 +180,17 @@ export async function getDashboard(): Promise<Record<string, unknown>> {
     users,
     total_events: events.length,
     parse_errors: parseErrors,
-    extraction_survival_rate: extractionSurvivalRate,
-    extractions: {
-      total: extractions,
-      by_domain: extractionsByDomain,
-      by_strength: extractionsByStrength,
-      by_target: extractionsByTarget,
-    },
-    depth: {
-      domains_covered: domainsCovered,
-      strong_ratio: strongRatio,
-    },
     sessions: sessionCount,
-    captures_per_session: sessionCount > 0 ? Math.round(extractions / sessionCount * 10) / 10 : null,
-    feedback: {
-      total: totalFeedback,
-      by_type: feedbackByType,
-      positive_ratio: positiveRatio,
-    },
-    mode_activations: modeActivations,
-    vault_intake: {
-      sessions_with_intake: vaultIntakeEvents.length,
-      total_files_surfaced: vaultIntakeTotal,
-    },
     errors: {
-      drive_write_errors: driveWriteErrors,
-      dropped_writes: droppedWrites,
-      vault_tracker_errors: vaultTrackerErrors,
-      vault_list_errors: vaultListErrors,
       log_parse_errors: parseErrors,
-      auth_errors: authErrors,
     },
-    system_observations: systemObservations,
     anomaly: {
       last_session_event: lastSessionEvent,
       hours_since_last_session: hoursSinceLastSession,
       smoke_failures_24h: smokeFailures24h,
     },
     library: await getLibraryMetrics(events),
+    _events: events,
   };
 }
 

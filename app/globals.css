@@ -410,6 +410,31 @@ html.app-shell input:focus {
   cursor: pointer;
 }
 
+/* Session demo */
+.demo-scroll {
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.demo-scroll::-webkit-scrollbar {
+  display: none;
+}
+/* blinking cursor */
+.demo-cursor::after {
+  content: '';
+  display: inline-block;
+  width: 1.5px;
+  height: 1em;
+  background: var(--text-primary);
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 1s step-end infinite;
+}
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-3px); }
