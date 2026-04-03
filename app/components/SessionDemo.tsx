@@ -161,32 +161,17 @@ export default function SessionDemo() {
 
   return (
     <div ref={outerRef} style={{ position: 'relative' }}>
-      {/* Top fade */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '2rem',
-          background: 'linear-gradient(to bottom, var(--bg-primary), transparent)',
-          zIndex: 1,
-          pointerEvents: 'none',
-          borderRadius: '2px 2px 0 0',
-        }}
-      />
-      {/* Bottom fade */}
+      {/* Bottom fade — text dissolves at the lower edge */}
       <div
         style={{
           position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
-          height: '2rem',
+          height: '2.5rem',
           background: 'linear-gradient(to top, var(--bg-primary), transparent)',
           zIndex: 1,
           pointerEvents: 'none',
-          borderRadius: '0 0 2px 2px',
         }}
       />
       <div
@@ -196,8 +181,8 @@ export default function SessionDemo() {
           fontFamily: MONO,
           fontSize: '0.73rem',
           lineHeight: 1.8,
-          height: '16rem',
-          padding: '2rem 0',
+          height: '18rem',
+          paddingBottom: '2.5rem',
           opacity: fading ? 0 : 1,
           transition: `opacity ${FADE}ms ease`,
         }}
