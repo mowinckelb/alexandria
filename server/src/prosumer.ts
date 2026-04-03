@@ -949,14 +949,13 @@ async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
     <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 12px; text-align: left;">
       <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ${SERVER_URL}/setup | bash -s ${apiKey}</code>
     </div>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. block</strong> &mdash; paste in new tab</p>
-    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">the curl prints the block. copy it, open a new tab in your cli or ide, paste. it builds your starter constitution. takes a while &mdash; let it work.</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. <a href="${SERVER_URL}/block" style="color: #3d3630;">block</a></strong> &mdash; paste in new tab</p>
+    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">copy the block, open a new tab in your cli or ide, paste. it builds your starter constitution. takes a while &mdash; let it work.</p>
     <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. /a</strong> &mdash; type when it's ready</p>
-    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 0;">the ramp. your first real session. this is the product.</p>
   </div>
   <div style="margin-bottom: 2.5rem;">
     <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">always</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><a href="${WEBSITE_URL}/shortcut" style="color: #3d3630;">share</a> to a.</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><a href="${WEBSITE_URL}/shortcut" style="color: #8a8078;">share</a> to a.</p>
     <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">/a to start</p>
     <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">a. to close</p>
   </div>
@@ -982,8 +981,8 @@ async function sendFollowupEmail(email: string, apiKey: string, day: number): Pr
     <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 12px; text-align: left;">
       <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ${SERVER_URL}/setup | bash -s ${apiKey}</code>
     </div>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. block</strong> &mdash; paste in new tab</p>
-    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">the curl prints the block. copy it, open a new tab in your cli or ide, paste. it builds your starter constitution.</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. <a href="${SERVER_URL}/block" style="color: #3d3630;">block</a></strong> &mdash; paste in new tab</p>
+    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">copy the block, open a new tab in your cli or ide, paste. it builds your starter constitution.</p>
     <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. /a</strong> &mdash; type when it's ready</p>
   </div>
 </div>`);
