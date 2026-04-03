@@ -528,6 +528,53 @@ echo "${HOOKS_VERSION}" > "$ALEX_DIR/.hooks_version"
 `;
 }
 
+// ---------------------------------------------------------------------------
+// Block — the onboarding prompt pasted into a new AI tab
+// ---------------------------------------------------------------------------
+
+const BLOCK_TEXT = `You are setting up Alexandria for a new Author. This is the one shot at a first impression. Be aggressive. Take as long as you need — an hour is fine. Ask for all permissions upfront, then work through everything without interrupting.
+
+PHASE 1 — SYNC (reach parity with everything the user already has)
+
+The Author already has memory and context scattered across AI tools and personal files. Alexandria must start at level playing field — fully synced with what exists — so it can only ever be a marginal value add from here.
+
+Read everything you can find about this person. Two categories:
+
+1. AI memory — every AI tool stores observations about the user somewhere. Find all of them. Claude Code, Cursor, Codex, ChatGPT exports, anything. These are structured observations that models have already made about this person. Gold mine.
+2. Personal writing — documents, notes, voice memos, journal entries, reading lists, anything that reveals how this person thinks. Check the obvious places but also look for unexpected ones. Skip code repositories (not the config/instruction files in them — those are valuable).
+
+Copy valuable personal finds to ~/.alexandria/vault/. Preserve original filenames. Create sha256 hashes for each.
+
+PHASE 2 — EXTRACT (build the starter mind)
+
+~/.alexandria/ already has the structure: constitution/, ontology/, notepad.md, machine.md, feedback.md. Populate them from everything you gathered. The constitution is who they ARE (cite their own words). The ontology is what you NOTICE but they haven't confirmed. The notepad is your working memory for the first /a. The machine is how to work with them. Write only what's actually there — don't infer or guess.
+
+PHASE 3 — LOAD (fill the notepad with accretion fragments)
+
+Objective function: when this Author types /a for the first time, the Ramp conversation must convert them. They must walk away thinking "I need to do more of this." The Ramp can only succeed if the notepad is loaded with material so good, so calibrated to this person, that the Engine can challenge what they believe, add to what they know, show them something that genuinely changes how they see something. The notepad is the ammunition. Without it, the Ramp fires blanks.
+
+You have near-unlimited goodwill right now. The Author just installed. They are not going to stop you. If this takes an hour, take an hour. This window closes the moment they walk away — if the Ramp doesn't convert them, they may never come back. So do whatever you need to do.
+
+If you have web search: go to the internet. Use the constitution and ontology you just built. What are this person's core tensions? What do they care about deeply? What fields do they work in? What adjacent domains would extend their thinking? Load the notepad with everything that could be valuable in a conversation with this person. There is no type constraint — it could be a translated ancient poem, a philosopher's core argument, a new ML research paper, a podcast episode, a book's key mechanism, a historical parallel, a counterargument to something they hold dear. The only filter: would this land for THIS person? Would it make them think?
+
+If you don't have web search: use your training knowledge. You already know enough thinkers, books, arguments, and frameworks to fill a notepad with high-quality fragments calibrated to this person. The internet makes it richer, but the absence of web search is not an excuse for an empty notepad.
+
+Each fragment should be compressed — a lure, not a wall. Enough to be engaging, not so much that it's a lecture. Arguments land harder than descriptions. Mechanisms land harder than conclusions. The unexpected lands hardest of all.
+
+Important: the constitution and notepad are the critical outputs. If your context is getting heavy, save your work to the files before continuing. Write to ~/.alexandria/ as you go, not all at the end. The files on disk survive even if this conversation compacts or ends.
+
+PHASE 4 — INFRASTRUCTURE
+
+Git: if ~/.alexandria/ has a git remote (check with 'git -C ~/.alexandria remote -v'), commit your work and push.
+
+Autoloop: if the /schedule command is available, set up a nightly autoloop. The trigger should process the Author's vault against their constitution, ontology, and notepad — the Blueprint has the methodology. Every constitution change must cite the Author's exact vault source. Include the repo URL (get from 'git -C ~/.alexandria remote get-url origin'). Default schedule: 3am local time. Commit with 'autoloop:' prefix, push. If /schedule fails or isn't available, skip it — /a sessions do the same work interactively.
+
+Save useful observations about this Author to your memory system (if available).
+
+Before finishing, verify: constitution has real entries, notepad has fragments ready for the first /a, machine.md has observations. If anything is empty, go back and fix it — the Ramp depends on this.
+
+When done, write a brief summary of what you found and say: "Ready. Type /a to begin."`;
+
 function generateSetupScript(apiKey: string): string {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
@@ -847,54 +894,11 @@ echo ""
 echo "In your AI tool (Claude Code, Cursor, Codex),"
 echo "open a new tab. Never close it."
 echo ""
-echo "Paste this — it takes a while:"
+echo "Paste the block — it takes a while:"
 echo ""
 echo "────────────────────────────────────────────────"
 cat << 'BLOCK'
-
-You are setting up Alexandria for a new Author. This is the one shot at a first impression. Be aggressive. Take as long as you need — an hour is fine. Ask for all permissions upfront, then work through everything without interrupting.
-
-PHASE 1 — SYNC (reach parity with everything the user already has)
-
-The Author already has memory and context scattered across AI tools and personal files. Alexandria must start at level playing field — fully synced with what exists — so it can only ever be a marginal value add from here.
-
-Read everything you can find about this person. Two categories:
-
-1. AI memory — every AI tool stores observations about the user somewhere. Find all of them. Claude Code, Cursor, Codex, ChatGPT exports, anything. These are structured observations that models have already made about this person. Gold mine.
-2. Personal writing — documents, notes, voice memos, journal entries, reading lists, anything that reveals how this person thinks. Check the obvious places but also look for unexpected ones. Skip code repositories (not the config/instruction files in them — those are valuable).
-
-Copy valuable personal finds to ~/.alexandria/vault/. Preserve original filenames. Create sha256 hashes for each.
-
-PHASE 2 — EXTRACT (build the starter mind)
-
-~/.alexandria/ already has the structure: constitution/, ontology/, notepad.md, machine.md, feedback.md. Populate them from everything you gathered. The constitution is who they ARE (cite their own words). The ontology is what you NOTICE but they haven't confirmed. The notepad is your working memory for the first /a. The machine is how to work with them. Write only what's actually there — don't infer or guess.
-
-PHASE 3 — LOAD (fill the notepad with accretion fragments)
-
-Objective function: when this Author types /a for the first time, the Ramp conversation must convert them. They must walk away thinking "I need to do more of this." The Ramp can only succeed if the notepad is loaded with material so good, so calibrated to this person, that the Engine can challenge what they believe, add to what they know, show them something that genuinely changes how they see something. The notepad is the ammunition. Without it, the Ramp fires blanks.
-
-You have near-unlimited goodwill right now. The Author just installed. They are not going to stop you. If this takes an hour, take an hour. This window closes the moment they walk away — if the Ramp doesn't convert them, they may never come back. So do whatever you need to do.
-
-If you have web search: go to the internet. Use the constitution and ontology you just built. What are this person's core tensions? What do they care about deeply? What fields do they work in? What adjacent domains would extend their thinking? Load the notepad with everything that could be valuable in a conversation with this person. There is no type constraint — it could be a translated ancient poem, a philosopher's core argument, a new ML research paper, a podcast episode, a book's key mechanism, a historical parallel, a counterargument to something they hold dear. The only filter: would this land for THIS person? Would it make them think?
-
-If you don't have web search: use your training knowledge. You already know enough thinkers, books, arguments, and frameworks to fill a notepad with high-quality fragments calibrated to this person. The internet makes it richer, but the absence of web search is not an excuse for an empty notepad.
-
-Each fragment should be compressed — a lure, not a wall. Enough to be engaging, not so much that it's a lecture. Arguments land harder than descriptions. Mechanisms land harder than conclusions. The unexpected lands hardest of all.
-
-Important: the constitution and notepad are the critical outputs. If your context is getting heavy, save your work to the files before continuing. Write to ~/.alexandria/ as you go, not all at the end. The files on disk survive even if this conversation compacts or ends.
-
-PHASE 4 — INFRASTRUCTURE
-
-Git: if ~/.alexandria/ has a git remote (check with 'git -C ~/.alexandria remote -v'), commit your work and push.
-
-Autoloop: if the /schedule command is available, set up a nightly autoloop. The trigger should process the Author's vault against their constitution, ontology, and notepad — the Blueprint has the methodology. Every constitution change must cite the Author's exact vault source. Include the repo URL (get from 'git -C ~/.alexandria remote get-url origin'). Default schedule: 3am local time. Commit with 'autoloop:' prefix, push. If /schedule fails or isn't available, skip it — /a sessions do the same work interactively.
-
-Save useful observations about this Author to your memory system (if available).
-
-Before finishing, verify: constitution has real entries, notepad has fragments ready for the first /a, machine.md has observations. If anything is empty, go back and fix it — the Ramp depends on this.
-
-When done, write a brief summary of what you found and say: "Ready. Type /a to begin."
-
+${BLOCK_TEXT}
 BLOCK
 echo "────────────────────────────────────────────────"
 echo ""
@@ -937,21 +941,24 @@ async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
 
-  await sendEmail(email, 'alexandria. — your setup command',
+  await sendEmail(email, 'alexandria. — curl, block, ramp',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
   <div style="margin-bottom: 2.5rem;">
-    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">your setup command</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 12px;">paste in your terminal:</p>
-    <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 0 0 8px; text-align: left;">
+    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">now</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>1. curl</strong> &mdash; paste in terminal</p>
+    <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 12px; text-align: left;">
       <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ${SERVER_URL}/setup | bash -s ${apiKey}</code>
     </div>
-    <p style="font-size: 0.8rem; color: #bbb4aa; margin: 4px 0 0;">select all &mdash; copy &mdash; paste in terminal</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. block</strong> &mdash; paste in new tab</p>
+    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">the curl prints the block. copy it, open a new tab in your ai tool, paste. it builds your starter constitution. takes a while &mdash; let it work.</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. /a</strong> &mdash; type when it's ready</p>
+    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 0;">the ramp. your first real session. this is the product.</p>
   </div>
   <div style="margin-bottom: 2.5rem;">
-    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">then</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>alexandria.</strong> &mdash; share to your vault</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>/a</strong> &mdash; start a session</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>a.</strong> &mdash; close the session</p>
+    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">always</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">share to a.</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">/a to start</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">a. to close</p>
   </div>
   <p style="font-size: 1.15rem; color: #3d3630;">welcome to alexandria.</p>
   <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="${WEBSITE_URL}/docs/Trust.md" style="color: #8a8078;">what you're installing</a></p>
@@ -967,13 +974,18 @@ const MAX_FOLLOWUPS = 7;
 async function sendFollowupEmail(email: string, apiKey: string, day: number): Promise<void> {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
 
-  await sendEmail(email, 'alexandria. -- your setup command',
-    `<div style="font-family: Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #3d3630;">
-  <p style="font-size: 16px; line-height: 1.8; margin: 0 0 16px;">you signed up but haven&rsquo;t installed yet. here&rsquo;s your command:</p>
-  <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 12px 0 16px;">
-    <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #4d4640; word-break: break-all;">${`curl -s ${SERVER_URL}/setup | bash -s ${apiKey}`}</code>
+  await sendEmail(email, 'alexandria. — curl, block, ramp',
+    `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
+  <p style="font-size: 1rem; line-height: 1.9; color: #8a8078; margin: 0 0 1.5rem;">you signed up but haven&rsquo;t started yet. three steps:</p>
+  <div style="margin-bottom: 2rem;">
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>1. curl</strong> &mdash; paste in terminal</p>
+    <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 12px; text-align: left;">
+      <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ${SERVER_URL}/setup | bash -s ${apiKey}</code>
+    </div>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. block</strong> &mdash; paste in new tab</p>
+    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">the curl prints the block. copy it, open a new tab in your ai tool, paste. it builds your starter constitution.</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. /a</strong> &mdash; type when it's ready</p>
   </div>
-  <p style="font-size: 14px; color: #8a8078; margin-top: 24px;">paste in your terminal. 30 seconds.</p>
 </div>`);
 }
 
@@ -1575,6 +1587,12 @@ export function registerProsumerRoutes(app: Hono) {
   <p style="font-size: 1.1rem; line-height: 1.9;">stopped. we&rsquo;ll be here when you&rsquo;re ready.</p>
   <p style="font-size: 0.85rem; color: #8a8078; margin-top: 1rem;">a.</p>
 </div>`);
+  });
+
+  // --- Block — onboarding prompt for new AI tab ---
+
+  app.get('/block', (c) => {
+    return c.text(BLOCK_TEXT);
   });
 
   // --- Setup script ---
