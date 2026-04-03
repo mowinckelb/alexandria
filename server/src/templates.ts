@@ -45,9 +45,9 @@ export function callbackPageHtml(login: string, apiKey: string): string {
     min-height: 100vh;
     padding: 2rem;
   }
-  .container { max-width: 420px; text-align: center; }
-  .section { margin-bottom: 2.5rem; }
-  .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin-bottom: 0.8rem; }
+  .container { text-align: center; }
+  .section { margin-bottom: 2.5rem; display: inline-block; text-align: left; }
+  .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin-bottom: 0.8rem; text-align: center; }
   .line { font-size: 1.1rem; font-weight: 400; line-height: 1.9; color: #3d3630; }
   .action {
     color: #3d3630;
@@ -117,12 +117,12 @@ export function callbackPageHtml(login: string, apiKey: string): string {
   </div>
   <div class="section">
     <p class="label">always</p>
-    <p class="line">share to a. <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">voice notes, articles, podcasts, screenshots — anything with signal. from your phone, from anywhere. the more you share, the more /a has to work with.</span></span></p>
-    <p class="line">/a to start</p>
-    <p class="line">a. to close</p>
+    <p class="line">&middot; share to a. <a class="action" href="${WEBSITE_URL}/shortcut" target="_blank"><span class="icon">${ICON_DOWNLOAD}</span></a> <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">add the shortcut to your phone. voice notes, articles, podcasts, screenshots — anything with signal. hit share, pick alexandria, done. the more you share, the more /a has to work with.</span></span></p>
+    <p class="line">&middot; /a to start</p>
+    <p class="line">&middot; a. to close</p>
   </div>
   <p class="closing">welcome to alexandria.</p>
-  <p class="footer"><a class="action" href="${WEBSITE_URL}/shortcut" target="_blank">vault shortcut <span class="icon">${ICON_DOWNLOAD}</span></a> &nbsp; <a class="action" onclick="copySetup(this)">check with your ai: Trust.md <span class="icon">${ICON_COPY}</span></a></p>
+  <p class="footer"><a class="action" onclick="copySetup(this)">check with your ai: Trust.md <span class="icon">${ICON_COPY}</span></a></p>
 </div>
 <script>
 function copyCmd(el) {

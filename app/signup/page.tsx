@@ -39,7 +39,7 @@ export default function SignupPage() {
             </p>
           </a>
 
-          <div className="mt-14 sm:mt-16 flex flex-col items-center gap-10">
+          <div className="mt-14 sm:mt-16">
             <a
               href="https://mcp.mowinckel.ai/auth/github"
               className="text-[1.05rem] sm:text-[1.15rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60"
@@ -47,11 +47,6 @@ export default function SignupPage() {
             >
               sign up with github
             </a>
-
-            <p className="text-[0.75rem] tracking-wide text-center leading-[1.9]" style={{ color: 'var(--text-muted)' }}>
-              you&rsquo;ll get one command to paste in your terminal.<br />
-              we&rsquo;ll also email it so you don&rsquo;t lose it.
-            </p>
           </div>
 
         </div>
