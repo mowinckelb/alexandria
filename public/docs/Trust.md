@@ -80,7 +80,7 @@ On Mac, the vault, constitution, ontology, and library directories are symlinked
 
 ## The setup block
 
-After install, the setup prints a block of text to paste into a new chat. This block instructs the model to: (1) read your existing AI memory and personal files to build a preliminary constitution, ontology, and notepad, and (2) search the internet for material calibrated to your interests. **This is the most invasive step.** It runs inside your AI tool — same as any other conversation you have. No Alexandria server involved. You can read the block before pasting it. You can edit it. You can skip it and build your constitution manually via `/a`.
+After install, the setup prints a block of text to paste into a new chat. This block instructs the model to: (1) read your existing ai memory and personal files to build a preliminary constitution, ontology, and notepad, and (2) search the internet for material calibrated to your interests. **This is the most invasive step.** It runs inside your ai tool — same as any other conversation you have. No Alexandria server involved. You can read the block before pasting it. You can edit it. You can skip it and build your constitution manually via `/a`.
 
 ## Git backup — your data, your repo
 
