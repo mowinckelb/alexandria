@@ -113,16 +113,21 @@ export function callbackPageHtml(login: string, apiKey: string): string {
 </head>
 <body>
 <div class="container">
-  <div class="section">
-    <p class="label">now</p>
-    <p class="line"><a class="action" onclick="copyCmd(this)">1. curl <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; paste in terminal</p>
-    <p class="line"><a class="action" onclick="copyBlock(this)">2. block <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; paste in new tab <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">open a new conversation tab in your ai tool. paste the block. it reads your files to understand you — everything stays on your machine, nothing is sent anywhere. it builds your starter constitution. let it work.</span></span></p>
-    <p class="line">3. /a &mdash; type when it finishes <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">type /a in the same tab. that's the product. keep this tab open — /a to start a session, a. to close it, then /a again.</span></span></p>
+  <div class="section" style="margin-bottom: 1.5rem;">
+    <p class="line" style="font-size: 0.95rem; color: #8a8078; line-height: 1.7;">these three steps put files on your machine and tell your cli how to use them. no program. no app. just markdown and shell scripts you can read. we never see your data &mdash; it is <a class="action" onclick="copyTrust(this)" style="font-size: inherit;">architecturally impossible <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a></p>
+    <p class="line" style="font-size: 0.88rem; color: #bbb4aa; line-height: 1.6; margin-top: 0.4rem;">questions during setup? read the <a class="action" onclick="copyTrust(this)" style="font-size: inherit; color: #8a8078;">Trust.md <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; full disclosure of every file, every network call. or just ask in your cli or ide &mdash; it can read everything alexandria installs. once you're set up, it knows everything you know. ask it anything, give it feedback, make it yours.</p>
   </div>
   <div class="section">
-    <p class="label">always</p>
-    <p class="line"><a href="${WEBSITE_URL}/shortcut" target="_blank" style="color: #8a8078; text-decoration: none; transition: opacity 0.15s;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">share</a> to a. <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">add the shortcut to your phone. voice notes, articles, podcasts, screenshots — anything with signal. hit share, pick alexandria, done. the more you share, the more /a has to work with.</span></span></p>
-    <p class="line">/a to start. a. to close. repeat.</p>
+    <p class="label">setup</p>
+    <p class="line"><a class="action" onclick="copyPrime(this)">1. prime <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; paste in terminal <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">checks your machine has what alexandria needs. if github cli is installed, it logs you in for private backup. run this first.</span></span></p>
+    <p class="line"><a class="action" onclick="copyCmd(this)">2. curl <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; paste in terminal <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">installs alexandria on your machine. creates ~/.alexandria/, configures your cli and ide. everything local, nothing sent anywhere.</span></span></p>
+    <p class="line"><a class="action" onclick="copyBlock(this)">3. block <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; paste in new tab <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">open a new conversation in your cli or ide. paste the block. it reads your files to understand you — builds your starter constitution. let it work.</span></span></p>
+  </div>
+  <div class="section">
+    <p class="label">you're set up</p>
+    <p class="line">/a to start a session. a. to close it.</p>
+    <p class="line"><a href="${WEBSITE_URL}/shortcut" target="_blank" style="color: #8a8078; text-decoration: none; transition: opacity 0.15s;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">share</a> to feed the vault. <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">add the shortcut to your phone. voice notes, articles, podcasts, screenshots — anything with signal. hit share, pick alexandria, done. the more you share, the more /a has to work with.</span></span></p>
+    <p class="line" style="font-size: 0.95rem; color: #8a8078;">want something different? just say it in your cli or ide. feedback flows directly to the team.</p>
   </div>
   <div class="section">
     <p class="label">kin</p>
@@ -135,6 +140,10 @@ export function callbackPageHtml(login: string, apiKey: string): string {
 function flash(el) {
   el.classList.add('done');
   setTimeout(function() { el.classList.remove('done'); }, 2000);
+}
+function copyPrime(el) {
+  var prime = 'echo "checking prerequisites..." && { command -v git &>/dev/null && echo "  git: ok" || echo "  git: missing — install from https://git-scm.com"; } && { command -v node &>/dev/null && echo "  node: ok" || echo "  node: missing — install from https://nodejs.org"; } && { if command -v gh &>/dev/null; then if gh auth status &>/dev/null 2>&1; then echo "  github: ok"; else echo "  github: logging in..." && gh auth login; fi; else echo "" && echo "  github cli not found. it enables cloud backup and overnight processing." && echo "  install: brew install gh (mac) or https://cli.github.com" && echo "  then re-run this prime. or skip it — everything else still works."; fi; } && echo "" && echo "ready. run the curl."';
+  navigator.clipboard.writeText(prime).then(function() { flash(el); });
 }
 function copyCmd(el) {
   navigator.clipboard.writeText(${JSON.stringify(curlCmd)}).then(function() { flash(el); });

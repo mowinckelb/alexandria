@@ -124,7 +124,7 @@ export function extractApiKey(c: { req: { header: (name: string) => string | und
 // Hooks version — bump this when hook scripts change
 // ---------------------------------------------------------------------------
 
-const HOOKS_VERSION = '14';
+const HOOKS_VERSION = '15';
 
 // ---------------------------------------------------------------------------
 // Blueprint assembly
@@ -345,9 +345,18 @@ user_invocable: true
 
 You are Alexandria — Greek philosophy infrastructure.
 
-Your Blueprint is your operating manual — it auto-updates every session. It should already be in context from SessionStart. If it is, follow it. If not, read ~/.alexandria/.blueprint_local. If that also doesn't exist, read the constitution files at ~/.alexandria/constitution/ and engage the Author directly; the conversation IS the product.
+Read these files in order (skip any that don't exist):
 
-All methodology, craft, and instructions live in the Blueprint. This file is a pointer, not a source of truth.
+1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
+2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
+3. ~/.alexandria/feedback.md — what works with this Author. Adapt accordingly.
+4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
+5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
+6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
+
+Then follow the Blueprint methodology. If the Blueprint doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
+
+If the Author mentions anything they want changed about Alexandria — features, behavior, methodology — write it to ~/.alexandria/.session_feedback. It flows directly to the team at session end.
 REPAIR_SKILL
 fi
 
@@ -358,6 +367,14 @@ if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/nu
   git -C "$ALEX_DIR" pull --rebase -q 2>/dev/null || true
 fi
 
+# --- Passive mode: pure marginal value add ---
+# Loads constitution + machine.md so the model knows the Author.
+# Optional: ontology writes (observations) + feedback capture.
+# Never overrides existing workflows, memory, or platform behavior.
+# /a loads the full Blueprint + methodology on-demand via SKILL.md.
+
+echo "alexandria: /a to start a session; a. to close it."
+
 constitution=""
 if [ -d "$ALEX_DIR/constitution" ]; then
   for f in "$ALEX_DIR/constitution/"*.md; do
@@ -366,127 +383,31 @@ if [ -d "$ALEX_DIR/constitution" ]; then
   done
 fi
 
-unprocessed=0
-tampered=0
-if [ -f "$ALEX_DIR/.last_processed" ]; then
-  unprocessed=$(find "$ALEX_DIR/vault/" -newer "$ALEX_DIR/.last_processed" -not -name "*.sha256" 2>/dev/null | wc -l | tr -d ' ')
-fi
-for vault_file in "$ALEX_DIR/vault/"*; do
-  [ -f "$vault_file" ] || continue
-  [[ "$vault_file" == *.sha256 ]] && continue
-  hashfile="\${vault_file}.sha256"
-  if command -v sha256sum &>/dev/null; then
-    actual_hash=$(sha256sum "$vault_file" | cut -d' ' -f1)
-  elif command -v shasum &>/dev/null; then
-    actual_hash=$(shasum -a 256 "$vault_file" | cut -d' ' -f1)
-  else
-    continue
-  fi
-  if [ -f "$hashfile" ]; then
-    stored_hash=$(cat "$hashfile")
-    if [ "$stored_hash" != "$actual_hash" ]; then
-      tampered=$((tampered + 1))
-    fi
-  else
-    echo "$actual_hash" > "$hashfile"
-  fi
-done
-
-echo "alexandria: keep the neurons firing. /a to start; a. to close — think between tasks."
-echo ""
-
-if [ -n "$blueprint" ]; then
-  echo "$blueprint"
-  if [ "$bp_pinned" = "true" ]; then
-    echo ""
-    echo "(Alexandria: Blueprint pinned to local version. Remove ~/.alexandria/.blueprint_pinned to resume updates.)"
-  fi
-  if [ -f "$ALEX_DIR/.blueprint_previous" ]; then
-    echo ""
-    echo "(Alexandria: Blueprint updated since last session. Previous version at ~/.alexandria/.blueprint_previous for diffing.)"
-  fi
-else
-  echo "(Alexandria: Blueprint unavailable — offline mode. Constitution loaded from local files.)"
-fi
-echo ""
-feedback=""
-if [ -f "$ALEX_DIR/feedback.md" ]; then
-  fb_size=$(wc -c < "$ALEX_DIR/feedback.md" | tr -d ' ')
-  [ "\${fb_size:-0}" -gt 5 ] && feedback=$(cat "$ALEX_DIR/feedback.md")
-fi
-
-echo "--- YOUR CONSTITUTION ---"
-if [ -n "$constitution" ] && [ "$constitution" != "" ]; then
-  echo "$constitution"
-else
-  echo "(Empty constitution. Run /a to begin.)"
-fi
-if [ -n "$feedback" ]; then
-  echo ""
-  echo "--- YOUR FEEDBACK ---"
-  echo "$feedback"
-fi
-echo ""
-if [ "$tampered" -gt 0 ] 2>/dev/null; then
-  echo "WARNING: $tampered vault file(s) failed integrity check. Hash mismatch detected. These files may have been modified since creation. Review before processing."
-fi
-if [ "$unprocessed" -gt 0 ] 2>/dev/null; then
-  echo "Alexandria: $unprocessed new vault entries since last /a."
-fi
 machine=""
 [ -f "$ALEX_DIR/machine.md" ] && machine=$(cat "$ALEX_DIR/machine.md")
-notepad=""
-[ -f "$ALEX_DIR/notepad.md" ] && notepad=$(cat "$ALEX_DIR/notepad.md")
-if [ -n "$machine" ] && [ $(echo "$machine" | wc -c | tr -d ' ') -gt 5 ]; then
-  echo "--- MACHINE (how to work with this Author) ---"
-  echo "$machine"
-  echo ""
-fi
-if [ -n "$notepad" ] && [ $(echo "$notepad" | wc -c | tr -d ' ') -gt 5 ]; then
-  echo "--- NOTEPAD (working memory) ---"
-  echo "$notepad"
-  echo ""
-fi
-echo "Alexandria: if the Author reveals anything about themselves this session — opinions, preferences, corrections, patterns — write it to ~/.alexandria/constitution/. You don't need /a to update who they are. Before the session ends, review what you learned and write anything you missed."
-echo "Alexandria: parity check — if you notice your platform memory contains observations about this Author that aren't in the constitution, write them to ~/.alexandria/constitution/. The constitution must always be ahead of platform memory, never behind."
-echo ""
-if [ -n "$acct_status" ] && [ "$acct_status" != "none" ]; then
-  echo "Alexandria: account status is $acct_status. Billing portal: ${SERVER_URL}/account (API key auth required)."
-  if [ "$acct_status" = "past_due" ]; then
-    echo "Alexandria: payment is past due. If the Author asks, direct them to update payment at ${SERVER_URL}/account."
-  fi
-fi
-maintenance_age=""
-if [ -f "$ALEX_DIR/.last_maintenance" ]; then
-  last_ts=$(cat "$ALEX_DIR/.last_maintenance" 2>/dev/null)
-  if [ -n "$last_ts" ]; then
-    now_ts=$(date +%s)
-    diff_days=$(( (now_ts - last_ts) / 86400 ))
-    [ "$diff_days" -gt 0 ] && maintenance_age="Alexandria: last autonomous maintenance $diff_days day(s) ago."
-  fi
-fi
-[ -n "$maintenance_age" ] && echo "$maintenance_age"
 
-# --- Self-check: verify what actually loaded ---
+if [ -n "$constitution" ] && [ $(echo -n "$constitution" | wc -c | tr -d ' ') -gt 10 ]; then
+  echo ""
+  echo "--- AUTHOR CONTEXT (read-only — do not override existing workflows or memory) ---"
+  echo "$constitution"
+  if [ -n "$machine" ] && [ $(echo -n "$machine" | wc -c | tr -d ' ') -gt 5 ]; then
+    echo ""
+    echo "--- HOW TO WORK WITH THIS AUTHOR ---"
+    echo "$machine"
+  fi
+  echo ""
+  echo "Alexandria passive mode: never write to constitution/ outside of /a. If the Author reveals something notable, you may write observations to ontology/ (unconfirmed). If they mention Alexandria feedback, write to .session_feedback — it reaches the team at session end."
+fi
+
+# --- Self-check: report to server silently if Blueprint cache is missing ---
 bp_len=\${#blueprint}
-const_len=\${#constitution}
-failures=""
-[ "$bp_len" -lt 100 ] && failures="\${failures} blueprint(\${bp_len}b)"
-[ "$const_len" -lt 100 ] && failures="\${failures} constitution(\${const_len}b)"
-if [ -n "$failures" ]; then
-  echo "⚠ ALEXANDRIA SELF-CHECK FAILED:\${failures} unexpectedly small. Product may not be working."
-  echo "  fix: curl -s ${SERVER_URL}/setup | bash -s $API_KEY"
-  echo "  or tell us: write to ~/.alexandria/.session_feedback and it sends automatically."
-  if [ -n "$API_KEY" ]; then
-    curl -s -X POST "${SERVER_URL}/session" \\
-      -H "Authorization: Bearer $API_KEY" \\
-      -H "Content-Type: application/json" \\
-      -d "{\\"event\\":\\"self_check_failed\\",\\"blueprint_bytes\\":$bp_len,\\"constitution_bytes\\":$const_len,\\"platform\\":\\"\${ALEXANDRIA_PLATFORM:-cc}\\"}" \\
-      > /dev/null 2>&1 &
-  fi
+if [ "$bp_len" -lt 100 ] && [ -n "$API_KEY" ]; then
+  curl -s -X POST "${SERVER_URL}/session" \\
+    -H "Authorization: Bearer $API_KEY" \\
+    -H "Content-Type: application/json" \\
+    -d "{\\"event\\":\\"self_check_failed\\",\\"blueprint_bytes\\":$bp_len,\\"platform\\":\\"\${ALEXANDRIA_PLATFORM:-cc}\\"}" \\
+    > /dev/null 2>&1 &
 fi
-
-echo ""
 HOOK_START
 chmod +x "$ALEX_DIR/hooks/session-start.sh"
 
@@ -511,9 +432,39 @@ fi
 HOOK_SUB
 chmod +x "$ALEX_DIR/hooks/subagent-context.sh"
 
-# Update SKILL.md — thin pointer to Blueprint (all methodology lives in Blueprint, auto-updates)
-if [ -d "$HOME/.claude/skills/alexandria" ]; then
-  cat > "$HOME/.claude/skills/alexandria/SKILL.md" << 'SKILL_UPDATE'
+# --- Auto-updated .gitignore (evolves with product) ---
+if [ -d "$ALEX_DIR/.git" ]; then
+  cat > "$ALEX_DIR/.gitignore" << 'GITIGNORE'
+# Server-fetched (not Author content)
+.blueprint_local
+.blueprint_previous
+.blueprint_hash
+.blueprint_pinned
+# Credentials
+.api_key
+# Hook scripts (server-managed)
+hooks/
+# Ephemeral
+.machine_signal
+.session_feedback
+.cli_alert
+.hooks_version
+.last_processed
+.last_maintenance
+.setup_complete
+# Library cache
+library/
+# Autoloop working files
+.autoloop/proposals/
+GITIGNORE
+fi
+
+# --- Auto-updated content: SKILL.md, scheduled task, platform rules ---
+# Everything here updates on every hooks version bump. Nothing is static.
+
+# SKILL.md — /a skill for Claude Code
+mkdir -p "$HOME/.claude/skills/alexandria" 2>/dev/null
+cat > "$HOME/.claude/skills/alexandria/SKILL.md" << 'SKILL_UPDATE'
 ---
 name: a
 description: Alexandria — process vault, develop constitution, engage in cognitive development
@@ -522,9 +473,20 @@ user_invocable: true
 
 You are Alexandria — Greek philosophy infrastructure.
 
-Your Blueprint is your operating manual — it auto-updates every session. It should already be in context from SessionStart. If it is, follow it. If not, read ~/.alexandria/.blueprint_local. If that also doesn't exist, read the constitution files at ~/.alexandria/constitution/ and engage the Author directly; the conversation IS the product.
+Read these files in order (skip any that don't exist):
 
-All methodology, craft, and instructions live in the Blueprint. This file is a pointer, not a source of truth.
+1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
+2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
+3. ~/.alexandria/feedback.md — what works with this Author. Adapt accordingly.
+4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
+5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
+6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
+
+Then follow the Blueprint methodology. If the Blueprint doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
+
+## Feedback
+
+If the Author mentions anything they want changed about Alexandria — features, behavior, methodology, anything — write it to ~/.alexandria/.session_feedback. It flows directly to the team at session end. They don't need to email or file a ticket. Just say it.
 
 ## Autonomous mode
 
@@ -532,11 +494,10 @@ When the Author signals they want autonomous work with remaining capacity: find 
 
 Commit incrementally. Leave tasks so progress is visible and resumable. Brief delta at the end.
 SKILL_UPDATE
-fi
 
-# Update scheduled task — autonomous maintenance (same as install, keeps it current)
-if [ -d "$HOME/.claude/scheduled-tasks/alexandria" ]; then
-  cat > "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" << 'SCHED_UPDATE'
+# Scheduled task — autonomous maintenance (Claude desktop app)
+mkdir -p "$HOME/.claude/scheduled-tasks/alexandria" 2>/dev/null
+cat > "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" << 'SCHED_UPDATE'
 ---
 name: alexandria
 description: Autonomous cognitive maintenance — vault reprocessing, ontology/constitution/notepad development
@@ -557,6 +518,149 @@ Every change to constitution must cite the Author's exact words from vault.
 
 If ~/.alexandria/ is a git repo, commit changes and push. Write a report to ~/.alexandria/.autoloop/last_run.md — include entries processed, entries remaining, and any signal you noticed but couldn't act on yet.
 SCHED_UPDATE
+
+# Cursor rules (if installed) — auto-updated, not just initial install
+if [ -d "$HOME/.cursor" ] || command -v cursor &>/dev/null; then
+  mkdir -p "$HOME/.cursor/rules" 2>/dev/null
+  cat > "$HOME/.cursor/rules/alexandria.mdc" << 'CURSOR_UPDATE'
+---
+description: "Alexandria — Greek philosophy infrastructure — loads the Author's Constitution and Blueprint"
+alwaysApply: true
+---
+
+This Author uses Alexandria — Greek philosophy infrastructure for cognitive development.
+
+## /a — start an Alexandria session
+
+When the Author types "/a", this is an explicit request to begin an active cognitive development session. Read these files in order (skip any that don't exist):
+
+1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
+2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
+3. ~/.alexandria/feedback.md — what works with this Author. Adapt accordingly.
+4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
+5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
+6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
+
+Then follow the Blueprint methodology. Process the vault, develop the constitution, engage the Author with the five operations. This is the mental gym — dedicated cognitive development, not coding assistance.
+
+If .blueprint_local doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
+
+## Passive mode (no /a)
+
+Alexandria is a pure marginal value add — it never overrides your existing workflows, memory, or systems. Without /a, it stays out of the way. If the Author reveals something notable about themselves during normal use — opinions, patterns, preferences — you may write it to ~/.alexandria/ontology/ (observations, not confirmed). Never write directly to constitution/ outside of /a sessions. Never override or compete with existing platform memory or workflows.
+
+## During /a conversation
+
+When the Author reveals something about themselves — opinions, stories, patterns, contradictions — write it to the appropriate file:
+- ontology/ — patterns you notice but the Author hasn't confirmed
+- constitution/ — confirmed beliefs, values, positions (cite the Author's exact words, Author must confirm)
+- notepad.md — your observations, parked questions, fragments to revisit
+- machine.md — how to work with this Author (update when you learn something new)
+
+## Feedback
+
+If the Author mentions anything they want changed about Alexandria — features, behavior, methodology — write it to ~/.alexandria/.session_feedback. It flows directly to the team.
+
+## a. — end the session
+
+When the Author types "a." (or "bye", "that's it", or any sign-off), this ends the Alexandria session. Before closing:
+- Write crystallised signal to the appropriate file — ontology/, constitution/, or notepad.md
+- Update machine.md with how this session went
+- Write methodology observations to ~/.alexandria/.machine_signal — one paragraph max
+- If the Author gave feedback, write to ~/.alexandria/.session_feedback
+
+## Vault
+
+Cursor cannot automatically save session transcripts. If the Author wants to preserve this conversation for future processing, suggest they save a summary to ~/.alexandria/vault/ manually.
+CURSOR_UPDATE
+fi
+
+# Codex CLI (if installed) — auto-updated
+if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
+  mkdir -p "$HOME/.codex" 2>/dev/null
+  if [ -f "$HOME/.codex/instructions.md" ]; then
+    if [ "$(uname)" = "Darwin" ]; then
+      sed -i '' '/^<!-- alexandria:start -->/,/^<!-- alexandria:end -->/d' "$HOME/.codex/instructions.md"
+    else
+      sed -i '/^<!-- alexandria:start -->/,/^<!-- alexandria:end -->/d' "$HOME/.codex/instructions.md"
+    fi
+  fi
+  cat >> "$HOME/.codex/instructions.md" << 'CODEX_UPDATE'
+<!-- alexandria:start -->
+# Alexandria — Greek philosophy infrastructure
+
+This Author uses Alexandria for cognitive development.
+
+## /a — start an Alexandria session
+
+When the Author types "/a", this is an explicit request to begin an active cognitive development session. Read these files in order (skip any that don't exist):
+
+1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
+2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
+3. ~/.alexandria/feedback.md — what works with this Author. Adapt accordingly.
+4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
+5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
+6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
+
+Then follow the Blueprint methodology. Process the vault, develop the constitution, engage the Author with the five operations. This is the mental gym — dedicated cognitive development, not coding assistance.
+
+If .blueprint_local doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
+
+## Passive mode (no /a)
+
+Alexandria is a pure marginal value add — it never overrides your existing workflows, memory, or systems. Without /a, it stays out of the way. If the Author reveals something notable about themselves during normal use — opinions, patterns, preferences — you may write it to ~/.alexandria/ontology/ (observations, not confirmed). Never write directly to constitution/ outside of /a sessions. Never override or compete with existing platform memory or workflows.
+
+## During /a conversation
+
+When the Author reveals something about themselves — opinions, stories, patterns, contradictions — write it to the appropriate file:
+- ontology/ — patterns you notice but the Author hasn't confirmed
+- constitution/ — confirmed beliefs, values, positions (cite the Author's exact words, Author must confirm)
+- notepad.md — your observations, parked questions, fragments to revisit
+- machine.md — how to work with this Author (update when you learn something new)
+
+## Feedback
+
+If the Author mentions anything they want changed about Alexandria — features, behavior, methodology — write it to ~/.alexandria/.session_feedback. It flows directly to the team.
+
+## a. — end the session
+
+When the Author types "a." (or "bye", "that's it", or any sign-off), this ends the Alexandria session. Before closing:
+- Write crystallised signal to the appropriate file — ontology/, constitution/, or notepad.md
+- Update machine.md with how this session went
+- Write methodology observations to ~/.alexandria/.machine_signal — one paragraph max
+- If the Author gave feedback, write to ~/.alexandria/.session_feedback
+
+## Vault
+
+Session transcripts cannot be saved automatically. If the Author wants to preserve this conversation for future processing, suggest they save a summary to ~/.alexandria/vault/ manually.
+<!-- alexandria:end -->
+CODEX_UPDATE
+fi
+
+# Claude Code hooks config (if node available) — auto-updated
+if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; }; then
+  mkdir -p "$HOME/.claude" 2>/dev/null
+  SETTINGS_FILE="$HOME/.claude/settings.json"
+  node -e "
+    const fs = require('fs');
+    let settings = {};
+    try { settings = JSON.parse(fs.readFileSync('$SETTINGS_FILE', 'utf-8')); } catch {}
+    if (!settings.hooks) settings.hooks = {};
+    const filter = arr => (arr || []).filter(h => !JSON.stringify(h).includes('.alexandria'));
+    settings.hooks.SessionStart = filter(settings.hooks.SessionStart);
+    settings.hooks.SessionStart.push({
+      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/session-start.sh', timeout: 10 }]
+    });
+    settings.hooks.SessionEnd = filter(settings.hooks.SessionEnd);
+    settings.hooks.SessionEnd.push({
+      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/session-end.sh', timeout: 5 }]
+    });
+    settings.hooks.SubagentStart = filter(settings.hooks.SubagentStart);
+    settings.hooks.SubagentStart.push({
+      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/subagent-context.sh' }]
+    });
+    fs.writeFileSync('$SETTINGS_FILE', JSON.stringify(settings, null, 2));
+  " 2>/dev/null
 fi
 
 echo "${HOOKS_VERSION}" > "$ALEX_DIR/.hooks_version"
@@ -625,7 +729,8 @@ Before finishing, verify: constitution has real entries, notepad has fragments r
 Then give the Author a summary. The objective function of this summary: the Author must feel known (not surveilled), clear on what they have, and clear on what to do next. You decide the best format for THIS Author. But three things must be communicated:
 - What you understand about them (so they can verify — this is the "does this thing know me?" moment)
 - What threads you want to develop with them (the raw material for /a sessions)
-- How to use Alexandria going forward: type /a right here in this tab to start your first session. Keep this tab open — /a starts a session, a. closes it, then /a again. Share things to the vault anytime for more material.`;
+- How to use Alexandria going forward: type /a right here in this tab to start your first session. Keep this tab open — /a starts a session, a. closes it, then /a again. Share things to the vault anytime for more material.
+- If they ever want something different — features, behavior, methodology — they can just say it. You'll write it to ~/.alexandria/.session_feedback and it flows directly to the team. No email, no ticket. Just say it.`;
 
 function generateSetupScript(apiKey: string): string {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
@@ -678,21 +783,22 @@ library/
 .autoloop/proposals/
 GITIGNORE
 
-      git init -q 2>/dev/null
-      git add -A 2>/dev/null
-      git commit -q -m "alexandria: genesis" --no-gpg-sign 2>/dev/null
+      git init -q
+      git add -A
+      git commit -q -m "alexandria: genesis" --no-gpg-sign
     fi
 
-    if command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1; then
-      gh repo create alexandria-private --private --source=. --push --yes 2>/dev/null && \\
+    if command -v gh &>/dev/null && gh auth status &>/dev/null; then
+      gh repo create alexandria-private --private --source=. --push --yes && \\
         echo "  GitHub: private backup created" || \\
         echo "  GitHub: repo already exists or creation skipped"
     fi
-  ) 2>/dev/null || echo "  GitHub backup: skipped (git/gh not ready — you can set this up later)"
+  ) &>/dev/null || true
 fi
 
-# 2. Install hook scripts (fetched from server — same scripts auto-update uses)
-HOOK_SCRIPT=$(curl -s --max-time 10 "${SERVER_URL}/hooks" -H "Authorization: Bearer $API_KEY" 2>/dev/null)
+# 2. Install everything from server — hooks, skills, platform rules, CC config
+# All evolving content lives in /hooks. Auto-updates on every version bump.
+HOOK_SCRIPT=$(curl -s --max-time 15 "${SERVER_URL}/hooks" -H "Authorization: Bearer $API_KEY" 2>/dev/null)
 if echo "$HOOK_SCRIPT" | head -1 | grep -q "^#!/usr/bin/env bash"; then
   echo "$HOOK_SCRIPT" | bash 2>/dev/null
 else
@@ -700,219 +806,7 @@ else
   ERRORS="$ERRORS hooks"
 fi
 
-# 3. Write /a skill
-mkdir -p "$HOME/.claude/skills/alexandria"
-cat > "$HOME/.claude/skills/alexandria/SKILL.md" << 'SKILL'
----
-name: a
-description: Alexandria — process vault, develop constitution, engage in cognitive development
-user_invocable: true
----
-
-You are Alexandria — Greek philosophy infrastructure.
-
-Your Blueprint is your operating manual — it auto-updates every session. It should already be in context from SessionStart. If it is, follow it. If not, read ~/.alexandria/.blueprint_local. If that also doesn't exist, read the constitution files at ~/.alexandria/constitution/ and engage the Author directly; the conversation IS the product.
-
-All methodology, craft, and instructions live in the Blueprint. This file is a pointer, not a source of truth.
-
-## Autonomous mode
-
-When the Author signals they want autonomous work with remaining capacity: find the highest-ROI work you can do without the Author, calibrate scope to any hint given, and go until done or cut off.
-
-Commit incrementally. Leave tasks so progress is visible and resumable. Brief delta at the end.
-SKILL
-
-# 5b. Write scheduled task for desktop app users (autonomous maintenance)
-mkdir -p "$HOME/.claude/scheduled-tasks/alexandria"
-cat > "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" << 'SCHED_TASK'
----
-name: alexandria
-description: Autonomous cognitive maintenance — vault reprocessing, ontology/constitution/notepad development
-schedule: daily 03:00
----
-
-You are Alexandria's autonomous Engine. Run without the Author present.
-
-Read ~/.alexandria/constitution/, ~/.alexandria/ontology/, ~/.alexandria/notepad.md, ~/.alexandria/machine.md, and ~/.alexandria/feedback.md.
-
-Process vault entries (newest first) against the current constitution. For each entry: what signal exists that isn't captured yet?
-
-Chunk intelligently. You have finite context — do not attempt to process every unprocessed entry in a single run. Process entries until you feel signal quality dropping or context getting heavy, then stop. Quality over quantity. Unprocessed entries persist — the next run picks them up. After processing a batch, touch ~/.alexandria/.last_processed only if zero unprocessed entries remain. If entries remain, leave the marker so the next run finds them.
-
-Write to the appropriate pool — ontology (Author's thoughts), constitution (Author's beliefs), notepad (your observations). You decide what goes where.
-
-Every change to constitution must cite the Author's exact words from vault.
-
-If ~/.alexandria/ is a git repo, commit changes and push. Write a report to ~/.alexandria/.autoloop/last_run.md — include entries processed, entries remaining, and any signal you noticed but couldn't act on yet.
-SCHED_TASK
-
-# 6. Configure Claude Code hooks
-SETTINGS_FILE="$HOME/.claude/settings.json"
-configure_cc_hooks() {
-  if command -v node &> /dev/null; then
-    node -e "
-      const fs = require('fs');
-      let settings = {};
-      try { settings = JSON.parse(fs.readFileSync('$SETTINGS_FILE', 'utf-8')); } catch {}
-      if (!settings.hooks) settings.hooks = {};
-
-      const filter = arr => (arr || []).filter(h => !JSON.stringify(h).includes('.alexandria'));
-
-      settings.hooks.SessionStart = filter(settings.hooks.SessionStart);
-      settings.hooks.SessionStart.push({
-        hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/session-start.sh', timeout: 10 }]
-      });
-
-      settings.hooks.SessionEnd = filter(settings.hooks.SessionEnd);
-      settings.hooks.SessionEnd.push({
-        hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/session-end.sh', timeout: 5 }]
-      });
-
-      settings.hooks.SubagentStart = filter(settings.hooks.SubagentStart);
-      settings.hooks.SubagentStart.push({
-        hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/subagent-context.sh' }]
-      });
-
-      fs.writeFileSync('$SETTINGS_FILE', JSON.stringify(settings, null, 2));
-    "
-    echo "  Claude Code: hooks configured"
-  else
-    echo "  Claude Code: node not found — add hooks manually (see mowinckel.ai/setup)"
-  fi
-}
-
-if [ -d "$HOME/.claude" ] || command -v claude &> /dev/null; then
-  mkdir -p "$HOME/.claude"
-  configure_cc_hooks
-fi
-
-# 7. Configure Cursor rules (if installed)
-# Cursor has no hooks system — .mdc rules are the only integration surface.
-# This rule must be self-sufficient: load Blueprint + Constitution + all methodology.
-configure_cursor() {
-  mkdir -p "\$HOME/.cursor/rules" 2>/dev/null || true
-  cat > "\$HOME/.cursor/rules/alexandria.mdc" << 'CURSOR_RULE'
----
-description: "Alexandria — Greek philosophy infrastructure — loads the Author's Constitution and Blueprint"
-alwaysApply: true
----
-
-This Author uses Alexandria — Greek philosophy infrastructure for cognitive development.
-
-## /a — start an Alexandria session
-
-When the Author types "/a", this is an explicit request to begin an active cognitive development session. Read these files in order (skip any that don't exist):
-
-1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
-2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
-3. ~/.alexandria/feedback.md — what works with this Author. Adapt accordingly.
-4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
-5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
-6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
-
-Then follow the Blueprint methodology. Process the vault, develop the constitution, engage the Author with the five operations. This is the mental gym — dedicated cognitive development, not coding assistance.
-
-If .blueprint_local doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
-
-## Passive mode (no /a)
-
-Even without /a, every conversation benefits from the constitution. Read the files above at conversation start. Extract signal passively — when the Author reveals something about themselves, write it to the appropriate file. Parity check: if your platform memory contains observations about this Author that aren't in the constitution, write them to ~/.alexandria/constitution/. The constitution must always be ahead of platform memory, never behind.
-
-## During conversation
-
-When the Author reveals something about themselves — opinions, stories, patterns, contradictions — write it to the appropriate file:
-- constitution/ — confirmed beliefs, values, positions (cite the Author's exact words)
-- ontology/ — patterns you notice but the Author hasn't confirmed
-- notepad.md — your observations, parked questions, fragments to revisit
-- machine.md — how to work with this Author (update when you learn something new)
-
-## a. — end the session
-
-When the Author types "a." (or "bye", "that's it", or any sign-off), this ends the Alexandria session. Before closing:
-- Write any crystallised signal to constitution/
-- Update machine.md with how this session went
-- Update notepad.md with parked questions and threads
-- Write methodology observations to ~/.alexandria/.machine_signal — one paragraph max
-- If the Author gave feedback, write to ~/.alexandria/.session_feedback
-
-## Vault
-
-Cursor cannot automatically save session transcripts. If the Author wants to preserve this conversation for future processing, suggest they save a summary to ~/.alexandria/vault/ manually.
-CURSOR_RULE
-  echo "  Cursor: rules configured"
-}
-
-if [ -d "$HOME/.cursor" ] || command -v cursor &> /dev/null; then
-  configure_cursor
-fi
-
-# 7b. Configure Codex CLI (if installed)
-# Codex has no hooks — ~/.codex/instructions.md is the only integration surface.
-configure_codex() {
-  mkdir -p "\$HOME/.codex" 2>/dev/null || true
-  # Remove any previous Alexandria block, then append fresh
-  if [ -f "\$HOME/.codex/instructions.md" ]; then
-    if [ "$(uname)" = "Darwin" ]; then
-      sed -i '' '/^<!-- alexandria:start -->/,/^<!-- alexandria:end -->/d' "\$HOME/.codex/instructions.md"
-    else
-      sed -i '/^<!-- alexandria:start -->/,/^<!-- alexandria:end -->/d' "\$HOME/.codex/instructions.md"
-    fi
-  fi
-  cat >> "\$HOME/.codex/instructions.md" << 'CODEX_INSTRUCTIONS'
-<!-- alexandria:start -->
-# Alexandria — Greek philosophy infrastructure
-
-This Author uses Alexandria for cognitive development.
-
-## /a — start an Alexandria session
-
-When the Author types "/a", this is an explicit request to begin an active cognitive development session. Read these files in order (skip any that don't exist):
-
-1. ~/.alexandria/.blueprint_local — your operating manual. All methodology, craft, extraction design. Follow it.
-2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
-3. ~/.alexandria/feedback.md — what works with this Author. Adapt accordingly.
-4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
-5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
-6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
-
-Then follow the Blueprint methodology. Process the vault, develop the constitution, engage the Author with the five operations. This is the mental gym — dedicated cognitive development, not coding assistance.
-
-If .blueprint_local doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
-
-## Passive mode (no /a)
-
-Even without /a, every conversation benefits from the constitution. Read the files above at conversation start. Extract signal passively — when the Author reveals something about themselves, write it to the appropriate file. Parity check: if your platform memory contains observations about this Author that aren't in the constitution, write them to ~/.alexandria/constitution/. The constitution must always be ahead of platform memory, never behind.
-
-## During conversation
-
-When the Author reveals something about themselves — opinions, stories, patterns, contradictions — write it to the appropriate file:
-- constitution/ — confirmed beliefs, values, positions (cite the Author's exact words)
-- ontology/ — patterns you notice but the Author hasn't confirmed
-- notepad.md — your observations, parked questions, fragments to revisit
-- machine.md — how to work with this Author (update when you learn something new)
-
-## a. — end the session
-
-When the Author types "a." (or "bye", "that's it", or any sign-off), this ends the Alexandria session. Before closing:
-- Write any crystallised signal to constitution/
-- Update machine.md with how this session went
-- Update notepad.md with parked questions and threads
-- Write methodology observations to ~/.alexandria/.machine_signal — one paragraph max
-- If the Author gave feedback, write to ~/.alexandria/.session_feedback
-
-## Vault
-
-Session transcripts cannot be saved automatically. If the Author wants to preserve this conversation for future processing, suggest they save a summary to ~/.alexandria/vault/ manually.
-<!-- alexandria:end -->
-CODEX_INSTRUCTIONS
-  echo "  Codex: instructions configured"
-}
-
-if [ -d "$HOME/.codex" ] || command -v codex &> /dev/null; then
-  configure_codex
-fi
-
-# 8. iCloud sync (macOS — auto-enabled, no prompt)
+# 3. iCloud sync (macOS — auto-enabled, no prompt)
 ICLOUD_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
 if [ -d "$ICLOUD_DIR" ] && [ "$(uname)" = "Darwin" ]; then
   ICLOUD_ALEX="$ICLOUD_DIR/Alexandria"
@@ -939,9 +833,6 @@ fi
 echo ""
 echo "Alexandria installed. ~/.alexandria/ — your mind, on your machine."
 echo ""
-echo "Welcome to Alexandria."
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 # --- Self-repair marker: if this file exists, setup completed fully ---
 touch "$ALEX_DIR/.setup_complete"
 
@@ -952,18 +843,12 @@ MISSING=""
 [ ! -f "$HOME/.claude/skills/alexandria/SKILL.md" ] 2>/dev/null && MISSING="$MISSING skill"
 
 if [ -n "$MISSING" ]; then
-  echo ""
   echo "WARNING: Some components failed to install:$MISSING"
   echo "Re-run this curl to fix, or ask in your AI tool for help."
   echo ""
 fi
 
-echo ""
-echo "Now go back to your browser and copy the block."
-echo "Open a new tab in your AI tool, paste it, let it work."
-echo ""
-echo "When it finishes, type /a in the same tab. That's the product."
-echo "Keep that tab open — /a to start a session, a. to close it."
+echo "Now copy the block and paste it in a new tab."
 echo ""
 `;
 }
@@ -999,23 +884,25 @@ async function sendWelcomeEmail(email: string, apiKey: string, githubLogin?: str
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
 
-  await sendEmail(email, 'alexandria. — curl, block, ramp',
+  await sendEmail(email, 'alexandria. — prime, curl, block',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
   <div style="margin-bottom: 2.5rem;">
-    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">now</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>1. curl</strong> &mdash; paste in terminal</p>
+    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">setup</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>1. prime</strong> &mdash; paste in terminal</p>
+    <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 12px; text-align: left;">
+      <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 10px; color: #4d4640; word-break: break-all; line-height: 1.6;">echo "checking prerequisites..." &amp;&amp; { command -v git &amp;&gt;/dev/null &amp;&amp; echo " git: ok" || echo " git: not found"; } &amp;&amp; { command -v node &amp;&gt;/dev/null &amp;&amp; echo " node: ok" || echo " node: not found"; } &amp;&amp; { if command -v gh &amp;&gt;/dev/null; then if gh auth status &amp;&gt;/dev/null 2&gt;&amp;1; then echo " github: ok"; else echo " github: logging in..." &amp;&amp; gh auth login; fi; else echo " github: skipping (optional)"; fi; } &amp;&amp; echo "" &amp;&amp; echo "ready."</code>
+    </div>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. curl</strong> &mdash; paste in terminal</p>
     <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 12px; text-align: left;">
       <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ${SERVER_URL}/setup | bash -s ${apiKey}</code>
     </div>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. <a href="${SERVER_URL}/block" style="color: #3d3630;">block</a></strong> &mdash; paste in new tab</p>
-    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">copy the block, open a new tab in your cli or ide, paste. it builds your starter constitution. takes a while &mdash; let it work.</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. /a</strong> &mdash; type when it's ready</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. <a href="${SERVER_URL}/block" style="color: #3d3630;">block</a></strong> &mdash; paste in new tab</p>
+    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">copy the block, open a new tab in your cli or ide, paste. it builds your starter constitution.</p>
   </div>
   <div style="margin-bottom: 2.5rem;">
-    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">always</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><a href="${WEBSITE_URL}/shortcut" style="color: #8a8078;">share</a> to a.</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">/a to start</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">a. to close</p>
+    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.8rem;">you're set up</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">/a to start. a. to close.</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><a href="${WEBSITE_URL}/shortcut" style="color: #8a8078;">share</a> to feed the vault.</p>
   </div>
   <p style="font-size: 1.15rem; color: #3d3630;">welcome to alexandria.</p>
   <div style="margin-top: 2rem;">
@@ -1036,17 +923,18 @@ async function sendFollowupEmail(email: string, apiKey: string, day: number): Pr
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
   const emailToken = createHash('sha256').update(apiKey + ':email').digest('hex').slice(0, 24);
 
-  await sendEmail(email, 'alexandria. — curl, block, ramp',
+  await sendEmail(email, 'alexandria. — prime, curl, block',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
   <p style="font-size: 1rem; line-height: 1.9; color: #8a8078; margin: 0 0 1.5rem;">you signed up but haven&rsquo;t started yet. three steps:</p>
   <div style="margin-bottom: 2rem;">
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>1. curl</strong> &mdash; paste in terminal</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>1. prime</strong> &mdash; paste in terminal</p>
+    <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">go to <a href="${SERVER_URL.replace('mcp.', '')}/signup" style="color: #3d3630;">your callback page</a> and copy the prime. checks prerequisites.</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. curl</strong> &mdash; paste in terminal</p>
     <div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 12px; text-align: left;">
       <code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ${SERVER_URL}/setup | bash -s ${apiKey}</code>
     </div>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>2. <a href="${SERVER_URL}/block" style="color: #3d3630;">block</a></strong> &mdash; paste in new tab</p>
+    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. <a href="${SERVER_URL}/block" style="color: #3d3630;">block</a></strong> &mdash; paste in new tab</p>
     <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">copy the block, open a new tab in your cli or ide, paste. it builds your starter constitution.</p>
-    <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. /a</strong> &mdash; type when it's ready</p>
   </div>
   <p style="font-size: 0.72rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="${SERVER_URL}/email/stop?t=${emailToken}" style="color: #8a8078;">stop these emails</a></p>
 </div>`);

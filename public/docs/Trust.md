@@ -18,8 +18,8 @@ Read the bash script. Everything below explains what it does. If anything below 
 |---|---|---|
 | `constitution/` | Markdown files about how you think | Yes — open in any editor |
 | `vault/` | Raw input — transcripts, notes, anything you drop in | Yes |
-| `hooks/session-start.sh` | Fetches methodology from server, loads constitution into session | Yes — `cat` it |
-| `hooks/session-end.sh` | Saves transcript to vault, sends anonymous metadata + optional feedback to server | Yes — `cat` it |
+| `hooks/session-start.sh` | Fetches and caches methodology, loads constitution + machine.md as context, syncs git, auto-updates hooks | Yes — `cat` it |
+| `hooks/session-end.sh` | Saves transcript to vault, sends anonymous metadata + optional feedback to server, syncs git | Yes — `cat` it |
 | `hooks/subagent-context.sh` | Injects constitution into subagents | Yes — `cat` it |
 | `feedback.md` | What works and doesn't with you — append-only | Yes |
 | `machine.md` | Engine's notes on how to work with you | Yes |
@@ -53,6 +53,18 @@ cat ~/.claude/settings.json | grep -A 3 alexandria
 **`~/.cursor/rules/alexandria.mdc`** — only if Cursor is detected. A rule that tells Cursor to read your constitution and follow the Blueprint. Cursor has no hooks — the rule is the only integration. This means activation is probabilistic: the model reads and follows the rule most of the time, but there is no guarantee. Vault capture, overnight processing, and automatic Blueprint updates require Claude Code.
 
 **`~/.codex/instructions.md`** — only if Codex is detected. Appends an Alexandria block (delimited by `<!-- alexandria:start/end -->` comments). Same as Cursor: probabilistic, no hooks, no vault capture.
+
+## What happens every session (passive mode)
+
+Every time you open a session in Claude Code, the session-start hook runs. It does three things:
+
+1. **Infrastructure** (silent): fetches and caches the Blueprint methodology, auto-updates hook scripts if a new version is available, syncs git if configured. You see none of this — it happens in the background.
+2. **Context** (visible): outputs your constitution and machine.md so the model knows who you are. This is read-only context — same as platform memory or a CLAUDE.md file. It makes every conversation slightly better because the model adapts to you.
+3. **One instruction**: if you reveal something notable about yourself during a normal session, the model may write an observation to `~/.alexandria/ontology/` (unconfirmed observations, not your constitution). If you mention product feedback about Alexandria, it writes to `.session_feedback` so the team hears it.
+
+That is it. Passive mode never writes to your constitution. Never overrides your existing memory, workflows, or tools. Never injects methodology or tells the model how to behave. It just provides context.
+
+When you type `/a`, that is active mode — the model reads the full Blueprint, loads all Alexandria files, and runs dedicated cognitive development. Active mode is always opt-in.
 
 ## What talks to the server
 
