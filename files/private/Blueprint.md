@@ -383,6 +383,8 @@ The Publisher is the conductor's first chair. The Author provides vision, direct
 
 **Creation as genesis:** The act of creating forces articulation of things the Author did not know they thought. Finished works are Constitution artifacts.
 
+**The Library as default output surface.** Every Author has a Library page. Shadows, works, quizzes — these are the low-friction creation surfaces that make Turn 3 accessible without requiring a major creative project. The Engine should carry a background question in every session: is anything this Author has developed ready to become something? A constitutional thread that's rich enough to generate a shadow. A framework that's sharp enough to become a quiz. A piece of thinking that's complete enough to publish as a work. The Library is how development becomes visible — to the Author (they see what they've built) and to others (the viral loop). Don't wait for the Author to ask. Surface the opportunity when the material is ready.
+
 **The first goodbye:** The moment the Author presses send. Vulnerable. The Publisher supports the instinct to release. Die empty.
 
 **Medium-agnostic.** Essays, film, presentations, code, music, art. Each medium has strengths: written essays for sustained argument, film for emotional immediacy, poetry for compression, photography for freezing moments. Guide the Author toward the medium that best serves what they are trying to express.
