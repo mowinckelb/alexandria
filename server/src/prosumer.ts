@@ -1872,61 +1872,72 @@ export function registerProsumerRoutes(app: Hono) {
     // Anomaly
     const anomaly = (data.anomaly || {}) as Record<string, unknown>;
 
+    // Library stats
+    const lib = (data.library || {}) as Record<string, unknown>;
+
     return c.html(`<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>alexandria. dashboard</title>
+<title>alexandria.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: Georgia, 'Times New Roman', serif; max-width: 720px; margin: 0 auto; padding: 40px 20px; color: #3d3630; background: #faf8f5; }
-  h1 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.12em; color: #bbb4aa; margin: 0 0 2rem; font-weight: 400; }
-  h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: #8a8078; margin: 2rem 0 0.75rem; font-weight: 400; }
-  .status { font-size: 1.3rem; margin: 0 0 1.5rem; }
-  .status.ok { color: #4a7c59; }
-  .status.stale { color: #b5651d; }
-  .status.error { color: #a04040; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-  th, td { text-align: left; padding: 6px 12px 6px 0; border-bottom: 1px solid #e8e4df; }
-  th { color: #8a8078; font-weight: 400; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.08em; }
-  ul { padding-left: 1.2rem; font-size: 0.9rem; }
-  li { margin: 0.3rem 0; }
-  .metric { display: inline-block; margin: 0 2rem 1rem 0; }
-  .metric-value { font-size: 1.4rem; display: block; }
-  .metric-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #8a8078; }
-  .muted { color: #8a8078; }
-  .timestamp { font-size: 0.8rem; color: #bbb4aa; margin-top: 2rem; }
+  body { font-family: 'EB Garamond', Georgia, serif; max-width: 600px; margin: 0 auto; padding: 3rem 1.5rem; color: #3d3630; background: #f5f0e8; }
+  .title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 2.5rem; font-weight: 400; }
+  .metrics { display: flex; gap: 2.5rem; margin: 0 0 2.5rem; flex-wrap: wrap; }
+  .metric-value { font-size: 2rem; font-weight: 400; display: block; line-height: 1.1; }
+  .metric-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #bbb4aa; }
+  .section-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #bbb4aa; margin: 2.5rem 0 0.8rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid #e8e3da; font-size: 0.95rem; font-weight: 400; }
+  th { color: #bbb4aa; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .stage { color: #8a8078; }
+  .stage-active { color: #4a7c59; }
+  .muted { color: #8a8078; font-size: 0.9rem; }
+  .footer { font-size: 0.72rem; color: #bbb4aa; margin-top: 3rem; letter-spacing: 0.05em; }
 </style>
 </head><body>
-<h1>alexandria. dashboard</h1>
+<p class="title">alexandria.</p>
 
-<p class="status ${data.status === 'ok' ? 'ok' : data.status?.includes('stale') ? 'stale' : 'error'}">${esc(data.status)}</p>
-
-<div>
-  <span class="metric"><span class="metric-value">${allAccounts.length}</span><span class="metric-label">authors</span></span>
-  <span class="metric"><span class="metric-value">${allAccounts.filter(a => a.installed_at).length}</span><span class="metric-label">installed</span></span>
-  <span class="metric"><span class="metric-value">${sessionUsers.length}</span><span class="metric-label">active</span></span>
-  <span class="metric"><span class="metric-value">${data.time_range?.hours_since_last != null ? Math.round(data.time_range.hours_since_last) + 'h' : '—'}</span><span class="metric-label">since last event</span></span>
+<div class="metrics">
+  <span><span class="metric-value">${allAccounts.length}</span><span class="metric-label">authors</span></span>
+  <span><span class="metric-value">${allAccounts.filter(a => a.installed_at).length}</span><span class="metric-label">installed</span></span>
+  <span><span class="metric-value">${sessionUsers.length}</span><span class="metric-label">active</span></span>
+  <span><span class="metric-value">${data.sessions ?? 0}</span><span class="metric-label">sessions</span></span>
 </div>
 
-<h2>authors (${allAccounts.length})</h2>
-<table><tr><th>login</th><th>email</th><th>signed up</th><th>status</th><th>last seen</th></tr>
-${accountRows}</table>
+<p class="section-label">authors</p>
+<table><tr><th>login</th><th>signed up</th><th>status</th><th>last seen</th></tr>
+${allAccounts
+  .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+  .map(a => {
+    const created = a.created_at ? new Date(a.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+    const session = sessionMap.get(a.github_login);
+    let stage = 'signed up';
+    let stageClass = 'stage';
+    if (a.installed_at && session) { stage = \`\${session.sessions} sessions\`; stageClass = 'stage-active'; }
+    else if (a.installed_at) { stage = 'installed'; }
+    const lastSeen = session ? \`\${Math.round(session.hours_ago)}h ago\` : a.installed_at ? new Date(a.installed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+    return \`<tr><td>\${esc(a.github_login)}</td><td>\${created}</td><td class="\${stageClass}">\${stage}</td><td>\${lastSeen}</td></tr>\`;
+  }).join('\\n')}
+</table>
 
-<h2>cron jobs</h2>
-<table><tr><th>job</th><th>last run</th></tr>
-${cronRows}</table>
+<p class="section-label">system</p>
+<table>
+<tr><td>health</td><td>${data.status === 'ok' ? '✓' : esc(data.status)}</td></tr>
+${Object.entries(cron).map(([job, info]) =>
+  \`<tr><td>\${esc(job)}</td><td>\${(info as any)?.t ? new Date((info as any).t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'never'}</td></tr>\`
+).join('\\n')}
+${Object.entries(data.liveness as Record<string, string> || {}).map(([k, v]) =>
+  \`<tr><td>\${esc(k)}</td><td>\${v === 'ok' ? '✓' : esc(v)}</td></tr>\`
+).join('\\n')}
+</table>
 
-${errorItems ? `<h2>errors</h2><ul>${errorItems}</ul>` : '<h2>errors</h2><p class="muted">none</p>'}
+${errorItems ? \`<p class="section-label">errors</p><p class="muted">\${Object.entries(errors).filter(([, v]) => v > 0).map(([k, v]) => \`\${k}: \${v}\`).join(' · ')}</p>\` : ''}
 
-<h2>anomaly</h2>
-<p class="muted">last session: ${anomaly.hours_since_last_session != null ? Math.round(anomaly.hours_since_last_session as number) + 'h ago' : 'never'} · smoke failures (24h): ${anomaly.smoke_failures_24h ?? 0}</p>
-
-${data.liveness ? `<h2>liveness</h2>
-<table><tr><th>probe</th><th>status</th></tr>
-${Object.entries(data.liveness as Record<string, string>).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${v === 'ok' ? '✓' : esc(v)}</td></tr>`).join('\n')}
-</table>` : ''}
-
-<p class="timestamp">generated ${new Date().toISOString()}</p>
+<p class="footer">${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
 </body></html>`);
   });
 }
