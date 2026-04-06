@@ -108,13 +108,11 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     return { status: 'no data', message: 'No events logged yet.' };
   }
 
-  // 1. Session count (gap-based: >1h between events = new session)
-  let sessionCount = events.length > 0 ? 1 : 0;
-  for (let i = 1; i < events.length; i++) {
-    const prev = new Date(events[i - 1].t).getTime();
-    const curr = new Date(events[i].t).getTime();
-    if (curr - prev > 60 * 60 * 1000) sessionCount++;
-  }
+  // 1. Real session count — only actual session-end events, not smoke tests
+  const SMOKE_EVENTS_TOP = new Set(['smoke_test', 'smoke_check', 'github_smoke', 'smoke_post_migration', 'debug_check', 'verification', 'lifecycle-test']);
+  const sessionCount = events.filter(e =>
+    e.e === 'prosumer_session' && e.event === 'end' && !SMOKE_EVENTS_TOP.has(e.event) && !SMOKE_EVENTS_TOP.has(e.platform)
+  ).length;
 
   // Time range + staleness
   const firstEvent = events[0]?.t || null;
@@ -149,16 +147,19 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
   } catch { /* non-fatal */ }
 
   // Active users — per-author session counts and last seen
+  // Only count real sessions (event=end or event=start), not smoke tests or automated checks
+  const SMOKE_EVENTS = new Set(['smoke_test', 'smoke_check', 'github_smoke', 'smoke_post_migration', 'debug_check', 'verification']);
   const authorStats: Record<string, { sessions: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
   for (const e of events) {
     if (e.e !== 'prosumer_session' || !e.author) continue;
+    if (SMOKE_EVENTS.has(e.event)) continue; // skip automated checks
     if (!authorStats[e.author]) {
       authorStats[e.author] = { sessions: 0, last_seen: e.t, failures: 0, platforms: new Set() };
     }
     const stat = authorStats[e.author];
-    stat.sessions++;
+    if (e.event === 'hook_failure') { stat.failures++; }
+    else { stat.sessions++; }
     if (e.t > stat.last_seen) stat.last_seen = e.t;
-    if (e.event === 'hook_failure') stat.failures++;
     if (e.platform) stat.platforms.add(e.platform);
   }
 

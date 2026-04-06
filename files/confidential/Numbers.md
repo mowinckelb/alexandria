@@ -51,17 +51,19 @@ One tier. Everyone gets everything. Slider open — Authors pay what it's worth.
 
 | The Examined Life | $/mo |
 |---|---:|
-| With 3+ active kin | $5 floor |
-| Without 3 kin | $10 floor |
+| With 5 active kin | Free |
+| Without 5 kin | $10 floor |
 | Slider | No ceiling |
 
-60% of users expected to have 3+ active kin.
+Binary pricing. The structural difference between $0 and $1 is larger than $1 and $100. Free users are not lost revenue — every free user brought 5 people into the network. The kin mechanic is a viral distribution engine: free users are Library inventory, paid users are margin.
+
+40% of users expected to pay $10+. 60% expected to go free via kin (each generating 5 new network members).
 
 | | $/mo |
 |---|---:|
-| **Blended ARPU** | **$7** |
+| **Blended ARPU** | **$4** |
 
-After kin mix and quarterly/annual discounts. Slider surplus adds to ARPU but is not modelled — pure upside.
+After kin mix. Slider surplus and kin-driven network growth add to ARPU over time but are not modelled — pure upside.
 
 Promo codes: Author-generated. Alexandria subsidises from its 50% Library cut. Viral mechanic, not discount.
 
@@ -81,11 +83,11 @@ Promo codes: Author-generated. Alexandria subsidises from its 50% Library cut. V
 | | |
 |---|---:|
 | Founding seeds | 25 |
-| Pricing | $5 floor, slider open |
-| If each seed brings 3 kin | 25 → 75 → 225 (Q1) |
+| Pricing | $10/month or free with 5 kin |
+| If each seed brings 5 kin | 25 → 125 → 625 (Q1) |
 | If kin multiplier is 1.5x | 25 → 38 → 57 (slower but organic) |
-| Break-even on company opex | 21 subscribers at $5/month |
-| Break-even on founder costs | ~80 subscribers at $7 blended ARPU |
+| Break-even on company opex | 10 subscribers at $10/month |
+| Break-even on founder costs | ~143 subscribers at $4 blended ARPU |
 
 Three distribution channels: local (founder in SF), network (Library viral — quizzes, shareable shadows), global (content claws — future, ai agents on video platforms).
 
@@ -106,7 +108,7 @@ Not a product tier — a mission tier. For people who believe Alexandria should 
 
 | | |
 |---|---:|
-| 20 patrons at $5/month | Break-even on company opex |
+| 10 patrons at $10/month | Break-even on company opex |
 | 50 patrons at $10/month | Founder costs start getting covered |
 
 This is the concrete mechanism behind "cannot die." Independent of whether the product achieves scale.

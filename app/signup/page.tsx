@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useTheme } from '../components/ThemeProvider';
 
 function ThemeToggle() {
@@ -25,6 +26,10 @@ function ThemeToggle() {
 }
 
 export default function SignupPage() {
+  const searchParams = useSearchParams();
+  const ref = searchParams.get('ref');
+  const authUrl = `https://mcp.mowinckel.ai/auth/github${ref ? `?ref=${encodeURIComponent(ref)}` : ''}`;
+
   return (
     <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', minHeight: '100vh' }}>
       <ThemeToggle />
@@ -41,7 +46,7 @@ export default function SignupPage() {
 
           <div className="mt-14 sm:mt-16">
             <a
-              href="https://mcp.mowinckel.ai/auth/github"
+              href={authUrl}
               className="text-[1.05rem] sm:text-[1.15rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60"
               style={{ color: 'var(--text-primary)' }}
             >
@@ -107,7 +112,7 @@ export default function SignupPage() {
           </div>
 
           <a
-            href="https://mcp.mowinckel.ai/auth/github"
+            href={authUrl}
             className="text-[1.05rem] sm:text-[1.15rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60"
             style={{ color: 'var(--text-primary)' }}
           >

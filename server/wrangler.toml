@@ -38,5 +38,8 @@ fallthrough = false
 [vars]
 BETA_MODE = "true"
 SERVER_URL = "https://mcp.mowinckel.ai"
+FOUNDER_EMAIL = "benjamin@mowinckel.com"
+ADMIN_GITHUB_LOGIN = "benmowinckel"
 WEBSITE_URL = "https://mowinckel.ai"
 LIBRARY_CUT_PERCENT = "50"
+KIN_THRESHOLD = "5"

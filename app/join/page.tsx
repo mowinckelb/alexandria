@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useTheme } from '../components/ThemeProvider';
 import FooterSection from '../components/FooterSection';
 import PhilosophyFiveWays from '../components/PhilosophyFiveWays';
@@ -29,6 +30,10 @@ function ThemeToggle() {
 }
 
 export default function JoinPage() {
+  const searchParams = useSearchParams();
+  const ref = searchParams.get('ref');
+  const signupUrl = `/signup${ref ? `?ref=${encodeURIComponent(ref)}` : ''}`;
+
   return (
     <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', minHeight: '100vh' }}>
       <ThemeToggle />
@@ -58,7 +63,7 @@ export default function JoinPage() {
             {/* Action */}
             <div className="py-2">
               <a
-                href="/signup"
+                href={signupUrl}
                 className="text-[1.05rem] sm:text-[1.15rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60"
                 style={{ color: 'var(--text-primary)' }}
               >

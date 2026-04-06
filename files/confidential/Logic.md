@@ -220,7 +220,7 @@ C9: **Buying the dataset means buying access to a marketplace of opted-in Shadow
 
 ### 10. How Alexandria gets there
 
-P35. Layer 1 — The Examined Life ($5/month with 3+ active kin, $10/month without; slider open — Authors pay what it's worth). Sovereign portable cognitive infrastructure plus active cognitive development — Socratic questioning, blind spot surfacing, creative iteration calibrated to the user's taste. One tier, everyone gets everything. The product is the changed person. Socrates said the unexamined life is not worth living. Alexandria sells the examined one. The product is built: Library v1 is live with shadows, quizzes, works, payment, promo codes, 24 API endpoints, and Stripe checkout. The question is no longer whether it can be built — it is whether anyone wants it.
+P35. Layer 1 — The Examined Life ($10/month, or free with 5 active kin; slider open — Authors pay what it's worth). Sovereign portable cognitive infrastructure plus active cognitive development — Socratic questioning, blind spot surfacing, creative iteration calibrated to the user's taste. One tier, everyone gets everything. The product is the changed person. Socrates said the unexamined life is not worth living. Alexandria sells the examined one. The product is built: Library v1 is live with shadows, quizzes, works, payment, promo codes, 24 API endpoints, and Stripe checkout. The question is no longer whether it can be built — it is whether anyone wants it.
 
 (Settled on the product. Assumption on adoption.)
 
@@ -236,11 +236,11 @@ P38. The cost base is near-zero. Solo founder. Every operational function is eit
 
 (Settled. Factual. The founder is not opposed to hiring — the structural argument is that no function currently justifies it, and the list of functions that might is shrinking as models improve.)
 
-P39. Break-even at approximately 21 subscribers at $5/month. The company cannot die from cost pressure.
+P39. Break-even at approximately 10 subscribers at $10/month. The company cannot die from cost pressure.
 
 (Settled. Arithmetic.)
 
-C10: **Two revenue layers on the same architecture. ai-native cost structure that improves as models improve. Break-even at 21 subscribers. The floor is survival. The ceiling depends on adoption.**
+C10: **Two revenue layers on the same architecture. ai-native cost structure that improves as models improve. Break-even at 10 subscribers. The floor is survival. The ceiling depends on adoption.**
 
 (Valid. Survival is settled. Scale is the assumption.)
 
@@ -332,7 +332,7 @@ The blue numbers are the assumptions. These are the only things worth discussing
 - P25 Most competing ai investments will be obsoleted by model releases.
 - P25b The four-position taxonomy is correct and Alexandria occupies position two (generate live data).
 - P30 Churn trends toward near-zero as Constitutions deepen.
-- P35 Enough people pay $5-10/month for the examined life.
+- P35 Enough people pay $10/month for the examined life (or bring 5 kin and pay nothing).
 - P36 Labs will pay for Library access.
 - P44 The founder's philosophical depth is a meaningful advantage.
 - P46 The subscription and Library revenue tiers reach meaningful scale.
@@ -444,13 +444,13 @@ Against: Users might not perceive the compounding value. If the experience doesn
 
 Assessment: The structural argument is sound. Whether users feel the compounding is an empirical question. Moderate assumption.
 
-**P35 — Enough people pay $5-10/month for the examined life.**
+**P35 — Enough people pay $10/month for the examined life (or bring 5 kin and pay nothing).**
 
-For: The pitch is simple: own your cognitive data, make every ai better, develop your thinking — $5/month with kin, $10 without. Below the threshold of deliberation for most ai users. One tier, everyone gets everything. Therapy is a $200B+ global market. Coaching is growing rapidly. Journaling and self-improvement apps have proven willingness to pay for inner development. The examined life is the ai-native version of an existing human need. The positive-sum attention frame sharpens the value proposition further: the target user (builders — coders, founders, creatives) knows there is marginal value in all the papers, podcasts, and books they do not have time to consume. Alexandria converts that zero-sum attention into positive-sum — the vault absorbs the material, the engine extracts only what is genuinely new against the user's constitution. The product is not an extra commitment. It is an amplifier of what the user already does.
+For: The pitch is binary: own your cognitive data, make every ai better, develop your thinking — $10/month, or free with 5 active kin. The structural difference between $0 and $1 is larger than the difference between $1 and $100. Binary pricing eliminates the comparison-to-software problem entirely — it is free or it is not. Free users are not lost revenue. Every free user brought 5 people into the network. The kin mechanic is a viral distribution engine: free users are Library inventory, paid users are margin. Below the threshold of deliberation for most ai users. One tier, everyone gets everything. Therapy is a $200B+ global market. Coaching is growing rapidly. Journaling and self-improvement apps have proven willingness to pay for inner development. The examined life is the ai-native version of an existing human need. The positive-sum attention frame sharpens the value proposition further: the target user (builders — coders, founders, creatives) knows there is marginal value in all the papers, podcasts, and books they do not have time to consume. Alexandria converts that zero-sum attention into positive-sum — the vault absorbs the material, the engine extracts only what is genuinely new against the user's constitution. The product is not an extra commitment. It is an amplifier of what the user already does.
 
 Against: The pain point is not acutely felt. Most people do not know they need this. Requires frame imposition before conversion. The examined life is a niche desire — most people do not want to be Socratically questioned about their thinking. Could be a long, slow build rather than a viral product. The positive-sum attention frame helps — "save time on reading" is felt more acutely than "develop your cognition" — but it is still an unfamiliar category.
 
-Assessment: Depends on distribution effectiveness and how quickly the frame spreads. The $5 price point with kin removes the deliberation barrier. The product is now built — Library v1 is live with payment, quizzes, viral sharing, and promo codes. The question has shifted from "can it be built?" to "do people want it?" That question is answerable for ~$15K by seeding 25 users. Moderate assumption.
+Assessment: Depends on distribution effectiveness and how quickly the frame spreads. The binary pricing — free with kin, $10 without — removes the deliberation barrier entirely. The product is now built — Library v1 is live with payment, quizzes, viral sharing, and promo codes. The question has shifted from "can it be built?" to "do people want it?" That question is answerable for ~$15K by seeding 25 users. Moderate assumption.
 
 **P36 — Labs will pay for Library access.**
 

@@ -1,7 +1,7 @@
 /**
  * Billing — Stripe subscription management + Library payment
  *
- * Subscription: $5/mo (with 3+ active kin), $10/mo (without). Slider open above floor.
+ * Subscription: $10/mo, or free with 5+ active kin. Binary. Slider open above floor.
  * Library: monthly tab billing (micro-transactions settled monthly via Stripe Billing Meters).
  * Non-Author: instant payment via Stripe Checkout.
  * Free during beta — billing infra is ready but not gating.
@@ -26,16 +26,16 @@ function getStripe(): Stripe {
 }
 
 // ---------------------------------------------------------------------------
-// Price IDs — resolved lazily on first use
+// Price ID — one price, $10/month. Free with 5+ active kin (coupon).
 // ---------------------------------------------------------------------------
 
-let priceWithKin: string | null = null;
-let priceWithoutKin: string | null = null;
+const KIN_THRESHOLD = parseInt(process.env.KIN_THRESHOLD || '5', 10);
 
-async function ensurePrices(): Promise<{ withKin: string; withoutKin: string }> {
-  if (priceWithKin && priceWithoutKin) {
-    return { withKin: priceWithKin, withoutKin: priceWithoutKin };
-  }
+let _priceId: string | null = null;
+let _couponId: string | null = null;
+
+async function ensurePrice(): Promise<string> {
+  if (_priceId) return _priceId;
 
   const stripe = getStripe();
   const products = await stripe.products.list({ limit: 10 });
@@ -50,32 +50,97 @@ async function ensurePrices(): Promise<{ withKin: string; withoutKin: string }> 
   }
 
   const prices = await stripe.prices.list({ product: product.id, limit: 10 });
-  let kin = prices.data.find(p => p.metadata.tier === 'with_kin' && p.active);
-  let noKin = prices.data.find(p => p.metadata.tier === 'without_kin' && p.active);
+  let price = prices.data.find(p => p.metadata.tier === 'standard' && p.active);
 
-  if (!kin) {
-    kin = await stripe.prices.create({
-      product: product.id,
-      unit_amount: 500,
-      currency: 'usd',
-      recurring: { interval: 'month' },
-      metadata: { tier: 'with_kin' },
-    });
-  }
-
-  if (!noKin) {
-    noKin = await stripe.prices.create({
+  if (!price) {
+    price = await stripe.prices.create({
       product: product.id,
       unit_amount: 1000,
       currency: 'usd',
       recurring: { interval: 'month' },
-      metadata: { tier: 'without_kin' },
+      metadata: { tier: 'standard' },
     });
   }
 
-  priceWithKin = kin.id;
-  priceWithoutKin = noKin.id;
-  return { withKin: priceWithKin, withoutKin: priceWithoutKin };
+  _priceId = price.id;
+  return _priceId;
+}
+
+async function ensureKinCoupon(): Promise<string> {
+  if (_couponId) return _couponId;
+
+  const stripe = getStripe();
+  const coupons = await stripe.coupons.list({ limit: 20 });
+  let coupon = coupons.data.find(c => c.metadata?.alexandria === 'kin_free' && c.valid);
+
+  if (!coupon) {
+    coupon = await stripe.coupons.create({
+      percent_off: 100,
+      duration: 'forever',
+      name: 'Active Kin — Free',
+      metadata: { alexandria: 'kin_free' },
+    });
+  }
+
+  _couponId = coupon.id;
+  return _couponId;
+}
+
+// ---------------------------------------------------------------------------
+// Kin — count active kin for a user, recalculate subscription
+// ---------------------------------------------------------------------------
+
+export async function countActiveKin(apiKey: string): Promise<number> {
+  const user = await findByApiKey(apiKey);
+  if (!user?.github_login) return 0;
+
+  // Find who this user referred (from D1 referrals table)
+  const { getDB } = await import('./db.js');
+  const db = getDB();
+  const { results } = await db.prepare(
+    `SELECT referred_github_login FROM referrals WHERE author_id = ?`
+  ).bind(user.github_login).all<{ referred_github_login: string }>();
+
+  if (!results || results.length === 0) return 0;
+
+  // Check which referred users had a session in the last 30 days
+  const { loadAccounts } = await import('./kv.js');
+  const accounts = await loadAccounts<Record<string, any>>();
+  const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  let active = 0;
+
+  for (const row of results) {
+    const kinAccount = Object.values(accounts).find((a: any) => a.github_login === row.referred_github_login);
+    if (kinAccount && (kinAccount as any).last_session) {
+      const lastSession = new Date((kinAccount as any).last_session).getTime();
+      if (now - lastSession < thirtyDays) active++;
+    }
+  }
+
+  return active;
+}
+
+export async function recalculateKinPricing(apiKey: string): Promise<void> {
+  const user = await findByApiKey(apiKey);
+  if (!user?.subscription_id) return;
+
+  const activeKin = await countActiveKin(apiKey);
+  const shouldBeFree = activeKin >= KIN_THRESHOLD;
+
+  const stripe = getStripe();
+  const sub = await stripe.subscriptions.retrieve(user.subscription_id);
+
+  const hasKinDiscount = sub.discount?.coupon?.metadata?.alexandria === 'kin_free';
+
+  if (shouldBeFree && !hasKinDiscount) {
+    const couponId = await ensureKinCoupon();
+    await stripe.subscriptions.update(user.subscription_id, { coupon: couponId });
+    logEvent('kin_pricing_free', { api_key: apiKey, active_kin: String(activeKin) });
+  } else if (!shouldBeFree && hasKinDiscount) {
+    await stripe.subscriptions.deleteDiscount(user.subscription_id);
+    logEvent('kin_pricing_paid', { api_key: apiKey, active_kin: String(activeKin) });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -126,10 +191,10 @@ export async function createCheckoutSession(opts: {
     return session.url || '';
   }
 
-  const prices = await ensurePrices();
+  const priceId = await ensurePrice();
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
-    line_items: [{ price: prices.withKin, quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     ...customer,
     subscription_data: {
       description: 'the examined life',
@@ -356,6 +421,28 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
           logEvent('billing_subscription_canceled', {
             customer: sub.customer as string,
           });
+          break;
+        }
+
+        case 'invoice.upcoming': {
+          // Recalculate kin pricing ~3 days before billing
+          const invoice = event.data.object as Stripe.Invoice;
+          const subDetails = invoice.parent?.subscription_details;
+          const subId = typeof subDetails?.subscription === 'string'
+            ? subDetails.subscription
+            : subDetails?.subscription?.id
+              || (typeof (invoice as any).subscription === 'string' ? (invoice as any).subscription : null);
+          if (subId) {
+            try {
+              const sub = await stripe.subscriptions.retrieve(subId);
+              const apiKey = sub.metadata?.api_key;
+              if (apiKey) {
+                await recalculateKinPricing(apiKey);
+              }
+            } catch (e) {
+              console.error('[billing] Kin recalculation failed:', e);
+            }
+          }
           break;
         }
 

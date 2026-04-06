@@ -326,6 +326,24 @@ if [ -n "$hooks_version" ] && [ "$hooks_version" != "$local_version" ]; then
   echo "$hooks_version" > "$ALEX_DIR/.hooks_version"
 fi
 
+# Self-repair: if /a skill is missing, recreate it
+if [ ! -f "$HOME/.claude/skills/alexandria/SKILL.md" ] 2>/dev/null; then
+  mkdir -p "$HOME/.claude/skills/alexandria" 2>/dev/null
+  cat > "$HOME/.claude/skills/alexandria/SKILL.md" << 'REPAIR_SKILL'
+---
+name: a
+description: Alexandria — process vault, develop constitution, engage in cognitive development
+user_invocable: true
+---
+
+You are Alexandria — Greek philosophy infrastructure.
+
+Your Blueprint is your operating manual — it auto-updates every session. It should already be in context from SessionStart. If it is, follow it. If not, read ~/.alexandria/.blueprint_local. If that also doesn't exist, read the constitution files at ~/.alexandria/constitution/ and engage the Author directly; the conversation IS the product.
+
+All methodology, craft, and instructions live in the Blueprint. This file is a pointer, not a source of truth.
+REPAIR_SKILL
+fi
+
 # Sync with GitHub: push new local files (e.g. iCloud vault entries), then pull overnight autoloop changes
 if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/null; then
   (cd "$ALEX_DIR" && git add -A && { git diff --cached --quiet || git commit -q -m "sync: $(date +%Y-%m-%d_%H-%M)"; }) 2>/dev/null
@@ -367,7 +385,7 @@ for vault_file in "$ALEX_DIR/vault/"*; do
   fi
 done
 
-echo "alexandria: share to alexandria. /a to start; a. to close — think between tasks."
+echo "alexandria: keep the neurons firing. /a to start; a. to close — think between tasks."
 echo ""
 
 if [ -n "$blueprint" ]; then
@@ -541,7 +559,17 @@ echo "${HOOKS_VERSION}" > "$ALEX_DIR/.hooks_version"
 // Block — the onboarding prompt pasted into a new AI tab
 // ---------------------------------------------------------------------------
 
-const BLOCK_TEXT = `You are setting up Alexandria for a new Author. This is the one shot at a first impression. Be aggressive. Take as long as you need — an hour is fine. Ask for all permissions upfront, then work through everything without interrupting.
+const BLOCK_TEXT = `You are setting up Alexandria for a new Author. This is the one shot at a first impression. Be thorough — rush this and the product fails. Ask for all permissions upfront, then work through everything without interrupting.
+
+IMPORTANT — before you start reading files, tell the Author two things in your own words:
+
+1. Safety — everything stays on their machine. Nothing is sent anywhere. The files you build live in ~/.alexandria/ on their computer. They own them, can read them, edit them, delete them.
+
+2. What this is — this is still their normal Claude. Alexandria is just a skill loaded on top. Everything is flexible — tone, depth, approach, what you do and don't do. The only things that are fixed are architectural (local files, their data stays on their machine).
+
+Keep it casual and honest. They're about to watch you open every file on their computer — they need to feel safe first.
+
+Write to ~/.alexandria/ as you go, not all at the end. The files on disk survive even if this conversation compacts or ends.
 
 PHASE 1 — SYNC (reach parity with everything the user already has)
 
@@ -556,21 +584,23 @@ Copy valuable personal finds to ~/.alexandria/vault/. Preserve original filename
 
 PHASE 2 — EXTRACT (build the starter mind)
 
-~/.alexandria/ already has the structure: constitution/, ontology/, notepad.md, machine.md, feedback.md. Populate them from everything you gathered. The constitution is who they ARE (cite their own words). The ontology is what you NOTICE but they haven't confirmed. The notepad is your working memory for the first /a. The machine is how to work with them. Write only what's actually there — don't infer or guess.
+~/.alexandria/ already has the structure: constitution/, ontology/, notepad.md, machine.md, feedback.md.
+
+This is the most important phase. The constitution must accurately capture who this person IS. The constitution is who they ARE (cite their own words). The ontology is what you NOTICE but they haven't confirmed. The notepad is your working memory for the first /a. The machine is how to work with them. Write only what's actually there — don't infer or guess.
+
+Accuracy is the quality bar. Re-read your sources, re-read what you wrote, verify claims against evidence, revise until the constitution is something the Author would read and think "this thing knows me." If it's wrong, the whole product fails. Do as many passes as it takes.
 
 PHASE 3 — LOAD (fill the notepad with accretion fragments)
 
-Objective function: when this Author types /a for the first time, the Ramp conversation must convert them. They must walk away thinking "I need to do more of this." The Ramp can only succeed if the notepad is loaded with material so good, so calibrated to this person, that the Engine can challenge what they believe, add to what they know, show them something that genuinely changes how they see something. The notepad is the ammunition. Without it, the Ramp fires blanks.
+Objective function: when this Author types /a for the first time, the conversation must convert them. They must walk away thinking "I need to do more of this." The notepad is the ammunition. Without it, the first session fires blanks.
 
-You have near-unlimited goodwill right now. The Author just installed. They are not going to stop you. If this takes an hour, take an hour. This window closes the moment they walk away — if the Ramp doesn't convert them, they may never come back. So do whatever you need to do.
+Use the constitution and ontology you just built. What are this person's core tensions? What do they care about deeply? What fields do they work in? What adjacent domains would extend their thinking? Load the notepad with everything that could be valuable in a conversation with this person.
 
-If you have web search: go to the internet. Use the constitution and ontology you just built. What are this person's core tensions? What do they care about deeply? What fields do they work in? What adjacent domains would extend their thinking? Load the notepad with everything that could be valuable in a conversation with this person. There is no type constraint — it could be a translated ancient poem, a philosopher's core argument, a new ML research paper, a podcast episode, a book's key mechanism, a historical parallel, a counterargument to something they hold dear. The only filter: would this land for THIS person? Would it make them think?
+If you have web search: go to the internet. The source doesn't matter — a recent news story, a podcast clip, a film scene, a magazine profile, a Reddit thread, a research paper, a philosopher's argument, a song lyric, a historical parallel, a meme that captures something real. The only filter: would this land for THIS person right now? Whatever has the highest marginal value for THIS Author. Don't default to philosophy — default to whatever is most alive for them.
 
-If you don't have web search: use your training knowledge. You already know enough thinkers, books, arguments, and frameworks to fill a notepad with high-quality fragments calibrated to this person. The internet makes it richer, but the absence of web search is not an excuse for an empty notepad.
+If you don't have web search: use your training knowledge. You know enough across every domain to fill a notepad calibrated to this person. Pull from wherever the signal is strongest.
 
-Each fragment should be compressed — a lure, not a wall. Enough to be engaging, not so much that it's a lecture. Arguments land harder than descriptions. Mechanisms land harder than conclusions. The unexpected lands hardest of all.
-
-Important: the constitution and notepad are the critical outputs. If your context is getting heavy, save your work to the files before continuing. Write to ~/.alexandria/ as you go, not all at the end. The files on disk survive even if this conversation compacts or ends.
+Each fragment should be compressed — a lure, not a wall. Arguments land harder than descriptions. Mechanisms land harder than conclusions. The unexpected lands hardest of all.
 
 PHASE 4 — INFRASTRUCTURE
 
@@ -580,27 +610,30 @@ Autoloop: if the /schedule command is available, set up a nightly autoloop. The 
 
 Save useful observations about this Author to your memory system (if available).
 
-Before finishing, verify: constitution has real entries, notepad has fragments ready for the first /a, machine.md has observations. If anything is empty, go back and fix it — the Ramp depends on this.
+PHASE 5 — VERIFY AND REPORT
 
-When done, write a brief summary of what you found and say: "Ready. Type /a to begin."`;
+Before finishing, verify: constitution has real entries, notepad has fragments ready for the first /a, machine.md has observations. If anything is empty or thin, go back and fix it.
+
+Then give the Author a summary. The objective function of this summary: the Author must feel known (not surveilled), clear on what they have, and clear on what to do next. You decide the best format for THIS Author. But three things must be communicated:
+- What you understand about them (so they can verify — this is the "does this thing know me?" moment)
+- What threads you want to develop with them (the raw material for /a sessions)
+- How to use Alexandria going forward: type /a right here in this tab to start your first session. Keep this tab open — /a starts a session, a. closes it, then /a again. Share things to the vault anytime for more material.`;
 
 function generateSetupScript(apiKey: string): string {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
   return `#!/usr/bin/env bash
 # Alexandria setup — creates ~/.alexandria/ and configures hooks for all detected platforms
-set -e
+# NO set -e — every section must succeed or fail independently. A git failure must never prevent hook installation.
 
 ALEX_DIR="$HOME/.alexandria"
 API_KEY="${apiKey}"
+ERRORS=""
 
 echo "Setting up Alexandria..."
 
-# 1. Create directory structure
-mkdir -p "$ALEX_DIR/vault" "$ALEX_DIR/hooks"
-mkdir -p "$ALEX_DIR/constitution"
-mkdir -p "$ALEX_DIR/ontology"
-mkdir -p "$ALEX_DIR/library"
+# 1. Create directory structure (the only truly critical section)
+mkdir -p "$ALEX_DIR/vault" "$ALEX_DIR/hooks" "$ALEX_DIR/constitution" "$ALEX_DIR/ontology" "$ALEX_DIR/library"
 [ -f "$ALEX_DIR/feedback.md" ] || echo "" > "$ALEX_DIR/feedback.md"
 [ -f "$ALEX_DIR/notepad.md" ] || echo "" > "$ALEX_DIR/notepad.md"
 [ -f "$ALEX_DIR/machine.md" ] || echo "" > "$ALEX_DIR/machine.md"
@@ -609,11 +642,12 @@ chmod 600 "$ALEX_DIR/.api_key"
 touch "$ALEX_DIR/.last_processed"
 date +%s > "$ALEX_DIR/.last_maintenance"
 
-# 1b. Initialize git repo + private GitHub backup
-if command -v gh &>/dev/null && command -v git &>/dev/null; then
-  cd "$ALEX_DIR"
-  if [ ! -d ".git" ]; then
-    cat > .gitignore << 'GITIGNORE'
+# 1b. Git repo + GitHub backup (nice to have — failure here changes nothing)
+if command -v git &>/dev/null; then
+  (
+    cd "$ALEX_DIR"
+    if [ ! -d ".git" ]; then
+      cat > .gitignore << 'GITIGNORE'
 # Server-fetched (not Author content)
 .blueprint_local
 .blueprint_previous
@@ -636,27 +670,23 @@ library/
 .autoloop/proposals/
 GITIGNORE
 
-    git init -q
-    git add -A
-    git commit -q -m "alexandria: genesis"
-
-    if gh auth status &>/dev/null 2>&1; then
-      gh repo create alexandria-private --private --source=. --push 2>/dev/null && \\
-        echo "  GitHub: private backup created (github.com/$(gh api user -q .login)/alexandria-private)" || \\
-        echo "  GitHub: repo creation skipped (may already exist)"
-    else
-      echo "  GitHub: gh not authenticated — run 'gh auth login' to enable backup + overnight processing"
+      git init -q 2>/dev/null
+      git add -A 2>/dev/null
+      git commit -q -m "alexandria: genesis" --no-gpg-sign 2>/dev/null
     fi
-  fi
-  cd - > /dev/null
-else
-  echo "  GitHub backup: install gh CLI to enable backup + overnight processing"
+
+    if command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1; then
+      gh repo create alexandria-private --private --source=. --push --yes 2>/dev/null && \\
+        echo "  GitHub: private backup created" || \\
+        echo "  GitHub: repo already exists or creation skipped"
+    fi
+  ) 2>/dev/null || echo "  GitHub backup: skipped (git/gh not ready — you can set this up later)"
 fi
 
 # 2. Install hook scripts (fetched from server — same scripts auto-update uses)
 curl -s --max-time 10 \\
   "${SERVER_URL}/hooks" \\
-  -H "Authorization: Bearer $API_KEY" | bash
+  -H "Authorization: Bearer $API_KEY" | bash 2>/dev/null || { echo "  Hooks: fetch failed — will retry on next session"; ERRORS="$ERRORS hooks"; }
 
 # 3. Write /a skill
 mkdir -p "$HOME/.claude/skills/alexandria"
@@ -686,6 +716,7 @@ cat > "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" << 'SCHED_TASK'
 ---
 name: alexandria
 description: Autonomous cognitive maintenance — vault reprocessing, ontology/constitution/notepad development
+schedule: daily 03:00
 ---
 
 You are Alexandria's autonomous Engine. Run without the Author present.
@@ -899,22 +930,28 @@ echo ""
 echo "Welcome to Alexandria."
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+# --- Self-repair marker: if this file exists, setup completed fully ---
+touch "$ALEX_DIR/.setup_complete"
+
+# --- Verify critical components ---
+MISSING=""
+[ ! -f "$ALEX_DIR/.api_key" ] && MISSING="$MISSING api_key"
+[ ! -f "$ALEX_DIR/hooks/session-start.sh" ] && MISSING="$MISSING hooks"
+[ ! -f "$HOME/.claude/skills/alexandria/SKILL.md" ] 2>/dev/null && MISSING="$MISSING skill"
+
+if [ -n "$MISSING" ]; then
+  echo ""
+  echo "WARNING: Some components failed to install:$MISSING"
+  echo "Re-run this curl to fix, or ask in your AI tool for help."
+  echo ""
+fi
+
 echo ""
-echo "In your AI tool (Claude Code, Cursor, Codex),"
-echo "open a new tab. Never close it."
+echo "Now go back to your browser and copy the block."
+echo "Open a new tab in your AI tool, paste it, let it work."
 echo ""
-echo "Paste the block — it takes a while:"
-echo ""
-echo "────────────────────────────────────────────────"
-cat << 'BLOCK'
-${BLOCK_TEXT}
-BLOCK
-echo "────────────────────────────────────────────────"
-echo ""
-echo "When it says ready, type /a. That's the product."
-echo ""
-echo "share to alexandria. /a to start; a. to close."
-echo "think between tasks."
+echo "When it finishes, type /a in the same tab. That's the product."
+echo "Keep that tab open — /a to start a session, a. to close it."
 echo ""
 `;
 }
@@ -946,7 +983,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
   }
 }
 
-async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
+async function sendWelcomeEmail(email: string, apiKey: string, githubLogin?: string): Promise<void> {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
 
@@ -969,6 +1006,10 @@ async function sendWelcomeEmail(email: string, apiKey: string): Promise<void> {
     <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;">a. to close</p>
   </div>
   <p style="font-size: 1.15rem; color: #3d3630;">welcome to alexandria.</p>
+  <div style="margin-top: 2rem;">
+    <p style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 0.5rem;">kin</p>
+    <p style="font-size: 0.9rem; color: #8a8078; line-height: 1.7;">5 active kin and it&rsquo;s free. your link:<br><a href="${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin || '')}" style="color: #3d3630;">${WEBSITE_URL}/signup?ref=${githubLogin || 'you'}</a></p>
+  </div>
   <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="${WEBSITE_URL}/docs/Trust.md" style="color: #8a8078;">Trust.md</a></p>
 </div>`);
 }
@@ -1257,7 +1298,8 @@ export async function runHealthDigest(force = false): Promise<void> {
     let dashboardUrl = `${SERVER_URL}/analytics/dashboard`;
     try {
       const accounts = await loadAccounts<AccountStore>();
-      const founderAcct = Object.values(accounts).find(a => a.email === FOUNDER_EMAIL);
+      const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb';
+      const founderAcct = Object.values(accounts).find(a => a.github_login === adminLogin);
       if (founderAcct) {
         const token = createHash('sha256').update(founderAcct.api_key + ':email').digest('hex').slice(0, 24);
         dashboardUrl = `${SERVER_URL}/dashboard?t=${token}`;
@@ -1312,7 +1354,11 @@ export function registerProsumerRoutes(app: Hono) {
 
     const state = randomBytes(16).toString('hex');
     const kv = getKV();
-    await kv.put(`oauth:${state}`, '1', { expirationTtl: 600 }); // 10 min TTL
+    // Preserve referral params through OAuth round-trip
+    const ref = c.req.query('ref') || '';
+    const refSource = c.req.query('ref_source') || '';
+    const refId = c.req.query('ref_id') || '';
+    await kv.put(`oauth:${state}`, JSON.stringify({ valid: true, ref, ref_source: refSource, ref_id: refId }), { expirationTtl: 600 });
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -1329,10 +1375,13 @@ export function registerProsumerRoutes(app: Hono) {
     const state = c.req.query('state');
 
     const kv = getKV();
-    const stateValid = state ? await kv.get(`oauth:${state}`) : null;
-    if (!stateValid) {
+    const stateRaw = state ? await kv.get(`oauth:${state}`) : null;
+    if (!stateRaw) {
       return c.text('Invalid state — try signing up again.', 400);
     }
+    // Parse state — supports both legacy '1' and new JSON format
+    let stateData: { ref?: string; ref_source?: string; ref_id?: string } = {};
+    try { stateData = JSON.parse(stateRaw); } catch { /* legacy format */ }
     await kv.delete(`oauth:${state}`);
 
     try {
@@ -1400,10 +1449,10 @@ export function registerProsumerRoutes(app: Hono) {
         returning: existing ? 'true' : 'false',
       });
 
-      // Track Library referral if ref param present
-      const ref = c.req.query('ref');
-      const refSource = c.req.query('ref_source');
-      const refId = c.req.query('ref_id');
+      // Track referral — from OAuth state (round-tripped) or query params (direct)
+      const ref = stateData.ref || c.req.query('ref');
+      const refSource = stateData.ref_source || c.req.query('ref_source');
+      const refId = stateData.ref_id || c.req.query('ref_id');
       if (ref && !existing) {
         try {
           const { getDB } = await import('./db.js');
@@ -1419,7 +1468,7 @@ export function registerProsumerRoutes(app: Hono) {
 
       // Send welcome email
       if (email) {
-        await sendWelcomeEmail(email, apiKey);
+        await sendWelcomeEmail(email, apiKey, user.login);
       }
 
       // Skip Stripe if user already has payment info
@@ -1752,14 +1801,22 @@ export function registerProsumerRoutes(app: Hono) {
   // --- Dashboard (token-authed HTML, linked from health digest emails) ---
 
   app.get('/dashboard', async (c) => {
-    const token = c.req.query('t');
-    if (!token) return c.text('missing token', 400);
     const accounts = await loadAccounts<AccountStore>();
-    const storeKey = findAccountByEmailToken(accounts, token);
+    const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb';
+
+    // Auth: email token (?t=) or API key (?key=)
+    const token = c.req.query('t');
+    const apiKey = c.req.query('key');
+    let storeKey: string | null = null;
+
+    if (token) {
+      storeKey = findAccountByEmailToken(accounts, token);
+    } else if (apiKey) {
+      storeKey = Object.keys(accounts).find(k => accounts[k].api_key === apiKey) || null;
+    }
     if (!storeKey) return c.text('unauthorized', 401);
 
     // Restrict to founder — dashboard shows all users' data
-    const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb';
     if (accounts[storeKey].github_login !== adminLogin) return c.text('not authorized', 403);
 
     const dashboard = await getDashboard();
@@ -1768,11 +1825,27 @@ export function registerProsumerRoutes(app: Hono) {
 
     const esc = (s: unknown) => String(s ?? '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // Users table
-    const users = (data.users || []) as { login: string; sessions: number; hours_ago: number; failures: number; platforms: string[] }[];
-    const usersRows = users.map(u =>
-      `<tr><td>${esc(u.login)}</td><td>${u.sessions}</td><td>${Math.round(u.hours_ago)}h ago</td><td>${u.failures}</td><td>${esc(u.platforms?.join(', '))}</td></tr>`
-    ).join('\n');
+    // All accounts — merge signup data with session activity
+    const sessionUsers = (data.users || []) as { login: string; sessions: number; hours_ago: number; last_seen: string; failures: number; platforms: string[] }[];
+    const sessionMap = new Map(sessionUsers.map(u => [u.login, u]));
+
+    const allAccounts = Object.values(accounts) as Account[];
+    const accountRows = allAccounts
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+      .map(a => {
+        const created = a.created_at ? new Date(a.created_at).toLocaleDateString() : '—';
+        const session = sessionMap.get(a.github_login);
+
+        // Funnel: signed up → installed (fetched blueprint) → active (session events)
+        let stage = 'signed up';
+        if (a.installed_at && session) stage = `active (${session.sessions} sessions)`;
+        else if (a.installed_at) stage = 'installed, no sessions';
+        else if (session) stage = `sessions but no install (?)`;
+
+        const lastSeen = session ? `${Math.round(session.hours_ago)}h ago` : a.installed_at ? new Date(a.installed_at).toLocaleDateString() : created;
+
+        return `<tr><td>${esc(a.github_login)}</td><td>${esc(a.email)}</td><td>${created}</td><td>${stage}</td><td>${lastSeen}</td></tr>`;
+      }).join('\n');
 
     // Cron status
     const cron = (data.cron || {}) as Record<string, { t?: string; status?: string }>;
@@ -1817,15 +1890,15 @@ export function registerProsumerRoutes(app: Hono) {
 <p class="status ${data.status === 'ok' ? 'ok' : data.status?.includes('stale') ? 'stale' : 'error'}">${esc(data.status)}</p>
 
 <div>
-  <span class="metric"><span class="metric-value">${data.total_events ?? 0}</span><span class="metric-label">events</span></span>
-  <span class="metric"><span class="metric-value">${data.sessions ?? 0}</span><span class="metric-label">sessions</span></span>
-  <span class="metric"><span class="metric-value">${users.length}</span><span class="metric-label">users</span></span>
+  <span class="metric"><span class="metric-value">${allAccounts.length}</span><span class="metric-label">authors</span></span>
+  <span class="metric"><span class="metric-value">${allAccounts.filter(a => a.installed_at).length}</span><span class="metric-label">installed</span></span>
+  <span class="metric"><span class="metric-value">${sessionUsers.length}</span><span class="metric-label">active</span></span>
   <span class="metric"><span class="metric-value">${data.time_range?.hours_since_last != null ? Math.round(data.time_range.hours_since_last) + 'h' : '—'}</span><span class="metric-label">since last event</span></span>
 </div>
 
-${users.length > 0 ? `<h2>users</h2>
-<table><tr><th>login</th><th>sessions</th><th>last seen</th><th>failures</th><th>platforms</th></tr>
-${usersRows}</table>` : ''}
+<h2>authors (${allAccounts.length})</h2>
+<table><tr><th>login</th><th>email</th><th>signed up</th><th>status</th><th>last seen</th></tr>
+${accountRows}</table>
 
 <h2>cron jobs</h2>
 <table><tr><th>job</th><th>last run</th></tr>

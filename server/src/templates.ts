@@ -116,14 +116,17 @@ export function callbackPageHtml(login: string, apiKey: string): string {
   <div class="section">
     <p class="label">now</p>
     <p class="line"><a class="action" onclick="copyCmd(this)">1. curl <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; paste in terminal</p>
-    <p class="line"><a class="action" onclick="copyBlock(this)">2. block <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; paste in new tab <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">open a new tab in your cli or ide. paste the block. it scans your machine, builds your starter constitution, and loads your notepad. takes a while — let it work.</span></span></p>
-    <p class="line">3. /a &mdash; type when it's ready <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">the ramp. your first real session. the block loaded the notepad — /a uses it. this is the product.</span></span></p>
+    <p class="line"><a class="action" onclick="copyBlock(this)">2. block <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> &mdash; paste in new tab <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">open a new conversation tab in your ai tool. paste the block. it reads your files to understand you — everything stays on your machine, nothing is sent anywhere. it builds your starter constitution. let it work.</span></span></p>
+    <p class="line">3. /a &mdash; type when it finishes <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">type /a in the same tab. that's the product. keep this tab open — /a to start a session, a. to close it, then /a again.</span></span></p>
   </div>
   <div class="section">
     <p class="label">always</p>
     <p class="line"><a href="${WEBSITE_URL}/shortcut" target="_blank" style="color: #8a8078; text-decoration: none; transition: opacity 0.15s;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">share</a> to a. <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">add the shortcut to your phone. voice notes, articles, podcasts, screenshots — anything with signal. hit share, pick alexandria, done. the more you share, the more /a has to work with.</span></span></p>
-    <p class="line">/a to start</p>
-    <p class="line">a. to close</p>
+    <p class="line">/a to start. a. to close. repeat.</p>
+  </div>
+  <div class="section">
+    <p class="label">kin</p>
+    <p class="line"><a class="action" onclick="copyKin(this)">your link <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a> <span class="info" onclick="toggleTip(this)">${ICON_INFO}<span class="tooltip">5 active kin and alexandria is free. send this to anyone who builds things.</span></span></p>
   </div>
   <p class="closing">welcome to alexandria.</p>
   <p class="footer"><a class="action" onclick="copyTrust(this)">Trust.md <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></a></p>
@@ -140,6 +143,9 @@ function copyBlock(el) {
   fetch('${SERVER_URL}/block').then(function(r) { return r.text(); }).then(function(text) {
     navigator.clipboard.writeText(text).then(function() { flash(el); });
   });
+}
+function copyKin(el) {
+  navigator.clipboard.writeText(${JSON.stringify(`${WEBSITE_URL}/signup?ref=${login}`)}).then(function() { flash(el); });
 }
 function copyTrust(el) {
   fetch('${WEBSITE_URL}/docs/Trust.md').then(function(r) { return r.text(); }).then(function(text) {

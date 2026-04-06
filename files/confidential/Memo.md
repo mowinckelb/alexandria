@@ -62,7 +62,7 @@ That is the opportunity cost of passing. Not zero. Everything you are currently 
 
 ## The Product
 
-**The Examined Life.** $5/month with three active kin, $10 without. Slider open. Everyone gets everything.
+**The Examined Life.** $10/month, or free with five active kin. Slider open. Everyone gets everything.
 
 Sovereignty: one structured picture across every ai provider. Your data, your machine. Mental gym: Socratic questioning, blind spot surfacing, creative iteration calibrated to your taste. Positive-sum attention: the vault absorbs everything the user does not have time to read and extracts only what changes their thinking. The product is the changed person — and the changed person's work is distinctly theirs.
 
@@ -112,7 +112,7 @@ I could be wrong about all of this. I don't think I am. Perhaps. The company cos
 
 ## The Numbers
 
-$100/month. No payroll, no compute, no storage, no database. Six dependencies, all CLI-controllable by ai agents. Break-even at 21 subscribers. The Patron tier (mission supporters, pay-what-you-want) makes this concrete — twenty patrons = break-even, independent of product traction.
+$100/month. No payroll, no compute, no storage, no database. Six dependencies, all CLI-controllable by ai agents. Break-even at 10 subscribers. The Patron tier (mission supporters, pay-what-you-want) makes this concrete — ten patrons = break-even, independent of product traction.
 
 A hire is a fixed cost that does not compound. An ai agent is a variable cost that compounds. The question is not "will you hire" but "what would a hire do that a better model won't do better, cheaper, and faster in six months?" That list is shrinking.
 
@@ -202,7 +202,7 @@ mowinckel.ai
 
 *- Logic.md: mowinckel.ai/partners/logic. 51 premises, 14 conclusions, 17 assumptions.*
 
-*- Break-even at 21 subscribers. $100/month. Patron tier = structural floor independent of product traction. Unkillable.*
+*- Break-even at 10 subscribers. $100/month. Patron tier = structural floor independent of product traction. Unkillable.*
 
 *- Library for Everyone (horizon): every software company, app, service would pay for richer personal data. Shadow MDs are the richest personal data artifact that exists. Author controls access, monetises own data. Alexandria captures value at the aggregate. Inverts the data economy.*
 
@@ -210,7 +210,7 @@ mowinckel.ai
 
 *- Library v1: 24 endpoints. Shadows, quizzes, works, Stripe, slider, promo codes, agent tokens. D1+R2. Zero inference cost.*
 
-*- Founding cohort: 25 seeds. Four quadrants. Author numbers. Slider: $5 floor, no ceiling.*
+*- Founding cohort: 25 seeds. Four quadrants. Author numbers. $10/month or free with 5 kin. Slider: no ceiling.*
 
 *- C1 circle: Ayo/Kaizen (Anthropic RL). Thomas/Millennium. Hama/Bain. Khiara/Oxford+Ellison. Ed/defence+Claude Code Max. Michal/Army→Rangers. All Princeton, all under 27.*
 

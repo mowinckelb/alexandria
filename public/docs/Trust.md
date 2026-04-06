@@ -135,6 +135,30 @@ Every autoloop run and every Engine session commits to git. This gives you full 
 
 The autoloop writes proposals, not edicts. Constitution changes cite the Author's exact words from the vault — you can verify every claim against your own source material. If something looks wrong, revert it. The git history is the audit trail.
 
+## What you can change — just by talking
+
+Alexandria is not an app with fixed behavior. It is a skill loaded into your existing ai. The same Claude you already use. Alexandria gives it a philosophy, a methodology (the Blueprint), and your files. That is all.
+
+Everything about HOW it works with you is flexible. Just say it:
+
+- "Be more direct" / "Be gentler"
+- "Don't bring up philosophy"
+- "Stop asking me questions at the end"
+- "Focus only on my writing, not my thinking"
+- "Be shorter" / "Go deeper"
+- "Skip the vault processing this session"
+- "Don't push back so hard"
+- "I want accretion only, no development"
+
+There is no behavior you have to accept. The Engine writes your preferences to `machine.md` so you only have to say it once. Over time, the Engine learns how to work with you specifically — that is what `machine.md` is for.
+
+**What IS Alexandria (cannot change by talking):**
+- Your constitution lives as local markdown files on your machine — that is the architecture
+- The developmental objective: the Engine tries to help you think harder — that is the philosophy
+- Your data stays local — that is the sovereignty guarantee
+
+Everything else — tone, depth, topics, structure, what it does and does not do — is a conversation between you and your ai. Same as it always was.
+
 ## Remove everything
 
 ```

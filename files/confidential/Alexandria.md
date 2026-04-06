@@ -18,7 +18,7 @@ Library v1 is live: shadow publishing (curated Constitution fragments at free an
 
 Three modes, one product. Output mode: the constitution enriches every ai interaction passively — the subscription pays for itself whether or not the Author did /a this week. Input mode: the mental gym, active Socratic development, the thing that changes the person. Accretion mode: the Engine reads the books, processes the sources, surfaces only the fragments that connect to the Author's existing thinking. Output sells itself. Input is the mission. Accretion bridges them. Ancient philosophy died when it stopped being daily practice and became academic (Hadot). Alexandria's output mode keeps compounding even when the Author is not actively engaged — the Author never fully leaves the building, and the transformation is always one session away.
 
-$5/month with three active kin, $10 without. Slider open — Authors pay what it is worth. Everyone gets everything. One tier.
+$10/month, or free with five active kin. Slider open — Authors pay what it is worth. Everyone gets everything. One tier.
 
 Pre-revenue. No external users. The product works. Distribution starts San Francisco, April 2026.
 
@@ -60,11 +60,11 @@ Defensibility is a cost gradient, not a wall: hidden extraction methodology (ser
 
 ### The economics
 
-Break-even at 21 subscribers. $100/month opex. You cannot kill this company.
+Break-even at 10 subscribers. $100/month opex. You cannot kill this company.
 
-The Patron tier makes unkillability concrete: mission supporters at pay-what-you-want, donation-style churn, independent of product scale. Twenty patrons = break-even. Fifty = founder costs start getting covered.
+The Patron tier makes unkillability concrete: mission supporters at pay-what-you-want, donation-style churn, independent of product scale. Ten patrons = break-even. Fifty = founder costs start getting covered.
 
-Three revenue layers on the same architecture. Layer 1: subscription ($5-10/month, scales linearly, sustains independently). Layer 2: Library for People (Authors earn from shadow access, Alexandria takes 50%, zero inference cost — pure margin). Layer 3: Library for Everyone (horizon) — every software company, app, and service would pay for richer personal data on their users. The shadow MD is the richest personal data artifact that exists. Author controls access per service, revocable at any time. Author monetises their own data. Alexandria captures value at the aggregate. This inverts the current data economy — the user owns the data, controls access, and earns from it.
+Three revenue layers on the same architecture. Layer 1: subscription ($10/month or free with 5 active kin, scales linearly, sustains independently). Layer 2: Library for People (Authors earn from shadow access, Alexandria takes 50%, zero inference cost — pure margin). Layer 3: Library for Everyone (horizon) — every software company, app, and service would pay for richer personal data on their users. The shadow MD is the richest personal data artifact that exists. Author controls access per service, revocable at any time. Author monetises their own data. Alexandria captures value at the aggregate. This inverts the current data economy — the user owns the data, controls access, and earns from it.
 
 No natural cancellation point. The Constitution compounds. Cancelling means abandoning a growing cognitive asset. As long as someone uses ai, the layer adds value.
 
