@@ -1034,6 +1034,7 @@ const MAX_FOLLOWUPS = 7;
 
 async function sendFollowupEmail(email: string, apiKey: string, day: number): Promise<void> {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
+  const emailToken = createHash('sha256').update(apiKey + ':email').digest('hex').slice(0, 24);
 
   await sendEmail(email, 'alexandria. — curl, block, ramp',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
@@ -1047,6 +1048,7 @@ async function sendFollowupEmail(email: string, apiKey: string, day: number): Pr
     <p style="font-size: 0.8rem; color: #8a8078; margin: 4px 0 12px;">copy the block, open a new tab in your cli or ide, paste. it builds your starter constitution.</p>
     <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 4px;"><strong>3. /a</strong> &mdash; type when it's ready</p>
   </div>
+  <p style="font-size: 0.72rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="${SERVER_URL}/email/stop?t=${emailToken}" style="color: #8a8078;">stop these emails</a></p>
 </div>`);
 }
 
@@ -1058,6 +1060,7 @@ export async function runFollowupCheck(): Promise<void> {
 
   for (const [key, account] of Object.entries(accounts)) {
     if (account.installed_at || !account.email) continue;
+    if (account.engagement_opt_out) continue;
     const count = account.followup_count || 0;
     if (count >= MAX_FOLLOWUPS) continue;
     const signupAge = Date.now() - new Date(account.created_at).getTime();
@@ -1797,6 +1800,34 @@ export function registerProsumerRoutes(app: Hono) {
 </div>`);
   });
 
+  // Admin: send a one-time email to all uninstalled users
+  app.post('/admin/nudge', async (c) => {
+    const key = c.req.query('key');
+    if (!key) return c.text('missing key', 400);
+    const accounts = await loadAccounts<AccountStore>();
+    const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'benmowinckel';
+    const adminKey = Object.keys(accounts).find(k => accounts[k].api_key === key);
+    if (!adminKey || accounts[adminKey].github_login !== adminLogin) return c.text('not authorized', 403);
+
+    const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
+    let sent = 0;
+    for (const [, account] of Object.entries(accounts)) {
+      if (account.installed_at || !account.email || account.engagement_opt_out) continue;
+      if (account.github_login === adminLogin) continue;
+      const emailToken = createHash('sha256').update(account.api_key + ':email').digest('hex').slice(0, 24);
+      await sendEmail(account.email, 'alexandria. — quick fix',
+        '<div style="font-family: \'EB Garamond\', Georgia, serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">' +
+        '<p style="font-size: 1rem; line-height: 1.9; color: #8a8078; margin: 0 0 1.5rem;">we fixed a setup issue. paste this in your terminal and everything should work:</p>' +
+        '<div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 2rem; text-align: left;">' +
+        '<code style="font-family: \'SF Mono\', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ' + SERVER_URL + '/setup | bash -s ' + account.api_key + '</code>' +
+        '</div>' +
+        '<p style="font-size: 0.72rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="' + SERVER_URL + '/email/stop?t=' + emailToken + '" style="color: #8a8078;">stop these emails</a></p>' +
+        '</div>');
+      sent++;
+    }
+    return c.json({ ok: true, sent });
+  });
+
   // --- Block — onboarding prompt for new AI tab ---
 
   app.get('/block', (c) => {
@@ -1872,8 +1903,39 @@ export function registerProsumerRoutes(app: Hono) {
     // Anomaly
     const anomaly = (data.anomaly || {}) as Record<string, unknown>;
 
+    // Pre-compute rows outside the template literal to avoid nested backtick issues
+    const authorTableRows = allAccounts
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+      .map(a => {
+        const created = a.created_at ? new Date(a.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+        const session = sessionMap.get(a.github_login);
+        let stage = 'signed up';
+        let stageClass = 'stage';
+        if (a.installed_at && session) { stage = session.sessions + ' sessions'; stageClass = 'stage-active'; }
+        else if (a.installed_at) { stage = 'installed'; }
+        const lastSeen = session ? Math.round(session.hours_ago) + 'h ago' : a.installed_at ? new Date(a.installed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+        return '<tr><td>' + esc(a.github_login) + '</td><td class="' + stageClass + '">' + stage + '</td><td>' + lastSeen + '</td></tr>';
+      }).join('\n');
+
+    // System: only show if something is wrong
+    const systemIssues: string[] = [];
+    if (data.status !== 'ok') systemIssues.push(String(data.status));
+    for (const [k, v] of Object.entries((data.liveness || {}) as Record<string, string>)) {
+      if (v !== 'ok') systemIssues.push(k + ': ' + v);
+    }
+    const systemOk = systemIssues.length === 0;
+
+    const errorLine = Object.entries(errors).filter(([, v]) => v > 0).map(([k, v]) => k + ': ' + v).join(' · ');
+
     // Library stats
     const lib = (data.library || {}) as Record<string, unknown>;
+    const libAuthors = (lib.total_authors || 0) as number;
+    const libShadows = (lib.total_shadows || 0) as number;
+    const libWorks = (lib.total_works || 0) as number;
+    const libQuizzes = (lib.total_quizzes || 0) as number;
+    const libCompletions = (lib.total_quiz_completions || 0) as number;
+
+    const timestamp = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     return c.html(`<!DOCTYPE html>
 <html lang="en"><head>
@@ -1885,7 +1947,7 @@ export function registerProsumerRoutes(app: Hono) {
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'EB Garamond', Georgia, serif; max-width: 600px; margin: 0 auto; padding: 3rem 1.5rem; color: #3d3630; background: #f5f0e8; }
-  .title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: #bbb4aa; margin: 0 0 2.5rem; font-weight: 400; }
+  .title { font-size: 1.15rem; letter-spacing: 0.03em; color: #3d3630; margin: 0 0 2.5rem; font-weight: 400; }
   .metrics { display: flex; gap: 2.5rem; margin: 0 0 2.5rem; flex-wrap: wrap; }
   .metric-value { font-size: 2rem; font-weight: 400; display: block; line-height: 1.1; }
   .metric-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #bbb4aa; }
@@ -1901,43 +1963,11 @@ export function registerProsumerRoutes(app: Hono) {
 </head><body>
 <p class="title">alexandria.</p>
 
-<div class="metrics">
-  <span><span class="metric-value">${allAccounts.length}</span><span class="metric-label">authors</span></span>
-  <span><span class="metric-value">${allAccounts.filter(a => a.installed_at).length}</span><span class="metric-label">installed</span></span>
-  <span><span class="metric-value">${sessionUsers.length}</span><span class="metric-label">active</span></span>
-  <span><span class="metric-value">${data.sessions ?? 0}</span><span class="metric-label">sessions</span></span>
-</div>
-
-<p class="section-label">authors</p>
-<table><tr><th>login</th><th>signed up</th><th>status</th><th>last seen</th></tr>
-${allAccounts
-  .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
-  .map(a => {
-    const created = a.created_at ? new Date(a.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
-    const session = sessionMap.get(a.github_login);
-    let stage = 'signed up';
-    let stageClass = 'stage';
-    if (a.installed_at && session) { stage = \`\${session.sessions} sessions\`; stageClass = 'stage-active'; }
-    else if (a.installed_at) { stage = 'installed'; }
-    const lastSeen = session ? \`\${Math.round(session.hours_ago)}h ago\` : a.installed_at ? new Date(a.installed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
-    return \`<tr><td>\${esc(a.github_login)}</td><td>\${created}</td><td class="\${stageClass}">\${stage}</td><td>\${lastSeen}</td></tr>\`;
-  }).join('\\n')}
+<table><tr><th>author</th><th>status</th><th>last seen</th></tr>
+${authorTableRows}
 </table>
 
-<p class="section-label">system</p>
-<table>
-<tr><td>health</td><td>${data.status === 'ok' ? '✓' : esc(data.status)}</td></tr>
-${Object.entries(cron).map(([job, info]) =>
-  \`<tr><td>\${esc(job)}</td><td>\${(info as any)?.t ? new Date((info as any).t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'never'}</td></tr>\`
-).join('\\n')}
-${Object.entries(data.liveness as Record<string, string> || {}).map(([k, v]) =>
-  \`<tr><td>\${esc(k)}</td><td>\${v === 'ok' ? '✓' : esc(v)}</td></tr>\`
-).join('\\n')}
-</table>
-
-${errorItems ? \`<p class="section-label">errors</p><p class="muted">\${Object.entries(errors).filter(([, v]) => v > 0).map(([k, v]) => \`\${k}: \${v}\`).join(' · ')}</p>\` : ''}
-
-<p class="footer">${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+<p class="footer">${timestamp}</p>
 </body></html>`);
   });
 }
