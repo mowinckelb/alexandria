@@ -168,7 +168,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         {/* ── HOW THEY THINK ── */}
         {(pulse || shadow || paidShadow || data.quizzes.length > 0) && (
           <section style={{ margin: '0 0 4rem' }}>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 2rem' }}>how they think</p>
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 2rem' }}>how i think</p>
 
             {/* Pulse */}
             {pulse && (
@@ -294,7 +294,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         {/* ── WHAT THEY DO ── */}
         {(data.works.length > 0 || author.website || socialLinks.length > 0) && (
           <section style={{ margin: '0 0 4rem' }}>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 2rem' }}>what they do</p>
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 2rem' }}>what i do</p>
 
             {data.works.length > 0 && (
               <div style={{ margin: '0 0 2rem' }}>
