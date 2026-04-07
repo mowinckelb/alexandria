@@ -18,7 +18,7 @@ import { extractApiKey, findByApiKey } from './prosumer.js';
 
 function r2Response(body: ReadableStream | null, contentType: string, reqOrigin?: string | null, cache?: string): Response {
   const websiteUrl = process.env.WEBSITE_URL || 'https://mowinckel.ai';
-  const allowed = [websiteUrl, websiteUrl.replace('https://', 'https://www.')];
+  const allowed = [websiteUrl, websiteUrl.replace('https://', 'https://www.'), 'http://localhost:3000'];
   const headers: Record<string, string> = {
     'Content-Type': contentType,
     'Vary': 'Origin',

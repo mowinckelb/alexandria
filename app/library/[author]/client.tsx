@@ -158,7 +158,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             )}
           </div>
           {author.bio && (
-            <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.8, margin: '0.3rem 0 0' }}>
+            <p style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8, margin: '0.3rem 0 0' }}>
               {author.bio}
             </p>
           )}
@@ -192,13 +192,13 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         {/* ── HOW THEY THINK ── */}
         {(pulse || shadow || paidShadow || data.quizzes.length > 0) && (
           <section style={{ margin: '0 0 4rem' }}>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 2rem' }}>how i think</p>
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 2rem' }}>how i think</p>
 
             {/* Pulse */}
             {pulse && (
               <div style={{ margin: '0 0 3rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem' }}>
-                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>pulse</p>
+                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>pulse</p>
                   <span onClick={() => setOpenInfo(openInfo === 'pulse' ? null : 'pulse')} style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}>ⓘ</span>
                 </div>
                 {openInfo === 'pulse' && (
@@ -206,7 +206,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                     my mind this month. auto-generated from the constitution.
                   </p>
                 )}
-                <div style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.8 }}>
+                <div style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8 }}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{pulse}</ReactMarkdown>
                 </div>
               </div>
@@ -216,7 +216,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             {(shadow || paidShadow) && (
               <div style={{ margin: '0 0 3rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem' }}>
-                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>shadow</p>
+                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>shadow</p>
                   <span onClick={() => setOpenInfo(openInfo === 'shadow' ? null : 'shadow')} style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}>ⓘ</span>
                 </div>
                 {openInfo === 'shadow' && (
@@ -270,7 +270,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                   <>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                       {(data.shadow_chapters || []).map((title, i) => (
-                        <span key={i} style={{ fontSize: '0.88rem', color: 'var(--text-ghost)', opacity: Math.max(0.3, 1 - (i * 0.08)) }}>{title}</span>
+                        <span key={i} style={{ fontSize: '0.88rem', color: 'var(--text-muted)', opacity: Math.max(0.3, 1 - (i * 0.08)) }}>{title}</span>
                       ))}
                     </div>
                     {hasPaid && (
@@ -292,7 +292,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             {data.quizzes.length > 0 && (
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem' }}>
-                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: 0 }}>games</p>
+                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>games</p>
                   <span onClick={() => setOpenInfo(openInfo === 'games' ? null : 'games')} style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}>ⓘ</span>
                 </div>
                 {openInfo === 'games' && (
@@ -318,7 +318,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         {/* ── WHAT I DO ── */}
         {data.works.length > 0 && (
           <section style={{ margin: '0 0 4rem' }}>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 2rem' }}>what i do</p>
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 2rem' }}>what i do</p>
             {data.works.map(work => {
               const isPaid = work.tier === 'paid';
               return (
@@ -342,7 +342,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         {/* ── AUTHOR STATS (visible only to owning Author) ── */}
         {stats && (
           <section style={{ margin: '0 0 4rem', padding: '1.5rem 0', borderTop: '1px solid var(--border-light)' }}>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-whisper)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>your stats</p>
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>your stats</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1.5rem' }}>
               <div>
                 <p style={{ fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0, fontWeight: 300 }}>{stats.shadow_views}</p>
