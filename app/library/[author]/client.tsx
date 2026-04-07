@@ -166,11 +166,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               <span style={{ fontSize: '0.65rem', color: 'var(--text-whisper)', letterSpacing: '0.05em' }}>{settings.library_id}</span>
             )}
           </div>
-          {author.bio && (
-            <p style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8, margin: '0.3rem 0 0' }}>
-              {author.bio}
-            </p>
-          )}
           {author.location && (
             <p style={{ fontSize: '0.78rem', color: 'var(--text-ghost)', margin: '0.3rem 0 0' }}>
               {author.location}

@@ -85,10 +85,9 @@ export default function LibraryPage() {
                   </p>
                   {(() => { try { const s = JSON.parse(author.settings || '{}'); return s.library_id ? <span style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', letterSpacing: '0.05em' }}>{s.library_id}</span> : null; } catch { return null; } })()}
                 </div>
-                {(author.location || author.bio) && (
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.7, margin: '0.3rem 0 0' }}>
-                    {author.location && <span style={{ color: 'var(--text-ghost)' }}>{author.location}{author.bio ? ' \u00b7 ' : ''}</span>}
-                    {author.bio}
+                {author.location && (
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-ghost)', margin: '0.3rem 0 0' }}>
+                    {author.location}
                   </p>
                 )}
               </a>
