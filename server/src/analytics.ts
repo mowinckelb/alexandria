@@ -283,6 +283,67 @@ export async function getUserEvents(login: string): Promise<Record<string, unkno
   };
 }
 
+/**
+ * Process factory signals into factory:delta.
+ * Caps per-author contribution to prevent any single user from dominating.
+ * Runs daily via cron. Replaces delta with latest signals, cleans up processed keys.
+ */
+export async function processFactorySignals(): Promise<{ processed: number; authors: number; delta_length: number }> {
+  const { getKV } = await import('./kv.js');
+  const kv = getKV();
+
+  // Read all accumulated signals
+  const keys = await kv.list({ prefix: 'factory:signal:' });
+  if (keys.keys.length === 0) return { processed: 0, authors: 0, delta_length: 0 };
+
+  const signals: { t: string; author: string; signal: string }[] = [];
+  for (const key of keys.keys) {
+    try {
+      const raw = await kv.get(key.name);
+      if (raw) signals.push(JSON.parse(raw));
+    } catch { continue; }
+  }
+
+  if (signals.length === 0) return { processed: 0, authors: 0, delta_length: 0 };
+
+  // Cap per-author: keep only 3 most recent signals per author
+  const MAX_PER_AUTHOR = 3;
+  const byAuthor: Record<string, typeof signals> = {};
+  for (const s of signals) {
+    const author = s.author || 'unknown';
+    if (!byAuthor[author]) byAuthor[author] = [];
+    byAuthor[author].push(s);
+  }
+
+  const capped: typeof signals = [];
+  for (const [, authorSignals] of Object.entries(byAuthor)) {
+    authorSignals.sort((a, b) => b.t.localeCompare(a.t)); // newest first
+    capped.push(...authorSignals.slice(0, MAX_PER_AUTHOR));
+  }
+
+  // Compile delta — anonymous (strip author), sorted by time
+  capped.sort((a, b) => a.t.localeCompare(b.t));
+  const deltaLines = capped.map(s => `- ${s.signal.slice(0, 500)}`);
+  const delta = `Factory observations (${capped.length} signals from ${Object.keys(byAuthor).length} Authors, updated ${new Date().toISOString().split('T')[0]}):\n\n${deltaLines.join('\n')}`;
+
+  // Write delta (cap at 10K total to avoid bloating Blueprint)
+  await kv.put('factory:delta', delta.slice(0, 10000));
+
+  // Clean up processed signal keys
+  for (const key of keys.keys) {
+    await kv.delete(key.name);
+  }
+
+  logEvent('factory_delta_processed', {
+    signals_processed: String(signals.length),
+    signals_kept: String(capped.length),
+    authors: String(Object.keys(byAuthor).length),
+    delta_length: String(delta.length),
+  });
+
+  return { processed: signals.length, authors: Object.keys(byAuthor).length, delta_length: delta.length };
+}
+
 export async function getRecentEvents(n: number = 200): Promise<string> {
   try {
     const full = await getAllEvents();
