@@ -1696,12 +1696,11 @@ export function registerProsumerRoutes(app: Hono) {
 
   // Admin: send a one-time email to all uninstalled users
   app.post('/admin/nudge', async (c) => {
-    const key = c.req.query('key');
-    if (!key) return c.text('missing key', 400);
-    const accounts = await loadAccounts<AccountStore>();
+    const key = extractApiKey(c);
+    if (!key) return c.text('missing key', 401);
+    const account = await findByApiKey(key);
     const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'benmowinckel';
-    const adminKey = Object.keys(accounts).find(k => accounts[k].api_key === key);
-    if (!adminKey || accounts[adminKey].github_login !== adminLogin) return c.text('not authorized', 403);
+    if (!account || account.github_login !== adminLogin) return c.text('not authorized', 403);
 
     const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
     let sent = 0;
