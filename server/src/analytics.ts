@@ -304,10 +304,14 @@ export async function processFactorySignals(): Promise<{ processed: number; auth
   if (allKeys.length === 0) return { processed: 0, authors: 0, delta_length: 0 };
 
   const signals: { t: string; author: string; signal: string }[] = [];
+  const rawByKey: Record<string, string> = {};
   for (const key of allKeys) {
     try {
       const raw = await kv.get(key.name);
-      if (raw) signals.push(JSON.parse(raw));
+      if (raw) {
+        rawByKey[key.name] = raw;
+        signals.push(JSON.parse(raw));
+      }
     } catch { continue; }
   }
 
@@ -336,10 +340,9 @@ export async function processFactorySignals(): Promise<{ processed: number; auth
 
   await kv.put('factory:delta', delta.slice(0, 10000));
 
-  // Move processed signals to factory:archive: prefix with 30-day TTL
-  // Preserves raw data for reprocessing while clearing the input queue
+  // Archive processed signals with 30-day TTL, then clear input queue
   for (const key of allKeys) {
-    const raw = await kv.get(key.name);
+    const raw = rawByKey[key.name];
     if (raw) {
       const archiveKey = key.name.replace('factory:signal:', 'factory:archive:');
       await kv.put(archiveKey, raw, { expirationTtl: 30 * 24 * 60 * 60 });
