@@ -35,6 +35,13 @@ const mdComponents = {
   hr: () => <hr className="pdoc-hr" />,
 };
 
+const explainers: Record<string, string> = {
+  pulse: 'my mind this month. what changed, what crystallised, what i am thinking about. auto-generated from the constitution.',
+  shadow: 'a structured file that captures how this person thinks. give it to any ai and it will know them. each chapter is a different dimension.',
+  games: 'quizzes generated from real cognitive data. not a personality test — a side effect of something much bigger.',
+  works: 'published artifacts. essays, art, code, whatever the author creates.',
+};
+
 interface SocialLink {
   platform: string;
   url: string;
@@ -73,9 +80,13 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   const [accessToken, setAccessToken] = useState<{ token: string; api_url: string } | null>(null);
   const [pulse, setPulse] = useState<string>('');
   const [stats, setStats] = useState<AuthorStats | null>(null);
-  const [openInfo, setOpenInfo] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [showInfo, setShowInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+
+  const toggle = (key: string) => setExpanded(expanded === key ? null : key);
+  const toggleInfo = (key: string) => { setShowInfo(showInfo === key ? null : key); };
 
   useEffect(() => {
     params.then(({ author }) => {
@@ -92,7 +103,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         .then(r => { if (r.ok) return r.text(); return ''; })
         .then(text => setPulse(text))
         .catch(() => {});
-      // Check for paid access via session_id — get API token + shadow content
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       if (sessionId) {
@@ -109,7 +119,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           })
           .catch(() => {});
       }
-      // Try to fetch stats (will 401/403 if not the owning Author)
       const apiKey = typeof window !== 'undefined' ? localStorage.getItem('alexandria_api_key') : null;
       if (apiKey) {
         fetch(`${SERVER_URL}/library/${author}/stats`, {
@@ -147,8 +156,8 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
       <ThemeToggle />
       <main style={{ maxWidth: '640px', margin: '0 auto', padding: '6rem 2rem 4rem', fontFamily: 'var(--font-eb-garamond)' }}>
 
-        {/* ── HEADER (substrate) ── */}
-        <div style={{ margin: '0 0 4rem' }}>
+        {/* ── HEADER ── */}
+        <div style={{ margin: '0 0 3rem' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', margin: '0 0 0.3rem' }}>
             <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
               {displayName}
@@ -189,127 +198,156 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           )}
         </div>
 
-        {/* ── HOW THEY THINK ── */}
+        {/* ── HOW I THINK ── */}
         {(pulse || shadow || paidShadow || data.quizzes.length > 0) && (
-          <section style={{ margin: '0 0 4rem' }}>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 2rem' }}>how i think</p>
+          <section style={{ margin: '0 0 2.5rem' }}>
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>how i think</p>
 
             {/* Pulse */}
             {pulse && (
-              <div style={{ margin: '0 0 3rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem' }}>
-                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>pulse</p>
-                  <span onClick={() => setOpenInfo(openInfo === 'pulse' ? null : 'pulse')} style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}>ⓘ</span>
+              <div style={{ margin: '0 0 0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span
+                    onClick={() => toggle('pulse')}
+                    style={{ fontSize: '0.95rem', color: 'var(--text-primary)', cursor: 'pointer', transition: 'opacity 0.15s' }}
+                    className="hover:opacity-60"
+                  >
+                    pulse
+                  </span>
+                  <span
+                    onClick={(e) => { e.stopPropagation(); toggleInfo('pulse'); }}
+                    style={{ fontSize: '0.55rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}
+                  >
+                    ?
+                  </span>
                 </div>
-                {openInfo === 'pulse' && (
-                  <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0 0 1rem', lineHeight: 1.6 }}>
-                    my mind this month. auto-generated from the constitution.
+                {showInfo === 'pulse' && (
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0.4rem 0 0', lineHeight: 1.6 }}>
+                    {explainers.pulse}
                   </p>
                 )}
-                <div style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8 }}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{pulse}</ReactMarkdown>
-                </div>
+                {expanded === 'pulse' && (
+                  <div style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8, marginTop: '1rem' }}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{pulse}</ReactMarkdown>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Shadow */}
             {(shadow || paidShadow) && (
-              <div style={{ margin: '0 0 3rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem' }}>
-                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>shadow</p>
-                  <span onClick={() => setOpenInfo(openInfo === 'shadow' ? null : 'shadow')} style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}>ⓘ</span>
+              <div style={{ margin: '0 0 0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span
+                    onClick={() => toggle('shadow')}
+                    style={{ fontSize: '0.95rem', color: 'var(--text-primary)', cursor: 'pointer', transition: 'opacity 0.15s' }}
+                    className="hover:opacity-60"
+                  >
+                    shadow
+                  </span>
+                  <span
+                    onClick={(e) => { e.stopPropagation(); toggleInfo('shadow'); }}
+                    style={{ fontSize: '0.55rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}
+                  >
+                    ?
+                  </span>
+                  {hasPaid && !accessToken && (
+                    <a href={`/library/${authorId}/checkout/shadow`}
+                      style={{ fontSize: '0.55rem', color: 'var(--text-whisper)', textDecoration: 'none', marginLeft: '0.2rem' }}
+                      className="hover:opacity-60"
+                    >$</a>
+                  )}
                 </div>
-                {openInfo === 'shadow' && (
-                  <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0 0 1rem', lineHeight: 1.6 }}>
-                    the full mind, published as a file. each chapter is a different dimension of how this person thinks.
+                {showInfo === 'shadow' && (
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0.4rem 0 0', lineHeight: 1.6 }}>
+                    {explainers.shadow}
                   </p>
                 )}
-
-                {accessToken ? (
-                  <div>
-                    <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: '0 0 1.5rem', lineHeight: 1.7 }}>
-                      your access token. give this url to any ai.
-                    </p>
-                    <div
-                      onClick={() => {
-                        navigator.clipboard.writeText(accessToken.api_url);
-                        const el = document.getElementById('url-copied');
-                        if (el) { el.textContent = 'copied'; setTimeout(() => { el.textContent = 'click to copy'; }, 2000); }
-                      }}
-                      style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '4px', cursor: 'pointer', margin: '0 0 0.5rem' }}
-                    >
-                      <code style={{ fontSize: '0.7rem', color: 'var(--text-primary)', wordBreak: 'break-all', fontFamily: 'monospace' }}>
-                        {accessToken.api_url}
-                      </code>
-                    </div>
-                    <p id="url-copied" style={{ fontSize: '0.68rem', color: 'var(--text-ghost)', margin: '0 0 1.5rem' }}>click to copy</p>
-                    <p style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', margin: '0 0 1.5rem', lineHeight: 1.7, fontStyle: 'italic' }}>
-                      paste the url into any ai chat. it will read the shadow and know this person. the token is yours — rate-limited, logged, revocable. always serves the latest version.
-                    </p>
-                    {paidShadow && (
-                      <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1rem' }}>
-                        <span
-                          onClick={() => {
-                            navigator.clipboard.writeText(paidShadow);
-                            const el = document.getElementById('shadow-copied');
-                            if (el) { el.textContent = 'copied'; setTimeout(() => { el.textContent = 'copy shadow to clipboard'; }, 2000); }
-                          }}
-                          id="shadow-copied"
-                          style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', cursor: 'pointer', transition: 'opacity 0.15s' }}
-                          className="hover:opacity-60"
-                        >
-                          copy shadow to clipboard
-                        </span>
-                        <p style={{ fontSize: '0.65rem', color: 'var(--text-whisper)', margin: '0.4rem 0 0', fontStyle: 'italic' }}>
-                          if your ai can&apos;t fetch urls (gpt, gemini), paste the shadow directly into the chat instead.
+                {expanded === 'shadow' && (
+                  <div style={{ marginTop: '1rem' }}>
+                    {accessToken ? (
+                      <div>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: '0 0 1rem', lineHeight: 1.7 }}>
+                          your access token. give this url to any ai.
                         </p>
+                        <div
+                          onClick={() => {
+                            navigator.clipboard.writeText(accessToken.api_url);
+                            const el = document.getElementById('url-copied');
+                            if (el) { el.textContent = 'copied'; setTimeout(() => { el.textContent = 'click to copy'; }, 2000); }
+                          }}
+                          style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '4px', cursor: 'pointer', margin: '0 0 0.5rem' }}
+                        >
+                          <code style={{ fontSize: '0.7rem', color: 'var(--text-primary)', wordBreak: 'break-all', fontFamily: 'monospace' }}>
+                            {accessToken.api_url}
+                          </code>
+                        </div>
+                        <p id="url-copied" style={{ fontSize: '0.68rem', color: 'var(--text-ghost)', margin: '0 0 1rem' }}>click to copy</p>
+                        {paidShadow && (
+                          <span
+                            onClick={() => {
+                              navigator.clipboard.writeText(paidShadow);
+                              const el = document.getElementById('shadow-copied');
+                              if (el) { el.textContent = 'copied'; setTimeout(() => { el.textContent = 'copy shadow to clipboard'; }, 2000); }
+                            }}
+                            id="shadow-copied"
+                            style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', cursor: 'pointer', transition: 'opacity 0.15s' }}
+                            className="hover:opacity-60"
+                          >
+                            copy shadow to clipboard
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {(data.shadow_chapters || []).map((title, i) => (
+                          <span key={i} style={{ fontSize: '0.85rem', color: 'var(--text-muted)', opacity: Math.max(0.35, 1 - (i * 0.07)) }}>{title}</span>
+                        ))}
                       </div>
                     )}
                   </div>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                      {(data.shadow_chapters || []).map((title, i) => (
-                        <span key={i} style={{ fontSize: '0.88rem', color: 'var(--text-muted)', opacity: Math.max(0.3, 1 - (i * 0.08)) }}>{title}</span>
-                      ))}
-                    </div>
-                    {hasPaid && (
-                      <a
-                        href={`/library/${authorId}/checkout/shadow`}
-                        style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', marginTop: '1.5rem', textDecoration: 'none', transition: 'opacity 0.15s' }}
-                        className="hover:opacity-60"
-                      >
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)' }}>{authorId}.md</span>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)' }}>$</span>
-                      </a>
-                    )}
-                  </>
                 )}
               </div>
             )}
 
             {/* Games */}
             {data.quizzes.length > 0 && (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem' }}>
-                  <p style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>games</p>
-                  <span onClick={() => setOpenInfo(openInfo === 'games' ? null : 'games')} style={{ fontSize: '0.6rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}>ⓘ</span>
-                </div>
-                {openInfo === 'games' && (
-                  <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0 0 1rem', lineHeight: 1.6 }}>
-                    these exist because ai mapped how this person actually thinks. a side effect of something much bigger.
-                  </p>
-                )}
-                {data.quizzes.map(quiz => (
-                  <a
-                    key={quiz.id}
-                    href={`/library/${authorId}/quiz/${quiz.id}`}
-                    style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 1.2rem', transition: 'opacity 0.15s' }}
+              <div style={{ margin: '0 0 0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span
+                    onClick={() => toggle('games')}
+                    style={{ fontSize: '0.95rem', color: 'var(--text-primary)', cursor: 'pointer', transition: 'opacity 0.15s' }}
                     className="hover:opacity-60"
                   >
-                    <span style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{quiz.title}</span>
-                  </a>
-                ))}
+                    games
+                  </span>
+                  <span
+                    onClick={(e) => { e.stopPropagation(); toggleInfo('games'); }}
+                    style={{ fontSize: '0.55rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}
+                  >
+                    ?
+                  </span>
+                </div>
+                {showInfo === 'games' && (
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0.4rem 0 0', lineHeight: 1.6 }}>
+                    {explainers.games}
+                  </p>
+                )}
+                {expanded === 'games' && (
+                  <div style={{ marginTop: '1rem' }}>
+                    {data.quizzes.map(quiz => (
+                      <a
+                        key={quiz.id}
+                        href={`/library/${authorId}/quiz/${quiz.id}`}
+                        style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.8rem', transition: 'opacity 0.15s' }}
+                        className="hover:opacity-60"
+                      >
+                        <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{quiz.title}</span>
+                        {quiz.subtitle && <span style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>{quiz.subtitle}</span>}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -317,60 +355,83 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
 
         {/* ── WHAT I DO ── */}
         {data.works.length > 0 && (
-          <section style={{ margin: '0 0 4rem' }}>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 2rem' }}>what i do</p>
-            {data.works.map(work => {
-              const isPaid = work.tier === 'paid';
-              return (
-                <div
-                  key={work.id}
-                  onClick={() => {
-                    if (isPaid) return;
-                    window.open(work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`, '_blank');
-                  }}
-                  style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', transition: 'opacity 0.15s' }}
+          <section style={{ margin: '0 0 2.5rem' }}>
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>what i do</p>
+
+            <div style={{ margin: '0 0 0.8rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span
+                  onClick={() => toggle('works')}
+                  style={{ fontSize: '0.95rem', color: 'var(--text-primary)', cursor: 'pointer', transition: 'opacity 0.15s' }}
                   className="hover:opacity-60"
                 >
-                  <span style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{work.title}</span>
-                  {isPaid && <span style={{ fontSize: '0.72rem', color: 'var(--text-whisper)' }}>$</span>}
-                </div>
-              );
-            })}
-          </section>
-        )}
-
-        {/* ── AUTHOR STATS (visible only to owning Author) ── */}
-        {stats && (
-          <section style={{ margin: '0 0 4rem', padding: '1.5rem 0', borderTop: '1px solid var(--border-light)' }}>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>your stats</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1.5rem' }}>
-              <div>
-                <p style={{ fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0, fontWeight: 300 }}>{stats.shadow_views}</p>
-                <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.2rem 0 0', letterSpacing: '0.05em' }}>shadow views</p>
+                  works
+                </span>
+                <span
+                  onClick={(e) => { e.stopPropagation(); toggleInfo('works'); }}
+                  style={{ fontSize: '0.55rem', color: 'var(--text-whisper)', cursor: 'pointer', opacity: 0.5 }}
+                >
+                  ?
+                </span>
               </div>
-              <div>
-                <p style={{ fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0, fontWeight: 300 }}>{stats.quiz_plays}</p>
-                <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.2rem 0 0', letterSpacing: '0.05em' }}>quiz plays</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0, fontWeight: 300 }}>{stats.quiz_share_views}</p>
-                <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.2rem 0 0', letterSpacing: '0.05em' }}>share views</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0, fontWeight: 300 }}>{stats.referral_signups}</p>
-                <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.2rem 0 0', letterSpacing: '0.05em' }}>signups</p>
-              </div>
-              {stats.total_earnings_cents > 0 && (
-                <div>
-                  <p style={{ fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0, fontWeight: 300 }}>${(stats.total_earnings_cents / 100).toFixed(0)}</p>
-                  <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.2rem 0 0', letterSpacing: '0.05em' }}>earned</p>
+              {showInfo === 'works' && (
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: '0.4rem 0 0', lineHeight: 1.6 }}>
+                  {explainers.works}
+                </p>
+              )}
+              {expanded === 'works' && (
+                <div style={{ marginTop: '1rem' }}>
+                  {data.works.map(work => {
+                    const isPaid = work.tier === 'paid';
+                    return (
+                      <div
+                        key={work.id}
+                        onClick={() => {
+                          if (isPaid) return;
+                          window.open(work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`, '_blank');
+                        }}
+                        style={{ margin: '0 0 0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', transition: 'opacity 0.15s' }}
+                        className="hover:opacity-60"
+                      >
+                        <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{work.title}</span>
+                        {isPaid && <span style={{ fontSize: '0.65rem', color: 'var(--text-whisper)' }}>$</span>}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
           </section>
         )}
 
-        <footer style={{ margin: '6rem 0 0', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+        {/* ── AUTHOR STATS (owner only) ── */}
+        {stats && (
+          <section style={{ margin: '0 0 2.5rem', padding: '1.5rem 0', borderTop: '1px solid var(--border-light)' }}>
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 1.5rem' }}>your stats</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '1.5rem' }}>
+              {[
+                [stats.shadow_views, 'shadow views'],
+                [stats.quiz_plays, 'quiz plays'],
+                [stats.quiz_share_views, 'share views'],
+                [stats.referral_signups, 'signups'],
+              ].map(([val, label]) => (
+                <div key={label as string}>
+                  <p style={{ fontSize: '1.3rem', color: 'var(--text-primary)', margin: 0, fontWeight: 300 }}>{val}</p>
+                  <p style={{ fontSize: '0.6rem', color: 'var(--text-ghost)', margin: '0.2rem 0 0', letterSpacing: '0.05em' }}>{label}</p>
+                </div>
+              ))}
+              {stats.total_earnings_cents > 0 && (
+                <div>
+                  <p style={{ fontSize: '1.3rem', color: 'var(--text-primary)', margin: 0, fontWeight: 300 }}>${(stats.total_earnings_cents / 100).toFixed(0)}</p>
+                  <p style={{ fontSize: '0.6rem', color: 'var(--text-ghost)', margin: '0.2rem 0 0', letterSpacing: '0.05em' }}>earned</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── FOOTER ── */}
+        <footer style={{ margin: '4rem 0 0', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
           <a href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</a>
           <a href="/library" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">library</a>
           <a href={`/signup?${signupRef}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">start yours</a>
