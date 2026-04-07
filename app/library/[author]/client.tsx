@@ -77,7 +77,6 @@ function Section({ id, expanded, onToggle, children }: {
 
 interface PulseCard {
   closest_minds: Array<{ name: string; pct: number; why: string }>;
-  delta: string;
   position: string;
   month: string;
 }
@@ -91,12 +90,12 @@ function PulseCardView({ card, authorName }: { card: PulseCard; authorName: stri
       maxWidth: '360px',
     }}>
       {/* Header */}
-      <div style={{ margin: '0 0 1.5rem' }}>
-        <p style={{ fontSize: '0.6rem', letterSpacing: '0.15em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.2rem' }}>
-          {card.month}
-        </p>
-        <p style={{ fontSize: '1.1rem', color: 'var(--text-primary)', margin: 0, fontWeight: 400 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', margin: '0 0 1.5rem' }}>
+        <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', margin: 0, fontWeight: 400 }}>
           {authorName}
+        </p>
+        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>
+          {card.month}
         </p>
       </div>
 
@@ -108,7 +107,6 @@ function PulseCardView({ card, authorName }: { card: PulseCard; authorName: stri
               <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>{mind.name}</span>
               <span style={{ fontSize: '0.78rem', color: 'var(--text-ghost)', fontWeight: 300 }}>{mind.pct}%</span>
             </div>
-            {/* Bar */}
             <div style={{ height: '2px', background: 'var(--border-light)', marginTop: '0.3rem', borderRadius: '1px' }}>
               <div style={{ height: '2px', background: 'var(--text-ghost)', width: `${mind.pct}%`, borderRadius: '1px', transition: 'width 0.5s' }} />
             </div>
@@ -118,17 +116,9 @@ function PulseCardView({ card, authorName }: { card: PulseCard; authorName: stri
       </div>
 
       {/* Position */}
-      <div style={{ margin: '0 0 1.2rem', padding: '0.8rem 0', borderTop: '1px solid var(--border-light)' }}>
+      <div style={{ padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)' }}>
         <p style={{ fontSize: '0.82rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.7, fontStyle: 'italic' }}>
           &ldquo;{card.position}&rdquo;
-        </p>
-      </div>
-
-      {/* Delta */}
-      <div style={{ padding: '0.6rem 0 0', borderTop: '1px solid var(--border-light)' }}>
-        <p style={{ fontSize: '0.6rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.3rem' }}>this month</p>
-        <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
-          {card.delta}
         </p>
       </div>
 
