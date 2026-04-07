@@ -84,6 +84,7 @@ Five loops. Full spec in Blueprint.md section V (served to every Engine every se
   - Stateless server. No private user data stored. KV for accounts/events, D1 for Library metadata, R2 for published Library content.
 - **Static assets:** `public/` (includes `public/docs/` for public ax artifacts, `public/partners/` for investor artifacts).
 - **Partners:** Markdown docs (Memo.md, Numbers.md, Logic.md, Alexandria.md) served at `/partners/*` via dynamic `[doc]` route. Source of truth is `files/confidential/`. Copied to `public/partners/` automatically by `prebuild` script — runs before every build and deploy. Never manually sync.
+- **Pre-commit hook:** `scripts/pre-commit` gates server type check + app build (mirrors CI). Activate on fresh clone: `git config core.hooksPath scripts`.
 - **Build:** `cd server && npx wrangler deploy --dry-run --outdir=dist` (server). **Deploy:** `cd server && npx wrangler deploy && bash server/test/smoke.sh` (Cloudflare Workers), push to main (Vercel). **Render abstract PDF:** `python scripts/generate_pdf.py <input.md> [output.pdf]` — only abstract.pdf uses this pipeline now. Verify preview PNGs before committing.
 - **Server health:** `curl https://mcp.mowinckel.ai/health`
 - **Stack:** Vercel (website), Cloudflare (DNS + server + KV storage + D1 database + R2 object storage), Resend (transactional email), GitHub (code + OAuth), Stripe (billing), Mercury (banking, API), Claude (intelligence). All hybrid (CLI or API-controllable). Zero external dependencies. Dependency alarm: max internal, min hybrid, zero external.
