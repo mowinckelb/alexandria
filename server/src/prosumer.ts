@@ -1703,16 +1703,17 @@ export function registerProsumerRoutes(app: Hono) {
     if (!account || account.github_login !== adminLogin) return c.text('not authorized', 403);
 
     const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
+    const accounts = await loadAccounts<AccountStore>();
     let sent = 0;
-    for (const [, account] of Object.entries(accounts)) {
-      if (account.installed_at || !account.email || account.engagement_opt_out) continue;
-      if (account.github_login === adminLogin) continue;
-      const emailToken = createHash('sha256').update(account.api_key + ':email').digest('hex').slice(0, 24);
-      await sendEmail(account.email, 'alexandria. — quick fix',
+    for (const [, acct] of Object.entries(accounts)) {
+      if (acct.installed_at || !acct.email || acct.engagement_opt_out) continue;
+      if (acct.github_login === adminLogin) continue;
+      const emailToken = createHash('sha256').update(acct.api_key + ':email').digest('hex').slice(0, 24);
+      await sendEmail(acct.email, 'alexandria. — quick fix',
         '<div style="font-family: \'EB Garamond\', Georgia, serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">' +
         '<p style="font-size: 1rem; line-height: 1.9; color: #8a8078; margin: 0 0 1.5rem;">we fixed a setup issue. paste this in your terminal and everything should work:</p>' +
         '<div style="background: #f5f0e8; border-radius: 6px; padding: 14px 18px; margin: 8px 0 2rem; text-align: left;">' +
-        '<code style="font-family: \'SF Mono\', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ' + SERVER_URL + '/setup | bash -s ' + account.api_key + '</code>' +
+        '<code style="font-family: \'SF Mono\', Monaco, Consolas, monospace; font-size: 11px; color: #4d4640; word-break: break-all; line-height: 1.6;">curl -s ' + SERVER_URL + '/setup | bash -s ' + acct.api_key + '</code>' +
         '</div>' +
         '<p style="font-size: 0.72rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="' + SERVER_URL + '/email/stop?t=' + emailToken + '" style="color: #8a8078;">stop these emails</a></p>' +
         '</div>');
