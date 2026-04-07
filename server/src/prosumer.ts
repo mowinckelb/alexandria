@@ -40,6 +40,7 @@ interface Account {
   subscription_status?: string;
   subscription_id?: string;
   current_period_end?: string;
+  constitution_size?: number;
 }
 
 type AccountStore = Record<string, Account>;
