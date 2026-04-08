@@ -127,6 +127,7 @@ export default function ShadowCheckoutPage({ params }: { params: Promise<{ autho
           <span>$0</span>
           <span>${SLIDER_MAX}</span>
         </div>
+        <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.5rem 0 0' }}>pay what you want. the author gets half.</p>
 
         {/* Promo */}
         <div style={{ margin: '2rem 0 0', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
