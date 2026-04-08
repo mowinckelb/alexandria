@@ -87,16 +87,14 @@ function PulseCardView({ card, authorName, authorId }: { card: PulseCard; author
 
       <div style={{ margin: '1.2rem 0 0', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <a href={`/library/${authorId}`}
-          style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+          style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
           className="hover:opacity-60"
-        >read the shadow</a>
+        >mowinckel.ai/library/{authorId}</a>
         <a href={`/signup?ref=${authorId}&ref_source=library`}
-          style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+          style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
           className="hover:opacity-60"
-        >get yours</a>
+        >get yours at mowinckel.ai</a>
       </div>
-
-      <p style={{ fontSize: '0.5rem', color: 'var(--text-whisper)', margin: '0.6rem 0 0', textAlign: 'right', letterSpacing: '0.1em' }}>alexandria.</p>
     </div>
   );
 }
