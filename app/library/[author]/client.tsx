@@ -124,7 +124,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   const [pulse, setPulse] = useState<string>('');
   const [stats, setStats] = useState<AuthorStats | null>(null);
   const [showAllGames, setShowAllGames] = useState(false);
-  const [expanded, setExpanded] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -281,58 +280,52 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>shadows</p>
 
               {accessToken && paidShadow ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', margin: '0 0 0.6rem' }}>
-                  <span
-                    onClick={() => copyText(paidShadow, 'paid-shadow')}
-                    style={{ fontSize: '0.88rem', color: 'var(--text-primary)', cursor: 'pointer', transition: 'opacity 0.15s' }}
-                    className="hover:opacity-60"
-                  >
+                <div
+                  onClick={() => copyText(paidShadow, 'paid-shadow')}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'opacity 0.15s', margin: '0 0 0.6rem' }}
+                  className="hover:opacity-60"
+                >
+                  <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>
                     {copiedId === 'paid-shadow' ? 'copied' : `${authorId}-paid.md`}
                   </span>
-                  <span
-                    onClick={() => {
-                      const blob = new Blob([paidShadow], { type: 'text/markdown' });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url; a.download = `${authorId}-paid.md`; a.click();
-                      URL.revokeObjectURL(url);
-                    }}
-                    style={{ fontSize: '0.6rem', color: 'var(--text-ghost)', cursor: 'pointer', transition: 'opacity 0.15s' }}
-                    className="hover:opacity-60"
-                  >
-                    download
-                  </span>
+                  {copiedId !== 'paid-shadow' && (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-ghost)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  )}
+                  {copiedId === 'paid-shadow' && (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                   {hasFree && shadow && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', margin: '0 0 0.6rem' }}>
-                      <span
-                        onClick={() => copyText(shadow, 'free-shadow')}
-                        style={{ fontSize: '0.88rem', color: 'var(--text-primary)', cursor: 'pointer', transition: 'opacity 0.15s' }}
-                        className="hover:opacity-60"
-                      >
+                    <div
+                      onClick={() => copyText(shadow, 'free-shadow')}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'opacity 0.15s', margin: '0 0 0.6rem' }}
+                      className="hover:opacity-60"
+                    >
+                      <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>
                         {copiedId === 'free-shadow' ? 'copied' : `${authorId}-free.md`}
                       </span>
-                      <span
-                        onClick={() => {
-                          const blob = new Blob([shadow], { type: 'text/markdown' });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url; a.download = `${authorId}-free.md`; a.click();
-                          URL.revokeObjectURL(url);
-                        }}
-                        style={{ fontSize: '0.6rem', color: 'var(--text-ghost)', cursor: 'pointer', transition: 'opacity 0.15s' }}
-                        className="hover:opacity-60"
-                      >
-                        download
-                      </span>
+                      {copiedId !== 'free-shadow' && (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-ghost)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                      )}
+                      {copiedId === 'free-shadow' && (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
                     </div>
                   )}
                   {hasPaid && (
                     <a
                       href={`/library/${authorId}/checkout/shadow`}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+                      style={{ fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
                       className="hover:opacity-60"
                     >
                       {authorId}-paid.md
