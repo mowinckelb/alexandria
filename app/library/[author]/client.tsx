@@ -238,6 +238,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           {/* Pulse card — shows directly */}
           {pulseCard?.alltime && (
             <div style={{ margin: '0 0 2rem' }}>
+              <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>pulse</p>
               <PulseCardView card={pulseCard} authorName={displayName} authorId={authorId} />
             </div>
           )}
@@ -273,10 +274,10 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             </div>
           )}
 
-          {/* Shadow — free (copy) + premium (pay) */}
+          {/* Shadows — free (copy) + paid */}
           {(hasFree || hasPaid) && (
             <div>
-              <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>shadow</p>
+              <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>shadows</p>
 
               {accessToken ? (
                 <div>
@@ -304,26 +305,29 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                   {hasFree && shadow && (
-                    <span
-                      onClick={() => copyText(shadow, 'free-shadow')}
-                      style={{ fontSize: '0.88rem', color: 'var(--text-primary)', cursor: 'pointer', transition: 'opacity 0.15s' }}
-                      className="hover:opacity-60"
-                    >
-                      {copiedId === 'free-shadow' ? 'copied to clipboard' : `${displayName.split(' ')[0].toLowerCase()}.md`}
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>
-                        {copiedId === 'free-shadow' ? '' : 'free — click to copy'}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{authorId}-free.md</span>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)' }}>free</span>
+                      <span
+                        onClick={() => copyText(shadow, 'free-shadow')}
+                        style={{ cursor: 'pointer', transition: 'opacity 0.15s', fontSize: '0.75rem', color: 'var(--text-ghost)' }}
+                        className="hover:opacity-60"
+                      >
+                        {copiedId === 'free-shadow' ? '\u2713' : '\u2398'}
                       </span>
-                    </span>
+                    </div>
                   )}
                   {hasPaid && (
-                    <a
-                      href={`/library/${authorId}/checkout/shadow`}
-                      style={{ fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
-                      className="hover:opacity-60"
-                    >
-                      {authorId}.md
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>premium</span>
-                    </a>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <a
+                        href={`/library/${authorId}/checkout/shadow`}
+                        style={{ fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+                        className="hover:opacity-60"
+                      >
+                        {authorId}-paid.md
+                      </a>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)' }}>paid</span>
+                    </div>
                   )}
                 </div>
               )}

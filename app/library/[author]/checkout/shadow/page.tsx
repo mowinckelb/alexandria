@@ -23,9 +23,9 @@ function ThemeToggle() {
   );
 }
 
-const SLIDER_MIN = 20;
-const SLIDER_MAX = 200;
-const SLIDER_DEFAULT = 20;
+const SLIDER_MIN = 5;
+const SLIDER_MAX = 50;
+const SLIDER_DEFAULT = 5;
 
 export default function ShadowCheckoutPage({ params }: { params: Promise<{ author: string }> }) {
   const [authorId, setAuthorId] = useState('');
@@ -141,16 +141,19 @@ export default function ShadowCheckoutPage({ params }: { params: Promise<{ autho
 
             <input
               type="range"
-              min={SLIDER_MIN}
+              min={0}
               max={SLIDER_MAX}
-              step={5}
+              step={1}
               value={amount}
-              onChange={e => setAmount(parseInt(e.target.value, 10))}
+              onChange={e => {
+                const v = parseInt(e.target.value, 10);
+                setAmount(v < SLIDER_MIN ? SLIDER_MIN : v);
+              }}
               className="w-full patron-slider"
             />
 
             <div className="flex justify-between text-[0.65rem] tracking-wide" style={{ color: 'var(--text-ghost)' }}>
-              <span>${SLIDER_MIN}</span>
+              <span>$0</span>
               <span>${SLIDER_MAX}</span>
             </div>
           </div>
