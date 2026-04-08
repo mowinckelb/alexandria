@@ -233,7 +233,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
 
         {/* ── HOW I THINK ── */}
         <section style={{ margin: '0 0 3rem' }}>
-          <p style={{ fontSize: '1.1rem', fontWeight: 400, color: 'var(--text-primary)', margin: '0 0 1.5rem', letterSpacing: '-0.01em' }}>how i think</p>
+          <p style={{ fontSize: '1.15rem', fontWeight: 300, color: 'var(--text-primary)', margin: '0 0 2rem', letterSpacing: '-0.01em' }}>how i think</p>
 
           {/* Pulse card — shows directly */}
           {pulseCard?.alltime && (
@@ -334,33 +334,41 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         {/* ── WHAT I DO ── */}
         {(data.works.length > 0 || author.website || socialLinks.length > 0) && (
           <section style={{ margin: '0 0 3rem' }}>
-            <p style={{ fontSize: '1.1rem', fontWeight: 400, color: 'var(--text-primary)', margin: '0 0 1.5rem', letterSpacing: '-0.01em' }}>what i do</p>
+            <p style={{ fontSize: '1.15rem', fontWeight: 300, color: 'var(--text-primary)', margin: '0 0 2rem', letterSpacing: '-0.01em' }}>what i do</p>
 
-            {data.works.map(work => {
-              const isPaid = work.tier === 'paid';
-              return (
-                <a
-                  key={work.id}
-                  href={work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textDecoration: 'none', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
-                  className="hover:opacity-60"
-                  onClick={(e) => { if (isPaid) { e.preventDefault(); } }}
-                >
-                  <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{work.title}</span>
-                  {isPaid && <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>premium</span>}
-                </a>
-              );
-            })}
+            {data.works.length > 0 && (
+              <div style={{ margin: '0 0 1.5rem' }}>
+                <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>works</p>
+                {data.works.map(work => {
+                  const isPaid = work.tier === 'paid';
+                  return (
+                    <a
+                      key={work.id}
+                      href={work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ textDecoration: 'none', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
+                      className="hover:opacity-60"
+                      onClick={(e) => { if (isPaid) { e.preventDefault(); } }}
+                    >
+                      <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{work.title}</span>
+                      {isPaid && <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>premium</span>}
+                    </a>
+                  );
+                })}
+              </div>
+            )}
 
             {author.website && (
-              <a href={author.website} target="_blank" rel="noopener noreferrer"
-                style={{ display: 'block', margin: '0.6rem 0 0', fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
-                className="hover:opacity-60"
-              >
-                {author.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-              </a>
+              <div>
+                <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>website</p>
+                <a href={author.website} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+                  className="hover:opacity-60"
+                >
+                  {author.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                </a>
+              </div>
             )}
           </section>
         )}
