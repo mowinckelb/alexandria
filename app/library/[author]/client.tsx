@@ -307,27 +307,33 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                   {hasFree && shadow && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{authorId}-free.md</span>
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)' }}>free</span>
-                      <span
+                      <svg
                         onClick={() => copyText(shadow, 'free-shadow')}
-                        style={{ cursor: 'pointer', transition: 'opacity 0.15s', fontSize: '0.75rem', color: 'var(--text-ghost)' }}
+                        width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke={copiedId === 'free-shadow' ? 'var(--text-muted)' : 'var(--text-ghost)'}
+                        strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                        style={{ cursor: 'pointer', transition: 'opacity 0.15s' }}
                         className="hover:opacity-60"
                       >
-                        {copiedId === 'free-shadow' ? '\u2713' : '\u2398'}
-                      </span>
+                        {copiedId === 'free-shadow' ? (
+                          <polyline points="20 6 9 17 4 12" />
+                        ) : (
+                          <>
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </>
+                        )}
+                      </svg>
                     </div>
                   )}
                   {hasPaid && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <a
-                        href={`/library/${authorId}/checkout/shadow`}
-                        style={{ fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
-                        className="hover:opacity-60"
-                      >
-                        {authorId}-paid.md
-                      </a>
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)' }}>paid</span>
-                    </div>
+                    <a
+                      href={`/library/${authorId}/checkout/shadow`}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+                      className="hover:opacity-60"
+                    >
+                      {authorId}-paid.md
+                    </a>
                   )}
                 </div>
               )}
