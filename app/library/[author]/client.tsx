@@ -56,7 +56,9 @@ function PulseCardView({ card, authorName, authorId }: { card: PulseCard; author
         <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>{card.month}</p>
       </div>
 
+      {/* All-time closest mind */}
       <div style={{ margin: '0 0 1.2rem' }}>
+        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.5rem' }}>thinks most like</p>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <span style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>{card.alltime.name}</span>
           <span style={{ fontSize: '0.82rem', color: 'var(--text-ghost)', fontWeight: 300 }}>{card.alltime.pct}%</span>
@@ -67,8 +69,9 @@ function PulseCardView({ card, authorName, authorId }: { card: PulseCard; author
         <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.3rem 0 0', lineHeight: 1.5 }}>{card.alltime.why}</p>
       </div>
 
+      {/* This month's thinking resembled */}
       <div style={{ margin: '0 0 1.5rem', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)' }}>
-        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.6rem' }}>this month</p>
+        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.6rem' }}>this month&apos;s thinking resembled</p>
         {card.this_month.map((mind, i) => (
           <div key={i} style={{ margin: '0 0 0.5rem' }}>
             <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{mind.name}</span>
@@ -77,12 +80,13 @@ function PulseCardView({ card, authorName, authorId }: { card: PulseCard; author
         ))}
       </div>
 
-      <div style={{ padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <div>
+      {/* Idea count */}
+      <div style={{ padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)' }}>
+        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.4rem' }}>crystallised ideas</p>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <span style={{ fontSize: '1.3rem', color: 'var(--text-primary)', fontWeight: 300 }}>{card.ideas}</span>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', marginLeft: '0.4rem' }}>ideas</span>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-ghost)' }}>+{card.ideas_delta} this month</span>
         </div>
-        <span style={{ fontSize: '0.72rem', color: 'var(--text-ghost)' }}>+{card.ideas_delta} this month</span>
       </div>
 
       <div style={{ margin: '1.2rem 0 0', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
