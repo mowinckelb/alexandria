@@ -445,7 +445,14 @@ echo "Done."
     recordAccess('shadow_view', authorId, accessorKey, shadow.id, 'free');
     logEvent('library_shadow_view', { author: authorId, tier: 'free' });
 
-    return r2Response(obj.body, 'text/markdown; charset=utf-8', c.req.header('Origin'), 'public, max-age=300');
+    // Free shadow is fully public — any ai, any origin
+    return new Response(obj.body, {
+      headers: {
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=300',
+      },
+    });
   });
 
   // Read paid shadow (requires auth + payment)
