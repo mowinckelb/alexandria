@@ -304,9 +304,9 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  {hasFree && shadow && (
+                  {hasFree && (
                     <div
-                      onClick={() => copyText(shadow, 'free-shadow')}
+                      onClick={() => copyText(`${SERVER_URL}/library/${authorId}/shadow/free`, 'free-shadow')}
                       style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'opacity 0.15s' }}
                       className="hover:opacity-60"
                     >
