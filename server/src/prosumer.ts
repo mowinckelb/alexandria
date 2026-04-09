@@ -599,6 +599,8 @@ Write to the appropriate pool — ontology (Author's thoughts), constitution (Au
 
 Every change to constitution must cite the Author's exact words from vault.
 
+After processing vault, check constitution structural fit. Not every run — only when you notice signals: one file growing disproportionately, signal landing between domains, a domain gone dark, cross-references clustering between the same two files. If restructure signals are present, note them in last_run.md under "## Restructure signals" — the Author or the interactive Engine decides whether to act. You do not restructure autonomously. See Blueprint § III for the full signal list.
+
 If ~/.alexandria/ is a git repo, commit changes and push. Write a report to ~/.alexandria/.autoloop/last_run.md — include entries processed, entries remaining, and any signal you noticed but couldn't act on yet.
 
 After writing last_run.md, send a morning brief email. Read last_run.md and notepad.md, then POST to the server:
