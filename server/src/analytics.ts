@@ -108,11 +108,13 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     return { status: 'no data', message: 'No events logged yet.' };
   }
 
-  // 1. Real session count — only actual session-end events, not smoke tests
+  // 1. Heartbeats (hooks ran) vs practices (product was used)
+  // Backward compat: old "end" events count as heartbeats
   const SMOKE_EVENTS_TOP = new Set(['smoke_test', 'smoke_check', 'github_smoke', 'smoke_post_migration', 'debug_check', 'verification', 'lifecycle-test']);
-  const sessionCount = events.filter(e =>
-    e.e === 'prosumer_session' && e.event === 'end' && !SMOKE_EVENTS_TOP.has(e.event) && !SMOKE_EVENTS_TOP.has(e.platform)
-  ).length;
+  const isReal = (e: Record<string, string>) =>
+    e.e === 'prosumer_session' && !SMOKE_EVENTS_TOP.has(e.event) && !SMOKE_EVENTS_TOP.has(e.platform);
+  const heartbeats = events.filter(e => isReal(e) && (e.event === 'heartbeat' || e.event === 'end')).length;
+  const practices = events.filter(e => isReal(e) && e.event === 'practice').length;
 
   // Time range + staleness
   const firstEvent = events[0]?.t || null;
@@ -146,26 +148,27 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     }
   } catch { /* non-fatal */ }
 
-  // Active users — per-author session counts and last seen
-  // Only count real sessions (event=end or event=start), not smoke tests or automated checks
+  // Active users — per-author heartbeats, practices, and last seen
   const SMOKE_EVENTS = new Set(['smoke_test', 'smoke_check', 'github_smoke', 'smoke_post_migration', 'debug_check', 'verification']);
-  const authorStats: Record<string, { sessions: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
+  const authorStats: Record<string, { heartbeats: number; practices: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
   for (const e of events) {
     if (e.e !== 'prosumer_session' || !e.author) continue;
-    if (SMOKE_EVENTS.has(e.event)) continue; // skip automated checks
+    if (SMOKE_EVENTS.has(e.event)) continue;
     if (!authorStats[e.author]) {
-      authorStats[e.author] = { sessions: 0, last_seen: e.t, failures: 0, platforms: new Set() };
+      authorStats[e.author] = { heartbeats: 0, practices: 0, last_seen: e.t, failures: 0, platforms: new Set() };
     }
     const stat = authorStats[e.author];
     if (e.event === 'hook_failure') { stat.failures++; }
-    else { stat.sessions++; }
+    else if (e.event === 'practice') { stat.practices++; }
+    else if (e.event === 'end' || e.event === 'heartbeat') { stat.heartbeats++; }
     if (e.t > stat.last_seen) stat.last_seen = e.t;
     if (e.platform) stat.platforms.add(e.platform);
   }
 
   const users = Object.entries(authorStats).map(([login, stat]) => ({
     login,
-    sessions: stat.sessions,
+    heartbeats: stat.heartbeats,
+    practices: stat.practices,
     last_seen: stat.last_seen,
     hours_ago: Math.round((Date.now() - new Date(stat.last_seen).getTime()) / (1000 * 60 * 60) * 10) / 10,
     failures: stat.failures,
@@ -181,7 +184,8 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     users,
     total_events: events.length,
     parse_errors: parseErrors,
-    sessions: sessionCount,
+    heartbeats,
+    practices,
     errors: {
       log_parse_errors: parseErrors,
     },
@@ -276,8 +280,45 @@ async function getLibraryMetrics(events: Record<string, string>[]): Promise<Reco
     // D1 not available — ok, just return event-based metrics
   }
 
+  // RL signal health — is the Library feedback loop working?
+  let rlSignal: Record<string, unknown> = {};
+  try {
+    const { getDB } = await import('./db.js');
+    const db = getDB();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    // How many access_log entries have meta (enriched signal vs bare events)
+    const metaStats = await db.prepare(`
+      SELECT
+        COUNT(*) as total_events,
+        COUNT(meta) as events_with_meta,
+        COUNT(DISTINCT author_id) as active_authors,
+        COUNT(DISTINCT event) as event_types
+      FROM access_log WHERE created_at > ?
+    `).bind(thirtyDaysAgo).first();
+
+    // Publish → engagement ratio per author (are published artifacts getting seen?)
+    const publishCount = await db.prepare(
+      `SELECT COUNT(*) as c FROM access_log WHERE event LIKE 'publish_%' AND created_at > ?`
+    ).bind(thirtyDaysAgo).first<{ c: number }>();
+    const engagementCount = await db.prepare(
+      `SELECT COUNT(*) as c FROM access_log WHERE event NOT LIKE 'publish_%' AND created_at > ?`
+    ).bind(thirtyDaysAgo).first<{ c: number }>();
+
+    rlSignal = {
+      status: (metaStats as any)?.total_events > 0 ? 'active' : 'no signal',
+      last_30d: metaStats || {},
+      publish_to_engagement_ratio: publishCount?.c && engagementCount?.c
+        ? `${publishCount.c} publishes → ${engagementCount.c} engagements`
+        : 'no data',
+    };
+  } catch {
+    rlSignal = { status: 'd1 unavailable' };
+  }
+
   return {
     events: { shadow_views: shadowViews, pulse_views: pulseViews, quizzes_taken: quizzesTaken, work_views: workViews, paid_access: paidAccess, publishes, purchases },
+    rl_signal: rlSignal,
     ...d1Metrics,
   };
 }
@@ -301,24 +342,27 @@ export async function getUserEvents(login: string): Promise<Record<string, unkno
     return { status: 'no data', author: login };
   }
 
-  const sessions = events.filter(e => e.e === 'prosumer_session');
-  const failures = sessions.filter(e => e.event === 'hook_failure');
+  const allSessions = events.filter(e => e.e === 'prosumer_session');
+  const heartbeatEvents = allSessions.filter(e => e.event === 'end' || e.event === 'heartbeat');
+  const practiceEvents = allSessions.filter(e => e.event === 'practice');
+  const failures = allSessions.filter(e => e.event === 'hook_failure');
   const feedback = events.filter(e => e.e === 'user_feedback');
   const signals = events.filter(e => e.e === 'machine_signal');
-  const lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+  const lastSession = allSessions.length > 0 ? allSessions[allSessions.length - 1] : null;
 
   return {
     author: login,
     total_events: events.length,
+    heartbeats: heartbeatEvents.length,
+    practices: practiceEvents.length,
     sessions: {
-      total: sessions.length,
       last: lastSession,
-      platforms: [...new Set(sessions.map(s => s.platform).filter(Boolean))],
-      blueprint_fetched_rate: sessions.length > 0
-        ? Math.round(sessions.filter(s => s.blueprint_fetched === 'true').length / sessions.length * 100) + '%'
+      platforms: [...new Set(allSessions.map(s => s.platform).filter(Boolean))],
+      blueprint_fetched_rate: heartbeatEvents.length > 0
+        ? Math.round(heartbeatEvents.filter(s => s.blueprint_fetched === 'true').length / heartbeatEvents.length * 100) + '%'
         : null,
-      constitution_injected_rate: sessions.length > 0
-        ? Math.round(sessions.filter(s => s.constitution_injected === 'true').length / sessions.length * 100) + '%'
+      constitution_injected_rate: heartbeatEvents.length > 0
+        ? Math.round(heartbeatEvents.filter(s => s.constitution_injected === 'true').length / heartbeatEvents.length * 100) + '%'
         : null,
     },
     failures: {

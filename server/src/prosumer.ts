@@ -269,11 +269,18 @@ blueprint_ok=false
 const_injected=false
 [ "\${const_size:-0}" -gt 10 ] 2>/dev/null && const_injected=true
 
+# Classify: practice (product was used) vs heartbeat (hooks ran)
+event_type="heartbeat"
+if [ -f "$ALEX_DIR/.practice" ]; then
+  event_type="practice"
+  rm -f "$ALEX_DIR/.practice"
+fi
+
 if [ -n "$API_KEY" ]; then
   curl -s -X POST "${SERVER_URL}/session" \\
     -H "Authorization: Bearer $API_KEY" \\
     -H "Content-Type: application/json" \\
-    -d "{\\"event\\":\\"end\\",\\"platform\\":\\"$PLATFORM\\",\\"constitution_size\\":\${const_size:-0},\\"constitution_files\\":\${const_file_count:-0},\\"vault_entry_count\\":\${vault_count:-0},\\"feedback_size\\":\${feedback_size:-0},\\"constitution_injected\\":$const_injected,\\"blueprint_fetched\\":$blueprint_ok}" \\
+    -d "{\\"event\\":\\"$event_type\\",\\"platform\\":\\"$PLATFORM\\",\\"constitution_size\\":\${const_size:-0},\\"constitution_files\\":\${const_file_count:-0},\\"vault_entry_count\\":\${vault_count:-0},\\"feedback_size\\":\${feedback_size:-0},\\"constitution_injected\\":$const_injected,\\"blueprint_fetched\\":$blueprint_ok}" \\
     > /dev/null 2>&1 &
 
   # JSON-escape helper: node is always available (required for CC hooks)
@@ -2094,6 +2101,141 @@ ${delta}`);
     return c.json({ ok: true, length: Math.min(delta.length, 10000) });
   });
 
+  // --- Factory Library signal (RL aggregation for meta trigger) ---
+
+  app.get('/admin/factory/library-signal', async (c) => {
+    const key = extractApiKey(c);
+    if (!key) return c.text('missing key', 401);
+    const account = await findByApiKey(key);
+    const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb';
+    if (!account || account.github_login !== adminLogin) return c.text('not authorized', 403);
+
+    // Read window — default last 30 days, configurable
+    const days = parseInt(c.req.query('days') || '30');
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+    try {
+      const { getDB } = await import('./db.js');
+      const db = getDB();
+
+      // Per-author aggregate: what they published, what engagement they got
+      const publishEvents = await db.prepare(
+        `SELECT author_id, event, meta, created_at FROM access_log
+         WHERE event LIKE 'publish_%' AND created_at > ? ORDER BY created_at`
+      ).bind(since).all();
+
+      const engagementEvents = await db.prepare(
+        `SELECT author_id, event, tier, meta, created_at FROM access_log
+         WHERE event NOT LIKE 'publish_%' AND created_at > ? ORDER BY created_at`
+      ).bind(since).all();
+
+      // Quiz outcomes — score distribution is RL signal
+      const quizOutcomes = await db.prepare(
+        `SELECT q.author_id, qr.quiz_id, qr.score_pct, qr.taken_at
+         FROM quiz_results qr
+         JOIN quizzes q ON qr.quiz_id = q.id
+         WHERE qr.taken_at > ?
+         ORDER BY qr.taken_at`
+      ).bind(since).all();
+
+      // Referral conversions — which artifacts drove signups
+      const referrals = await db.prepare(
+        `SELECT author_id, source_type, COUNT(*) as count FROM referrals
+         WHERE created_at > ? GROUP BY author_id, source_type`
+      ).bind(since).all();
+
+      // Event distribution — the Factory determines which patterns matter
+      const funnelCounts = await db.prepare(
+        `SELECT event, COUNT(*) as count, COUNT(DISTINCT author_id) as authors,
+                COUNT(DISTINCT accessor_id) as unique_accessors
+         FROM access_log WHERE created_at > ?
+         GROUP BY event ORDER BY count DESC`
+      ).bind(since).all();
+
+      // Build unstructured text for Opus to interpret
+      const lines: string[] = [
+        `# Library RL Signal — last ${days} days (since ${since.slice(0, 10)})`,
+        '',
+        '## Funnel Overview',
+      ];
+
+      for (const row of (funnelCounts.results || []) as Array<{ event: string; count: number; authors: number; unique_accessors: number }>) {
+        lines.push(`- ${row.event}: ${row.count} events, ${row.authors} authors, ${row.unique_accessors} unique accessors`);
+      }
+
+      // Per-author publishing patterns
+      const authorPublishes: Record<string, Array<{ event: string; meta: string | null; at: string }>> = {};
+      for (const row of (publishEvents.results || []) as Array<{ author_id: string; event: string; meta: string | null; created_at: string }>) {
+        if (!authorPublishes[row.author_id]) authorPublishes[row.author_id] = [];
+        authorPublishes[row.author_id].push({ event: row.event, meta: row.meta, at: row.created_at });
+      }
+
+      // Per-author engagement received
+      const authorEngagement: Record<string, Record<string, number>> = {};
+      for (const row of (engagementEvents.results || []) as Array<{ author_id: string; event: string }>) {
+        if (!authorEngagement[row.author_id]) authorEngagement[row.author_id] = {};
+        authorEngagement[row.author_id][row.event] = (authorEngagement[row.author_id][row.event] || 0) + 1;
+      }
+
+      const allAuthors = new Set([...Object.keys(authorPublishes), ...Object.keys(authorEngagement)]);
+      if (allAuthors.size > 0) {
+        lines.push('', '## Per-Author Signal');
+        for (const author of allAuthors) {
+          lines.push('', `### ${author}`);
+          const pubs = authorPublishes[author] || [];
+          if (pubs.length > 0) {
+            lines.push('Published:');
+            for (const p of pubs) {
+              const meta = p.meta ? ` — ${p.meta}` : '';
+              lines.push(`  ${p.event} at ${p.at}${meta}`);
+            }
+          }
+          const eng = authorEngagement[author] || {};
+          if (Object.keys(eng).length > 0) {
+            lines.push('Engagement received:');
+            for (const [event, count] of Object.entries(eng)) {
+              lines.push(`  ${event}: ${count}`);
+            }
+          }
+        }
+      }
+
+      // Quiz score distributions — what correlates with shares/conversions
+      const quizResults = (quizOutcomes.results || []) as Array<{ author_id: string; quiz_id: string; score_pct: number }>;
+      if (quizResults.length > 0) {
+        lines.push('', '## Quiz Score Distribution');
+        const byQuiz: Record<string, number[]> = {};
+        for (const r of quizResults) {
+          const key = `${r.author_id}/${r.quiz_id}`;
+          if (!byQuiz[key]) byQuiz[key] = [];
+          byQuiz[key].push(r.score_pct);
+        }
+        for (const [key, scores] of Object.entries(byQuiz)) {
+          const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+          const min = Math.min(...scores);
+          const max = Math.max(...scores);
+          lines.push(`- ${key}: ${scores.length} takes, avg ${avg}%, range ${min}-${max}%`);
+        }
+      }
+
+      // Referral conversions
+      const refs = (referrals.results || []) as Array<{ author_id: string; source_type: string; count: number }>;
+      if (refs.length > 0) {
+        lines.push('', '## Referral Conversions');
+        for (const r of refs) {
+          lines.push(`- ${r.author_id}: ${r.count} via ${r.source_type}`);
+        }
+      }
+
+      lines.push('', '---', 'Raw structural signal. No content. The Factory interprets patterns and updates Blueprint defaults.');
+
+      return c.text(lines.join('\n'));
+    } catch (err) {
+      console.error('[factory] library-signal error:', err);
+      return c.text('error reading library signal', 500);
+    }
+  });
+
   // --- Block — onboarding prompt for new AI tab ---
 
   app.get('/block', (c) => {
@@ -2141,7 +2283,7 @@ ${delta}`);
     const esc = (s: unknown) => String(s ?? '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     // All accounts — merge signup data with session activity
-    const sessionUsers = (data.users || []) as { login: string; sessions: number; hours_ago: number; last_seen: string; failures: number; platforms: string[] }[];
+    const sessionUsers = (data.users || []) as { login: string; heartbeats: number; practices: number; hours_ago: number; last_seen: string; failures: number; platforms: string[] }[];
     const sessionMap = new Map(sessionUsers.map(u => [u.login, u]));
 
     const allAccounts = Object.values(accounts) as Account[];
@@ -2163,8 +2305,9 @@ ${delta}`);
       .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
       .map(a => {
         const session = sessionMap.get(a.github_login);
-        const sessions = session ? String(session.sessions) : '0';
-        return '<tr><td>' + esc(a.github_login) + '</td><td>' + sessions + '</td></tr>';
+        const practices = session ? String(session.practices) : '0';
+        const heartbeats = session ? String(session.heartbeats) : '0';
+        return '<tr><td>' + esc(a.github_login) + '</td><td>' + practices + '</td><td>' + heartbeats + '</td></tr>';
       }).join('\n');
 
     // System: only show if something is wrong
@@ -2211,7 +2354,7 @@ ${delta}`);
 </head><body>
 <p class="title">alexandria.</p>
 
-<table><tr><th>author</th><th>sessions</th></tr>
+<table><tr><th>author</th><th>practices</th><th>heartbeats</th></tr>
 ${authorTableRows}
 </table>
 
