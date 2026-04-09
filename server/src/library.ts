@@ -45,12 +45,13 @@ function isValidAuthorId(id: string): boolean {
 // Access logging
 // ---------------------------------------------------------------------------
 
-async function recordAccess(event: string, authorId: string, accessorId: string | null, artifactId: string | null, tier: string | null): Promise<void> {
+async function recordAccess(event: string, authorId: string, accessorId: string | null, artifactId: string | null, tier: string | null, meta?: Record<string, string | number>): Promise<void> {
   try {
     const db = getDB();
+    const metaJson = meta ? JSON.stringify(meta) : null;
     await db.prepare(
-      `INSERT INTO access_log (event, author_id, accessor_id, artifact_id, tier, created_at) VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(event, authorId, accessorId, artifactId, tier, new Date().toISOString()).run();
+      `INSERT INTO access_log (event, author_id, accessor_id, artifact_id, tier, meta, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(event, authorId, accessorId, artifactId, tier, metaJson, new Date().toISOString()).run();
   } catch (e) {
     console.error('[library] access_log write failed:', e);
   }
@@ -122,6 +123,19 @@ export function registerLibraryRoutes(app: Hono): void {
       ).bind(generateId(), authorId, tier, r2Key, (content as string).length, now, now).run();
     }
 
+    // Structural signal for Factory — shape of what was published, never content
+    const freeShadow = body.free_shadow as string | undefined;
+    const paidShadow = body.paid_shadow as string | undefined;
+    const publishMeta: Record<string, string | number> = {};
+    if (freeShadow) {
+      publishMeta.free_bytes = freeShadow.length;
+      publishMeta.free_sections = freeShadow.split('\n').filter((l: string) => l.startsWith('## ')).length;
+    }
+    if (paidShadow) {
+      publishMeta.paid_bytes = paidShadow.length;
+      publishMeta.paid_sections = paidShadow.split('\n').filter((l: string) => l.startsWith('## ')).length;
+    }
+    recordAccess('publish_shadow', authorId, authorId, null, null, publishMeta);
     logEvent('library_publish_shadow', { author: authorId });
     return c.json({ ok: true, url: `/library/${authorId}` });
   });
@@ -160,6 +174,14 @@ export function registerLibraryRoutes(app: Hono): void {
        ON CONFLICT(author_id, month) DO UPDATE SET r2_key_pulse = ?, r2_key_delta = ?, published_at = ?`
     ).bind(id, authorId, month, pulseKey, deltaKey, now, pulseKey, deltaKey, now).run();
 
+    // Structural signal — pulse shape
+    const pulseContent = body.pulse as string;
+    recordAccess('publish_pulse', authorId, authorId, id, null, {
+      bytes: pulseContent.length,
+      sections: pulseContent.split('\n').filter((l: string) => l.startsWith('## ')).length,
+      has_delta: body.delta ? 1 : 0,
+      month,
+    });
     logEvent('library_publish_pulse', { author: authorId, month });
     return c.json({ ok: true, month });
   });
@@ -188,6 +210,12 @@ export function registerLibraryRoutes(app: Hono): void {
       `INSERT INTO quizzes (id, author_id, title, subtitle, r2_key, published_at) VALUES (?, ?, ?, ?, ?, ?)`
     ).bind(id, authorId, body.title, body.subtitle || null, r2Key, now).run();
 
+    // Structural signal — quiz shape
+    recordAccess('publish_quiz', authorId, authorId, id, null, {
+      question_count: body.questions.length,
+      has_result_tiers: body.result_tiers ? 1 : 0,
+      data_bytes: JSON.stringify(body).length,
+    });
     logEvent('library_publish_quiz', { author: authorId, quiz_id: id, question_count: String(body.questions.length) });
     return c.json({ ok: true, quiz_id: id, url: `/library/${authorId}/quiz/${id}` });
   });
@@ -222,6 +250,12 @@ export function registerLibraryRoutes(app: Hono): void {
       `INSERT INTO works (id, author_id, title, medium, tier, r2_key, size_bytes, url, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(id, authorId, body.title, medium, tier, r2Key, content.length, body.url || null, now).run();
 
+    // Structural signal — work shape
+    recordAccess('publish_work', authorId, authorId, id, tier, {
+      bytes: content.length,
+      medium,
+      sections: content.split('\n').filter((l: string) => l.startsWith('## ')).length,
+    });
     logEvent('library_publish_work', { author: authorId, work_id: id, medium });
     return c.json({ ok: true, work_id: id });
   });
@@ -424,6 +458,14 @@ echo "Done."
       } catch {}
     }
 
+    const ref = c.req.query('ref') || null;
+    recordAccess('author_view', authorId, extractApiKey(c), null, null, {
+      ...(ref ? { ref } : {}),
+      shadows: (shadows.results?.length || 0) as number,
+      quizzes: (quizzes.results?.length || 0) as number,
+      works: (works.results?.length || 0) as number,
+      has_pulse: latestPulse ? 1 : 0,
+    });
     logEvent('library_author_view', { author: authorId });
 
     return c.json({ author, shadows: shadows.results, quizzes: quizzes.results, works: works.results, latest_pulse: latestPulse, shadow_chapters });
@@ -442,7 +484,8 @@ echo "Done."
     if (!obj) return c.json({ error: 'Shadow content not found' }, 404);
 
     const accessorKey = extractApiKey(c);
-    recordAccess('shadow_view', authorId, accessorKey, shadow.id, 'free');
+    const ref = c.req.query('ref') || null;
+    recordAccess('shadow_view', authorId, accessorKey, shadow.id, 'free', ref ? { ref } : undefined);
     logEvent('library_shadow_view', { author: authorId, tier: 'free' });
 
     // Free shadow is fully public — any ai, any origin
@@ -480,7 +523,7 @@ echo "Done."
         if (accessor.subscription_id) {
           const obj = await r2.get(shadow.r2_key);
           if (!obj) return c.json({ error: 'Shadow content not found' }, 404);
-          recordAccess('shadow_view', authorId, accessor.github_login, shadow.id, 'paid');
+          recordAccess('shadow_view', authorId, accessor.github_login, shadow.id, 'paid', { access: 'subscriber' });
           logEvent('library_paid_access_free', { author: authorId, accessor: accessor.github_login });
           return r2Response(obj.body, 'text/markdown; charset=utf-8', c.req.header('Origin'));
         }
@@ -504,7 +547,7 @@ echo "Done."
         const obj = await r2.get(shadow.r2_key);
         if (!obj) return c.json({ error: 'Shadow content not found' }, 404);
 
-        recordAccess('shadow_view', authorId, accessor.github_login, shadow.id, 'paid');
+        recordAccess('shadow_view', authorId, accessor.github_login, shadow.id, 'paid', { access: 'tab', amount_cents: priceCents });
         logEvent('library_paid_access', { author: authorId, accessor: accessor.github_login, artifact_type: 'shadow', amount_cents: String(priceCents) });
 
         return r2Response(obj.body, 'text/markdown; charset=utf-8', c.req.header('Origin'));
@@ -531,7 +574,7 @@ echo "Done."
 
         const obj = await r2.get(shadow.r2_key);
         if (!obj) return c.json({ error: 'Shadow content not found' }, 404);
-        recordAccess('shadow_view', authorId, token, shadow.id, 'paid');
+        recordAccess('shadow_view', authorId, token, shadow.id, 'paid', { access: 'token' });
         // Token IS the auth — allow any origin so AI tools (GPT, Claude, etc.) can fetch
         return new Response(obj.body, {
           headers: {
@@ -746,7 +789,8 @@ echo "Done."
     const obj = await r2.get(pulse.r2_key_pulse);
     if (!obj) return c.json({ error: 'Pulse content not found' }, 404);
 
-    recordAccess('pulse_view', authorId, extractApiKey(c), null, null);
+    const ref = c.req.query('ref') || null;
+    recordAccess('pulse_view', authorId, extractApiKey(c), null, null, ref ? { ref } : undefined);
     logEvent('library_pulse_view', { author: authorId });
 
     return r2Response(obj.body, 'text/markdown; charset=utf-8', c.req.header('Origin'), 'public, max-age=300');
@@ -854,7 +898,11 @@ echo "Done."
       `INSERT INTO quiz_results (id, quiz_id, taker_id, score_pct, result_slug, taken_at) VALUES (?, ?, ?, ?, ?, ?)`
     ).bind(id, quizId, takerId, scorePct, resultSlug, new Date().toISOString()).run();
 
-    recordAccess('quiz_take', authorId, takerId, quizId, 'free');
+    recordAccess('quiz_take', authorId, takerId, quizId, 'free', {
+      score_pct: scorePct,
+      questions: total,
+      correct,
+    });
     logEvent('library_quiz_taken', { author: authorId, quiz_id: quizId, score_pct: String(scorePct) });
 
     // Determine result tier
@@ -891,7 +939,8 @@ echo "Done."
     const quiz = await db.prepare('SELECT title FROM quizzes WHERE id = ?').bind(quizId).first<{ title: string }>();
     const author = await db.prepare('SELECT display_name FROM authors WHERE id = ?').bind(authorId).first<{ display_name: string }>();
 
-    recordAccess('quiz_share_view', authorId, null, quizId, null);
+    const ref = c.req.query('ref') || null;
+    recordAccess('quiz_share_view', authorId, null, quizId, null, ref ? { ref } : undefined);
     logEvent('library_quiz_share_view', { author: authorId, quiz_id: quizId, slug });
 
     return c.json({
@@ -942,7 +991,7 @@ echo "Done."
           if (accessor.subscription_id) {
             const obj = await r2.get(work.r2_key);
             if (!obj) return c.json({ error: 'Work content not found' }, 404);
-            recordAccess('work_view', authorId, accessor.github_login, workId, 'paid');
+            recordAccess('work_view', authorId, accessor.github_login, workId, 'paid', { access: 'subscriber' });
             logEvent('library_paid_access_free', { author: authorId, accessor: accessor.github_login });
             return r2Response(obj.body, 'text/markdown; charset=utf-8', c.req.header('Origin'));
           }
@@ -965,7 +1014,7 @@ echo "Done."
           const obj = await r2.get(work.r2_key);
           if (!obj) return c.json({ error: 'Work content not found' }, 404);
 
-          recordAccess('work_view', authorId, accessor.github_login, workId, 'paid');
+          recordAccess('work_view', authorId, accessor.github_login, workId, 'paid', { access: 'tab', amount_cents: priceCents });
           logEvent('library_paid_access', { author: authorId, accessor: accessor.github_login, artifact_type: 'work', amount_cents: String(priceCents) });
 
           return r2Response(obj.body, 'text/markdown; charset=utf-8', c.req.header('Origin'));
@@ -986,7 +1035,8 @@ echo "Done."
     const obj = await r2.get(work.r2_key);
     if (!obj) return c.json({ error: 'Work content not found' }, 404);
 
-    recordAccess('work_view', authorId, extractApiKey(c), workId, work.tier);
+    const ref = c.req.query('ref') || null;
+    recordAccess('work_view', authorId, extractApiKey(c), workId, work.tier, ref ? { ref } : undefined);
     logEvent('library_work_view', { author: authorId, work_id: workId, tier: work.tier });
 
     return r2Response(obj.body, 'text/markdown; charset=utf-8', c.req.header('Origin'), 'public, max-age=300');

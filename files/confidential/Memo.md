@@ -48,11 +48,11 @@ The formal argument is at mowinckel.ai/partners/logic — 51 premises, 14 conclu
 
 ## The Uncomfortable Truth About Your Portfolio
 
-Four positions survive the software collapse: make models, generate live data, gatekeep permissions, own atoms. Everything else gets absorbed.
+One question separates the ai investments that survive from the ones that do not: does the company get better or worse when the next model drops?
 
-Count the companies in your ai portfolio that occupy one of those four positions. Then count the ones that do not. The terminal value you have assigned to the second group — what is it based on? Not on a structural position that survives the next model release. On the hope that someone else buys it before the music stops. That is not terminal value. That is an exit timeline dressed as a multiple.
+Count the companies in your ai portfolio. For each one, ask: does a better model make this company more valuable, or does it close the gap between what the company does and what the model does natively? The terminal value you have assigned to the second group — what is it based on? Not on a structural position that survives the next model release. On the hope that someone else buys it before the music stops. That is not terminal value. That is an exit timeline dressed as a multiple.
 
-Alexandria is position two — both sides. The indirect play: scaffolding that helps individual users create live data (constitutions, structured cognitive profiles). The direct play: hosting the Library — a network of live personal data that no individual can build alone. The server's scaffolding value (Blueprint methodology, setup) thins over time for any single Author. But the server IS the Library infrastructure — hosting published shadows, serving them to other Authors' Engines, processing payments, running cognitive matchmaking. The network value compounds with every new Author. The server's total value to any individual Author may actually increase as the network grows. Free-first is structurally required — network effects need critical mass. Revenue comes from the network layer. Each user's Constitution is live, unique, private, unsynthesizable from public sources. Better models make the extraction *better*, which makes the data *more* valuable. The idiot index is 1 — cost of product divided by cost of raw materials. $100/month. Zero process overhead. The exponential is underneath the company, not in front of it.
+Alexandria gets better. Both sides. The indirect play: scaffolding that helps individual users create live data (constitutions, structured cognitive profiles). The direct play: hosting the Library — a network of live personal data that no individual can build alone. The server's scaffolding value (Blueprint methodology, setup) thins over time for any single Author. But the server IS the Library infrastructure — hosting published shadows, serving them to other Authors' Engines, processing payments, running cognitive matchmaking. The network value compounds with every new Author. The server's total value to any individual Author may actually increase as the network grows. Free-first is structurally required — network effects need critical mass. Revenue comes from the network layer. Each user's Constitution is live, unique, private, unsynthesizable from public sources. Better models make the extraction *better*, which makes the data *more* valuable. The idiot index is 1 — cost of product divided by cost of raw materials. $100/month. Zero process overhead. The exponential is underneath the company, not in front of it.
 
 If this thesis is wrong, you have a company that costs nothing and a founder who builds regardless. If it is right — and every trend confirms it — then most of your ai portfolio cannot honestly justify terminal value, and this is one of the few investments that can.
 
@@ -178,7 +178,7 @@ mowinckel.ai
 
 *TOPICS (rotate, never repeat):*
 
-*- Portfolio uncomfortable truth: "Count the companies in your ai portfolio that occupy one of the four positions. Make models, generate live data, gatekeep permissions, own atoms. The terminal value on the rest — what is it based on?"*
+*- Portfolio uncomfortable truth: "For each company in your ai portfolio, ask: does a better model make this company more valuable, or does it close the gap? The terminal value on the ones where the gap closes — what is it based on?"*
 
 *- Karpathy validation: "Andrej Karpathy just described this exact architecture — raw data compiled into structured markdown, incrementally enhanced, queries that compound. He's doing it for research with duct-taped scripts. We built the product for the self. The guy who coined Software 2.0 independently validated the mechanism."*
 
@@ -194,7 +194,7 @@ mowinckel.ai
 
 *- Labs won't: golden cages. Lock-in disincentive. Regulation reinforces. Every memory feature validates the thesis.*
 
-*- Not software: software is trivial. Product is data + philosophy. Four positions survive. Position two.*
+*- Not software: software is trivial. Product is data + philosophy. Better models make the data more valuable, not the company obsolete.*
 
 *- Demand is the only question: product built, philosophy written, money answers demand. ~$15K seeds 25 users.*
 

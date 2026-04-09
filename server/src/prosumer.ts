@@ -2229,7 +2229,9 @@ ${delta}`);
 
       lines.push('', '---', 'Raw structural signal. No content. The Factory interprets patterns and updates Blueprint defaults.');
 
-      return c.text(lines.join('\n'));
+      const output = lines.join('\n');
+      // Cap output — Workers have memory limits, and the meta trigger has context limits
+      return c.text(output.slice(0, 50000));
     } catch (err) {
       console.error('[factory] library-signal error:', err);
       return c.text('error reading library signal', 500);

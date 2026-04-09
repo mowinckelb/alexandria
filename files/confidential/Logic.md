@@ -162,9 +162,9 @@ P25. Pure software is rapidly becoming uninvestable. ai wrappers around model ca
 
 (Assumption. Strong pattern — coding assistants, productivity tools, and content generators are being absorbed. But some wrapper companies build genuine distribution and survive.)
 
-P25b. Four positions survive the software collapse: make models, generate live data, gatekeep permissions, own atoms. Everything else is absorbed. The terminal value question is whether the company occupies one of these positions. Alexandria is position two — generate live data. The data appreciates with model quality, making every model release an improvement rather than an existential threat. Most ai investments cannot make this claim.
+P25b. The survival test for any ai company is whether it improves or degrades with each model release. Alexandria improves — better models extract deeper signal from the same vault, produce richer constitutions, run better sessions. The data appreciates with model quality, making every model release an improvement rather than an existential threat. Most ai investments degrade — their value is the gap between model capability and user need, and that gap closes with every release. Common examples of companies that pass the test: make models, generate live data, gatekeep permissions, own atoms. Alexandria generates live data. But the defensibility is not the category — it is the specific properties of the data: private, accumulating, unsynthesizable, appreciating with model quality.
 
-(Assumption. The four-position taxonomy is the founder's framework. Whether it is exhaustive is debatable. The structural point — that Alexandria improves with model releases rather than being absorbed — is settled.)
+(The structural point — that Alexandria improves with model releases rather than being absorbed — is settled. The illustrative categories are a useful heuristic, not an exhaustive taxonomy.)
 
 P26. Each user's Constitution is live, unique, private, and unsynthesizable from public sources. Better models make the extraction better, but a model release alone cannot replicate what Alexandria builds.
 
@@ -330,7 +330,7 @@ The blue numbers are the assumptions. These are the only things worth discussing
 - P22 The per-user feedback log advantage is large enough to matter.
 - P23 The question is non-obvious enough that competitors won't arrive at it quickly.
 - P25 Most competing ai investments will be obsoleted by model releases.
-- P25b The four-position taxonomy is correct and Alexandria occupies position two (generate live data).
+- P25b Alexandria improves with model releases rather than being absorbed (model-release survival test).
 - P30 Churn trends toward near-zero as Constitutions deepen.
 - P35 Enough people pay $10/month for the examined life (or bring 5 kin and pay nothing).
 - P36 Labs will pay for Library access.
@@ -428,13 +428,13 @@ Against: Some wrapper companies build genuine distribution and brand loyalty tha
 
 Assessment: The structural pattern is real. The claim that "most" will die is strong. Many will. Not all. Strong on pattern, moderate on magnitude.
 
-**P25b — The four-position taxonomy is correct and Alexandria occupies position two.**
+**P25b — Alexandria improves with model releases rather than being absorbed.**
 
-For: The taxonomy — make models, generate live data, gatekeep permissions, own atoms — exhaustively covers the value chain. Alexandria generates live data (each Constitution is unique, private, unsynthesizable). Better models make the extraction more valuable, not the company obsolete. The idiot index is 1 — zero process overhead between intelligence and product. Most ai portfolios cannot make this claim about terminal value. Dead companies validate the pattern: Dot (shutdown Oct 2025, users lost data), Limitless (acquired by Meta Dec 2025, $350M, product killed) — both were software wrappers without a position in the four-position framework.
+For: Better models extract deeper signal from the same vault, produce richer constitutions, run better sessions. The data appreciates with model quality. The idiot index is 1 — zero process overhead between intelligence and product. Most ai portfolios cannot make this structural claim. Dead companies validate the inverse: Dot (shutdown Oct 2025, users lost data), Limitless (acquired by Meta Dec 2025, $350M, product killed) — both were capability wrappers whose value degraded as models improved. Alexandria's data properties are the defensibility: private (requires sustained conversational extraction), accumulating (compounds with every session), unsynthesizable (no public dataset produces it), appreciating (better models = more valuable data, not less valuable company).
 
-Against: The taxonomy may not be exhaustive. A fifth position could exist that the framework does not capture. "Generate live data" is broad — many companies claim unique data without it being meaningfully defensible.
+Against: "Generate live data" is broad — many companies claim unique data without it being meaningfully defensible. The specific properties of Alexandria's data (private, accumulating, unsynthesizable, appreciating) are strong, but whether the accumulation creates sufficient switching costs is unproven.
 
-Assessment: The taxonomy is a useful framework, not a proven law. Alexandria's position within it is strong — the data is genuinely unsynthesizable from public sources and appreciates with model quality. Whether the taxonomy itself captures all surviving positions is debatable. Moderate assumption.
+Assessment: That Alexandria improves with model releases is settled — the mechanism is direct and observable. Whether that improvement translates to sufficient defensibility depends on the specific data properties, not on membership in a category. The data properties are strong. Moderate assumption on magnitude of defensibility.
 
 **P30 — Churn trends toward near-zero as Constitutions deepen.**
 

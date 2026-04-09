@@ -249,7 +249,7 @@ Alexandria is a sovereign layer that develops human cognition through ai. One cu
 
 [beat — rope swing lands, now pivot]
 
-Here's what matters. Pure software is dying. Most ai investments are bridge companies — absorbed by the next model release. The terminal value in your models is fabricated. Four positions survive: make models, generate live data, gatekeep permissions, own atoms. Alexandria is position two. Better models make us better. A model release cannot replicate what we build. The data compounds.
+Here's what matters. Pure software is dying. Most ai investments are bridge companies — absorbed by the next model release. The terminal value in your portfolio is fabricated. One question separates the survivors: does a better model make the company more valuable, or does it close the gap? Alexandria gets better with every model release. Better models extract deeper signal from the same data. A model release cannot replicate what we build — private, accumulating, unsynthesizable. The data compounds.
 
 The company runs on a hundred dollars a month. I built this in eight weeks. Pivoted three times. The product is done. I don't need your money — the company can't die. But the entry price is lowest now, and I'm choosing one partner. This is a conviction bet at the earliest possible moment. The question is whether you want to be in the cap table before there's traction data, or after — when you're paying five times more."
 

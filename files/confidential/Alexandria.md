@@ -28,11 +28,11 @@ Pre-revenue. No external users. The product works. Distribution starts San Franc
 
 Five dimensions of human value: intelligence, strength, dexterity, empathy, and the human itself. The first four are capabilities that ai and robotics commoditise. The fifth is constitutive — the fact that a human is involved. It cannot be commoditised by definition. Alexandria develops the fifth dimension.
 
-Four positions survive the software collapse: make models, generate live data, gatekeep permissions, own atoms. Everything else gets absorbed by the next frontier release. Alexandria is position two — generate live data. Each Constitution is live, unique, private, unsynthesizable. Better models make the extraction deeper, which makes the data more valuable. The company improves with every model release.
+The survival test for any ai company: does it get better or worse when the next model drops? Most ai investments degrade — their value is the gap between what the model can do and what the user needs, and that gap closes with every release. Alexandria improves. Each Constitution is live, unique, private, unsynthesizable. Better models make the extraction deeper, which makes the data more valuable. The company gets better with every model release. Make models, generate live data, gatekeep permissions, own atoms — these are examples of positions that pass the test. Alexandria generates live data. But the defensibility is not the category — it is the specific properties of the data: private, accumulating, unsynthesizable from public sources, appreciating with model quality.
 
 The idiot index is 1. $100/month opex. One Claude subscription. No payroll, no compute, no storage, no database. Six dependencies, all CLI-controllable. The entire company runs autonomously from the terminal. Zero overhead between the intelligence and the product. The exponential is underneath the company, not in front of it. Hiring is a cost that would need to justify itself — a hire is a fixed cost that does not compound, an ai agent is a variable cost that compounds. The question is what a hire would do that a better model won't do better in six months. That list is shrinking.
 
-Most ai investments cannot make this structural claim. The terminal value question is whether a company occupies one of the four positions. Alexandria does.
+Most ai investments cannot make this structural claim. The terminal value question is whether a company improves with model releases or gets absorbed by them. Alexandria improves.
 
 ---
 
