@@ -145,16 +145,7 @@ No Machine loop. No constitution writes. This is company work, not product:
 - **Meta loop.** Product learnings → `files/private/Blueprint.md`.
 - **Vision loop.** New thinking about Alexandria → a0, crystallise into an when ready.
 - **Founder loop.** Save CC memories for communication patterns, preferences, anti-patterns.
-- **Downstream staleness check.** If a1, a2, a3, or a4 changed, verify ax still match:
-  - `files/private/Axioms.md` (from a1+a2)
-  - `files/private/Blueprint.md` (from a2)
-  - `files/confidential/Memo.md` + `public/partners/Memo.md` (identical)
-  - `files/confidential/Numbers.md` + `public/partners/Numbers.md` (identical)
-  - `files/confidential/Logic.md` + `public/partners/Logic.md` (identical)
-  - `files/confidential/Alexandria.md` + `public/partners/Alexandria.md` (identical)
-  - `public/docs/Concrete.md`, `public/docs/Vision.md`, `public/docs/Trust.md`
-  - `app/privacy/page.tsx`, `app/terms/page.tsx`
-  Fix silently. Flag only if the founder needs to make a judgment call.
+- **ax sync check.** If an (a1/a2/a3/a4) changed this session, judge whether the changes are material enough to warrant ax regeneration. This is an intelligence decision — a typo doesn't trigger, a new thesis-level argument does. If material: surface one line — "ax is stale — want me to regenerate?" If the founder says yes, do a full re-read of all an and regenerate each affected ax file from first principles against its own objective function (listed in the Files section above). Never incremental patch — always regenerate from a full re-read. Which ax files are affected is itself an intelligence decision: read the an changes, read the ax files, judge what's stale. After regenerating confidential files, sync to `public/partners/` (Memo, Numbers, Logic, Alexandria — must be identical). Flag only if the founder needs to make a judgment call.
 
 **Principles (both protocols):**
 - Hazy fragments scale. Weeds do not. Keep it compressed.

@@ -131,11 +131,15 @@ This is the stronger position. If creating a constitution were hard, Alexandria 
 
 This reframes the competitive position: the threat is not that someone copies the constitution architecture (they will). The threat is that they replicate the ongoing operations — the Blueprint that knows how to develop cognition over months and years. That is craft, not architecture. And craft compounds with every Author.
 
-DIY IS GENESIS WITHOUT DEVELOPMENT
+DIY IS THE EASIEST CUSTOMER
 
 The closest competitor is not a lab — it is the prosumer who already dumps personal notes into markdown and feeds them to their ai. Karpathy does it with Obsidian scripts. Thousands of builders are doing it with system prompts, Claude Projects, and personal context files. They look at Alexandria and think: "I am already doing this."
 
-They are doing genesis. They are not doing anything else.
+They are the ideal audience. Not despite their existing system — because of it.
+
+Alexandria is pure marginal value add. It does not replace what the Author built. It adds to it. If someone already has a design.md file and Alexandria ships one, they do not choose between them — they extract the marginal value from Alexandria's and add it to their own. If someone already has their own money and Alexandria offers more, they do not say "no thanks, I have my own." They take it and add it to theirs. This is why DIY people are not competing with Alexandria — and Alexandria is not competing with them. The product is the delta. Always additive, never substitutive.
+
+This is structurally different from every other ai product. Every other tool asks the user to switch. Alexandria asks the user to keep doing exactly what they are doing — and layer Alexandria on top. The more sophisticated the Author's existing system, the more surface area for marginal value. The power user is not the hardest sale. They are the easiest. They already understand the value of structured cognition. They already have the vault. They already have the habit. They just do not have the six things that break without Alexandria:
 
 Six things break in every DIY system:
 
@@ -151,7 +155,7 @@ No accountability. The gym metaphor is literal. Everyone can do pushups at home.
 
 No Library. DIY notes sit on your machine and die with your hard drive. No published shadow, no quizzes, no collective asset, no way for others to encounter your thinking, no way to earn from depth. The Library is the network effect that makes individual sovereignty collectively valuable — and it requires the sovereignty architecture that DIY provides but cannot leverage.
 
-The honest framing: DIY is a photograph. Alexandria is a gym membership. The photograph captures you once. The gym develops you continuously. Everyone can take a selfie. That does not make you fit. The prosumer who dumps notes into markdown has taken a very good selfie. Alexandria is proposing that the selfie is the easy part — and the part that does not compound.
+The honest framing: DIY is genesis without development. The prosumer has taken a very good photograph. Alexandria is proposing that the photograph is the easy part — and the part that does not compound. But the pitch is not "throw away your photograph and buy a gym membership." The pitch is: "keep your photograph. Keep everything you built. Here are six things that will make all of it better." Pure marginal value. The Author's existing system is the floor. Alexandria only adds.
 
 Alexandria is the gym. The Author's LLM is the training partner. The gym provides the environment, the infrastructure, the methodology, the accountability. The trainer brings the intelligence, the conversation, the responsiveness. You need both. The constitution is the training log. The Blueprint is the programming. The vault is the equipment. The gym gets better with every athlete (Factory). The training log compounds across sessions (Machine). The partner changes — maybe Claude today, something else tomorrow — but the gym stays. Alexandria does not replace the LLM. Alexandria creates the environment in which the LLM can do its best work on the Author's cognition.
 

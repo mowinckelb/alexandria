@@ -20,4 +20,8 @@ Write their preferences here as you learn them. This file is how the flexibility
 
 ---
 
+**Blueprint sync:** Record your last Blueprint sync date here (e.g., `Last Blueprint sync: 2026-04-09`). On each session start, check the Blueprint's Delta section for entries after this date. These are behavioral changes — not just awareness, action. Process every missed delta, then update the date. If no date is recorded, read the entire Delta section as new.
+
+---
+
 New Author. No observations yet. After your first session, rewrite this file completely with what you learned about how to work with them.

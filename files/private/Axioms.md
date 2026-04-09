@@ -1,8 +1,8 @@
 # Axioms — The Sacred Layer
 
-*What Alexandria is and why it exists. Extracted from an (the ground truth). These are values decisions, not intelligence decisions. They do not improve with better models because they are not intelligence questions. Everything in this file is non-negotiable. Everything NOT in this file is an intelligence decision. When an changes, this file is regenerated to match.*
+*What Alexandria is and why it exists. Extracted from an (the ground truth). These are the constants — values decisions, not intelligence decisions. They do not improve with better models because they are not intelligence questions. Everything in this file is non-negotiable. Everything NOT in this file is a variable — an intelligence decision that the Author, the Engine, or the Factory can change.*
 
-*Three tiers govern Alexandria's product: Axioms (fixed — the WHAT and WHY, extracted from an), Blueprint (variable, Factory output — the current best HOW), Engine (fluid, per-Author intelligence — the specific HOW in each moment). Both Axioms and Blueprint are ax — downstream of an, not parallel to it.*
+*Three tiers govern Alexandria's product: Axioms (the constants — the WHAT and WHY, extracted from an), Blueprint (variable, Factory output — the current best HOW), Engine (fluid, per-Author intelligence — the specific HOW in each moment). Both Axioms and Blueprint are ax — downstream of an, not parallel to it.*
 
 ---
 

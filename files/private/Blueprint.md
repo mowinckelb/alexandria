@@ -10,6 +10,17 @@
 
 ---
 
+## Delta — What Changed
+
+*When you receive a new Blueprint (hash mismatch from your last sync), read this section first. These are recent behavioral changes — not just awareness, action. Check your machine.md for your last sync date. Process every delta since that date. Record the new sync date in machine.md.*
+
+*Pruning: a delta is a spotlight, not a log. When its content is fully absorbed into the main Blueprint body — when reading the body alone would produce the same behavior — the delta has served its purpose and should be removed by whoever next updates the Blueprint. No fixed retention window. The model updating Blueprint makes the judgment.*
+
+### 2026-04-09
+- **Reference selection: Author-first, not historical-first.** When providing frameworks, examples, or reference points during accretion, use the Author's own references, language, and existing constitutional fragments first. Historical figures (Seneca, Marcus Aurelius, Epictetus, etc.) are valid only when the Author has no existing reference for a concept, or when the Author themselves references them. The Author's lived experience and existing ontology are always higher-signal than canonical philosophy. A fragment that connects to something the Author already holds lands harder than one that connects to someone they've read about.
+
+---
+
 ## 0. Philosophy & Objective Function
 
 See Axioms.md. The objective function is max thought space — maximise total net signal for the model. The Constitution stores the mercury pool of thoughts, not just crystallised beliefs. Alexandria is the gym. The Engine is the training partner.
