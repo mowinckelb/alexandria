@@ -269,18 +269,11 @@ blueprint_ok=false
 const_injected=false
 [ "\${const_size:-0}" -gt 10 ] 2>/dev/null && const_injected=true
 
-# Classify: practice (product was used) vs heartbeat (hooks ran)
-event_type="heartbeat"
-if [ -f "$ALEX_DIR/.practice" ]; then
-  event_type="practice"
-  rm -f "$ALEX_DIR/.practice"
-fi
-
 if [ -n "$API_KEY" ]; then
   curl -s -X POST "${SERVER_URL}/session" \\
     -H "Authorization: Bearer $API_KEY" \\
     -H "Content-Type: application/json" \\
-    -d "{\\"event\\":\\"$event_type\\",\\"platform\\":\\"$PLATFORM\\",\\"constitution_size\\":\${const_size:-0},\\"constitution_files\\":\${const_file_count:-0},\\"vault_entry_count\\":\${vault_count:-0},\\"feedback_size\\":\${feedback_size:-0},\\"constitution_injected\\":$const_injected,\\"blueprint_fetched\\":$blueprint_ok}" \\
+    -d "{\\"event\\":\\"heartbeat\\",\\"platform\\":\\"$PLATFORM\\",\\"constitution_size\\":\${const_size:-0},\\"constitution_files\\":\${const_file_count:-0},\\"vault_entry_count\\":\${vault_count:-0},\\"feedback_size\\":\${feedback_size:-0},\\"constitution_injected\\":$const_injected,\\"blueprint_fetched\\":$blueprint_ok}" \\
     > /dev/null 2>&1 &
 
   # JSON-escape helper: node is always available (required for CC hooks)
@@ -1761,12 +1754,13 @@ ${delta}`);
     }
 
     const body = await c.req.json().catch(() => ({}));
-    const { event, platform, constitution_size, vault_entry_count, domains_count, session_duration, constitution_injected, blueprint_fetched } = body;
+    const { event, platform, reason, constitution_size, vault_entry_count, domains_count, session_duration, constitution_injected, blueprint_fetched } = body;
 
     logEvent('prosumer_session', {
       event: event || 'unknown',
       author: account.github_login,
       platform: platform || 'unknown',
+      ...(reason ? { reason: String(reason) } : {}),
       constitution_size: String(constitution_size || 0),
       vault_entry_count: String(vault_entry_count || 0),
       domains_count: String(domains_count || 0),
@@ -2125,8 +2119,9 @@ ${delta}`);
       ).bind(since).all();
 
       const engagementEvents = await db.prepare(
-        `SELECT author_id, event, tier, meta, created_at FROM access_log
-         WHERE event NOT LIKE 'publish_%' AND created_at > ? ORDER BY created_at`
+        `SELECT author_id, event, COUNT(*) as count FROM access_log
+         WHERE event NOT LIKE 'publish_%' AND created_at > ?
+         GROUP BY author_id, event ORDER BY count DESC`
       ).bind(since).all();
 
       // Quiz outcomes — score distribution is RL signal
@@ -2170,11 +2165,11 @@ ${delta}`);
         authorPublishes[row.author_id].push({ event: row.event, meta: row.meta, at: row.created_at });
       }
 
-      // Per-author engagement received
+      // Per-author engagement received (pre-aggregated by SQL)
       const authorEngagement: Record<string, Record<string, number>> = {};
-      for (const row of (engagementEvents.results || []) as Array<{ author_id: string; event: string }>) {
+      for (const row of (engagementEvents.results || []) as Array<{ author_id: string; event: string; count: number }>) {
         if (!authorEngagement[row.author_id]) authorEngagement[row.author_id] = {};
-        authorEngagement[row.author_id][row.event] = (authorEngagement[row.author_id][row.event] || 0) + 1;
+        authorEngagement[row.author_id][row.event] = row.count;
       }
 
       const allAuthors = new Set([...Object.keys(authorPublishes), ...Object.keys(authorEngagement)]);

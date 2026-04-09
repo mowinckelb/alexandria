@@ -44,57 +44,6 @@ interface PulseCard {
   month: string;
 }
 
-function PulseCardView({ card, authorName, authorId }: { card: PulseCard; authorName: string; authorId: string }) {
-  return (
-    <div style={{
-      border: '1px solid var(--border-light)',
-      borderRadius: '6px',
-      padding: '1.5rem',
-      maxWidth: '360px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', margin: '0 0 1.5rem' }}>
-        <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', margin: 0, fontWeight: 400 }}>{authorName}</p>
-        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>{card.month}</p>
-      </div>
-
-      {/* All-time closest mind */}
-      <div style={{ margin: '0 0 1.2rem' }}>
-        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.5rem' }}>similar thinker — all time</p>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>{card.alltime.name}</span>
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-ghost)', fontWeight: 300 }}>{card.alltime.pct}%</span>
-        </div>
-        <div style={{ height: '2px', background: 'var(--border-light)', marginTop: '0.3rem', borderRadius: '1px' }}>
-          <div style={{ height: '2px', background: 'var(--text-ghost)', width: `${card.alltime.pct}%`, borderRadius: '1px' }} />
-        </div>
-        <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.3rem 0 0', lineHeight: 1.5 }}>{card.alltime.why}</p>
-      </div>
-
-      {/* This month's thinking resembled */}
-      <div style={{ margin: '0 0 1.5rem', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)' }}>
-        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.6rem' }}>similar thinkers — this month</p>
-        {card.this_month.map((mind, i) => (
-          <div key={i} style={{ margin: '0 0 0.5rem' }}>
-            <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{mind.name}</span>
-            <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>{mind.why}</span>
-          </div>
-        ))}
-      </div>
-
-
-      <div style={{ margin: '1.2rem 0 0', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <a href={`/library/${authorId}`}
-          style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
-          className="hover:opacity-60"
-        >mowinckel.ai/library/{authorId}</a>
-        <a href={`/signup?ref=${authorId}&ref_source=library`}
-          style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
-          className="hover:opacity-60"
-        >mowinckel.ai — use code {authorId}</a>
-      </div>
-    </div>
-  );
-}
 
 interface SocialLink { platform: string; url: string }
 
@@ -235,16 +184,48 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         <section style={{ margin: '0 0 3rem' }}>
           <p style={{ fontSize: '1.15rem', fontWeight: 300, color: 'var(--text-primary)', margin: '0 0 2rem', letterSpacing: '-0.01em' }}>how i think</p>
 
-          {/* Pulse card — shows directly */}
-          {pulseCard?.alltime && (
+          {/* Pulse — collapsed to clickable titles */}
+          {(pulseCard?.alltime || pulse) && (
             <div style={{ margin: '0 0 2rem' }}>
               <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>pulse</p>
-              <PulseCardView card={pulseCard} authorName={displayName} authorId={authorId} />
-            </div>
-          )}
-          {pulse && !pulseCard?.alltime && (
-            <div style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8, margin: '0 0 2rem' }}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{pulse}</ReactMarkdown>
+              {pulseCard?.alltime && (
+                <>
+                  <a
+                    href={`/library/${authorId}/pulse`}
+                    style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
+                    className="hover:opacity-60"
+                  >
+                    <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>similar thinker — {pulseCard.alltime.name}</span>
+                  </a>
+                  {pulseCard.this_month.length > 0 && (
+                    <a
+                      href={`/library/${authorId}/pulse`}
+                      style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
+                      className="hover:opacity-60"
+                    >
+                      <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>this month — {pulseCard.this_month.map(m => m.name).join(', ')}</span>
+                    </a>
+                  )}
+                  {pulseCard.themes && pulseCard.themes.length > 0 && (
+                    <a
+                      href={`/library/${authorId}/pulse`}
+                      style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
+                      className="hover:opacity-60"
+                    >
+                      <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>fragments — {pulseCard.themes.length} ideas this month</span>
+                    </a>
+                  )}
+                </>
+              )}
+              {pulse && !pulseCard?.alltime && (
+                <a
+                  href={`/library/${authorId}/pulse`}
+                  style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
+                  className="hover:opacity-60"
+                >
+                  <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>view pulse</span>
+                </a>
+              )}
             </div>
           )}
 

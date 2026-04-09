@@ -108,13 +108,11 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     return { status: 'no data', message: 'No events logged yet.' };
   }
 
-  // 1. Heartbeats (hooks ran) vs practices (product was used)
-  // Backward compat: old "end" events count as heartbeats
-  const SMOKE_EVENTS_TOP = new Set(['smoke_test', 'smoke_check', 'github_smoke', 'smoke_post_migration', 'debug_check', 'verification', 'lifecycle-test']);
+  // 1. Heartbeats (hooks ran) — backward compat: old "end" events count as heartbeats
+  const SMOKE_EVENTS = new Set(['smoke_test', 'smoke_check', 'github_smoke', 'smoke_post_migration', 'debug_check', 'verification', 'lifecycle-test']);
   const isReal = (e: Record<string, string>) =>
-    e.e === 'prosumer_session' && !SMOKE_EVENTS_TOP.has(e.event) && !SMOKE_EVENTS_TOP.has(e.platform);
+    e.e === 'prosumer_session' && !SMOKE_EVENTS.has(e.event) && !SMOKE_EVENTS.has(e.platform);
   const heartbeats = events.filter(e => isReal(e) && (e.event === 'heartbeat' || e.event === 'end')).length;
-  const practices = events.filter(e => isReal(e) && e.event === 'practice').length;
 
   // Time range + staleness
   const firstEvent = events[0]?.t || null;
@@ -148,18 +146,16 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     }
   } catch { /* non-fatal */ }
 
-  // Active users — per-author heartbeats, practices, and last seen
-  const SMOKE_EVENTS = new Set(['smoke_test', 'smoke_check', 'github_smoke', 'smoke_post_migration', 'debug_check', 'verification']);
-  const authorStats: Record<string, { heartbeats: number; practices: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
+  // Active users — per-author heartbeats and last seen
+  const authorStats: Record<string, { heartbeats: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
   for (const e of events) {
     if (e.e !== 'prosumer_session' || !e.author) continue;
     if (SMOKE_EVENTS.has(e.event)) continue;
     if (!authorStats[e.author]) {
-      authorStats[e.author] = { heartbeats: 0, practices: 0, last_seen: e.t, failures: 0, platforms: new Set() };
+      authorStats[e.author] = { heartbeats: 0, last_seen: e.t, failures: 0, platforms: new Set() };
     }
     const stat = authorStats[e.author];
     if (e.event === 'hook_failure') { stat.failures++; }
-    else if (e.event === 'practice') { stat.practices++; }
     else if (e.event === 'end' || e.event === 'heartbeat') { stat.heartbeats++; }
     if (e.t > stat.last_seen) stat.last_seen = e.t;
     if (e.platform) stat.platforms.add(e.platform);
@@ -168,7 +164,6 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
   const users = Object.entries(authorStats).map(([login, stat]) => ({
     login,
     heartbeats: stat.heartbeats,
-    practices: stat.practices,
     last_seen: stat.last_seen,
     hours_ago: Math.round((Date.now() - new Date(stat.last_seen).getTime()) / (1000 * 60 * 60) * 10) / 10,
     failures: stat.failures,
@@ -185,7 +180,6 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     total_events: events.length,
     parse_errors: parseErrors,
     heartbeats,
-    practices,
     errors: {
       log_parse_errors: parseErrors,
     },
@@ -344,7 +338,6 @@ export async function getUserEvents(login: string): Promise<Record<string, unkno
 
   const allSessions = events.filter(e => e.e === 'prosumer_session');
   const heartbeatEvents = allSessions.filter(e => e.event === 'end' || e.event === 'heartbeat');
-  const practiceEvents = allSessions.filter(e => e.event === 'practice');
   const failures = allSessions.filter(e => e.event === 'hook_failure');
   const feedback = events.filter(e => e.e === 'user_feedback');
   const signals = events.filter(e => e.e === 'machine_signal');
@@ -354,7 +347,6 @@ export async function getUserEvents(login: string): Promise<Record<string, unkno
     author: login,
     total_events: events.length,
     heartbeats: heartbeatEvents.length,
-    practices: practiceEvents.length,
     sessions: {
       last: lastSession,
       platforms: [...new Set(allSessions.map(s => s.platform).filter(Boolean))],

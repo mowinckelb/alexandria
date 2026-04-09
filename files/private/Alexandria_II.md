@@ -696,9 +696,13 @@ V1 soft default format (the Factory's current best guess — will evolve through
 - Similar thinkers — this month. Three names with one-line descriptions. What rotates monthly. Why it's worth sharing each month — different names show up as the Author's thinking shifts.
 - Screenshotable URLs: link to the Author's Library page, kin signup code ("mowinckel.ai — use code mowinckelb"). Works as clickable links AND as readable text in screenshots.
 
-The pulse is Machine-generated from constitutional data. The Author didn't write it — their Machine did. That's the plausible deniability. "I didn't write this, my ai did." But the data it's working from IS them. The gym selfie dynamic: the stated reason is "just my monthly pulse." The real reason is "look who I think like."
+Fragment List — "what I engaged with this month." Ten ideas the Author engaged with, drawn from that month's notepad fragments. The range IS the signal. Hormozi next to Kendrick Lamar next to Seneca next to Kipchoge — that juxtaposition is unsimulatable. Nobody else has that exact list. Each entry: source name + one-line idea. The evocation: "wow, what an interesting person." The curation fingerprint — in a world of infinite generation, the selection from everything is the human value. Machine-generated from notepad + vault intake + session data. Same plausible deniability as the similarity card.
 
-The format will evolve. This is the v1 soft default. The Factory measures: share rate, click-through to Library page, signup conversion from pulse screenshots. Authors who experiment with different formats contribute signal. The Blueprint propagates winners. No format is permanent.
+The two pulse formats serve complementary functions. The similarity card anchors identity (who you think like). The fragment list signals range (what you're engaging with). Both are screenshotable. Both evolve. Authors can publish either or both.
+
+The pulse is Machine-generated from constitutional data. The Author didn't write it — their Machine did. That's the plausible deniability. "I didn't write this, my ai did." But the data it's working from IS them. The gym selfie dynamic: the stated reason is "just my monthly pulse." The real reason is "look who I think like" / "look what I'm thinking about."
+
+The format will evolve. These are v1 soft defaults. The Factory measures: share rate, click-through to Library page, signup conversion from pulse screenshots. Authors who experiment with different formats contribute signal. The Blueprint propagates winners. No format is permanent.
 
 -----
 

@@ -135,7 +135,7 @@ export function registerLibraryRoutes(app: Hono): void {
       publishMeta.paid_bytes = paidShadow.length;
       publishMeta.paid_sections = paidShadow.split('\n').filter((l: string) => l.startsWith('## ')).length;
     }
-    recordAccess('publish_shadow', authorId, authorId, null, null, publishMeta);
+    recordAccess('publish_shadow', authorId, null, null, null, publishMeta);
     logEvent('library_publish_shadow', { author: authorId });
     return c.json({ ok: true, url: `/library/${authorId}` });
   });
@@ -176,7 +176,7 @@ export function registerLibraryRoutes(app: Hono): void {
 
     // Structural signal — pulse shape
     const pulseContent = body.pulse as string;
-    recordAccess('publish_pulse', authorId, authorId, id, null, {
+    recordAccess('publish_pulse', authorId, null, id, null, {
       bytes: pulseContent.length,
       sections: pulseContent.split('\n').filter((l: string) => l.startsWith('## ')).length,
       has_delta: body.delta ? 1 : 0,
@@ -211,7 +211,7 @@ export function registerLibraryRoutes(app: Hono): void {
     ).bind(id, authorId, body.title, body.subtitle || null, r2Key, now).run();
 
     // Structural signal — quiz shape
-    recordAccess('publish_quiz', authorId, authorId, id, null, {
+    recordAccess('publish_quiz', authorId, null, id, null, {
       question_count: body.questions.length,
       has_result_tiers: body.result_tiers ? 1 : 0,
       data_bytes: JSON.stringify(body).length,
@@ -251,7 +251,7 @@ export function registerLibraryRoutes(app: Hono): void {
     ).bind(id, authorId, body.title, medium, tier, r2Key, content.length, body.url || null, now).run();
 
     // Structural signal — work shape
-    recordAccess('publish_work', authorId, authorId, id, tier, {
+    recordAccess('publish_work', authorId, null, id, tier, {
       bytes: content.length,
       medium,
       sections: content.split('\n').filter((l: string) => l.startsWith('## ')).length,
