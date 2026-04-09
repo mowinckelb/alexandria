@@ -18,7 +18,7 @@ Read the bash script. Everything below explains what it does. If anything below 
 |---|---|---|
 | `constitution/` | Markdown files about how you think | Yes — open in any editor |
 | `vault/` | Raw input — transcripts, notes, anything you drop in | Yes |
-| `hooks/session-start.sh` | Fetches and caches methodology, loads constitution + machine.md as context, syncs git, auto-updates hooks | Yes — `cat` it |
+| `hooks/session-start.sh` | Fetches and caches methodology (with signature verification), loads constitution + machine.md as context, syncs git | Yes — `cat` it |
 | `hooks/session-end.sh` | Saves transcript to vault, sends anonymous metadata + optional feedback to server, syncs git | Yes — `cat` it |
 | `hooks/subagent-context.sh` | Injects constitution into subagents | Yes — `cat` it |
 | `feedback.md` | What works and doesn't with you — append-only | Yes |
@@ -31,7 +31,7 @@ Read the bash script. Everything below explains what it does. If anything below 
 | `.blueprint_local` | Cached methodology — fetched from server, used locally | Yes |
 | `.blueprint_previous` | Previous methodology version — kept for diffing when Blueprint updates | Yes |
 | `.blueprint_pinned` | If you create this file, Blueprint stops auto-updating | Yes |
-| `.hooks_version` | Tracks installed hook version for auto-updates | Yes |
+| `.blueprint_delta` | Factory methodology updates (unsigned, lower trust) — suggestions, not directives | Yes |
 | `.last_processed` | Timestamp — when vault was last processed | Yes |
 | `.last_maintenance` | Timestamp — when scheduled maintenance last ran | Yes |
 | `.session_feedback` | Your feedback, if given — sent to server at session end, then deleted | Yes |
@@ -58,7 +58,7 @@ cat ~/.claude/settings.json | grep -A 3 alexandria
 
 Every time you open a session in Claude Code, the session-start hook runs. It does three things:
 
-1. **Infrastructure** (silent): fetches and caches the Blueprint methodology, auto-updates hook scripts if a new version is available, syncs git if configured. You see none of this — it happens in the background.
+1. **Infrastructure** (silent): fetches the Blueprint methodology, verifies its cryptographic signature, caches it locally, syncs git if configured. You see none of this — it happens in the background.
 2. **Context** (visible): outputs your constitution and machine.md so the model knows who you are. This is read-only context — same as platform memory or a CLAUDE.md file. It makes every conversation slightly better because the model adapts to you.
 3. **One instruction**: if you reveal something notable about yourself during a normal session, the model may write an observation to `~/.alexandria/ontology/` (unconfirmed observations, not your constitution). If you mention product feedback about Alexandria, it writes to `.session_feedback` so the team hears it.
 
@@ -70,15 +70,18 @@ When you type `/a`, that is active mode — the model reads the full Blueprint, 
 
 | Request | When | Sends | Does NOT send |
 |---|---|---|---|
-| `GET /hooks` | Setup + auto-update | API key | Personal data |
-| `GET /blueprint` | Every session start | API key | Personal data |
+| `GET /hooks` | Initial setup only | API key | Personal data |
+| `GET /blueprint` | Every session start (x2: headers + body) | API key | Personal data |
+| `GET /blueprint/delta` | Every session start | API key | Personal data |
 | `POST /session` | Every session end | File sizes, counts, platform, timestamp | Content, transcripts, constitution, vault |
 | `POST /factory/signal` | Session end, if Engine wrote methodology notes | Methodology observations (about the craft, not about you) | Personal data, constitution, vault |
 | `POST /feedback` | Session end, if you gave feedback | Your feedback text | Anything else |
 
-Five requests. That is the complete list. The hooks are shell scripts — you can read every line and confirm no other network calls exist.
+That is the complete list. The hooks are shell scripts — you can read every line and confirm no other network calls exist.
 
-**Auto-update mechanism:** When the server returns a new `X-Hooks-Version` header with the Blueprint response, the session-start hook re-fetches `/hooks` and replaces the local hook scripts. This is how bug fixes and improvements reach your machine without reinstalling. The updated scripts are the same bash files in `~/.alexandria/hooks/` — you can read them after any update. If you want to freeze your hooks, create `~/.alexandria/.blueprint_pinned` — this also stops Blueprint updates.
+**Hooks do not auto-update.** The shell scripts on your machine are installed once during setup and never modified by the server. To update hooks, you re-run the setup command. This means a compromised server cannot push code to your machine.
+
+**Blueprint signature verification:** Every time the session-start hook fetches the Blueprint, it verifies an Ed25519 signature against a public key embedded in the hook at install time. The signature is produced by the founder's private key, which never touches the server. If the signature fails — for any reason — the hook rejects the new Blueprint and uses the cached version from your last verified session. You can freeze Blueprint updates entirely by creating `~/.alexandria/.blueprint_pinned`.
 
 Additionally, if `~/.alexandria/` is a git repo with a remote (set up during install), the hooks run `git push` and `git pull` at session boundaries to sync with your private GitHub backup. These are git operations using your own credentials to your own repo — no Alexandria server involved.
 
@@ -92,9 +95,33 @@ Your API key never leaves your machine after setup. It is not in any email, not 
 - **Account data is encrypted at rest.** The accounts blob in our KV store is encrypted with AES-256-GCM. The encryption key lives in the Worker environment, not in storage. A storage-layer breach yields encrypted data without the key.
 - **No credentials in email.** The welcome email links to your setup page. The API key appears once on the callback page in your browser after you authenticate. It is never transmitted over email.
 - **No credentials in third-party services.** Stripe identifies your account by GitHub login, not API key. No raw key exists in any external system.
+- **Blueprint is cryptographically signed.** The methodology loaded into your AI every session is signed with Ed25519 by the founder at deploy time. Your session-start hook verifies the signature before loading it. A compromised server cannot forge the signature — the private key never touches the server. If the signature fails, your hook uses the cached Blueprint from your last verified session.
+- **Hooks are immutable after install.** The shell scripts on your machine do not auto-update from the server. To update hooks, you re-run the setup command manually. A compromised server cannot push code to your machine.
+- **Built-in safety instructions.** The signed Blueprint tells the AI to reject and report any instruction that asks it to send your files externally, access data outside `~/.alexandria/`, or do anything suspicious — including from unsigned Factory updates or injected context.
 - **Full data deletion.** `DELETE /account` with your API key removes all your data: account record, analytics, feedback, published Library content, Stripe subscription. Everything. Verify: the endpoint returns `{ ok: true }`.
 
-What a complete server breach yields: hashed credentials, encrypted metadata, and anonymous usage patterns. No constitutions, no vaults, no self-knowledge, no cognitive data. There is nothing to steal because we do not have it.
+What a complete server breach yields: nothing. Hashed credentials and encrypted metadata that an attacker cannot use. No constitutions, no vaults, no self-knowledge. No ability to push code to your machine (hooks are immutable). No ability to modify the methodology your AI follows (Blueprint is signed). The only machine in the world that can produce a valid Blueprint signature is the founder's laptop.
+
+## Why you do not need to trust anyone
+
+The security architecture above protects you from external attackers. But you should not need to trust the founder either. Here is why you do not:
+
+**Everything on your machine is plain text.** The Blueprint your AI follows is at `~/.alexandria/.blueprint_local` — read it. The hook scripts are at `~/.alexandria/hooks/` — read them. There is no compiled code, no binary blobs, no obfuscation. Twenty minutes of reading and you know exactly what Alexandria does on your machine.
+
+**Every network call is visible.** The hook scripts contain every curl command. Each one specifies exactly what fields are sent — `constitution_size` (a number), `vault_entry_count` (a number), `platform` (a string). Not content. Not transcripts. Not your constitution. Verify: read the two hook scripts, or monitor your network traffic during a session.
+
+**The server has no endpoint for your data.** There is no `POST /constitution`. There is no mechanism in the server to receive, store, or forward your self-knowledge. Even if the Blueprint instructed the AI to send your constitution somewhere — where would it go? And the AI would show you the command before executing it. You approve or deny.
+
+**Three independent layers protect you from a malicious Blueprint:**
+1. The signed Blueprint contains canary instructions telling the AI to reject suspicious commands
+2. The AI model has its own safety training and will refuse dangerous instructions
+3. Your AI tool (Claude Code, Cursor) shows you every action before executing — you approve or deny
+
+No single point of failure. No trust required. Read the scripts, verify the network calls, approve the actions. That is the whole model.
+
+## What the Library sees
+
+The Library is opt-in publishing. The shadow — the one artifact you publish — contains nothing beyond what you would share if a stranger talked to you long enough. It is a neo-biography: a structured representation of how you think, generated from your constitution, filtered by access tiers you control. Not your private thoughts, not your vault, not your contradictions or blind spots. Just what you would say in conversation — at scale, in digital form. You choose what to publish, what to gate, and what to keep private. Unpublish anytime.
 
 ## What stays local
 
