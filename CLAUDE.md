@@ -91,6 +91,16 @@ Five loops. Full spec in Blueprint.md section V (served to every Engine every se
 - **Stack:** Vercel (website), Cloudflare (DNS + server + KV storage + D1 database + R2 object storage), Resend (transactional email), GitHub (code + OAuth), Stripe (billing), Mercury (banking, API), Claude (intelligence). All hybrid (CLI or API-controllable). Zero external dependencies. Dependency alarm: max internal, min hybrid, zero external.
 - **Storage architecture:** Stateless server, sovereign local files (`~/.alexandria/`, iCloud-synced), thin persistence for collective Library (D1 for metadata/discovery, R2 for published shadow/works content, KV for accounts/events). Alexandria stores what Authors publish, never what they think.
 
+## Visual Workflow
+
+**See before shipping.** For any frontend work, use `~/.alexandria/see.mjs` (Playwright) to screenshot and visually verify. Read the PNGs with the Read tool — you are multimodal.
+
+- **Screenshot any URL:** `node ~/.alexandria/see.mjs <url> [--full] [--dark] [--only desktop|tablet|mobile]`
+- **Local dev:** `node ~/.alexandria/see.mjs localhost --port 3000`
+- **Design reference:** `~/.alexandria/design.md` — craft substrate (900 lines of concrete CSS physics, anti-patterns, thresholds). Read before any frontend work. Not taste — that's `~/.alexandria/constitution/Taste.md`.
+- Screenshots save to `~/.alexandria/.see/`, auto-cleaned to last 30.
+- **Loop:** build → screenshot → evaluate against design.md → fix → screenshot → ship.
+
 ## Style
 
 - "ai" is always lowercase unless at the start of a sentence or in a proper noun (e.g. "Apple Intelligence"). This is a brand and taste decision.

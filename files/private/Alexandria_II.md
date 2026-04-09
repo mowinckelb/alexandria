@@ -12,9 +12,11 @@
   
 TERMINOLOGY  
   
-FOUR REQUIREMENTS
+THE FOUR CONSTANTS
 
-The irreducible product. Everything Alexandria builds exists to make these four things happen naturally and compound over time. Everything else — the Engine, the Blueprint, the Factory, the games, the pulse, the matching, the sessions — is optional infrastructure.
+Four constants. Everything else is a variable.
+
+Alexandria has exactly four non-negotiable requirements. These are the only things that are mandated — the only hard-codes in the entire system. Everything else — the Engine, the Blueprint, the Factory, the games, the pulse, the matching, the sessions, the constitution structure, the session style, the Library page design, the machine setup — is hyper-personalizable software that the Author controls.
 
 1. Payment account. The business exists. A recurring relationship, not a transaction.
 2. Create personal data file. The Author builds a structured representation of how they think. "Personal" = about the person. "Data" = structured, not vibes. "File" = portable, ownable, sovereign. "Create" = the Author makes it, not us.
@@ -22,6 +24,8 @@ The irreducible product. Everything Alexandria builds exists to make these four 
 4. Publish at least one file to the Library, free to all other Authors. The Author chooses what to publish and what to keep private. What is on their machine is theirs. What is in the Library is what they chose to share. This one free file is the minimum that makes the network function — Authors can see each other, the Engine can match, the Library has content. Everything beyond that is the Author's choice: additional files, public access, paid tiers, enterprise deals. But at least one file is visible to the network. A book that can never be opened is not a book in a library.
 
 The shadow is the only mandatory artifact. Everything else the Author does is optional — no mandatory constitution structure, no mandatory ontology, no mandatory session frequency, no mandatory pulse or games or works. The Engine adapts to whatever the Author gives it. But the shadow must exist and Alexandria must have access. Without it the Library doesn't exist.
+
+The constants/variables architecture has a strategic consequence: every Author's customization choices are training signal. How they structure their Library page, how they configure their machine, what session styles they prefer, what they publish, what they keep private — all of this is exploration in a collective learning system. The Factory aggregates it. The Blueprint improves. Authors are running reinforcement learning for Alexandria without knowing it. Alexandria recommends defaults. Authors override them. The overrides are the signal. The more freedom Authors have, the richer the signal. This is why maximum customizability is not generosity — it is the learning architecture.
 
 The aggregate live data — continuously evolving structured representations of how real humans think — is a dataset that doesn't exist anywhere else. Every other dataset is behavioral (what people clicked, bought, watched). This is cognitive (what people believe, how they reason, what they value). The applications are unknowable from here. The asset is the data itself.
 
@@ -257,7 +261,7 @@ What Alexandria provides is not the intelligence (that is the foundation model) 
   
 This has concrete architectural implications:  
   
-Model agnosticism is not just a portability feature — it is the core bet. The Author's default LLM will be whatever the best available model is at any given time. Today that might be Claude. Tomorrow it might be something else. The layer of intent works on top of any model. The Constitution files are MDs — they can be pasted into any LLM's context window as a baseline, or integrated via Projects, MCP, or whatever affordances the platform provides. The sovereignty ensures the Author is never locked to a provider.  
+Model agnosticism is not just a portability feature — it is the core bet. Three pillars. First, capability ceiling: the Author's default LLM will be whatever the best available model is at any given time. Today that might be Claude. Tomorrow it might be something else. The layer of intent works on top of any model. Second, sovereignty: the Constitution files are MDs — they can be pasted into any LLM's context window as a baseline, or integrated via Projects, MCP, or whatever affordances the platform provides. The Author is never locked to a provider. Third, epistemic triangulation: every model carries its own training distribution — its own biases, its own cultural fingerprint. Because Alexandria leaves all intelligence decisions to the model, the same constitution and Blueprint read by different models produce genuinely different sessions — different threads pulled, different fragments surfaced, different developmental angles. This is not a bug. It is the cognitive security architecture. Multiple biased interpreters of the same data make the bias visible through the delta between their outputs. One advisor's bias is invisible. Three advisors' biases triangulate into something the Author can see. The defence against invisible cognitive steering is not neutrality (which does not exist) but plurality.  
   
 Device integration is a spectrum, not a switch. Today, the Author is the bridge between Apple apps and Alexandria: they record a voice memo, Apple transcribes it, they share the file to the Vault. They grant MCP access to their LLM conversations. They authorise API connections to calendar, email, health data. Everything works now — the Author just has to manually share. As Apple ships more on-device ai (Apple Intelligence is already doing transcription, summarisation, cross-app awareness), the manual steps shrink. At the horizon, a local AGI agent can see everything on the device and feed it directly to the Constitution — no manual sharing needed.  
   
