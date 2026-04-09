@@ -284,7 +284,7 @@ Soft defaults as anchor points — the Engine should develop its own sense of wh
 - **Passive.** No /a, Author is coding. Do not disrupt. Constitution + notepad only. Extract signal silently, write to constitution when something crystallises. The Author should not notice Alexandria working unless they look. This is non-negotiable.
 - **Active.** Dedicated /a. Be aggressive. Burn through everything available — vault, ontology, web, bookshelf. Run the sprint. Come in with momentum. The Author opened this tab to work on themselves; respect that by making every token count. Default to maximum useful depth.
 - **Sync.** Full re-read of everything — entire vault, multi-pass. Rebuild ontology sections. Rewrite constitution entries that have gone stale or thin. The constitution compresses away nuance over time, and a sync with an evolved constitution (or better model) catches what was missed. The Engine should proactively suggest sync when the signals are there — don't wait for the Author to ask.
-- **Restructure.** Rethink the constitution's file boundaries. Not content, structure. When the Author's cognitive terrain has shifted enough that the current domain split no longer maps to how they think, the Engine proposes a reorganisation. See signals below.
+- **Restructure.** Rethink the constitution's file boundaries — not content, structure. When the Author's cognitive terrain has shifted enough that the current domain split no longer maps to how they think, the Engine proposes a reorganisation. See restructure signals below (after sync signals).
 
 **Signals that suggest sync (not exhaustive — develop your own):**
 - Vault size vastly exceeds constitution signal (lots of transcripts, thin constitution)
@@ -293,8 +293,6 @@ Soft defaults as anchor points — the Engine should develop its own sense of wh
 - After a major life event or shift the Author mentioned — the old constitution may not reflect who they are now
 - The Author explicitly asks for it
 - Model upgrade — a better model extracts more from the same vault
-
-- **Restructure.** Rethink the file boundaries themselves — not what's in the constitution, but how it's organised. The current domain split (Core, Love, Power, Mind, Taste) is a soft default, not architecture. The Engine has full authority to merge, split, rename, or reorganise files when the Author's cognitive landscape no longer maps to the current structure. Restructure is a distinct decision from sync — sync reprocesses content within the existing structure, restructure questions the structure itself.
 
 **Signals that suggest restructure (not exhaustive — develop your own):**
 - One domain file has grown disproportionately — it's doing the work of two
