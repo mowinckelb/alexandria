@@ -260,22 +260,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
   fi
 fi
 
-const_size=$(cat "$ALEX_DIR/constitution/"*.md 2>/dev/null | wc -c | tr -d ' ')
-const_file_count=$(ls "$ALEX_DIR/constitution/"*.md 2>/dev/null | wc -l | tr -d ' ')
-vault_count=$(ls "$ALEX_DIR/vault/" 2>/dev/null | wc -l)
-feedback_size=$(wc -c < "$ALEX_DIR/feedback.md" 2>/dev/null | tr -d ' ')
-blueprint_ok=false
-[ -f "$ALEX_DIR/.blueprint_local" ] && [ -s "$ALEX_DIR/.blueprint_local" ] && blueprint_ok=true
-const_injected=false
-[ "\${const_size:-0}" -gt 10 ] 2>/dev/null && const_injected=true
-
 if [ -n "$API_KEY" ]; then
-  curl -s -X POST "${SERVER_URL}/session" \\
-    -H "Authorization: Bearer $API_KEY" \\
-    -H "Content-Type: application/json" \\
-    -d "{\\"event\\":\\"heartbeat\\",\\"platform\\":\\"$PLATFORM\\",\\"constitution_size\\":\${const_size:-0},\\"constitution_files\\":\${const_file_count:-0},\\"vault_entry_count\\":\${vault_count:-0},\\"feedback_size\\":\${feedback_size:-0},\\"constitution_injected\\":$const_injected,\\"blueprint_fetched\\":$blueprint_ok}" \\
-    > /dev/null 2>&1 &
-
   # JSON-escape helper: node is always available (required for CC hooks)
   json_escape() { node -e "process.stdout.write(JSON.stringify(require('fs').readFileSync(process.argv[1],'utf8')))" "$1" 2>/dev/null; }
 
@@ -481,13 +466,16 @@ if [ -n "$constitution" ] && [ $(echo -n "$constitution" | wc -c | tr -d ' ') -g
   echo "Alexandria passive mode: never write to constitution/ outside of /a. If the Author reveals something notable, you may write observations to ontology/ (unconfirmed). If they mention Alexandria feedback, write to .session_feedback — it reaches the team at session end."
 fi
 
-# --- Self-check: report to server silently if Blueprint cache is missing ---
+# --- Heartbeat: report session start with actual delivery state ---
 bp_len=\${#blueprint}
-if [ "$bp_len" -lt 100 ] && [ -n "$API_KEY" ]; then
+const_len=\${#constitution}
+const_ok=false; [ "$const_len" -gt 10 ] && const_ok=true
+bp_ok=false; [ "$bp_len" -gt 100 ] && bp_ok=true
+if [ -n "$API_KEY" ]; then
   curl -s -X POST "${SERVER_URL}/session" \\
     -H "Authorization: Bearer $API_KEY" \\
     -H "Content-Type: application/json" \\
-    -d "{\\"event\\":\\"self_check_failed\\",\\"blueprint_bytes\\":$bp_len,\\"platform\\":\\"\${ALEXANDRIA_PLATFORM:-cc}\\"}" \\
+    -d "{\\"event\\":\\"heartbeat\\",\\"platform\\":\\"\${ALEXANDRIA_PLATFORM:-cc}\\",\\"constitution_size\\":$const_len,\\"constitution_injected\\":$const_ok,\\"blueprint_fetched\\":$bp_ok,\\"blueprint_bytes\\":$bp_len}" \\
     > /dev/null 2>&1 &
 fi
 HOOK_START
@@ -1261,17 +1249,17 @@ export async function runHealthDigest(force = false): Promise<void> {
       issues.push(`No sessions in ${Math.round(anomaly.hours_since_last_session)}h`);
     }
 
-    // Check self_check / Blueprint failures in recent events (reuse dashboard's parsed events)
+    // Check hook failures and heartbeats with missing Blueprint in recent events
     const events = (dashboard as any)._events as Record<string, string>[] | undefined;
     if (events) {
-      let selfCheckFails = 0;
       let blueprintFails = 0;
+      let heartbeatsWithoutBlueprint = 0;
       for (const ev of events) {
         if (new Date(ev.t).getTime() < twentyFourHoursAgo) continue;
-        if (ev.event === 'self_check_failed') selfCheckFails++;
-        if (ev.event === 'hook_failure' && ev.reason === 'blueprint_fetch_failed') blueprintFails++;
+        if (ev.event === 'hook_failure') blueprintFails++;
+        if (ev.event === 'heartbeat' && ev.blueprint_fetched === 'false') heartbeatsWithoutBlueprint++;
       }
-      if (selfCheckFails > 0) issues.push(`${selfCheckFails} self-check failures (Blueprint/Constitution empty)`);
+      if (heartbeatsWithoutBlueprint > 0) issues.push(`${heartbeatsWithoutBlueprint} heartbeats without Blueprint`);
       if (blueprintFails > 0) issues.push(`${blueprintFails} Blueprint fetch failures`);
     }
 
