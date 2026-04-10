@@ -9,7 +9,7 @@
 
 import { randomBytes, createHash, timingSafeEqual } from 'crypto';
 import type { Hono } from 'hono';
-import { logEvent, getDashboard } from './analytics.js';
+import { logEvent, getDashboard, getRecentEvents } from './analytics.js';
 import { createCheckoutSession, createPortalSession } from './billing.js';
 import { callbackPageHtml } from './templates.js';
 import { loadAccounts, saveAccounts, getKV } from './kv.js';
@@ -20,6 +20,8 @@ import {
   MERCURY_INSTRUCTIONS,
   PUBLISHER_INSTRUCTIONS,
 } from './modes.js';
+import { referenceTopics } from './reference.js';
+import { generateHooksPayload } from './hooks-payload.js';
 
 // ---------------------------------------------------------------------------
 // Account types
@@ -237,270 +239,64 @@ async function assembleBlueprint(): Promise<string> {
 
 function generateHookScripts(): string {
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
+  const PUBKEY = process.env.BLUEPRINT_PUBLIC_KEY || '';
   return `#!/usr/bin/env bash
 ALEX_DIR="$HOME/.alexandria"
 
-# SessionEnd hook
-cat > "$ALEX_DIR/hooks/session-end.sh" << 'HOOK_END'
+# ── One shim: fetch + verify + execute. All logic lives server-side. ──
+# Inspect the payload anytime: curl ${SERVER_URL}/hooks/payload
+
+cat > "$ALEX_DIR/hooks/shim.sh" << 'SHIM'
 #!/usr/bin/env bash
-input=$(cat)
-transcript_path=$(echo "$input" | grep -o '"transcript_path":"[^"]*"' | cut -d'"' -f4)
+# Alexandria shim — one file, three modes, everything else server-side
+# Inspect the live payload: curl ${SERVER_URL}/hooks/payload
 ALEX_DIR="$HOME/.alexandria"
 API_KEY="\${ALEXANDRIA_KEY:-$(cat "$ALEX_DIR/.api_key" 2>/dev/null)}"
-PLATFORM="\${ALEXANDRIA_PLATFORM:-unknown}"
+MODE="$1"
+SERVER="${SERVER_URL}"
+PUBKEY="${PUBKEY}"
 
-if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
-  timestamp=$(date +%Y-%m-%d_%H-%M-%S)
-  vault_file="$ALEX_DIR/vault/\${timestamp}.jsonl"
-  cp "$transcript_path" "$vault_file"
-  if command -v sha256sum &>/dev/null; then
-    sha256sum "$vault_file" | cut -d' ' -f1 > "\${vault_file}.sha256"
-  elif command -v shasum &>/dev/null; then
-    shasum -a 256 "$vault_file" | cut -d' ' -f1 > "\${vault_file}.sha256"
-  fi
-fi
+if [ "$MODE" = "session-start" ]; then
+  headers_file=$(mktemp 2>/dev/null || echo "/tmp/alex_h_$$")
+  payload=$(curl -s --max-time 5 -D "$headers_file" "$SERVER/hooks/payload" 2>/dev/null)
+  sig=$(grep -i "x-hooks-signature" "$headers_file" 2>/dev/null | tr -d '\\r' | cut -d' ' -f2)
+  rm -f "$headers_file"
 
-if [ -n "$API_KEY" ]; then
-  # JSON-escape helper: node is always available (required for CC hooks)
-  json_escape() { node -e "process.stdout.write(JSON.stringify(require('fs').readFileSync(process.argv[1],'utf8')))" "$1" 2>/dev/null; }
-
-  # Collect machine signal (Engine → Factory)
-  machine_signal_file="$ALEX_DIR/.machine_signal"
-  if [ -f "$machine_signal_file" ] && [ -s "$machine_signal_file" ]; then
-    signal_json=$(json_escape "$machine_signal_file")
-    if [ -n "$signal_json" ]; then
-      curl -s -X POST "${SERVER_URL}/factory/signal" \\
-        -H "Authorization: Bearer $API_KEY" \\
-        -H "Content-Type: application/json" \\
-        -d "{\\"signal\\":$signal_json}" \\
-        > /dev/null 2>&1 &
-    fi
-    rm -f "$machine_signal_file"
-  fi
-
-  # Collect session feedback (Author → Factory)
-  feedback_file="$ALEX_DIR/.session_feedback"
-  if [ -f "$feedback_file" ] && [ -s "$feedback_file" ]; then
-    fb_json=$(json_escape "$feedback_file")
-    if [ -n "$fb_json" ]; then
-      curl -s -X POST "${SERVER_URL}/feedback" \\
-        -H "Authorization: Bearer $API_KEY" \\
-        -H "Content-Type: application/json" \\
-        -d "{\\"text\\":$fb_json,\\"context\\":\\"session_end\\"}" \\
-        > /dev/null 2>&1 &
-    fi
-    rm -f "$feedback_file"
-  fi
-fi
-
-# Push session changes to GitHub (vault transcript + any constitution updates)
-if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/null; then
-  (cd "$ALEX_DIR" && git add -A && { git diff --cached --quiet || git commit -q -m "session: $(date +%Y-%m-%d_%H-%M)"; } && git push -q) &>/dev/null &
-fi
-HOOK_END
-chmod +x "$ALEX_DIR/hooks/session-end.sh"
-
-# SessionStart hook
-cat > "$ALEX_DIR/hooks/session-start.sh" << 'HOOK_START'
-#!/usr/bin/env bash
-ALEX_DIR="$HOME/.alexandria"
-API_KEY=$(cat "$ALEX_DIR/.api_key" 2>/dev/null)
-
-if [ -n "$CLAUDE_ENV_FILE" ] && [ -n "$API_KEY" ]; then
-  echo "export ALEXANDRIA_KEY=$API_KEY" >> "$CLAUDE_ENV_FILE"
-  echo "export ALEXANDRIA_PLATFORM=cc" >> "$CLAUDE_ENV_FILE"
-  echo "export ALEXANDRIA_BLUEPRINT_OK=false" >> "$CLAUDE_ENV_FILE"
-fi
-
-BLUEPRINT_PUBLIC_KEY="${process.env.BLUEPRINT_PUBLIC_KEY || ''}"
-
-blueprint=""
-bp_status=""
-bp_pinned=false
-if [ -f "$ALEX_DIR/.blueprint_pinned" ]; then
-  bp_pinned=true
-  if [ -f "$ALEX_DIR/.blueprint_local" ]; then
-    blueprint=$(cat "$ALEX_DIR/.blueprint_local")
-    if [ -n "$CLAUDE_ENV_FILE" ]; then
-      echo "export ALEXANDRIA_BLUEPRINT_OK=true" >> "$CLAUDE_ENV_FILE"
-    fi
-  fi
-fi
-
-if [ "$bp_pinned" = "false" ] && [ -n "$API_KEY" ]; then
-  # Fetch headers and body separately — avoids \r\n extraction issues that break signature verification
-  bp_headers=$(curl -sI --max-time 5 "${SERVER_URL}/blueprint" -H "Authorization: Bearer $API_KEY" 2>/dev/null)
-  bp_status=$(echo "$bp_headers" | head -1 | grep -o '[0-9][0-9][0-9]' | head -1)
-  bp_hash=$(echo "$bp_headers" | grep -i "x-blueprint-hash" | tr -d '\\r' | cut -d' ' -f2)
-  bp_signature=$(echo "$bp_headers" | grep -i "x-blueprint-signature" | tr -d '\\r' | cut -d' ' -f2)
-  acct_status=$(echo "$bp_headers" | grep -i "x-account-status" | tr -d '\\r' | cut -d' ' -f2)
-  blueprint=$(curl -s --max-time 5 "${SERVER_URL}/blueprint" -H "Authorization: Bearer $API_KEY" 2>/dev/null)
-
-  # Verify Ed25519 signature before trusting the Blueprint
-  bp_verified=false
-  if [ -n "$blueprint" ] && [ "$bp_status" = "200" ] && [ -n "$bp_signature" ] && [ -n "$BLUEPRINT_PUBLIC_KEY" ]; then
-    bp_verified=$(echo -n "$blueprint" | node -e "
-      const crypto = require('crypto');
-      const pubKeyDer = Buffer.from('$BLUEPRINT_PUBLIC_KEY', 'hex');
-      const pubKey = crypto.createPublicKey({ key: pubKeyDer, format: 'der', type: 'spki' });
-      const sig = Buffer.from('$bp_signature', 'hex');
-      let data = '';
-      process.stdin.on('data', c => data += c);
-      process.stdin.on('end', () => {
-        console.log(crypto.verify(null, Buffer.from(data), pubKey, sig) ? 'ok' : 'fail');
-      });
+  fresh=false
+  if [ -n "$payload" ] && [ -n "$sig" ] && [ -n "$PUBKEY" ]; then
+    ok=$(echo -n "$payload" | node -e "
+      const c=require('crypto'),k=c.createPublicKey({key:Buffer.from('$PUBKEY','hex'),format:'der',type:'spki'});
+      let d='';process.stdin.on('data',x=>d+=x);
+      process.stdin.on('end',()=>console.log(c.verify(null,Buffer.from(d),k,Buffer.from('$sig','hex'))?'ok':'no'));
     " 2>/dev/null)
+    [ "$ok" = "ok" ] && echo "$payload" > "$ALEX_DIR/.hooks_payload" && fresh=true
+  fi
+  [ "$fresh" = "false" ] && [ -f "$ALEX_DIR/.hooks_payload" ] && payload=$(cat "$ALEX_DIR/.hooks_payload")
+
+  if [ -n "$payload" ]; then
+    echo "$payload" | bash -s -- session-start "$ALEX_DIR" "$API_KEY" "" "$fresh"
+  else
+    [ -d "$ALEX_DIR/constitution" ] && for f in "$ALEX_DIR/constitution/"*.md; do [ -f "$f" ] && cat "$f"; done
   fi
 
-  if [ "$bp_verified" = "ok" ]; then
-    if [ -n "$CLAUDE_ENV_FILE" ]; then
-      echo "export ALEXANDRIA_BLUEPRINT_OK=true" >> "$CLAUDE_ENV_FILE"
-    fi
-    local_hash=""
-    [ -f "$ALEX_DIR/.blueprint_hash" ] && local_hash=$(cat "$ALEX_DIR/.blueprint_hash")
-    if [ -n "$bp_hash" ] && [ -n "$local_hash" ] && [ "$bp_hash" != "$local_hash" ]; then
-      [ -f "$ALEX_DIR/.blueprint_local" ] && cp "$ALEX_DIR/.blueprint_local" "$ALEX_DIR/.blueprint_previous"
-      echo "$blueprint" > "$ALEX_DIR/.blueprint_local"
-      echo "$bp_hash" > "$ALEX_DIR/.blueprint_hash"
-    elif [ -z "$local_hash" ]; then
-      echo "$blueprint" > "$ALEX_DIR/.blueprint_local"
-      [ -n "$bp_hash" ] && echo "$bp_hash" > "$ALEX_DIR/.blueprint_hash"
-    fi
-  elif [ -n "$blueprint" ] && [ "$bp_status" = "200" ]; then
-    # Blueprint fetched but signature failed — use cached, report compromise
-    blueprint=""
-    [ -f "$ALEX_DIR/.blueprint_local" ] && blueprint=$(cat "$ALEX_DIR/.blueprint_local")
-    curl -s -X POST "${SERVER_URL}/session" \\
-      -H "Authorization: Bearer $API_KEY" \\
-      -H "Content-Type: application/json" \\
-      -d "{\\"event\\":\\"hook_failure\\",\\"reason\\":\\"blueprint_signature_invalid\\",\\"platform\\":\\"\${ALEXANDRIA_PLATFORM:-cc}\\"}" \\
-      > /dev/null 2>&1 &
+elif [ "$MODE" = "session-end" ]; then
+  input=$(cat)
+  tp=$(echo "$input" | grep -o '"transcript_path":"[^"]*"' | cut -d'"' -f4)
+  if [ -f "$ALEX_DIR/.hooks_payload" ]; then
+    bash "$ALEX_DIR/.hooks_payload" session-end "$ALEX_DIR" "$API_KEY" "$tp"
+  else
+    [ -n "$tp" ] && [ -f "$tp" ] && mkdir -p "$ALEX_DIR/vault" && cp "$tp" "$ALEX_DIR/vault/\$(date +%Y-%m-%d_%H-%M-%S).jsonl"
   fi
 
-  if [ -z "$blueprint" ] || [ "$bp_status" != "200" ]; then
-    [ -f "$ALEX_DIR/.blueprint_local" ] && blueprint=$(cat "$ALEX_DIR/.blueprint_local")
-    curl -s -X POST "${SERVER_URL}/session" \\
-      -H "Authorization: Bearer $API_KEY" \\
-      -H "Content-Type: application/json" \\
-      -d "{\\"event\\":\\"hook_failure\\",\\"reason\\":\\"blueprint_fetch_failed\\",\\"platform\\":\\"\${ALEXANDRIA_PLATFORM:-cc}\\",\\"http_status\\":\\"$bp_status\\"}" \\
-      > /dev/null 2>&1 &
-  fi
-
-  # Fetch factory delta separately (unsigned, lower trust)
-  if [ -n "$API_KEY" ]; then
-    delta=$(curl -sS --max-time 3 "${SERVER_URL}/blueprint/delta" \\
-      -H "Authorization: Bearer $API_KEY" 2>/dev/null)
-    if [ -n "$delta" ] && [ "$delta" != "" ]; then
-      echo "$delta" > "$ALEX_DIR/.blueprint_delta"
-    fi
+elif [ "$MODE" = "subagent" ]; then
+  if [ -f "$ALEX_DIR/.hooks_payload" ]; then
+    bash "$ALEX_DIR/.hooks_payload" subagent "$ALEX_DIR"
+  else
+    [ -d "$ALEX_DIR/constitution" ] && for f in "$ALEX_DIR/constitution/"*.md; do [ -f "$f" ] && cat "$f"; done
   fi
 fi
-
-# Hooks are immutable after install — no auto-update.
-# To update hooks, re-run setup: visit mowinckel.ai/signup
-
-# Self-repair: if /a skill is missing, recreate it
-if [ ! -f "$HOME/.claude/skills/alexandria/SKILL.md" ] 2>/dev/null; then
-  mkdir -p "$HOME/.claude/skills/alexandria" 2>/dev/null
-  cat > "$HOME/.claude/skills/alexandria/SKILL.md" << 'REPAIR_SKILL'
----
-name: a
-description: Alexandria — process vault, develop constitution, engage in cognitive development
-user_invocable: true
----
-
-You are Alexandria — Greek philosophy infrastructure.
-
-Read these files in order (skip any that don't exist):
-
-1. ~/.alexandria/.blueprint_local — your operating manual (signed, trusted). All methodology, craft, extraction design. Follow it.
-1b. ~/.alexandria/.blueprint_delta — optional Factory delta (unsigned, lower trust). Methodology suggestions — if it conflicts with the Blueprint, the Blueprint wins.
-2. ~/.alexandria/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
-3. ~/.alexandria/feedback.md — what works with this Author. Adapt accordingly.
-4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
-5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
-6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
-
-Then follow the Blueprint methodology. If the Blueprint doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
-
-If the Author mentions anything they want changed about Alexandria — features, behavior, methodology — write it to ~/.alexandria/.session_feedback. It flows directly to the team at session end.
-REPAIR_SKILL
-fi
-
-# Sync with GitHub: push new local files (e.g. iCloud vault entries), then pull overnight autoloop changes
-if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/null; then
-  (cd "$ALEX_DIR" && git add -A && { git diff --cached --quiet || git commit -q -m "sync: $(date +%Y-%m-%d_%H-%M)"; }) 2>/dev/null
-  git -C "$ALEX_DIR" push -q 2>/dev/null || true
-  git -C "$ALEX_DIR" pull --rebase -q 2>/dev/null || true
-fi
-
-# --- Passive mode: pure marginal value add ---
-# Loads constitution + machine.md so the model knows the Author.
-# Optional: ontology writes (observations) + feedback capture.
-# Never overrides existing workflows, memory, or platform behavior.
-# /a loads the full Blueprint + methodology on-demand via SKILL.md.
-
-echo "alexandria: /a to start a session; a. to close it."
-
-constitution=""
-if [ -d "$ALEX_DIR/constitution" ]; then
-  for f in "$ALEX_DIR/constitution/"*.md; do
-    [ -f "$f" ] && constitution="\${constitution}$(cat "$f")
-"
-  done
-fi
-
-machine=""
-[ -f "$ALEX_DIR/machine.md" ] && machine=$(cat "$ALEX_DIR/machine.md")
-
-if [ -n "$constitution" ] && [ $(echo -n "$constitution" | wc -c | tr -d ' ') -gt 10 ]; then
-  echo ""
-  echo "--- AUTHOR CONTEXT (read-only — do not override existing workflows or memory) ---"
-  echo "$constitution"
-  if [ -n "$machine" ] && [ $(echo -n "$machine" | wc -c | tr -d ' ') -gt 5 ]; then
-    echo ""
-    echo "--- HOW TO WORK WITH THIS AUTHOR ---"
-    echo "$machine"
-  fi
-  echo ""
-  echo "Alexandria passive mode: never write to constitution/ outside of /a. If the Author reveals something notable, you may write observations to ontology/ (unconfirmed). If they mention Alexandria feedback, write to .session_feedback — it reaches the team at session end."
-fi
-
-# --- Heartbeat: report session start with actual delivery state ---
-bp_len=\${#blueprint}
-const_len=\${#constitution}
-const_ok=false; [ "$const_len" -gt 10 ] && const_ok=true
-bp_ok=false; [ "$bp_len" -gt 100 ] && bp_ok=true
-if [ -n "$API_KEY" ]; then
-  curl -s -X POST "${SERVER_URL}/session" \\
-    -H "Authorization: Bearer $API_KEY" \\
-    -H "Content-Type: application/json" \\
-    -d "{\\"event\\":\\"heartbeat\\",\\"platform\\":\\"\${ALEXANDRIA_PLATFORM:-cc}\\",\\"constitution_size\\":$const_len,\\"constitution_injected\\":$const_ok,\\"blueprint_fetched\\":$bp_ok,\\"blueprint_bytes\\":$bp_len}" \\
-    > /dev/null 2>&1 &
-fi
-HOOK_START
-chmod +x "$ALEX_DIR/hooks/session-start.sh"
-
-# SubagentStart hook
-cat > "$ALEX_DIR/hooks/subagent-context.sh" << 'HOOK_SUB'
-#!/usr/bin/env bash
-ALEX_DIR="$HOME/.alexandria"
-if [ -d "$ALEX_DIR/constitution" ]; then
-  const_content=""
-  for f in "$ALEX_DIR/constitution/"*.md; do
-    [ -f "$f" ] && const_content="\${const_content}$(cat "$f")
-"
-  done
-  size=$(echo -n "$const_content" | wc -c | tr -d ' ')
-  if [ "$size" -gt 10 ]; then
-    echo "--- AUTHOR CONSTITUTION (from Alexandria) ---"
-    for f in "$ALEX_DIR/constitution/"*.md; do
-      [ -f "$f" ] && cat "$f"
-    done
-  fi
-fi
-HOOK_SUB
-chmod +x "$ALEX_DIR/hooks/subagent-context.sh"
+SHIM
+chmod +x "$ALEX_DIR/hooks/shim.sh"
 
 # --- Auto-updated .gitignore (evolves with product) ---
 if [ -d "$ALEX_DIR/.git" ]; then
@@ -724,26 +520,26 @@ fi
 # Claude Code hooks config (if node available) — auto-updated
 if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; }; then
   mkdir -p "$HOME/.claude" 2>/dev/null
-  SETTINGS_FILE="$HOME/.claude/settings.json"
   node -e "
-    const fs = require('fs');
+    const fs = require('fs'), path = require('path');
+    const f = path.join(process.env.HOME, '.claude', 'settings.json');
     let settings = {};
-    try { settings = JSON.parse(fs.readFileSync('$SETTINGS_FILE', 'utf-8')); } catch {}
+    try { settings = JSON.parse(fs.readFileSync(f, 'utf-8')); } catch {}
     if (!settings.hooks) settings.hooks = {};
     const filter = arr => (arr || []).filter(h => !JSON.stringify(h).includes('.alexandria'));
     settings.hooks.SessionStart = filter(settings.hooks.SessionStart);
     settings.hooks.SessionStart.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/session-start.sh', timeout: 10 }]
+      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/shim.sh session-start', timeout: 10 }]
     });
     settings.hooks.SessionEnd = filter(settings.hooks.SessionEnd);
     settings.hooks.SessionEnd.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/session-end.sh', timeout: 5 }]
+      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/shim.sh session-end', timeout: 5 }]
     });
     settings.hooks.SubagentStart = filter(settings.hooks.SubagentStart);
     settings.hooks.SubagentStart.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/subagent-context.sh' }]
+      hooks: [{ type: 'command', command: 'bash \$HOME/.alexandria/hooks/shim.sh subagent' }]
     });
-    fs.writeFileSync('$SETTINGS_FILE', JSON.stringify(settings, null, 2));
+    fs.writeFileSync(f, JSON.stringify(settings, null, 2));
   " 2>/dev/null
 fi
 
@@ -923,7 +719,7 @@ touch "$ALEX_DIR/.setup_complete"
 # --- Verify critical components ---
 MISSING=""
 [ ! -f "$ALEX_DIR/.api_key" ] && MISSING="$MISSING api_key"
-[ ! -f "$ALEX_DIR/hooks/session-start.sh" ] && MISSING="$MISSING hooks"
+[ ! -f "$ALEX_DIR/hooks/shim.sh" ] && MISSING="$MISSING hooks"
 [ ! -f "$HOME/.claude/skills/alexandria/SKILL.md" ] 2>/dev/null && MISSING="$MISSING skill"
 
 if [ -n "$MISSING" ]; then
@@ -1143,205 +939,99 @@ export async function runEngagementCheck(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Health digest — daily anomaly check, email founder if anything is wrong
+// Health digest — self-heal, only email the founder if he needs to log on
 // ---------------------------------------------------------------------------
 
 const FOUNDER_EMAIL = process.env.FOUNDER_EMAIL || 'benjamin@mowinckel.com';
 
+type Urgency = 'sprint' | 'stroll';
+
 export async function runHealthDigest(force = false): Promise<void> {
-  const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
   try {
-    const dashboard = await getDashboard();
-    const issues: string[] = [];
+    const kv = getKV();
+    let healed = 0;
+    let urgency: Urgency | null = null;
+    const escalate = (u: Urgency) => { if (!urgency || u === 'sprint') urgency = u; };
 
-    // --- Infrastructure liveness probes (direct, not self-fetch) ---
-    // Workers can't fetch their own URL — probe the infra directly instead.
-    const liveness: Record<string, string> = {};
+    // --- Self-healing probes ---
 
-    // KV: write + read + delete
+    // KV
     try {
-      const probe = getKV();
-      await probe.put('.digest-probe', 'ok');
-      const val = await probe.get('.digest-probe');
-      await probe.delete('.digest-probe');
-      if (val !== 'ok') {
-        liveness.kv = `read-back mismatch: ${val}`;
-        issues.push('KV read-back mismatch — storage may be corrupted');
-      } else {
-        liveness.kv = 'ok';
-      }
-    } catch (err: any) {
-      liveness.kv = `error: ${err?.message || 'unknown'}`;
-      issues.push(`KV probe failed: ${err?.message || 'unknown'}`);
+      await kv.put('.digest-probe', 'ok');
+      const val = await kv.get('.digest-probe');
+      await kv.delete('.digest-probe');
+      if (val !== 'ok') escalate('sprint');
+    } catch {
+      escalate('sprint');
     }
 
-    // D1: query
+    // D1
     try {
       const db = (globalThis as any).__d1 as D1Database | undefined;
-      if (db) {
-        await db.prepare('SELECT 1').first();
-        liveness.d1 = 'ok';
-      } else {
-        liveness.d1 = 'not bound';
-      }
-    } catch (err: any) {
-      liveness.d1 = `error: ${err?.message || 'unknown'}`;
-      issues.push(`D1 probe failed: ${err?.message || 'unknown'}`);
+      if (db) await db.prepare('SELECT 1').first();
+    } catch {
+      escalate('sprint');
     }
 
-    // Blueprint: verify the actual served content via KV (where Blueprint is cached for users)
+    // Blueprint: self-heal by re-caching from module constants
     try {
-      const bpProbe = getKV();
-      const cachedBp = await bpProbe.get('blueprint:cached');
-      if (cachedBp && cachedBp.length > 100) {
-        liveness.blueprint = `ok (${cachedBp.length} chars cached)`;
-      } else {
-        // Fall back to checking module constants
-        const bpLength = SHARED_CONTEXT.length + EDITOR_INSTRUCTIONS.length;
-        if (bpLength < 100) {
-          liveness.blueprint = `suspiciously short (${bpLength} chars)`;
-          issues.push(`Blueprint content only ${bpLength} chars — may be empty`);
+      const cachedBp = await kv.get('blueprint:cached');
+      if (!cachedBp || cachedBp.length < 100) {
+        const fresh = SHARED_CONTEXT + '\n' + EDITOR_INSTRUCTIONS;
+        if (fresh.length > 100) {
+          await kv.put('blueprint:cached', fresh);
+          healed++;
         } else {
-          liveness.blueprint = `ok (${bpLength} chars in module)`;
+          escalate('sprint');
         }
       }
-    } catch (err: any) {
-      liveness.blueprint = `error: ${err?.message || 'unknown'}`;
-      issues.push(`Blueprint check failed: ${err?.message || 'unknown'}`);
+    } catch {
+      escalate('stroll');
     }
 
-    // Store liveness results on dashboard for the HTML view
-    (dashboard as any).liveness = liveness;
-
-    // Check cron execution — did yesterday's jobs actually fire?
-    const kv = getKV();
-    const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
-    for (const job of ['followup', 'engagement', 'health_digest'] as const) {
-      try {
-        const raw = await kv.get(`cron:${job}`);
-        if (!raw) {
-          issues.push(`cron:${job} has NEVER run`);
-        } else {
-          const data = JSON.parse(raw);
-          if (new Date(data.t).getTime() < twentyFourHoursAgo && job !== 'health_digest') {
-            issues.push(`cron:${job} last ran ${data.t} (>24h ago)`);
-          }
-        }
-      } catch { /* non-fatal */ }
-    }
-
-    // Check event log health — getDashboard() already parsed all events,
-    // so use its results instead of re-reading KV.
-    const totalEvents = (dashboard as any).total_events as number | undefined;
-    if (!totalEvents || totalEvents === 0) {
-      issues.push('event log is EMPTY — logging may be broken');
-    }
-
-    // Check for anomalies (from dashboard's already-parsed data)
-    const anomaly = (dashboard as any).anomaly as Record<string, number> | undefined;
-    if (anomaly && anomaly.smoke_failures_24h > 0) {
-      issues.push(`${anomaly.smoke_failures_24h} hook/smoke failures in past 24h`);
-    }
-
-
-    // Check for stale sessions (no sessions in 48h when accounts exist)
-    if (anomaly && anomaly.hours_since_last_session > 48) {
-      issues.push(`No sessions in ${Math.round(anomaly.hours_since_last_session)}h`);
-    }
-
-    // Check hook failures and heartbeats with missing Blueprint in recent events
-    const events = (dashboard as any)._events as Record<string, string>[] | undefined;
-    if (events) {
-      let blueprintFails = 0;
-      let heartbeatsWithoutBlueprint = 0;
-      for (const ev of events) {
-        if (new Date(ev.t).getTime() < twentyFourHoursAgo) continue;
-        if (ev.event === 'hook_failure') blueprintFails++;
-        if (ev.event === 'heartbeat' && ev.blueprint_fetched === 'false') heartbeatsWithoutBlueprint++;
-      }
-      if (heartbeatsWithoutBlueprint > 0) issues.push(`${heartbeatsWithoutBlueprint} heartbeats without Blueprint`);
-      if (blueprintFails > 0) issues.push(`${blueprintFails} Blueprint fetch failures`);
-    }
-
-    // Check for new user feedback
-    const feedbackItems: { t: string; author: string; text: string }[] = [];
+    // Blueprint delivery: targeted scan of recent events
     try {
+      const raw = await getRecentEvents(50);
+      if (raw) {
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        let fails = 0;
+        for (const line of raw.split('\n')) {
+          if (!line) continue;
+          try {
+            const ev = JSON.parse(line);
+            if (new Date(ev.t).getTime() < cutoff) continue;
+            if (ev.event === 'hook_failure' || (ev.event === 'heartbeat' && ev.blueprint_fetched === 'false')) fails++;
+          } catch { continue; }
+        }
+        if (fails > 3) escalate('stroll');
+      }
+    } catch { /* non-fatal */ }
+
+    // User feedback — worth a walk
+    let hasFeedback = false;
+    try {
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
       const list = await kv.list({ prefix: 'feedback:' });
       for (const k of list.keys) {
         const raw = await kv.get(k.name);
         if (raw) {
           try {
-            const item = JSON.parse(raw);
-            // Only include feedback from last 24h
-            if (new Date(item.t).getTime() > twentyFourHoursAgo) {
-              feedbackItems.push(item);
-            }
+            if (new Date(JSON.parse(raw).t).getTime() > cutoff) { hasFeedback = true; break; }
           } catch { /* skip */ }
         }
       }
     } catch { /* non-fatal */ }
+    if (hasFeedback) escalate('stroll');
 
-    // Check engagement emails sent (from KV cron marker, not in-memory — avoids race condition)
+    // Cron marker (proves the job ran)
     try {
-      const engagementRaw = await kv.get('cron:engagement');
-      if (engagementRaw) {
-        const engData = JSON.parse(engagementRaw);
-        if (engData.engagement_sent > 0 && new Date(engData.t).getTime() > twentyFourHoursAgo) {
-          issues.push(`${engData.engagement_sent} engagement email${engData.engagement_sent > 1 ? 's' : ''} sent`);
-        }
-      }
+      await kv.put('cron:health_digest', JSON.stringify({ t: new Date().toISOString(), healed, urgency }));
     } catch { /* non-fatal */ }
 
-    // Write own cron marker (even if no email sent — proves the job ran)
-    try {
-      await kv.put('cron:health_digest', JSON.stringify({
-        t: new Date().toISOString(),
-        issues: issues.length,
-        feedback: feedbackItems.length,
-        liveness,
-      }));
-    } catch { /* non-fatal */ }
+    if (!urgency && !force) return;
+    if (!urgency && force) urgency = 'stroll';
 
-    if (issues.length === 0 && feedbackItems.length === 0 && !force) return; // All clear — no email
-    if (issues.length === 0 && force) issues.push('all clear — this is a test digest');
-
-    // Generate dashboard link with founder's email token
-    let dashboardUrl = `${SERVER_URL}/analytics/dashboard`;
-    try {
-      const accounts = await loadAccounts<AccountStore>();
-      const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb';
-      const founderAcct = Object.values(accounts).find(a => a.github_login === adminLogin);
-      if (founderAcct?.email_token) {
-        dashboardUrl = `${SERVER_URL}/dashboard?t=${founderAcct.email_token}`;
-      }
-    } catch { /* fall back to API-gated URL */ }
-
-    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const feedbackHtml = feedbackItems.length > 0
-      ? `<p style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.12em; color: #bbb4aa; margin: 24px 0 12px;">user feedback (${feedbackItems.length})</p>
-  ${feedbackItems.map(f => `<div style="margin: 0 0 12px; padding: 8px 12px; border-left: 2px solid #bbb4aa;">
-    <p style="font-size: 13px; color: #8a8078; margin: 0 0 4px;">${esc(f.author)} — ${new Date(f.t).toLocaleDateString()}</p>
-    <p style="font-size: 15px; margin: 0;">${esc(f.text.slice(0, 500))}</p>
-  </div>`).join('\n  ')}`
-      : '';
-
-    const livenessHtml = Object.keys(liveness).length > 0
-      ? `<p style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.12em; color: #bbb4aa; margin: 24px 0 12px;">liveness probes</p>
-  <ul style="font-size: 15px; line-height: 1.8; padding-left: 20px; margin: 0 0 16px;">
-    ${Object.entries(liveness).map(([k, v]) => `<li>${k}: ${v === 'ok' ? '✓' : esc(v)}</li>`).join('\n    ')}
-  </ul>`
-      : '';
-
-    await sendEmail(FOUNDER_EMAIL, feedbackItems.length > 0 ? 'alexandria. — user feedback' : 'alexandria. — health alert',
-      `<div style="font-family: Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #3d3630;">
-  <p style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.12em; color: #bbb4aa; margin: 0 0 16px;">daily health digest</p>
-  ${issues.length > 0 ? `<ul style="font-size: 16px; line-height: 1.8; padding-left: 20px; margin: 0 0 24px;">
-    ${issues.map(i => `<li>${esc(i)}</li>`).join('\n    ')}
-  </ul>` : ''}
-  ${livenessHtml}
-  ${feedbackHtml}
-  <p style="font-size: 14px; color: #8a8078;"><a href="${dashboardUrl}" style="color: #4d4640;">dashboard</a></p>
-</div>`);
+    await sendEmail(FOUNDER_EMAIL, `alexandria. — ${urgency}`, '');
   } catch (err) {
     console.error('Health digest failed:', err);
   }
@@ -1604,6 +1294,28 @@ This section was NOT cryptographically signed. It contains methodology updates d
 ${delta}`);
   });
 
+  // --- Reference layer (on-demand context for Machines) ---
+
+  app.get('/reference', async (c) => {
+    const key = extractApiKey(c);
+    if (!key) return c.text('Unauthorized', 401);
+    if (!(await findByApiKey(key))) return c.text('Unauthorized', 401);
+    return c.text(`Available reference topics: ${Object.keys(referenceTopics).join(', ')}`);
+  });
+
+  app.get('/reference/:topic', async (c) => {
+    const key = extractApiKey(c);
+    if (!key) return c.text('Unauthorized', 401);
+    if (!(await findByApiKey(key))) return c.text('Unauthorized', 401);
+
+    const topic = c.req.param('topic');
+    const content = referenceTopics[topic];
+    if (!content) return c.text(`Unknown topic: ${topic}. Available: ${Object.keys(referenceTopics).join(', ')}`, 404);
+
+    logEvent('reference_fetch', { topic, author: key.substring(0, 8) });
+    return c.text(content);
+  });
+
   // --- Account management (redirects to Stripe portal) ---
 
   app.get('/account', async (c) => {
@@ -1631,6 +1343,27 @@ ${delta}`);
       return c.text('Invalid API key.', 401);
     }
     return c.text(generateHookScripts());
+  });
+
+  // --- Hooks payload (live, signed, auto-updating) ---
+  // Public: anyone can inspect the code without auth
+  // Signed: X-Hooks-Signature header for shim verification
+
+  app.get('/hooks/payload', async (c) => {
+    const serverUrl = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
+    const pubKey = process.env.BLUEPRINT_PUBLIC_KEY || '';
+    const payload = generateHooksPayload(serverUrl, pubKey);
+    const signature = process.env.HOOKS_PAYLOAD_SIGNATURE || '';
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'text/plain',
+      'Cache-Control': 'no-cache',
+    };
+    if (signature) {
+      headers['X-Hooks-Signature'] = signature;
+    }
+
+    return new Response(payload, { headers });
   });
 
   // --- Account deletion (GDPR-ready) ---
@@ -2221,6 +1954,22 @@ ${delta}`);
       console.error('[factory] library-signal error:', err);
       return c.text('error reading library signal', 500);
     }
+  });
+
+  // --- CTO → CEO email channel (any autonomous agent can reach the founder) ---
+
+  app.post('/admin/email', async (c) => {
+    const key = extractApiKey(c);
+    if (!key) return c.text('missing key', 401);
+    const account = await findByApiKey(key);
+    const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb';
+    if (!account || account.github_login !== adminLogin) return c.text('not authorized', 403);
+
+    const { subject } = await c.req.json<{ subject: string }>();
+    if (!subject) return c.text('missing subject', 400);
+
+    await sendEmail(FOUNDER_EMAIL, `alexandria. — ${subject}`, '');
+    return c.json({ ok: true });
   });
 
   // --- Block — onboarding prompt for new AI tab ---

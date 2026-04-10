@@ -1,0 +1,23 @@
+name: Stranger
+on:
+  push:
+    branches: [main]
+    paths: ['server/src/**', 'server/test/**']
+  workflow_dispatch: {}
+
+jobs:
+  stranger:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Stranger test
+        shell: bash
+        env:
+          ALEXANDRIA_TEST_KEY: ${{ secrets.ALEXANDRIA_TEST_KEY }}
+        run: bash server/test/stranger.sh
