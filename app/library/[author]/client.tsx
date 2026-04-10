@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useTheme } from '../../components/ThemeProvider';
+import type { PulseCard } from './types';
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'https://mcp.mowinckel.ai';
 
@@ -34,16 +35,6 @@ const mdComponents = {
   blockquote: ({ children }: any) => <blockquote className="pdoc-bq">{children}</blockquote>,
   hr: () => <hr className="pdoc-hr" />,
 };
-
-interface PulseCard {
-  alltime: { name: string; pct: number; why: string };
-  this_month: Array<{ name: string; why: string }>;
-  ideas: number;
-  ideas_delta: number;
-  themes?: string[];
-  fragments?: Array<{ source: string; idea: string }>;
-  month: string;
-}
 
 function PulseCardSimilarity({ card, authorName, authorId }: { card: PulseCard; authorName: string; authorId: string }) {
   return (

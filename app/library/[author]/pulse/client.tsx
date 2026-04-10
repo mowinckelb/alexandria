@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useTheme } from '../../../components/ThemeProvider';
+import type { PulseCard } from '../types';
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'https://mcp.mowinckel.ai';
 
@@ -28,20 +29,12 @@ function ThemeToggle() {
 const mdComponents = {
   h1: ({ children }: any) => <h1 style={{ fontSize: '1.3rem', fontWeight: 400, margin: '2rem 0 0.8rem', color: 'var(--text-primary)' }}>{children}</h1>,
   h2: ({ children }: any) => <h2 style={{ fontSize: '1rem', fontWeight: 400, margin: '1.8rem 0 0.6rem', color: 'var(--text-primary)' }}>{children}</h2>,
+  h3: ({ children }: any) => <h3 style={{ fontSize: '0.88rem', fontWeight: 400, margin: '1.2rem 0 0.4rem', color: 'var(--text-muted)' }}>{children}</h3>,
   p: ({ children }: any) => <p style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8, margin: '0 0 0.8rem' }}>{children}</p>,
+  li: ({ children }: any) => <li style={{ fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: 1.7, margin: '0 0 0.3rem' }}>{children}</li>,
   strong: ({ children }: any) => <strong style={{ fontWeight: 500 }}>{children}</strong>,
   hr: () => <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', margin: '2rem 0' }} />,
 };
-
-interface PulseCard {
-  alltime: { name: string; pct: number; why: string };
-  this_month: Array<{ name: string; why: string }>;
-  ideas: number;
-  ideas_delta: number;
-  themes?: string[];
-  fragments?: Array<{ source: string; idea: string }>;
-  month: string;
-}
 
 function SimilarityCard({ card, authorName, authorId }: { card: PulseCard; authorName: string; authorId: string }) {
   return (
