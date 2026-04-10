@@ -292,8 +292,12 @@ elif [ "$MODE" = "session-end" ]; then
       > /dev/null 2>&1 && event_sent=true
   fi
 
-  # Read stdin with timeout (bare cat blocks on Windows if pipe isn't closed)
-  input=$(timeout 5 cat 2>/dev/null)
+  # Read stdin — portable timeout (macOS lacks GNU timeout)
+  if command -v timeout &>/dev/null; then
+    input=$(timeout 5 cat 2>/dev/null)
+  else
+    input=$(cat 2>/dev/null)
+  fi
   tp=$(echo "$input" | grep -o '"transcript_path":"[^"]*"' | cut -d'"' -f4)
   if [ -f "$ALEX_DIR/.hooks_payload" ]; then
     ALEX_EVENT_SENT=$event_sent ALEX_WAS_ACTIVE=$was_active bash "$ALEX_DIR/.hooks_payload" session-end "$ALEX_DIR" "$API_KEY" "$tp"
