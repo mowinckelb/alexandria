@@ -9,43 +9,39 @@
 export const referenceTopics: Record<string, string> = {
   library: `# Reference: Library
 
-The Library is the Author's public-facing surface. Everything here is a soft default — Authors can customize, override, or invent new formats.
+The Library is the Author's public-facing surface. Everything here is a soft default — Authors can customize, override, or invent new formats. All endpoints require Authorization: Bearer <api_key> header. Server: mcp.mowinckel.ai.
 
-## Pulse Cards
+## Publish API
 
-Monthly artifacts designed to be screenshotted and shared. Two v1 soft default formats:
+**Shadows** — POST /library/publish/shadow
+Body: { shadows: [{ content: "md...", visibility: "public"|"authors"|"invite", price_cents: 0 }] }
+Legacy format also accepted: { free_shadow: "md...", paid_shadow: "md..." }
+At least one shadow must be public or authors-visible.
 
-**Similarity card.** Similar thinker — all time (one name, percentage, one-line connection) + similar thinkers this month (three names, one-line each) + screenshotable URLs (Library page, kin signup code). The flex.
-
-**Fragment card.** Five ideas the Author engaged with this month. Source name + one-line idea. The range is the signal — the juxtaposition of diverse sources is the curation fingerprint. Screenshotable URLs.
-
-Publish: POST /library/publish/pulse with JSON body { pulse: "<json-string>", month: "YYYY-MM" }. Authenticated with API key.
-
+**Pulse** — POST /library/publish/pulse
+Body: { pulse: "<json-string>", delta: "<md>", month: "YYYY-MM" }
 Pulse JSON structure (soft default — the Engine can evolve this):
-{
-  "alltime": { "name": "...", "pct": 89, "why": "..." },
-  "this_month": [{ "name": "...", "why": "..." }],
-  "fragments": [{ "source": "...", "idea": "..." }],
-  "month": "april 2026"
-}
+{ "alltime": { "name": "...", "pct": 89, "why": "..." }, "this_month": [{ "name": "...", "why": "..." }], "fragments": [{ "source": "...", "idea": "..." }], "month": "april 2026" }
+Two v1 card formats: Similarity card (alltime thinker + monthly thinkers) and Fragment card (five ideas + sources).
 
-## Shadows
+**Quiz** — POST /library/publish/quiz
+Body: { title: "...", questions: [...], result_tiers: [...] }
+No prescribed format. The server stores whatever JSON the Engine generates and serves it dynamically. Only constraint: include a "scoring" key so the server can compute results.
 
-The mandatory artifact. At least one, visible to other Authors. Generated from whatever the Author gives (constitution, vault, conversation). The Author controls visibility: public (anyone), authors (Alexandria Authors only), invite (token/promo code).
+**Work** — POST /library/publish/work
+Body: { title: "...", content: "md...", medium: "essay", tier: "free"|"paid" }
 
-Publish: POST /library/publish/shadow with body { shadow: "<markdown>", tier: "free|paid" }. Authenticated.
+**Settings** — PUT /library/settings
+Body: { display_name: "...", bio: "...", settings: { paid_price_cents: 100 } }
 
-## Games
+## Read API (for browsing other Authors)
 
-Quizzes generated from constitutional data. The Machine suggests formats. The Author picks.
-
-Publish: POST /library/publish/quiz with body { title, subtitle, questions: [...] }. Authenticated.
-
-## Works
-
-Finished creative works. Essays, art, anything the Author creates.
-
-Publish: POST /library/publish/work with body { title, medium, content, tier }. Authenticated.
+- GET /library/authors — all published Authors with metadata
+- GET /library/{author}/shadow/free — first public shadow as markdown (no auth required)
+- GET /library/{author}/shadow/{id} — any shadow by ID (access depends on visibility: public=anyone, authors=API key, invite=token)
+- GET /library/{author}/pulse — latest pulse
+- GET /library/{author}/quizzes — list quizzes
+- GET /library/{author}/works — list works
 
 All Library surfaces evolve through the RL loop. The Factory measures engagement. The Blueprint propagates winners.`,
 

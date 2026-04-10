@@ -106,7 +106,7 @@ export function registerLibraryRoutes(app: Hono): void {
     ).bind(authorId, body.display_name || authorId, now, now, now).run();
 
     // Normalize input: support both new format and legacy { free_shadow, paid_shadow }
-    type ShadowInput = { content: string; visibility: string; price_cents?: number };
+    type ShadowInput = { content: string; visibility: string; price_cents?: number; title?: string };
     let shadows: ShadowInput[];
     if (Array.isArray(body.shadows)) {
       shadows = body.shadows;
@@ -131,10 +131,11 @@ export function registerLibraryRoutes(app: Hono): void {
       const r2Key = `shadows/${authorId}/${vis}.md`;
       await r2.put(r2Key, content);
       // Delete existing shadow at this visibility, then insert new one
+      const title = typeof s.title === 'string' ? s.title.slice(0, 200) : null;
       await db.prepare('DELETE FROM shadows WHERE author_id = ? AND visibility = ?').bind(authorId, vis).run();
       await db.prepare(
-        `INSERT INTO shadows (id, author_id, visibility, price_cents, r2_key, size_bytes, published_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(generateId(), authorId, vis, s.price_cents || 0, r2Key, content.length, now, now).run();
+        `INSERT INTO shadows (id, author_id, visibility, price_cents, r2_key, size_bytes, title, published_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(generateId(), authorId, vis, s.price_cents || 0, r2Key, content.length, title, now, now).run();
 
       publishMeta[`${vis}_bytes`] = content.length;
       publishMeta[`${vis}_sections`] = content.split('\n').filter((l: string) => l.startsWith('## ')).length;
@@ -452,7 +453,7 @@ echo "Done."
     const author = await db.prepare('SELECT * FROM authors WHERE id = ?').bind(authorId).first();
     if (!author) return c.json({ error: 'Author not found' }, 404);
 
-    const shadows = await db.prepare('SELECT id, visibility, price_cents, size_bytes, updated_at FROM shadows WHERE author_id = ?').bind(authorId).all();
+    const shadows = await db.prepare('SELECT id, visibility, price_cents, size_bytes, title, updated_at FROM shadows WHERE author_id = ?').bind(authorId).all();
     const quizzes = await db.prepare('SELECT id, title, subtitle, published_at FROM quizzes WHERE author_id = ? AND active = 1').bind(authorId).all();
     const works = await db.prepare('SELECT id, title, medium, tier, url, published_at FROM works WHERE author_id = ?').bind(authorId).all();
     const latestPulse = await db.prepare('SELECT * FROM pulses WHERE author_id = ? ORDER BY month DESC LIMIT 1').bind(authorId).first();

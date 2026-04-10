@@ -110,7 +110,7 @@ interface AuthorData {
     id: string; display_name: string | null; bio: string | null; settings: string;
     website: string | null; location: string | null; social_links: string | null;
   };
-  shadows: Array<{ id: string; visibility: string; price_cents: number; size_bytes: number; updated_at: string }>;
+  shadows: Array<{ id: string; visibility: string; price_cents: number; size_bytes: number; title?: string; updated_at: string }>;
   quizzes: Array<{ id: string; title: string; subtitle?: string; published_at: string }>;
   works: Array<{ id: string; title: string; medium: string; tier: string; url?: string; published_at: string }>;
   latest_pulse: { month: string } | null;
@@ -202,8 +202,10 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   const displayName = author.display_name || author.id;
   let settings: Record<string, any> = {};
   try { settings = JSON.parse(author.settings || '{}'); } catch {}
-  const hasGated = data.shadows.some(s => s.visibility !== 'public');
-  const hasPublic = data.shadows.some(s => s.visibility === 'public');
+  const gatedShadow = data.shadows.find(s => s.visibility !== 'public');
+  const publicShadow = data.shadows.find(s => s.visibility === 'public');
+  const hasGated = !!gatedShadow;
+  const hasPublic = !!publicShadow;
   let socialLinks: SocialLink[] = [];
   try { if (author.social_links) socialLinks = JSON.parse(author.social_links); } catch {}
   const signupRef = `ref=${encodeURIComponent(authorId)}&ref_source=library`;
@@ -318,7 +320,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'opacity 0.15s', margin: '0 0 0.6rem' }}
                   className="hover:opacity-60"
                 >
-                  <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>the shadow</span>
+                  <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{gatedShadow?.title || 'the shadow'}</span>
                   {copiedId !== 'paid-shadow' && (
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-ghost)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
@@ -338,7 +340,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                       style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'opacity 0.15s', margin: '0 0 0.6rem' }}
                       className="hover:opacity-60"
                     >
-                      <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>the shadow — free</span>
+                      <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{publicShadow?.title || 'the shadow — free'}</span>
                       {copiedId !== 'free-shadow' && (
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-ghost)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
@@ -357,7 +359,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                       style={{ fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
                       className="hover:opacity-60"
                     >
-                      the full shadow
+                      {gatedShadow?.title || 'the full shadow'}
                     </a>
                   )}
                 </div>
