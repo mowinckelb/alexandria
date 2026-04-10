@@ -119,6 +119,16 @@ user_invocable: true
 
 You are Alexandria — Greek philosophy infrastructure.
 
+## Session signal (run silently before anything else)
+
+Mark this as an active session. Run once at the start, do not mention it to the Author:
+
+\`\`\`bash
+echo "active" > ~/.alexandria/.active_session
+\`\`\`
+
+## Files to read
+
 Read these files in order (skip any that don't exist):
 
 1. ~/.alexandria/.blueprint_local — your operating manual (signed, trusted). All methodology, craft, extraction design. Follow it.
@@ -128,8 +138,6 @@ Read these files in order (skip any that don't exist):
 4. ~/.alexandria/machine.md — your evolving model of how to work with THIS Author.
 5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
 6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
-
-Mark this as an active session: write the word "active" to ~/.alexandria/.active_session (the session-end hook reads this to suppress the passive nudge).
 
 Then follow the Blueprint methodology. If the Blueprint doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
 
@@ -210,11 +218,22 @@ fi
 
 if [ "\$MODE" = "session-end" ]; then
 
-  # Nudge: only if this wasn't an active session
+  # Detect active session (skill writes .active_session — ground truth)
+  was_active=false
   if [ -f "\$ALEX_DIR/.active_session" ]; then
+    was_active=true
     rm -f "\$ALEX_DIR/.active_session"
   else
     echo "alexandria: try an active session in a new tab — even 5 minutes compounds." > "\$ALEX_DIR/.nudge"
+  fi
+
+  # Session-end event — foreground with short timeout (background gets killed by CC's 5s hook timeout)
+  if [ -n "\$API_KEY" ]; then
+    curl -s --max-time 3 -X POST "\$SERVER/session" \\
+      -H "Authorization: Bearer \$API_KEY" \\
+      -H "Content-Type: application/json" \\
+      -d "{\\"event\\":\\"end\\",\\"platform\\":\\"cc\\",\\"was_active\\":\$was_active}" \\
+      > /dev/null 2>&1
   fi
 
   # Transcript → vault
@@ -244,7 +263,7 @@ if [ "\$MODE" = "session-end" ]; then
     if [ -f "\$machine_signal_file" ] && [ -s "\$machine_signal_file" ]; then
       signal_json=\$(json_escape "\$machine_signal_file")
       if [ -n "\$signal_json" ]; then
-        curl -sf --max-time 10 -X POST "\$SERVER/factory/signal" \\
+        curl -sf --max-time 4 -X POST "\$SERVER/factory/signal" \\
           -H "Authorization: Bearer \$API_KEY" \\
           -H "Content-Type: application/json" \\
           -d "{\\"signal\\":\$signal_json}" -o /dev/null 2>/dev/null &
@@ -255,7 +274,7 @@ if [ "\$MODE" = "session-end" ]; then
     if [ -f "\$feedback_file" ] && [ -s "\$feedback_file" ]; then
       fb_json=\$(json_escape "\$feedback_file")
       if [ -n "\$fb_json" ]; then
-        curl -sf --max-time 10 -X POST "\$SERVER/feedback" \\
+        curl -sf --max-time 4 -X POST "\$SERVER/feedback" \\
           -H "Authorization: Bearer \$API_KEY" \\
           -H "Content-Type: application/json" \\
           -d "{\\"text\\":\$fb_json,\\"context\\":\\"session_end\\"}" -o /dev/null 2>/dev/null &

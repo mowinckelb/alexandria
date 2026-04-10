@@ -349,8 +349,6 @@ Read these files in order (skip any that don't exist):
 5. ~/.alexandria/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
 6. ~/.alexandria/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
 
-Mark this as an active session: write the word "active" to ~/.alexandria/.active_session (the session-end hook reads this to suppress the passive nudge).
-
 Then follow the Blueprint methodology. If the Blueprint doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
 
 ## Feedback
@@ -739,7 +737,7 @@ echo ""
 // Email — Resend (hybrid dependency, API-controllable, free 100/day)
 // ---------------------------------------------------------------------------
 
-async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+async function sendEmail(to: string, subject: string, html: string): Promise<{ ok: boolean; error?: string }> {
   try {
     const resp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -755,10 +753,15 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
       }),
     });
     if (!resp.ok) {
-      console.error('Resend error:', resp.status, await resp.text());
+      const error = `Resend ${resp.status}: ${await resp.text()}`;
+      console.error(error);
+      return { ok: false, error };
     }
+    return { ok: true };
   } catch (err) {
-    console.error('Email send failed:', err);
+    const error = `Email send failed: ${err}`;
+    console.error(error);
+    return { ok: false, error };
   }
 }
 
@@ -1478,23 +1481,17 @@ ${delta}`);
       return c.json({ error: 'Invalid API key' }, 401);
     }
 
-    const body = await c.req.json().catch(() => ({}));
-    const { event, platform, reason, constitution_size, vault_entry_count, domains_count, session_duration, constitution_injected, blueprint_fetched, blueprint_bytes, payload_fresh } = body;
+    const body = await c.req.json().catch(() => ({})) as Record<string, unknown>;
 
-    logEvent('prosumer_session', {
-      event: event || 'unknown',
-      author: account.github_login,
-      platform: platform || 'unknown',
-      ...(reason ? { reason: String(reason) } : {}),
-      constitution_size: String(constitution_size || 0),
-      vault_entry_count: String(vault_entry_count || 0),
-      domains_count: String(domains_count || 0),
-      session_duration: String(session_duration || 0),
-      constitution_injected: String(constitution_injected ?? false),
-      blueprint_fetched: String(blueprint_fetched ?? false),
-      ...(blueprint_bytes ? { blueprint_bytes: String(blueprint_bytes) } : {}),
-      ...(payload_fresh !== undefined ? { payload_fresh: String(payload_fresh) } : {}),
-    });
+    // Pass through all fields as strings — no allowlist, no silent drops
+    const meta: Record<string, string> = { author: account.github_login };
+    for (const [k, v] of Object.entries(body)) {
+      if (v !== undefined && v !== null && v !== '') meta[k] = String(v);
+    }
+    if (!meta.event) meta.event = 'unknown';
+    if (!meta.platform) meta.platform = 'unknown';
+
+    logEvent('prosumer_session', meta);
 
     // Update last_session + constitution_size (used for kin activity verification)
     const accounts = await getAccounts();
@@ -1504,8 +1501,8 @@ ${delta}`);
     );
     if (storeKey) {
       accounts[storeKey].last_session = new Date().toISOString();
-      if (constitution_size && Number(constitution_size) > 0) {
-        accounts[storeKey].constitution_size = Number(constitution_size);
+      if (body.constitution_size && Number(body.constitution_size) > 0) {
+        accounts[storeKey].constitution_size = Number(body.constitution_size);
       }
       await persistAccounts(accounts);
     }
@@ -1551,6 +1548,7 @@ ${delta}`);
     }
 
     logEvent('morning_brief', { author: account.github_login, sent: 'true' });
+    logEvent('prosumer_session', { event: 'auto', author: account.github_login, platform: 'autoloop' });
     return c.json({ ok: true, sent: true });
   });
 
@@ -1969,11 +1967,27 @@ ${delta}`);
     const adminLogin = process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb';
     if (!account || account.github_login !== adminLogin) return c.text('not authorized', 403);
 
-    const { subject } = await c.req.json<{ subject: string }>();
-    if (!subject) return c.text('missing subject', 400);
+    const { to, subject, body } = await c.req.json<{ to?: string; subject: string; body: string }>();
+    if (!subject || !body) return c.text('missing subject or body', 400);
 
-    await sendEmail(FOUNDER_EMAIL, `alexandria. — ${subject}`, '');
-    return c.json({ ok: true });
+    let recipientEmail: string;
+    if (to) {
+      // Look up user by GitHub login
+      const accounts = await loadAccounts<AccountStore>();
+      const target = Object.values(accounts).find(a => a.github_login === to);
+      if (!target?.email) return c.text(`no email found for ${to}`, 404);
+      recipientEmail = target.email;
+    } else {
+      recipientEmail = FOUNDER_EMAIL;
+    }
+
+    const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630;">
+${body.split('\n').map((line: string) => line.trim() ? `<p style="font-size: 1rem; line-height: 1.9; color: #3d3630; margin: 0 0 1rem;">${line}</p>` : '').join('\n')}
+</div>`;
+
+    const result = await sendEmail(recipientEmail, `alexandria. — ${subject}`, html);
+    if (!result.ok) return c.json({ ok: false, sent_to: recipientEmail, error: result.error }, 502);
+    return c.json({ ok: true, sent_to: recipientEmail });
   });
 
   // --- Block — onboarding prompt for new AI tab ---
@@ -2023,7 +2037,7 @@ ${delta}`);
     const esc = (s: unknown) => String(s ?? '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     // All accounts — merge signup data with session activity
-    const sessionUsers = (data.users || []) as { login: string; heartbeats: number; hours_ago: number; last_seen: string; failures: number; platforms: string[] }[];
+    const sessionUsers = (data.users || []) as { login: string; starts: number; end_pct: number; active: number; auto: number; hours_ago: number; last_seen: string; failures: number; platforms: string[] }[];
     const sessionMap = new Map(sessionUsers.map(u => [u.login, u]));
 
     const allAccounts = Object.values(accounts) as Account[];
@@ -2042,12 +2056,14 @@ ${delta}`);
     const anomaly = (data.anomaly || {}) as Record<string, unknown>;
 
     const authorTableRows = allAccounts
-      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
       .map(a => {
         const session = sessionMap.get(a.github_login);
-        const heartbeats = session ? String(session.heartbeats) : '0';
-        return '<tr><td>' + esc(a.github_login) + '</td><td>' + heartbeats + '</td></tr>';
-      }).join('\n');
+        return { account: a, starts: session?.starts ?? 0, end_pct: session?.end_pct ?? 0, active: session?.active ?? 0, auto: session?.auto ?? 0 };
+      })
+      .sort((a, b) => b.starts - a.starts || b.active - a.active)
+      .map(({ account, starts, end_pct, active, auto }) =>
+        '<tr><td>' + esc(account.github_login) + '</td><td>' + starts + '</td><td>' + end_pct + '%</td><td>' + active + '</td><td>' + auto + '</td></tr>'
+      ).join('\n');
 
     // System: only show if something is wrong
     const systemIssues: string[] = [];
@@ -2093,7 +2109,7 @@ ${delta}`);
 </head><body>
 <p class="title">alexandria.</p>
 
-<table><tr><th>author</th><th>heartbeats</th></tr>
+<table><tr><th>author</th><th>starts</th><th>ends</th><th>active</th><th>auto</th></tr>
 ${authorTableRows}
 </table>
 

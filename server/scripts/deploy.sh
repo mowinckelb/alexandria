@@ -51,7 +51,7 @@ HP_SIG=$(sign_content "$HP_TEXT")
 echo "$HP_SIG" | npx wrangler secret put HOOKS_PAYLOAD_SIGNATURE 2>&1 | tail -1
 
 # Verify — full client-side signature check (same flow as the shim)
-sleep 5
+# Secrets need propagation time — retry with backoff
 PUB_KEY=$(grep BLUEPRINT_PUBLIC_KEY wrangler.toml | cut -d'"' -f2)
 
 verify_sig() {
@@ -65,15 +65,22 @@ verify_sig() {
   " 2>/dev/null
 }
 
-# Verify Blueprint
-BP_SIG_HEADER=$(curl -sI "$SERVER_URL/blueprint" -H "Authorization: Bearer $FOUNDER_KEY" | grep -i "x-blueprint-signature" | tr -d '\r' | cut -d' ' -f2)
-BP_VERIFY_TEXT=$(curl -s "$SERVER_URL/blueprint" -H "Authorization: Bearer $FOUNDER_KEY")
-BP_VERIFIED=$(verify_sig "$BP_VERIFY_TEXT" "$BP_SIG_HEADER")
+for attempt in 1 2 3; do
+  sleep $((attempt * 5))
 
-# Verify Hooks Payload
-HP_SIG_HEADER=$(curl -sI "$SERVER_URL/hooks/payload" | grep -i "x-hooks-signature" | tr -d '\r' | cut -d' ' -f2)
-HP_VERIFY_TEXT=$(curl -s "$SERVER_URL/hooks/payload")
-HP_VERIFIED=$(verify_sig "$HP_VERIFY_TEXT" "$HP_SIG_HEADER")
+  BP_SIG_HEADER=$(curl -sI "$SERVER_URL/blueprint" -H "Authorization: Bearer $FOUNDER_KEY" | grep -i "x-blueprint-signature" | tr -d '\r' | cut -d' ' -f2)
+  BP_VERIFY_TEXT=$(curl -s "$SERVER_URL/blueprint" -H "Authorization: Bearer $FOUNDER_KEY")
+  BP_VERIFIED=$(verify_sig "$BP_VERIFY_TEXT" "$BP_SIG_HEADER")
+
+  HP_SIG_HEADER=$(curl -sI "$SERVER_URL/hooks/payload" | grep -i "x-hooks-signature" | tr -d '\r' | cut -d' ' -f2)
+  HP_VERIFY_TEXT=$(curl -s "$SERVER_URL/hooks/payload")
+  HP_VERIFIED=$(verify_sig "$HP_VERIFY_TEXT" "$HP_SIG_HEADER")
+
+  if [ "$BP_VERIFIED" = "VALID" ] && [ "$HP_VERIFIED" = "VALID" ]; then
+    break
+  fi
+  echo "Attempt $attempt: signatures not yet valid, retrying..."
+done
 
 HEALTH=$(curl -s "$SERVER_URL/health" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).status))")
 
@@ -84,11 +91,11 @@ echo "Hooks signature: $HP_VERIFIED"
 echo "Health: $HEALTH"
 
 if [ "$BP_VERIFIED" != "VALID" ]; then
-  echo "ERROR: Blueprint signature verification failed"
+  echo "ERROR: Blueprint signature verification failed after 3 attempts"
   exit 1
 fi
 if [ "$HP_VERIFIED" != "VALID" ]; then
-  echo "ERROR: Hooks payload signature verification failed"
+  echo "ERROR: Hooks payload signature verification failed after 3 attempts"
   exit 1
 fi
 echo ""

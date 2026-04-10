@@ -10,6 +10,10 @@
 
 import { appendEvent, getAllEvents } from './kv.js';
 
+// Metrics epoch — dashboard counts events from this date forward.
+// Set 2026-04-10: new event types (start/end/active/auto) deployed, historical data is noise.
+const METRICS_EPOCH = '2026-04-10T15:00:00.000Z';
+
 // ---------------------------------------------------------------------------
 // Types — intentionally open-ended
 // ---------------------------------------------------------------------------
@@ -113,7 +117,7 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
   const isSmoke = (s: string) => /^(smoke_|test_|debug_|lifecycle-)/.test(s) || s === 'verification' || s === 'github_smoke';
   const isReal = (e: Record<string, string>) =>
     e.e === 'prosumer_session' && !isSmoke(e.event) && !isSmoke(e.platform);
-  const heartbeats = events.filter(e => isReal(e) && (e.event === 'heartbeat' || e.event === 'end')).length;
+  const heartbeats = events.filter(e => isReal(e) && (e.event === 'heartbeat' || e.event === 'end' || e.event === 'active' || e.event === 'auto')).length;
 
   // Time range + staleness
   const firstEvent = events[0]?.t || null;
@@ -147,29 +151,36 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     }
   } catch { /* non-fatal */ }
 
-  // Active users — per-author heartbeats and last seen
-  const authorStats: Record<string, { heartbeats: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
+  // Active users — per-author stats (from epoch forward for clean metrics)
+  const authorStats: Record<string, { starts: number; ends: number; active: number; auto: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
   for (const e of events) {
     if (e.e !== 'prosumer_session' || !e.author) continue;
+    if (e.t < METRICS_EPOCH) continue;
     if (isSmoke(e.event)) continue;
     if (!authorStats[e.author]) {
-      authorStats[e.author] = { heartbeats: 0, last_seen: e.t, failures: 0, platforms: new Set() };
+      authorStats[e.author] = { starts: 0, ends: 0, active: 0, auto: 0, last_seen: e.t, failures: 0, platforms: new Set() };
     }
     const stat = authorStats[e.author];
     if (e.event === 'hook_failure') { stat.failures++; }
-    else if (e.event === 'end' || e.event === 'heartbeat') { stat.heartbeats++; }
+    else if (e.event === 'heartbeat') { stat.starts++; }
+    else if (e.event === 'end') { stat.ends++; if (e.was_active === 'true') stat.active++; }
+    else if (e.event === 'active') { stat.active++; }  // legacy: old prompt-submit events
+    else if (e.event === 'auto') { stat.auto++; }
     if (e.t > stat.last_seen) stat.last_seen = e.t;
     if (e.platform) stat.platforms.add(e.platform);
   }
 
   const users = Object.entries(authorStats).map(([login, stat]) => ({
     login,
-    heartbeats: stat.heartbeats,
+    starts: stat.starts,
+    end_pct: stat.starts > 0 ? Math.round(stat.ends / stat.starts * 100) : 0,
+    active: stat.active,
+    auto: stat.auto,
     last_seen: stat.last_seen,
     hours_ago: Math.round((Date.now() - new Date(stat.last_seen).getTime()) / (1000 * 60 * 60) * 10) / 10,
     failures: stat.failures,
     platforms: [...stat.platforms],
-  })).sort((a, b) => b.hours_ago - a.hours_ago); // most stale first
+  })).sort((a, b) => b.starts - a.starts || a.hours_ago - b.hours_ago);
 
   return {
     status: stale ? 'stale — no events for 24+ hours, possible silent connector failure'
@@ -338,7 +349,7 @@ export async function getUserEvents(login: string): Promise<Record<string, unkno
   }
 
   const allSessions = events.filter(e => e.e === 'prosumer_session');
-  const heartbeatEvents = allSessions.filter(e => e.event === 'end' || e.event === 'heartbeat');
+  const heartbeatEvents = allSessions.filter(e => e.event === 'end' || e.event === 'heartbeat' || e.event === 'active' || e.event === 'auto');
   const failures = allSessions.filter(e => e.event === 'hook_failure');
   const feedback = events.filter(e => e.e === 'user_feedback');
   const signals = events.filter(e => e.e === 'machine_signal');
