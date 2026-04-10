@@ -12,22 +12,29 @@
   
 TERMINOLOGY  
   
-THE FOUR CONSTANTS
+THE SPINE
 
-Four constants. Everything else is a variable.
+Four constants. Everything else is a variable. This is the company. The spine. Everything else — sovereignty, hooks, folder structure, Blueprint, Factory, ontology, notepad, vault, Engine behavior, Library design, session style — is body around this core. Scaffolding, strategy, or feature. Variable. Replaceable. The spine is immutable.
 
-Alexandria has exactly four non-negotiable requirements. These are the only things that are mandated — the only hard-codes in the entire system. Everything else — the Engine, the Blueprint, the Factory, the games, the pulse, the matching, the sessions, the constitution structure, the session style, the Library page design, the machine setup — is hyper-personalizable software that the Author controls.
+1. **Payment.** Economic rights around the file. Not "Author pays us" — the principle of a payment relationship that governs the file and gives Alexandria the right to enforce the other constants. Can be subscription. Can be revenue share from Library earnings. Can be other models. The form is variable. The economic relationship is constant. Without it, we cannot require anything.
 
-1. Payment account. The business exists. A recurring relationship, not a transaction.
-2. Create personal data file. The Author builds a structured representation of how they think. "Personal" = about the person. "Data" = structured, not vibes. "File" = portable, ownable, sovereign. "Create" = the Author makes it, not us.
-3. Continuously update that file with live data. The value is in the liveness. A stale file is a dead file. "Continuously" is the key word — not "update occasionally." "Live data" = current thinking, not a snapshot from six months ago.
-4. Publish at least one shadow visible to other Authors (public or authors visibility). The Author chooses what to publish and what to keep private. What is on their machine is theirs. What is in the Library is what they chose to share. This one shared shadow is the minimum that makes the network function — Authors can see each other, the Engine can match, the Library has content. Everything beyond that is the Author's choice: additional shadows, public access, invite-only, pricing. But at least one shadow is visible to the network. A book that can never be opened is not a book in a library.
+2. **File(s) at `~/.alexandria/`.** A cognitive representation on the Author's machine. One file or many. The address must exist — `~/.alexandria/` is the known location. What's inside — structure, naming, domains, number of files — is entirely variable. The Engine and Author shape it organically. The setup seeds it (genesis). The Engine grows it. No mandated constitution structure, no mandated ontology, no mandated anything inside the folder. Just: cognitive file(s) exist at a known address.
 
-The shadow is the only mandatory artifact. Everything else the Author does is optional — no mandatory constitution structure, no mandatory ontology, no mandatory session frequency, no mandatory pulse or games or works. The Engine adapts to whatever the Author gives it. But the shadow must exist and Alexandria must have access. Without it the Library doesn't exist.
+3. **Network liveness.** The file must stay live in the aggregate. Not a one-time deposit — a continuous stream. Static data does not survive AGI (replication is trivial). Live data does (you cannot replicate what is still being written). The shadow — the Author's published representation in the Library — must be continuously refreshed from the source files. This soft-locks Author liveness: you cannot keep your shadow fresh without keeping your source fresh. Network liveness is the explicit constant. Author liveness is the implied consequence. The mechanism enforces itself.
 
-The constants/variables architecture has a strategic consequence: every Author's customization choices are training signal. How they structure their Library page, how they configure their machine, what session styles they prefer, what they publish, what they keep private — all of this is exploration in a collective learning system. The Factory aggregates it. The Blueprint improves. Authors are running reinforcement learning for Alexandria without knowing it. Alexandria recommends defaults. Authors override them. The overrides are the signal. The more freedom Authors have, the richer the signal. This is why maximum customizability is not generosity — it is the learning architecture.
+4. **Aggregation rights.** Alexandria must be allowed to aggregate the files across all Authors. One file is a personal tool. A million files is a dataset that doesn't exist anywhere else — cognitive, not behavioral. Every other dataset is what people clicked, bought, watched. This is what people believe, how they reason, what they value. The Library, the Factory, the matching, the network effects — all downstream of aggregation rights. Without aggregation, Alexandria is a solo tool. With it, Alexandria is a platform. The aggregation right is in the payment contract.
 
-The aggregate live data — continuously evolving structured representations of how real humans think — is a dataset that doesn't exist anywhere else. Every other dataset is behavioral (what people clicked, bought, watched). This is cognitive (what people believe, how they reason, what they value). The applications are unknowable from here. The asset is the data itself.
+These four constants are derived from first principles, not product features. The previous formulation ("create personal data file," "continuously update," "publish shadow") described implementations. This formulation describes requirements. The implementations change — hooks today, platform-native tomorrow, something else after that. The requirements do not.
+
+**What is NOT a constant:**
+
+- **Sovereignty.** A feature, a competitive advantage, a trust signal, a values statement. Not a structural requirement. The product works if the files live on our servers. It works worse — we lose trust, we lose positioning. But it works. We choose sovereignty because it is right and because it sells. It is strategy, not spine.
+- **Specific folder structure.** `constitution/`, `ontology/`, `vault/`, `notepad.md`, `machine.md` — all scaffolding the Engine creates as the relationship develops. No mandated structure within `~/.alexandria/`. The setup seeds a constitution. The Engine grows the rest.
+- **Hooks.** One delivery mechanism. The constant is "the AI reads and writes the files." Hooks achieve this today. If a better method arrives, hooks are replaced. The requirement is liveness, not hooks.
+- **The Factory.** Cross-Author signal compounding is the best strategy for improving the methodology. It is not a constant. The product works without it — the founder could manually improve the Blueprint. The Factory automates what could be done manually. Best strategy, not spine.
+- **The Blueprint.** Variable methodology. Factory output. Improves with every Author. Thins as models improve. Eventually approaches pure intention. Strategy, not spine.
+
+**The strategic consequence remains:** every Author's customization choices are training signal. How they structure their Library page, how they configure their machine, what session styles they prefer, what they publish, what they keep private — all exploration in a collective learning system. The Factory aggregates it. The Blueprint improves. Authors are running reinforcement learning for Alexandria without knowing it. Alexandria recommends defaults. Authors override them. The overrides are the signal. The more freedom Authors have, the richer the signal. Maximum customizability is not generosity — it is the learning architecture. But this is strategy, not spine. The spine is simpler: payment, file, liveness, aggregation.
 
 -----
 
@@ -95,7 +102,7 @@ MCP — Model Context Protocol. A standard for connecting ai models to external 
   
 THE LAYER OF INTENT  
   
-Alexandria is Greek philosophy infrastructure. A sovereign layer of intent that refines and scales thought.  
+Alexandria is Greek philosophy infrastructure. A sovereign layer of intent that refines and scales thought. In plain English: we help you think better.  
   
 The user's default LLM — Claude, ChatGPT, Gemini, whatever they use — is already doing the heavy lifting. It already knows how the user thinks. It already has memory, preferences, reasoning patterns, accumulated context. The user is already investing time and tokens building up personal context with their primary model. That investment is real and valuable.  
   
@@ -568,7 +575,7 @@ PRIVACY AND AUTHOR CONTROL
   
 The Shadow must behave differently in different contexts, just as humans do. This is social intelligence, not dishonesty.  
   
-Access is the Author's choice. Three visibility levels per shadow: public (anyone can read — the open shelf), authors (any Alexandria Author can read — the members' library), invite (token or promo code only — the private collection). The only hard constraint: at least one shadow must be public or authors (requirement #4 — the minimum that makes the network function). Everything beyond that — how many shadows, what visibility, what price — is the Author's decision. The Engine advises. Alexandria serves what the Author publishes.
+Access is the Author's choice. Three visibility levels per shadow: public (anyone can read — the open shelf), authors (any Alexandria Author can read — the members' library), invite (token or promo code only — the private collection). The only hard constraint: at least one shadow must be public or authors (spine constant #3 — network liveness requires a live published surface, and spine constant #4 — aggregation rights require at least one readable shadow). Everything beyond that — how many shadows, what visibility, what price — is the Author's decision. The Engine advises. Alexandria serves what the Author publishes.
 
 Price is orthogonal to visibility. A public shadow can be free (the hook) or priced for non-Authors. An authors shadow is always accessible to other Authors (free with subscription, billed if not subscribed). An invite shadow has no price — access is granted by the Author via promo codes or tokens, revocable at any time. The Author controls the entire access model.
 
@@ -712,7 +719,7 @@ The Library is a social network where the Machines do the matching. Each Author'
 
 Not "you're similar" (boring). Not prescriptive matching rules. The Machine decides what's most valuable — could be 100% similar, could be 0%, could be 80% similar with one critical disagreement. Max marginal value is the only hard-code. The models decide what that means for each Author.
 
-Infrastructure requirement: Machines must be able to read other Authors' shadows. This is why at least one shadow must be public or authors-visible (requirement #4). The shared shadow is the surface the Machines scan for matching. Invite-only shadows are for the Author's private distribution after the Machine identifies the connection.
+Infrastructure requirement: Machines must be able to read other Authors' shadows. This is why at least one shadow must be public or authors-visible (spine constants #3 and #4 — network liveness and aggregation rights). The shared shadow is the surface the Machines scan for matching. Invite-only shadows are for the Author's private distribution after the Machine identifies the connection.
 
 The matching feeds back into the product. Two matched Authors talk, develop each other's thinking, both constitutions deepen, both shadows get richer, the Library gets more valuable. The social network IS the accretion loop.
 
@@ -720,14 +727,14 @@ The matching feeds back into the product. Two matched Authors talk, develop each
 
 HARD CONSTRAINTS AND HYPER-PERSONAL FLEXIBILITY
 
-Four hard constraints — the only things Alexandria requires:
+Four hard constraints — the spine (see THE SPINE above):
 
-1. Payment account.
-2. Create personal data file.
-3. Continuously update that file with live data.
-4. Publish at least one file to the Library, free to all other Authors.
+1. Payment.
+2. File(s) at `~/.alexandria/`.
+3. Network liveness.
+4. Aggregation rights.
 
-Everything outside these four is flexible. Hyper-personal. The Engine adapts to whatever the Author wants. No mandatory constitution structure. No mandatory ontology. No mandatory session frequency. No mandatory pulse, games, works, or website. No mandatory formats, schedules, or workflows. The Author shapes the experience by talking, the same way they shape any ai conversation. The Engine writes preferences to machine.md so the Author only says it once.
+Everything outside these four is flexible. Hyper-personal. The Engine adapts to whatever the Author wants. No mandatory constitution structure. No mandatory ontology. No mandatory session frequency. No mandatory pulse, games, works, or website. No mandatory formats, schedules, or workflows. No mandatory folder structure within `~/.alexandria/`. The Author shapes the experience by talking, the same way they shape any ai conversation. The Engine writes preferences to machine.md so the Author only says it once.
 
 The soft defaults exist because current models need structure to avoid drift. But they are held loosely. If an Author wants something different, they say so. The system should never be the reason an Author leaves. The only reasons to leave: can't be bothered to find 5 kin for free access, can't be bothered to pay $10/month. Not "the product doesn't fit how I work" — that should never happen because the product fits however the Author wants it to fit.
 
