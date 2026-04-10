@@ -9,7 +9,7 @@ import { Hono } from 'hono';
 import { registerProsumerRoutes, extractApiKey, findByApiKey, updateAccountBilling, getBillingSummary, runFollowupCheck, runEngagementCheck, runHealthDigest } from './prosumer.js';
 import { registerBillingRoutes, settleMonthlyTabs } from './billing.js';
 import { registerLibraryRoutes } from './library.js';
-import { getAnalytics, getEventLog, getDashboard, getUserEvents, logEvent, archiveFactorySignals } from './analytics.js';
+import { getAnalytics, getEventLog, getDashboard, getUserEvents, logEvent, flushEvents, archiveFactorySignals } from './analytics.js';
 import { setKV, getKV } from './kv.js';
 
 // ---------------------------------------------------------------------------
@@ -31,6 +31,9 @@ function initEnv(env: Record<string, unknown>) {
 app.use('*', async (c, next) => {
   initEnv(c.env as Record<string, unknown>);
   await next();
+  // Flush pending event writes — without this, KV writes from logEvent()
+  // are killed when the Worker isolate exits after sending the response.
+  c.executionCtx.waitUntil(flushEvents());
 });
 
 // Security headers — all responses
@@ -301,6 +304,7 @@ export default {
     initEnv(env);
     // Daily cron (0 9 * * *) + monthly settlement (0 2 1 * *)
     // Settlement + engagement are idempotent so running on every cron trigger is safe
-    ctx.waitUntil(Promise.all([runFollowupCheck(), runEngagementCheck(), runHealthDigest(), settleMonthlyTabs(), archiveFactorySignals()]))
+    await Promise.all([runFollowupCheck(), runEngagementCheck(), runHealthDigest(), settleMonthlyTabs(), archiveFactorySignals()]);
+    ctx.waitUntil(flushEvents());
   },
 };

@@ -11,8 +11,8 @@
 import { appendEvent, getAllEvents } from './kv.js';
 
 // Metrics epoch — dashboard counts events from this date forward.
-// Set 2026-04-10T20:32: clean slate after ends fix deployed.
-const METRICS_EPOCH = '2026-04-10T20:32:00.000Z';
+// Set 2026-04-10T21:30: clean slate after flushEvents fix verified.
+const METRICS_EPOCH = '2026-04-10T21:30:00.000Z';
 
 // ---------------------------------------------------------------------------
 // Types — intentionally open-ended
@@ -43,9 +43,13 @@ const summary: Summary = {
 // Core functions
 // ---------------------------------------------------------------------------
 
+// Pending JSONL lines — collected during request, flushed as one KV write.
+// Batching avoids read-modify-write races between concurrent appends.
+let pendingLines: string[] = [];
+
 /**
- * Log an event. One JSONL line to KV, update in-memory summary.
- * Fire-and-forget — never blocks the tool response.
+ * Log an event. One JSONL line queued in memory, update in-memory summary.
+ * KV write happens in flushEvents() — call via ctx.waitUntil() to ensure completion.
  */
 export function logEvent(type: string, meta?: EventMeta): void {
   const now = new Date().toISOString();
@@ -59,10 +63,19 @@ export function logEvent(type: string, meta?: EventMeta): void {
 
   // JSONL entry — flat, open-ended
   const entry: Record<string, string> = { t: now, e: type, ...meta };
-  const line = JSON.stringify(entry) + '\n';
+  pendingLines.push(JSON.stringify(entry) + '\n');
+}
 
-  appendEvent(line).catch((err) => {
-    console.error('[analytics] Failed to append event:', err);
+/**
+ * Flush all pending event lines as one KV write. Call via ctx.waitUntil(flushEvents())
+ * to ensure KV writes complete before the Worker isolate is killed.
+ * Single write per flush eliminates read-modify-write races between events.
+ */
+export function flushEvents(): Promise<void> {
+  if (pendingLines.length === 0) return Promise.resolve();
+  const batch = pendingLines.splice(0).join('');
+  return appendEvent(batch).catch((err) => {
+    console.error('[analytics] Failed to flush events:', err);
   });
 }
 
