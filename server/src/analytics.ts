@@ -8,7 +8,7 @@
  * In-memory summary for fast /analytics reads (warm between requests).
  */
 
-import { appendEvent, getAllEvents } from './kv.js';
+import { appendEvent, getAllEvents, getRecentDaysEvents } from './kv.js';
 
 // Metrics epoch — dashboard counts events from this date forward.
 // Set 2026-04-10T21:30: clean slate after flushEvents fix verified.
@@ -104,7 +104,7 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
   let events: Record<string, string>[] = [];
   let parseErrors = 0;
   try {
-    const raw = await getAllEvents();
+    const raw = await getRecentDaysEvents(30);
     if (!raw) return { status: 'no data', message: 'No events logged yet.' };
     const lines = raw.trim().split('\n').filter(Boolean);
     for (const line of lines) {
@@ -165,19 +165,24 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
   } catch { /* non-fatal */ }
 
   // Active users — per-author stats (from epoch forward for clean metrics)
-  const authorStats: Record<string, { starts: number; ends: number; active: number; auto: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
+  // Dashboard dimensions:
+  // - starts: hook SessionStart heartbeat events
+  // - ends: hook SessionEnd end events
+  // - active: /a sessions (explicit event=active). Legacy fallback: end with was_active=true
+  // - auto: autoloop events
+  const authorStats: Record<string, { starts: number; ends: number; active_starts: number; active_legacy: number; auto: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
   for (const e of events) {
     if (e.e !== 'prosumer_session' || !e.author) continue;
     if (e.t < METRICS_EPOCH) continue;
     if (isSmoke(e.event)) continue;
     if (!authorStats[e.author]) {
-      authorStats[e.author] = { starts: 0, ends: 0, active: 0, auto: 0, last_seen: e.t, failures: 0, platforms: new Set() };
+      authorStats[e.author] = { starts: 0, ends: 0, active_starts: 0, active_legacy: 0, auto: 0, last_seen: e.t, failures: 0, platforms: new Set() };
     }
     const stat = authorStats[e.author];
     if (e.event === 'hook_failure') { stat.failures++; }
     else if (e.event === 'heartbeat') { stat.starts++; }
-    else if (e.event === 'end') { stat.ends++; if (e.was_active === 'true') stat.active++; }
-    else if (e.event === 'active') { stat.active++; }  // legacy: old prompt-submit events
+    else if (e.event === 'end') { stat.ends++; if (e.was_active === 'true') stat.active_legacy++; }
+    else if (e.event === 'active') { stat.active_starts++; }
     else if (e.event === 'auto') { stat.auto++; }
     if (e.t > stat.last_seen) stat.last_seen = e.t;
     if (e.platform) stat.platforms.add(e.platform);
@@ -188,7 +193,8 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     starts: stat.starts,
     ends: stat.ends,
     end_pct: stat.starts > 0 ? Math.round(stat.ends / stat.starts * 100) : 0,
-    active: stat.active,
+    active: Math.max(stat.active_starts, stat.active_legacy),
+    active_legacy: stat.active_legacy,
     auto: stat.auto,
     last_seen: stat.last_seen,
     hours_ago: Math.round((Date.now() - new Date(stat.last_seen).getTime()) / (1000 * 60 * 60) * 10) / 10,
@@ -349,7 +355,7 @@ async function getLibraryMetrics(events: Record<string, string>[]): Promise<Reco
 export async function getUserEvents(login: string): Promise<Record<string, unknown>> {
   let events: Record<string, string>[] = [];
   try {
-    const raw = await getAllEvents();
+    const raw = await getRecentDaysEvents(30);
     if (!raw) return { status: 'no data', author: login };
     const lines = raw.trim().split('\n').filter(Boolean);
     for (const line of lines) {
@@ -430,7 +436,7 @@ export async function archiveFactorySignals(): Promise<{ archived: number }> {
 
 export async function getRecentEvents(n: number = 200): Promise<string> {
   try {
-    const full = await getAllEvents();
+    const full = await getRecentDaysEvents(7);
     if (!full) return '';
     const lines = full.trim().split('\n');
     const recent = lines.slice(-n);

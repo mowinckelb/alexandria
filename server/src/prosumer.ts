@@ -847,7 +847,7 @@ export async function runFollowupCheck(): Promise<void> {
     await kv.put('cron:followup', JSON.stringify({
       t: new Date().toISOString(),
       followups_sent: sent,
-    }));
+    }), { expirationTtl: 30 * 24 * 60 * 60 });
   } catch { /* non-fatal */ }
 }
 
@@ -956,7 +956,7 @@ export async function runEngagementCheck(): Promise<void> {
     await kv.put('cron:engagement', JSON.stringify({
       t: new Date().toISOString(),
       engagement_sent: sent,
-    }));
+    }), { expirationTtl: 30 * 24 * 60 * 60 });
   } catch { /* non-fatal */ }
 }
 
@@ -979,10 +979,8 @@ export async function runHealthDigest(force = false): Promise<void> {
 
     // KV
     try {
-      await kv.put('.digest-probe', 'ok');
-      const val = await kv.get('.digest-probe');
-      await kv.delete('.digest-probe');
-      if (val !== 'ok') escalate('sprint');
+      const val = await kv.get('accounts:encrypted'); // read-only probe — no write ops burned
+      if (val === null) escalate('sprint'); // encrypted accounts should always exist
     } catch {
       escalate('sprint');
     }
@@ -1001,7 +999,7 @@ export async function runHealthDigest(force = false): Promise<void> {
       if (!cachedBp || cachedBp.length < 100) {
         const fresh = SHARED_CONTEXT + '\n' + EDITOR_INSTRUCTIONS;
         if (fresh.length > 100) {
-          await kv.put('blueprint:cached', fresh);
+          await kv.put('blueprint:cached', fresh, { expirationTtl: 3600 });
           healed++;
         } else {
           escalate('sprint');
@@ -1047,7 +1045,7 @@ export async function runHealthDigest(force = false): Promise<void> {
 
     // Cron marker (proves the job ran)
     try {
-      await kv.put('cron:health_digest', JSON.stringify({ t: new Date().toISOString(), healed, urgency }));
+      await kv.put('cron:health_digest', JSON.stringify({ t: new Date().toISOString(), healed, urgency }), { expirationTtl: 30 * 24 * 60 * 60 });
     } catch { /* non-fatal */ }
 
     if (!urgency && !force) return;
@@ -1277,8 +1275,8 @@ export function registerProsumerRoutes(app: Hono) {
     } else {
       blueprint = assembleBaseBlueprint();
       blueprintHash = createHash('sha256').update(blueprint).digest('hex').slice(0, 16);
-      kv.put(cacheKey, blueprint, { expirationTtl: 300 }).catch(e => console.error('[blueprint] Cache write failed:', e));
-      kv.put(cacheHashKey, blueprintHash, { expirationTtl: 300 }).catch(e => console.error('[blueprint] Cache hash write failed:', e));
+      kv.put(cacheKey, blueprint, { expirationTtl: 3600 }).catch(e => console.error('[blueprint] Cache write failed:', e));
+      kv.put(cacheHashKey, blueprintHash, { expirationTtl: 3600 }).catch(e => console.error('[blueprint] Cache hash write failed:', e));
       logEvent('blueprint_cache_miss', {});
     }
 
@@ -1598,7 +1596,7 @@ ${delta}`);
         t: new Date().toISOString(),
         author: account.github_login,
         signal: signal.slice(0, 10000),
-      }));
+      }), { expirationTtl: 30 * 24 * 60 * 60 });
 
       logEvent('machine_signal', { length: String(signal.length) });
 

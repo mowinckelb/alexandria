@@ -102,15 +102,36 @@ export async function appendEvent(line: string): Promise<void> {
   const kv = getKV();
   const key = todayKey();
   const existing = await kv.get(key) || '';
-  await kv.put(key, existing + line);
+  await kv.put(key, existing + line, { expirationTtl: 60 * 24 * 60 * 60 }); // 60-day TTL
 }
 
+/**
+ * Get events for the last N days (default 30). Avoids reading all historical keys.
+ * Each day = 1 KV read. 30 days = 30 reads instead of unbounded.
+ */
+export async function getRecentDaysEvents(days: number = 30): Promise<string> {
+  const kv = getKV();
+
+  // Generate keys oldest→newest, fetch all in parallel
+  const keys: string[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    keys.push(`events:${d.toISOString().split('T')[0]}`);
+  }
+
+  const results = await Promise.all(keys.map(k => kv.get(k)));
+  return results.filter(Boolean).join('');
+}
+
+/**
+ * Get ALL events across all time. Only use for explicit data export.
+ * Prefer getRecentDaysEvents() for dashboard/analytics.
+ */
 export async function getAllEvents(): Promise<string> {
   const kv = getKV();
   const keys = await kv.list({ prefix: 'events:' });
   if (keys.keys.length === 0) return '';
 
-  // Sort by key (date) to get chronological order
   const sorted = keys.keys.sort((a, b) => a.name.localeCompare(b.name));
   const chunks: string[] = [];
 

@@ -109,8 +109,7 @@ app.get('/health', async (c) => {
   try {
     const env = c.env as Record<string, unknown>;
     const kv = env.DATA as KVNamespace;
-    await kv.put('.health-probe', 'ok');
-    await kv.delete('.health-probe');
+    await kv.get('accounts:encrypted'); // read-only probe — no write ops burned
     components.kv = 'ok';
   } catch { components.kv = 'error'; }
 
