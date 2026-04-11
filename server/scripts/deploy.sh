@@ -23,7 +23,7 @@ sleep 2
 # Bust Blueprint KV cache so the signing fetch gets the fresh version
 KV_NS=$(grep -A1 'binding = "DATA"' wrangler.toml | grep id | cut -d'"' -f2)
 for key in blueprint:base:cached blueprint:base:hash blueprint:cached; do
-  npx wrangler kv key delete "$key" --namespace-id="$KV_NS" --force 2>/dev/null || true
+  echo y | npx wrangler kv key delete "$key" --namespace-id="$KV_NS" 2>/dev/null || true
 done
 
 echo "Signing Blueprint + Hooks Payload..."
