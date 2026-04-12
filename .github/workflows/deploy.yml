@@ -26,7 +26,7 @@ jobs:
         run: cd server && npx wrangler deploy 2>&1 | grep -E "Uploaded|Deployed|Version"
 
       - name: Wait for deployment propagation
-        run: sleep 5
+        run: sleep 10
 
       - name: Bust Blueprint cache
         env:
@@ -88,8 +88,8 @@ jobs:
           echo "$HP_SIG" | npx wrangler secret put HOOKS_PAYLOAD_SIGNATURE 2>&1 | tail -1
 
           # Verify with backoff (single fetch per artifact using -D for headers)
-          for attempt in 1 2 3; do
-            sleep $((attempt * 5))
+          for attempt in 1 2 3 4; do
+            sleep $((attempt * 10))
 
             bp_hdr=$(mktemp)
             BP_VERIFY_TEXT=$(curl -s -D "$bp_hdr" "$SERVER_URL/blueprint" -H "Authorization: Bearer $ALEXANDRIA_API_KEY")
