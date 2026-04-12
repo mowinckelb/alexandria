@@ -11,8 +11,8 @@
 import { appendEvent, getAllEvents, getRecentDaysEvents } from './kv.js';
 
 // Metrics epoch — dashboard counts events from this date forward.
-// Set 2026-04-10T21:30: clean slate after flushEvents fix verified.
-const METRICS_EPOCH = '2026-04-10T21:30:00.000Z';
+// Set 2026-04-11T16:58:53.562Z: manual clean-slate reset requested by founder.
+const METRICS_EPOCH = '2026-04-11T16:58:53.562Z';
 
 // ---------------------------------------------------------------------------
 // Types — intentionally open-ended
@@ -165,48 +165,149 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
   } catch { /* non-fatal */ }
 
   // Active users — per-author stats (from epoch forward for clean metrics)
-  // Dashboard dimensions:
-  // - starts: hook SessionStart heartbeat events
-  // - ends: hook SessionEnd end events
-  // - active: /a sessions (explicit event=active). Legacy fallback: end with was_active=true
-  // - auto: autoloop events
-  const authorStats: Record<string, { starts: number; ends: number; active_starts: number; active_legacy: number; auto: number; last_seen: string; failures: number; platforms: Set<string> }> = {};
+  // Deterministic model with session_id sets (plus legacy fallback when session_id is absent).
+  const authorStats: Record<string, {
+    start_ids: Set<string>;
+    end_ids: Set<string>;
+    active_ids: Set<string>;
+    active_from_end_ids: Set<string>;
+    orphan_end_ids: Set<string>;
+    recovered_end_ids: Set<string>;
+    legacy_starts: number;
+    legacy_ends: number;
+    legacy_active: number;
+    auto_attempt: number;
+    auto_legacy: number;
+    failures: number;
+    unknown: number;
+    last_seen: string;
+    platforms: Set<string>;
+  }> = {};
+  let startsWithId = 0;
+  let startsWithoutId = 0;
+  let endsWithId = 0;
+  let endsWithoutId = 0;
   for (const e of events) {
     if (e.e !== 'prosumer_session' || !e.author) continue;
     if (e.t < METRICS_EPOCH) continue;
     if (isSmoke(e.event)) continue;
     if (!authorStats[e.author]) {
-      authorStats[e.author] = { starts: 0, ends: 0, active_starts: 0, active_legacy: 0, auto: 0, last_seen: e.t, failures: 0, platforms: new Set() };
+      authorStats[e.author] = {
+        start_ids: new Set(),
+        end_ids: new Set(),
+        active_ids: new Set(),
+        active_from_end_ids: new Set(),
+        orphan_end_ids: new Set(),
+        recovered_end_ids: new Set(),
+        legacy_starts: 0,
+        legacy_ends: 0,
+        legacy_active: 0,
+        auto_attempt: 0,
+        auto_legacy: 0,
+        failures: 0,
+        unknown: 0,
+        last_seen: e.t,
+        platforms: new Set(),
+      };
     }
     const stat = authorStats[e.author];
+    const sid = (e.session_id || '').trim();
+    const hasSid = sid.length > 0 && sid !== 'unknown' && sid !== 'null';
     if (e.event === 'hook_failure') { stat.failures++; }
-    else if (e.event === 'heartbeat') { stat.starts++; }
-    else if (e.event === 'end') { stat.ends++; if (e.was_active === 'true') stat.active_legacy++; }
-    else if (e.event === 'active') { stat.active_starts++; }
-    else if (e.event === 'auto') { stat.auto++; }
+    else if (e.event === 'heartbeat') {
+      if (hasSid) { stat.start_ids.add(sid); startsWithId++; }
+      else { stat.legacy_starts++; startsWithoutId++; }
+    }
+    else if (e.event === 'end') {
+      if (hasSid) {
+        stat.end_ids.add(sid);
+        endsWithId++;
+        if (!stat.start_ids.has(sid)) stat.orphan_end_ids.add(sid);
+        if (e.was_active === 'true') stat.active_from_end_ids.add(sid);
+        if (e.recovered === 'true') stat.recovered_end_ids.add(sid);
+      } else {
+        stat.legacy_ends++;
+        endsWithoutId++;
+        if (e.was_active === 'true') stat.legacy_active++;
+      }
+    }
+    else if (e.event === 'active') {
+      if (hasSid) stat.active_ids.add(sid);
+      else stat.legacy_active++;
+    }
+    else if (e.event === 'auto_attempt') { stat.auto_attempt++; }
+    else if (e.event === 'auto') { stat.auto_legacy++; }
+    else if (e.event === 'unknown') { stat.unknown++; }
     if (e.t > stat.last_seen) stat.last_seen = e.t;
     if (e.platform) stat.platforms.add(e.platform);
   }
 
-  const users = Object.entries(authorStats).map(([login, stat]) => ({
-    login,
-    starts: stat.starts,
-    ends: stat.ends,
-    end_pct: stat.starts > 0 ? Math.round(stat.ends / stat.starts * 100) : 0,
-    active: Math.max(stat.active_starts, stat.active_legacy),
-    active_legacy: stat.active_legacy,
-    auto: stat.auto,
-    last_seen: stat.last_seen,
-    hours_ago: Math.round((Date.now() - new Date(stat.last_seen).getTime()) / (1000 * 60 * 60) * 10) / 10,
-    failures: stat.failures,
-    platforms: [...stat.platforms],
-  })).sort((a, b) => b.starts - a.starts || a.hours_ago - b.hours_ago);
+  const users = Object.entries(authorStats).map(([login, stat]) => {
+    const starts = stat.start_ids.size + stat.legacy_starts;
+    const ends = stat.end_ids.size + stat.legacy_ends;
+    const active_started = stat.active_ids.size + stat.legacy_active;
+    const active_completed = stat.active_from_end_ids.size + stat.legacy_active;
+    const open_sessions = Math.max(stat.start_ids.size - stat.end_ids.size, 0);
+    // "auto" on the dashboard means autoloop trigger attempts (plumbing truth).
+    // Legacy fallback: before auto_attempt existed, only auto (brief-sent) was logged.
+    const auto = stat.auto_attempt > 0 ? stat.auto_attempt : stat.auto_legacy;
+    return {
+      login,
+      starts,
+      ends,
+      end_pct: starts > 0 ? Math.round(ends / starts * 100) : 0,
+      active: active_completed,
+      active_started,
+      active_completed,
+      auto,
+      open_sessions,
+      recovered_ends: stat.recovered_end_ids.size,
+      orphan_ends: stat.orphan_end_ids.size,
+      unknown_events: stat.unknown,
+      last_seen: stat.last_seen,
+      hours_ago: Math.round((Date.now() - new Date(stat.last_seen).getTime()) / (1000 * 60 * 60) * 10) / 10,
+      failures: stat.failures,
+      platforms: [...stat.platforms],
+    };
+  }).sort((a, b) => b.starts - a.starts || a.hours_ago - b.hours_ago);
+
+  const verification = {
+    session_id_coverage: {
+      starts_with_id: startsWithId,
+      starts_without_id: startsWithoutId,
+      ends_with_id: endsWithId,
+      ends_without_id: endsWithoutId,
+    },
+    open_sessions_total: users.reduce((n, u) => n + u.open_sessions, 0),
+    orphan_ends_total: users.reduce((n, u) => n + u.orphan_ends, 0),
+    recovered_ends_total: users.reduce((n, u) => n + u.recovered_ends, 0),
+    active_started_total: users.reduce((n, u) => n + (u.active_started || 0), 0),
+    active_completed_total: users.reduce((n, u) => n + (u.active_completed || 0), 0),
+    unknown_events_total: users.reduce((n, u) => n + u.unknown_events, 0),
+  };
+
+  const invariantIssues: string[] = [];
+  if (startsWithoutId > 0) invariantIssues.push(`starts_without_session_id=${startsWithoutId}`);
+  if (endsWithoutId > 0) invariantIssues.push(`ends_without_session_id=${endsWithoutId}`);
+  if (verification.orphan_ends_total > 0) invariantIssues.push(`orphan_ends=${verification.orphan_ends_total}`);
+  if (verification.unknown_events_total > 0) invariantIssues.push(`unknown_events=${verification.unknown_events_total}`);
+
+  const status = invariantIssues.length > 0
+    ? `degraded — lifecycle invariant failure (${invariantIssues.join(', ')})`
+    : 'ok — lifecycle invariants satisfied';
 
   return {
-    status: stale ? 'stale — no events for 24+ hours, possible silent connector failure'
-      : parseErrors > 0 ? `ok — ${parseErrors} corrupted log lines skipped`
-      : 'ok',
+    status,
     time_range: { first: firstEvent, last: lastEvent, hours_since_last: hoursSinceLastEvent },
+    telemetry_health: {
+      stale,
+      parse_errors: parseErrors,
+      message: stale
+        ? 'no events for 24+ hours, possible silent connector failure'
+        : parseErrors > 0
+          ? `${parseErrors} corrupted log lines skipped`
+          : 'ok',
+    },
     cron: cronStatus,
     users,
     total_events: events.length,
@@ -220,6 +321,7 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
       hours_since_last_session: hoursSinceLastSession,
       smoke_failures_24h: smokeFailures24h,
     },
+    verification,
     library: await getLibraryMetrics(events),
     factory: await getFactoryStatus(events),
     _events: events,

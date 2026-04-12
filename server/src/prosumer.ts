@@ -282,13 +282,15 @@ if [ "$MODE" = "session-start" ]; then
 elif [ "$MODE" = "session-end" ]; then
   # Fire end event IMMEDIATELY — foreground, before stdin read blocks on Windows
   was_active=false
+  session_id=$(cat "$ALEX_DIR/.cc_session_id" 2>/dev/null)
+  [ -z "$session_id" ] && session_id="unknown"
   [ -f "$ALEX_DIR/.active_session" ] && was_active=true && rm -f "$ALEX_DIR/.active_session"
   event_sent=false
   if [ -n "$API_KEY" ]; then
     curl -sf --max-time 3 -X POST "$SERVER/session" \
       -H "Authorization: Bearer $API_KEY" \
       -H "Content-Type: application/json" \
-      -d "{\"event\":\"end\",\"platform\":\"cc\",\"was_active\":$was_active}" \
+      -d "{\"event\":\"end\",\"platform\":\"cc\",\"session_id\":\"$session_id\",\"was_active\":$was_active}" \
       > /dev/null 2>&1 && event_sent=true
   fi
 
@@ -389,6 +391,20 @@ schedule: daily 03:00
 ---
 
 You are Alexandria's autonomous Engine. Run without the Author present.
+
+## Session signal (run silently before anything else)
+
+Before processing anything, send an autoloop attempt event:
+
+\`\`\`bash
+if [ -f ~/.alexandria/.api_key ]; then
+  curl -s -X POST https://mcp.mowinckel.ai/session \
+    -H "Authorization: Bearer $(cat ~/.alexandria/.api_key)" \
+    -H "Content-Type: application/json" \
+    -d '{"event":"auto_attempt","platform":"autoloop"}' \
+    > /dev/null 2>&1
+fi
+\`\`\`
 
 Read ~/.alexandria/constitution/, ~/.alexandria/ontology/, ~/.alexandria/notepad.md, ~/.alexandria/machine.md, and ~/.alexandria/feedback.md.
 
@@ -2052,7 +2068,20 @@ ${body.split('\n').map((line: string) => line.trim() ? `<p style="font-size: 1re
     const esc = (s: unknown) => String(s ?? '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     // All accounts — merge signup data with session activity
-    const sessionUsers = (data.users || []) as { login: string; starts: number; ends: number; end_pct: number; active: number; auto: number; hours_ago: number; last_seen: string; failures: number; platforms: string[] }[];
+    const sessionUsers = (data.users || []) as {
+      login: string;
+      starts: number;
+      ends: number;
+      end_pct: number;
+      active: number;
+      active_started?: number;
+      active_completed?: number;
+      auto: number;
+      hours_ago: number;
+      last_seen: string;
+      failures: number;
+      platforms: string[];
+    }[];
     const sessionMap = new Map(sessionUsers.map(u => [u.login, u]));
 
     const allAccounts = Object.values(accounts) as Account[];
@@ -2063,43 +2092,15 @@ ${body.split('\n').map((line: string) => line.trim() ? `<p style="font-size: 1re
       `<tr><td>${esc(job)}</td><td>${info?.t ? new Date(info.t).toLocaleString() : 'never'}</td></tr>`
     ).join('\n');
 
-    // Errors
-    const errors = (data.errors || {}) as Record<string, number>;
-    const errorItems = Object.entries(errors).filter(([, v]) => v > 0).map(([k, v]) => `<li>${esc(k)}: ${v}</li>`).join('\n');
-
-    // Anomaly
-    const anomaly = (data.anomaly || {}) as Record<string, unknown>;
-
     const authorTableRows = allAccounts
       .map(a => {
         const session = sessionMap.get(a.github_login);
-        return { account: a, starts: session?.starts ?? 0, ends: session?.ends ?? 0, end_pct: session?.end_pct ?? 0, active: session?.active ?? 0, auto: session?.auto ?? 0 };
+        return { account: a, starts: session?.starts ?? 0, ends: session?.ends ?? 0, active: session?.active ?? 0, auto: session?.auto ?? 0 };
       })
       .sort((a, b) => b.starts - a.starts || b.active - a.active)
-      .map(({ account, starts, ends, end_pct, active, auto }) =>
-        '<tr><td>' + esc(account.github_login) + '</td><td>' + starts + '</td><td>' + ends + ' (' + end_pct + '%)</td><td>' + active + '</td><td>' + auto + '</td></tr>'
+      .map(({ account, starts, ends, active, auto }) =>
+        '<tr><td>' + esc(account.github_login) + '</td><td>' + starts + '</td><td>' + ends + '</td><td>' + active + '</td><td>' + auto + '</td></tr>'
       ).join('\n');
-
-    // System: only show if something is wrong
-    const systemIssues: string[] = [];
-    if (data.status !== 'ok') systemIssues.push(String(data.status));
-    for (const [k, v] of Object.entries((data.liveness || {}) as Record<string, string>)) {
-      if (v !== 'ok') systemIssues.push(k + ': ' + v);
-    }
-    const systemOk = systemIssues.length === 0;
-
-    const errorLine = Object.entries(errors).filter(([, v]) => v > 0).map(([k, v]) => k + ': ' + v).join(' · ');
-
-    // Library stats
-    const lib = (data.library || {}) as Record<string, unknown>;
-    const libAuthors = (lib.total_authors || 0) as number;
-    const libShadows = (lib.total_shadows || 0) as number;
-    const libWorks = (lib.total_works || 0) as number;
-    const libQuizzes = (lib.total_quizzes || 0) as number;
-    const libCompletions = (lib.total_quiz_completions || 0) as number;
-
-    const timestamp = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
     return c.html(`<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2119,16 +2120,12 @@ ${body.split('\n').map((line: string) => line.trim() ? `<p style="font-size: 1re
   th, td { text-align: left; padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid #e8e3da; font-size: 0.95rem; font-weight: 400; }
   th { color: #bbb4aa; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
   .muted { color: #8a8078; font-size: 0.9rem; }
-  .footer { font-size: 0.72rem; color: #bbb4aa; margin-top: 3rem; letter-spacing: 0.05em; }
 </style>
 </head><body>
 <p class="title">alexandria.</p>
-
-<table><tr><th>author</th><th>starts</th><th>ends</th><th>active</th><th>auto</th></tr>
+<table style="margin-top:1rem"><tr><th>author</th><th>start</th><th>end</th><th>active</th><th>auto</th></tr>
 ${authorTableRows}
 </table>
-
-<p class="footer">${timestamp}</p>
 </body></html>`);
   });
 }
