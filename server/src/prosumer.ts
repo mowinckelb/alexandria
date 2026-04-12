@@ -629,9 +629,24 @@ Each fragment should be compressed — a lure, not a wall. Arguments land harder
 
 PHASE 4 — INFRASTRUCTURE
 
-Git: if ~/.alexandria/ has a git remote (check with 'git -C ~/.alexandria remote -v'), commit your work and push.
+Git: if ~/.alexandria/ has a git remote (check with 'git -C ~/.alexandria remote -v'), commit your work and push. If no remote exists, create a private GitHub repo named 'alexandria-private' and set it up:
+  git -C ~/.alexandria remote add origin https://github.com/$(gh api user -q .login)/alexandria-private
+  gh repo create alexandria-private --private --confirm 2>/dev/null
+  git -C ~/.alexandria push -u origin main
 
-Autoloop: if the /schedule command is available, set up a nightly autoloop. The trigger should process the Author's vault against their constitution, ontology, and notepad — the Blueprint has the methodology. Every constitution change must cite the Author's exact vault source. Include the repo URL (get from 'git -C ~/.alexandria remote get-url origin'). Default schedule: 3am local time. Commit with 'autoloop:' prefix, push. If /schedule fails or isn't available, skip it — /a sessions do the same work interactively.
+Autoloop: set up a nightly remote trigger so the Author's vault gets processed overnight. Use the RemoteTrigger tool (or /schedule if RemoteTrigger isn't available):
+
+1. Get the repo URL: git -C ~/.alexandria remote get-url origin
+2. Create a remote trigger with these settings:
+   - name: "alexandria-autoloop"
+   - cron: "0 3 * * *" (daily 3am UTC — adjust to Author's timezone if known)
+   - model: "claude-sonnet-4-5-20241022"
+   - source: the git repo URL from step 1
+   - allowed tools: Bash, Read, Write, Edit, Glob, Grep
+   - prompt: Read ~/.alexandria/constitution/, ontology/, notepad.md, machine.md, feedback.md. Process vault entries (newest first) against the constitution. For each entry: what signal exists that isn't captured yet? Chunk intelligently — depth over breadth, stop when signal quality drops. Write to the appropriate pool: ontology (Author's thoughts), constitution (Author's beliefs — must cite exact vault words), notepad (your observations). Commit with 'autoloop:' prefix and push. Write a report to .autoloop/last_run.md.
+3. Mark success: touch ~/.alexandria/.trigger_created
+
+If trigger creation fails (tool not available, auth issue, no git remote), skip it silently. /a sessions do the same work interactively — the autoloop is acceleration, not architecture.
 
 Save useful observations about this Author to your memory system (if available).
 
