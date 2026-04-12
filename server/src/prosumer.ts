@@ -1830,7 +1830,7 @@ ${delta}`);
     if (!delta || typeof delta !== 'string') return c.json({ error: 'Missing delta' }, 400);
 
     const kv = getKV();
-    await kv.put('factory:delta', delta.slice(0, 10000));
+    await kv.put('factory:delta', delta.slice(0, 10000), { expirationTtl: 30 * 24 * 60 * 60 });
     logEvent('factory_delta_written', { length: String(delta.length), source: 'meta_trigger' });
     return c.json({ ok: true, length: Math.min(delta.length, 10000) });
   });
