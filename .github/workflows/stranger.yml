@@ -1,12 +1,14 @@
 name: Stranger
 on:
-  push:
-    branches: [main]
-    paths: ['server/src/**', 'server/test/**']
+  workflow_run:
+    workflows: [Deploy]
+    types: [completed]
   workflow_dispatch: {}
 
 jobs:
   stranger:
+    # Run after Deploy succeeds, or always on manual trigger
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     timeout-minutes: 5
     strategy:
       matrix:

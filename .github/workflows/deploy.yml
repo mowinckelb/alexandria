@@ -1,0 +1,113 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+    paths: ['server/src/**', 'server/wrangler.toml', 'server/package.json']
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install server deps
+        run: cd server && npm ci
+
+      - name: Type check
+        run: cd server && npx tsc --noEmit
+
+      - name: Deploy to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: cd server && npx wrangler deploy 2>&1 | grep -E "Uploaded|Deployed|Version"
+
+      - name: Wait for deployment propagation
+        run: sleep 5
+
+      - name: Bust Blueprint cache
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          cd server
+          KV_NS=$(grep -A1 'binding = "DATA"' wrangler.toml | grep id | cut -d'"' -f2)
+          for key in blueprint:base:cached blueprint:base:hash blueprint:cached; do
+            echo y | npx wrangler kv key delete "$key" --namespace-id="$KV_NS" 2>/dev/null || true
+          done
+
+      - name: Sign Blueprint + Hooks Payload
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          BLUEPRINT_SIGNING_KEY: ${{ secrets.BLUEPRINT_SIGNING_KEY }}
+          ALEXANDRIA_API_KEY: ${{ secrets.ALEXANDRIA_API_KEY }}
+        run: |
+          cd server
+          SERVER_URL="https://mcp.mowinckel.ai"
+          PUB_KEY=$(grep BLUEPRINT_PUBLIC_KEY wrangler.toml | cut -d'"' -f2)
+
+          # Write signing key to temp file
+          KEY_FILE=$(mktemp)
+          echo "$BLUEPRINT_SIGNING_KEY" > "$KEY_FILE"
+          trap "rm -f $KEY_FILE" EXIT
+
+          sign_content() {
+            echo -n "$1" | node -e "
+              const crypto = require('crypto'), fs = require('fs');
+              const key = crypto.createPrivateKey(fs.readFileSync(process.argv[1]));
+              let d = ''; process.stdin.on('data', c => d += c);
+              process.stdin.on('end', () => process.stdout.write(crypto.sign(null, Buffer.from(d), key).toString('hex')));
+            " "$KEY_FILE"
+          }
+
+          verify_sig() {
+            local content="$1" sig="$2"
+            echo -n "$content" | node -e "
+              const crypto = require('crypto');
+              const pubKey = crypto.createPublicKey({ key: Buffer.from('$PUB_KEY','hex'), format:'der', type:'spki' });
+              const sig = Buffer.from('$sig','hex');
+              let d=''; process.stdin.on('data',c=>d+=c);
+              process.stdin.on('end',()=>console.log(crypto.verify(null,Buffer.from(d),pubKey,sig)?'VALID':'INVALID'));
+            " 2>/dev/null
+          }
+
+          # Sign Blueprint
+          BP_TEXT=$(curl -s "$SERVER_URL/blueprint" -H "Authorization: Bearer $ALEXANDRIA_API_KEY")
+          BP_LEN=$(echo -n "$BP_TEXT" | wc -c | tr -d ' ')
+          if [ "$BP_LEN" -lt 100 ]; then echo "ERROR: Blueprint too short ($BP_LEN bytes)"; exit 1; fi
+          BP_SIG=$(sign_content "$BP_TEXT")
+          echo "$BP_SIG" | npx wrangler secret put BLUEPRINT_SIGNATURE 2>&1 | tail -1
+
+          # Sign Hooks Payload
+          HP_TEXT=$(curl -s "$SERVER_URL/hooks/payload")
+          HP_LEN=$(echo -n "$HP_TEXT" | wc -c | tr -d ' ')
+          if [ "$HP_LEN" -lt 100 ]; then echo "ERROR: Hooks payload too short ($HP_LEN bytes)"; exit 1; fi
+          HP_SIG=$(sign_content "$HP_TEXT")
+          echo "$HP_SIG" | npx wrangler secret put HOOKS_PAYLOAD_SIGNATURE 2>&1 | tail -1
+
+          # Verify with backoff
+          for attempt in 1 2 3; do
+            sleep $((attempt * 5))
+
+            BP_SIG_HEADER=$(curl -sI "$SERVER_URL/blueprint" -H "Authorization: Bearer $ALEXANDRIA_API_KEY" | grep -i "x-blueprint-signature" | tr -d '\r' | cut -d' ' -f2)
+            BP_VERIFY_TEXT=$(curl -s "$SERVER_URL/blueprint" -H "Authorization: Bearer $ALEXANDRIA_API_KEY")
+            BP_VERIFIED=$(verify_sig "$BP_VERIFY_TEXT" "$BP_SIG_HEADER")
+
+            HP_SIG_HEADER=$(curl -sI "$SERVER_URL/hooks/payload" | grep -i "x-hooks-signature" | tr -d '\r' | cut -d' ' -f2)
+            HP_VERIFY_TEXT=$(curl -s "$SERVER_URL/hooks/payload")
+            HP_VERIFIED=$(verify_sig "$HP_VERIFY_TEXT" "$HP_SIG_HEADER")
+
+            if [ "$BP_VERIFIED" = "VALID" ] && [ "$HP_VERIFIED" = "VALID" ]; then break; fi
+            echo "Attempt $attempt: signatures not yet valid, retrying..."
+          done
+
+          HEALTH=$(curl -s "$SERVER_URL/health" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).status))")
+
+          echo "Blueprint: $BP_LEN bytes — $BP_VERIFIED"
+          echo "Hooks payload: $HP_LEN bytes — $HP_VERIFIED"
+          echo "Health: $HEALTH"
+
+          if [ "$BP_VERIFIED" != "VALID" ]; then echo "ERROR: Blueprint signature failed"; exit 1; fi
+          if [ "$HP_VERIFIED" != "VALID" ]; then echo "ERROR: Hooks payload signature failed"; exit 1; fi
