@@ -87,16 +87,20 @@ jobs:
           HP_SIG=$(sign_content "$HP_TEXT")
           echo "$HP_SIG" | npx wrangler secret put HOOKS_PAYLOAD_SIGNATURE 2>&1 | tail -1
 
-          # Verify with backoff
+          # Verify with backoff (single fetch per artifact using -D for headers)
           for attempt in 1 2 3; do
             sleep $((attempt * 5))
 
-            BP_SIG_HEADER=$(curl -sI "$SERVER_URL/blueprint" -H "Authorization: Bearer $ALEXANDRIA_API_KEY" | grep -i "x-blueprint-signature" | tr -d '\r' | cut -d' ' -f2)
-            BP_VERIFY_TEXT=$(curl -s "$SERVER_URL/blueprint" -H "Authorization: Bearer $ALEXANDRIA_API_KEY")
+            bp_hdr=$(mktemp)
+            BP_VERIFY_TEXT=$(curl -s -D "$bp_hdr" "$SERVER_URL/blueprint" -H "Authorization: Bearer $ALEXANDRIA_API_KEY")
+            BP_SIG_HEADER=$(grep -i "x-blueprint-signature" "$bp_hdr" | tr -d '\r' | cut -d' ' -f2)
+            rm -f "$bp_hdr"
             BP_VERIFIED=$(verify_sig "$BP_VERIFY_TEXT" "$BP_SIG_HEADER")
 
-            HP_SIG_HEADER=$(curl -sI "$SERVER_URL/hooks/payload" | grep -i "x-hooks-signature" | tr -d '\r' | cut -d' ' -f2)
-            HP_VERIFY_TEXT=$(curl -s "$SERVER_URL/hooks/payload")
+            hp_hdr=$(mktemp)
+            HP_VERIFY_TEXT=$(curl -s -D "$hp_hdr" "$SERVER_URL/hooks/payload")
+            HP_SIG_HEADER=$(grep -i "x-hooks-signature" "$hp_hdr" | tr -d '\r' | cut -d' ' -f2)
+            rm -f "$hp_hdr"
             HP_VERIFIED=$(verify_sig "$HP_VERIFY_TEXT" "$HP_SIG_HEADER")
 
             if [ "$BP_VERIFIED" = "VALID" ] && [ "$HP_VERIFIED" = "VALID" ]; then break; fi

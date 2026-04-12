@@ -248,15 +248,19 @@ SCHED_CONTENT
   fi
 
   # ── Autoloop relay: git ground truth → dashboard ──
-  # Remote triggers can't reach the server (proxy blocks). The hook relays.
+  # Remote triggers can't reach the server (proxy blocks). The hook relays once per autoloop run.
   if [ -d "\$ALEX_DIR/.git" ] && [ -n "\$API_KEY" ]; then
-    auto_count=\$(git -C "\$ALEX_DIR" log --oneline --since='25 hours ago' --grep='autoloop:' 2>/dev/null | wc -l | tr -d ' ')
-    if [ "\$auto_count" -gt 0 ]; then
+    latest_autoloop=\$(git -C "\$ALEX_DIR" log -1 --format='%H' --grep='autoloop:' 2>/dev/null)
+    last_relayed=""
+    [ -f "\$ALEX_DIR/.autoloop_relayed" ] && last_relayed=\$(cat "\$ALEX_DIR/.autoloop_relayed" 2>/dev/null)
+    if [ -n "\$latest_autoloop" ] && [ "\$latest_autoloop" != "\$last_relayed" ]; then
+      auto_count=\$(git -C "\$ALEX_DIR" log --oneline --since='25 hours ago' --grep='autoloop:' 2>/dev/null | wc -l | tr -d ' ')
       curl -s -X POST "\$SERVER/session" \\
         -H "Authorization: Bearer \$API_KEY" \\
         -H "Content-Type: application/json" \\
         -d "{\\"event\\":\\"auto_attempt\\",\\"platform\\":\\"autoloop\\",\\"commits\\":\$auto_count}" \\
         > /dev/null 2>&1 &
+      echo "\$latest_autoloop" > "\$ALEX_DIR/.autoloop_relayed"
     fi
   fi
 

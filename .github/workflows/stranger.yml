@@ -3,12 +3,15 @@ on:
   workflow_run:
     workflows: [Deploy]
     types: [completed]
+  push:
+    branches: [main]
+    paths: ['server/test/**']
   workflow_dispatch: {}
 
 jobs:
   stranger:
-    # Run after Deploy succeeds, or always on manual trigger
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    # Run after Deploy succeeds, on test file changes, or manual trigger
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     timeout-minutes: 5
     strategy:
       matrix:
