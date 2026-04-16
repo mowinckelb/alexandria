@@ -125,7 +125,7 @@ echo "[stranger] pre-populated settings.json with existing hooks"
 echo ""
 echo "═══ Phase 2: Setup script ═══"
 
-SETUP_SCRIPT=$(curl -s --max-time 15 "$BASE_URL/setup" 2>/dev/null)
+SETUP_SCRIPT=$(curl -s --max-time 15 "https://raw.githubusercontent.com/mowinckelb/Alexandria/main/factory/setup.sh" 2>/dev/null)
 
 check "setup script fetched"       [ -n "$SETUP_SCRIPT" ]
 SETUP_FIRST_LINE=$(echo "$SETUP_SCRIPT" | head -1)
@@ -169,7 +169,7 @@ check "shim.sh non-empty"          [ -s "$HOME/.alexandria/hooks/shim.sh" ]
 check "SKILL.md exists"            [ -f "$HOME/.claude/skills/alexandria/SKILL.md" ]
 check "SKILL.md has Alexandria"    grep -q "Alexandria" "$HOME/.claude/skills/alexandria/SKILL.md"
 check "scheduled task exists"      [ -f "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" ]
-check "hooks_version written"      [ -f "$HOME/.alexandria/.hooks_version" ]
+check "canon cached"               [ -f "$HOME/.alexandria/.canon_local" ]
 
 # settings.json integrity
 check "settings.json exists"       [ -f "$HOME/.claude/settings.json" ]
