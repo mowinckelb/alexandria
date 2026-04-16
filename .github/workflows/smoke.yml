@@ -1,8 +1,8 @@
 name: Smoke
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
-  workflow_dispatch: {}     # Manual trigger
+    - cron: '0 */6 * * *'
+  workflow_dispatch: {}
 
 jobs:
   smoke:
@@ -10,69 +10,51 @@ jobs:
     steps:
       - name: Health
         run: |
-          status=$(curl -s -o /dev/null -w '%{http_code}' https://mcp.mowinckel.ai/health)
           body=$(curl -s https://mcp.mowinckel.ai/health)
           echo "$body"
-          if [ "$status" != "200" ] || ! echo "$body" | grep -q '"status":"ok"'; then
-            echo "::error::Health check failed (HTTP $status)"
-            exit 1
-          fi
-          echo "✓ health OK"
+          echo "$body" | grep -q '"status":"ok"' || { echo "::error::Health degraded"; exit 1; }
+          echo "✓ health"
 
-      - name: Protocol
+      - name: Protocol handshake
         run: |
-          status=$(curl -s -o /dev/null -w '%{http_code}' https://mcp.mowinckel.ai/alexandria)
-          if [ "$status" != "200" ]; then
-            echo "::error::Protocol handshake failed (HTTP $status)"
-            exit 1
-          fi
-          echo "✓ protocol OK"
+          curl -sf https://mcp.mowinckel.ai/alexandria | grep -q '"protocol":"alexandria"' || { echo "::error::Handshake failed"; exit 1; }
+          echo "✓ protocol"
 
-      - name: File
+      - name: Protocol file (write + read back)
         run: |
-          status=$(curl -s -o /dev/null -w '%{http_code}' -X PUT \
+          curl -sf -X PUT https://mcp.mowinckel.ai/file/ci-smoke \
             -H "Authorization: Bearer ${{ secrets.ALEXANDRIA_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{"content":"# CI smoke\nverification.","text":"ci"}' \
-            https://mcp.mowinckel.ai/file/ci-smoke)
-          if [ "$status" != "200" ]; then
-            echo "::error::File publish failed (HTTP $status)"
-            exit 1
-          fi
-          echo "✓ file OK"
+            -d '{"content":"# CI smoke\nverification.","text":"ci"}' | grep -q '"ok":true' || { echo "::error::File publish failed"; exit 1; }
+          curl -sf https://mcp.mowinckel.ai/marketplace \
+            -H "Authorization: Bearer ${{ secrets.ALEXANDRIA_API_KEY }}" | grep -q '"modules"' || { echo "::error::Marketplace read failed"; exit 1; }
+          echo "✓ file + marketplace"
 
-      - name: Call
+      - name: Protocol call
         run: |
-          status=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+          curl -sf -X POST https://mcp.mowinckel.ai/call \
             -H "Authorization: Bearer ${{ secrets.ALEXANDRIA_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{"modules":["canon/axioms"]}' \
-            https://mcp.mowinckel.ai/call)
-          if [ "$status" != "200" ]; then
-            echo "::error::Call failed (HTTP $status)"
-            exit 1
-          fi
-          echo "✓ call OK"
+            -d '{"modules":[{"id":"methodology","text":"ci smoke"}]}' | grep -q '"ok":true' || { echo "::error::Call failed"; exit 1; }
+          echo "✓ call"
 
-      - name: Library
+      - name: Company Library
         run: |
-          status=$(curl -s -o /dev/null -w '%{http_code}' https://mcp.mowinckel.ai/library/authors)
-          if [ "$status" != "200" ]; then
-            echo "::error::Library authors failed (HTTP $status)"
-            exit 1
-          fi
-          echo "✓ library OK"
+          curl -sf https://mcp.mowinckel.ai/library/authors | grep -q '"authors"' || { echo "::error::Library failed"; exit 1; }
+          echo "✓ library"
 
-      - name: Vercel DNS
+      - name: Factory (GitHub raw URLs)
         run: |
-          status=$(curl -s -o /dev/null -w '%{http_code}' https://mowinckel.ai)
-          if [ "$status" -lt 200 ] || [ "$status" -ge 400 ]; then
-            echo "::error::mowinckel.ai returned HTTP $status — DNS or Vercel misconfigured"
-            exit 1
-          fi
-          www_status=$(curl -s -o /dev/null -w '%{http_code}' https://www.mowinckel.ai)
-          if [ "$www_status" -lt 200 ] || [ "$www_status" -ge 400 ]; then
-            echo "::error::www.mowinckel.ai returned HTTP $www_status"
-            exit 1
-          fi
-          echo "✓ vercel DNS OK (root=$status, www=$www_status)"
+          BASE="https://raw.githubusercontent.com/mowinckelb/Alexandria/main/factory"
+          curl -sf "$BASE/setup.sh" | head -1 | grep -q "bash" || { echo "::error::setup.sh not accessible"; exit 1; }
+          curl -sf "$BASE/canon/methodology.md" | head -1 | grep -q "#" || { echo "::error::methodology.md not accessible"; exit 1; }
+          curl -sf "$BASE/hooks/shim.sh" | head -1 | grep -q "bash" || { echo "::error::shim.sh not accessible"; exit 1; }
+          curl -sf "$BASE/hooks/payload.sh" | head -1 | grep -q "bash" || { echo "::error::payload.sh not accessible"; exit 1; }
+          curl -sf "$BASE/skills/claudecode.md" | grep -q "Alexandria" || { echo "::error::claudecode.md not accessible"; exit 1; }
+          echo "✓ factory (5 files verified)"
+
+      - name: Website
+        run: |
+          curl -sf https://mowinckel.ai | grep -q "Alexandria" || { echo "::error::Website down"; exit 1; }
+          curl -sf https://www.mowinckel.ai > /dev/null || { echo "::error::www redirect broken"; exit 1; }
+          echo "✓ website"
