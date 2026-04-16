@@ -184,39 +184,16 @@ export async function runHealthDigest(force = false): Promise<void> {
       const raw = await getRecentEvents(200);
       if (raw) {
         const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-        let hookFailures = 0;
         let serverErrors = 0;
-        let canonFetchFails = 0;
-        const authorSessions: Record<string, { starts: number; ends: number; lastSeen: string }> = {};
         for (const line of raw.split('\n')) {
           if (!line) continue;
           try {
             const ev = JSON.parse(line);
             if (new Date(ev.t).getTime() < cutoff) continue;
-            if (ev.event === 'hook_failure') {
-              hookFailures++;
-              if (ev.reason === 'canon_fetch_failed') canonFetchFails++;
-            }
             if (ev.e === 'server_error') serverErrors++;
-            // Track per-author session balance
-            if (ev.e === 'prosumer_session' && ev.author && !/^(smoke_|test_|debug_|lifecycle-)/.test(ev.event)) {
-              if (!authorSessions[ev.author]) authorSessions[ev.author] = { starts: 0, ends: 0, lastSeen: ev.t };
-              if (ev.event === 'call') authorSessions[ev.author].starts++;
-              if (ev.event === 'end') authorSessions[ev.author].ends++;
-              if (ev.t > authorSessions[ev.author].lastSeen) authorSessions[ev.author].lastSeen = ev.t;
-            }
           } catch { continue; }
         }
-        if (hookFailures > 3) escalate('stroll', `${hookFailures} hook failures in 24h`);
         if (serverErrors > 0) escalate('stroll', `${serverErrors} server errors in 24h`);
-        if (canonFetchFails > 0) escalate('stroll', `${canonFetchFails} canon fetch failures in 24h`);
-
-        // Per-author health: flag broken session lifecycle
-        for (const [author, stats] of Object.entries(authorSessions)) {
-          if (stats.starts > 3 && stats.ends === 0) {
-            escalate('stroll', `${author}: ${stats.starts} starts, 0 ends — session-end hook broken`);
-          }
-        }
       }
     } catch { /* non-fatal */ }
 

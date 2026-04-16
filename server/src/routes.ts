@@ -638,18 +638,28 @@ export function registerRoutes(app: Hono) {
     const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
     const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
     const accounts = await loadAccounts<AccountStore>();
+    const recipients = Object.values(accounts).filter(acct =>
+      !acct.installed_at && acct.email && !acct.engagement_opt_out && acct.github_login !== auth.account.github_login
+    );
+
+    const html = (acct: Account) =>
+      '<div style="font-family: \'EB Garamond\', Georgia, serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">' +
+      '<p style="font-size: 1rem; line-height: 1.9; color: #8a8078; margin: 0 0 1.5rem;">we fixed a setup issue. <a href="' + WEBSITE_URL + '/signup" style="color: #3d3630;">sign in</a> to get your updated setup command.</p>' +
+      '<p style="font-size: 0.72rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="' + SERVER_URL + '/email/stop?t=' + acct.email_token + '" style="color: #8a8078;">stop these emails</a></p>' +
+      '</div>';
+
+    // Resend free tier is 2 req/sec; 5-wide keeps us under the limit with headroom.
+    const CONCURRENCY = 5;
     let sent = 0;
-    for (const [, acct] of Object.entries(accounts)) {
-      if (acct.installed_at || !acct.email || acct.engagement_opt_out) continue;
-      if (acct.github_login === auth.account.github_login) continue;
-      await sendEmail(acct.email, 'alexandria. — quick fix',
-        '<div style="font-family: \'EB Garamond\', Georgia, serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">' +
-        '<p style="font-size: 1rem; line-height: 1.9; color: #8a8078; margin: 0 0 1.5rem;">we fixed a setup issue. <a href="' + WEBSITE_URL + '/signup" style="color: #3d3630;">sign in</a> to get your updated setup command.</p>' +
-        '<p style="font-size: 0.72rem; color: #bbb4aa; margin-top: 1.5rem;"><a href="' + SERVER_URL + '/email/stop?t=' + acct.email_token + '" style="color: #8a8078;">stop these emails</a></p>' +
-        '</div>');
-      sent++;
+    let failed = 0;
+    for (let i = 0; i < recipients.length; i += CONCURRENCY) {
+      const batch = recipients.slice(i, i + CONCURRENCY);
+      const results = await Promise.all(
+        batch.map(acct => sendEmail(acct.email, 'alexandria. — quick fix', html(acct)))
+      );
+      for (const r of results) { if (r.ok) sent++; else failed++; }
     }
-    return c.json({ ok: true, sent });
+    return c.json({ ok: true, sent, failed, total: recipients.length });
   });
 
   // --- Marketplace: read signals (admin only, called by meta trigger) ---

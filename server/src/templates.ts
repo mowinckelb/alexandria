@@ -166,7 +166,7 @@ function flash(el) {
   setTimeout(function() { el.classList.remove('done'); }, 2000);
 }
 function copyPrime(el) {
-  var prime = 'echo "checking prerequisites..." && { command -v git &>/dev/null && echo "  git: ok" || echo "  git: missing — install from https://git-scm.com"; } && { command -v node &>/dev/null && echo "  node: ok" || echo "  node: missing — install from https://nodejs.org"; } && { if command -v gh &>/dev/null; then if gh auth status &>/dev/null 2>&1; then echo "  github: ok"; else echo "  github: logging in..." && gh auth login; fi; else echo "" && echo "  github cli not found. it enables cloud backup and overnight processing." && echo "  install: brew install gh (mac) or https://cli.github.com" && echo "  then re-run this prime. or skip it — everything else still works."; fi; } && echo "" && echo "ready. run the curl."';
+  var prime = 'echo "checking prerequisites..." && { command -v git >/dev/null 2>&1 && echo "  git: ok" || echo "  git: missing — install from https://git-scm.com"; } && { command -v node >/dev/null 2>&1 && echo "  node: ok" || echo "  node: missing — install from https://nodejs.org"; } && { if command -v gh >/dev/null 2>&1; then if gh auth status >/dev/null 2>&1; then echo "  github: ok"; else echo "  github: logging in..." && gh auth login; fi; else echo "" && echo "  github cli not found. it enables cloud backup and overnight processing." && echo "  install: brew install gh (mac) or https://cli.github.com" && echo "  then re-run this prime. or skip it — everything else still works."; fi; } && echo "" && echo "ready. run the curl."';
   navigator.clipboard.writeText(prime).then(function() { flash(el); });
 }
 function copyCmd(el) {

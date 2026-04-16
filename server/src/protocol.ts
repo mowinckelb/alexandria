@@ -51,9 +51,14 @@ export function registerProtocol(app: Hono) {
     const auth = await requireAuth(c);
     if (!auth) return c.text('Unauthorized', 401);
 
+    // Pagination — ?limit=N&offset=M. Defaults handle the common case; explicit
+    // params let clients walk the full set.
+    const limit = Math.min(Math.max(parseInt(c.req.query('limit') || '200', 10) || 200, 1), 1000);
+    const offset = Math.max(parseInt(c.req.query('offset') || '0', 10) || 0, 0);
+
     const { results } = await getDB().prepare(
-      `SELECT account_id, name, text, visibility, updated_at FROM protocol_files ORDER BY updated_at DESC LIMIT 1000`
-    ).all<{ account_id: string; name: string; text: string | null; visibility: string; updated_at: string }>();
+      `SELECT account_id, name, text, visibility, updated_at FROM protocol_files ORDER BY updated_at DESC LIMIT ? OFFSET ?`
+    ).bind(limit, offset).all<{ account_id: string; name: string; text: string | null; visibility: string; updated_at: string }>();
 
     // Group by author
     const authors: Record<string, { files: typeof results }> = {};
@@ -62,7 +67,11 @@ export function registerProtocol(app: Hono) {
       authors[f.account_id].files.push(f);
     }
 
-    return c.json({ authors });
+    const returned = (results || []).length;
+    return c.json({
+      authors,
+      pagination: { limit, offset, returned, next_offset: returned === limit ? offset + limit : null },
+    });
   });
 
   app.get('/library/:id', async (c, next) => {

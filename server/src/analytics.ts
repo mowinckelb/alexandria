@@ -129,12 +129,8 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     return { status: 'no data', message: 'No events logged yet.' };
   }
 
-  // 1. Calls (session events — call, end, active, auto)
   // Filter automated/test traffic by prefix convention — no hardcoded list to maintain
   const isSmoke = (s: string) => /^(smoke_|test_|debug_|lifecycle-)/.test(s) || s === 'verification' || s === 'github_smoke';
-  const isReal = (e: Record<string, string>) =>
-    e.e === 'prosumer_session' && !isSmoke(e.event) && !isSmoke(e.platform);
-  const calls = events.filter(e => isReal(e) && (e.event === 'call' || e.event === 'end' || e.event === 'active' || e.event === 'auto')).length;
 
   // Time range + staleness
   const firstEvent = events[0]?.t || null;
@@ -144,18 +140,8 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     : null;
   const stale = hoursSinceLastEvent !== null && hoursSinceLastEvent > 24;
 
-  // Anomaly detection
-  const sessionEvents = events.filter(e => e.e === 'prosumer_session');
-  const lastSessionEvent = sessionEvents.length > 0 ? sessionEvents[sessionEvents.length - 1].t : null;
-  const hoursSinceLastSession = lastSessionEvent
-    ? Math.round((Date.now() - new Date(lastSessionEvent).getTime()) / (1000 * 60 * 60) * 10) / 10
-    : null;
-
   const now = Date.now();
   const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
-  const smokeFailures24h = events.filter(
-    e => e.event === 'hook_failure' && new Date(e.t).getTime() > twentyFourHoursAgo
-  ).length;
   const serverErrors24h = events.filter(
     e => e.e === 'server_error' && new Date(e.t).getTime() > twentyFourHoursAgo
   );
@@ -182,159 +168,57 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     }
   } catch { /* non-fatal */ }
 
-  // Active users — per-author stats (from epoch forward for clean metrics)
-  // Deterministic model with session_id sets (plus legacy fallback when session_id is absent).
+  // Per-author cross-event visibility.
+  // Session lifecycle events (call/end/active) don't fire — hooks post to /call (D1)
+  // rather than emitting events. Build a lightweight per-author roll-up from what does
+  // fire: prosumer_session event='auto' (autoloop brief), machine_signal, user_feedback,
+  // morning_brief, library_* events. The ground truth for sessions is protocol_calls.
   const authorStats: Record<string, {
-    start_ids: Set<string>;
-    end_ids: Set<string>;
-    active_ids: Set<string>;
-    active_from_end_ids: Set<string>;
-    orphan_end_ids: Set<string>;
-    recovered_end_ids: Set<string>;
-    legacy_starts: number;
-    legacy_ends: number;
-    legacy_active: number;
-    auto_attempt: number;
-    auto_legacy: number;
-    failures: number;
-    canon_fetch_ok: number;
-    canon_fetch_fail: number;
-    unknown: number;
+    auto: number;
+    signals: number;
+    feedback: number;
     last_seen: string;
     platforms: Set<string>;
   }> = {};
-  let startsWithId = 0;
-  let startsWithoutId = 0;
-  let endsWithId = 0;
-  let endsWithoutId = 0;
   for (const e of events) {
-    if (e.e !== 'prosumer_session' || !e.author) continue;
+    const author = e.author;
+    if (!author) continue;
     if (e.t < METRICS_EPOCH) continue;
-    if (isSmoke(e.event)) continue;
-    if (!authorStats[e.author]) {
-      authorStats[e.author] = {
-        start_ids: new Set(),
-        end_ids: new Set(),
-        active_ids: new Set(),
-        active_from_end_ids: new Set(),
-        orphan_end_ids: new Set(),
-        recovered_end_ids: new Set(),
-        legacy_starts: 0,
-        legacy_ends: 0,
-        legacy_active: 0,
-        auto_attempt: 0,
-        auto_legacy: 0,
-        failures: 0,
-        canon_fetch_ok: 0,
-        canon_fetch_fail: 0,
-        unknown: 0,
-        last_seen: e.t,
-        platforms: new Set(),
-      };
+    if (isSmoke(e.event) || isSmoke(e.platform)) continue;
+    if (!authorStats[author]) {
+      authorStats[author] = { auto: 0, signals: 0, feedback: 0, last_seen: e.t, platforms: new Set() };
     }
-    const stat = authorStats[e.author];
-    const sid = (e.session_id || '').trim();
-    const hasSid = sid.length > 0 && sid !== 'unknown' && sid !== 'null';
-    if (e.event === 'hook_failure') {
-      stat.failures++;
-      if (e.reason === 'canon_fetch_failed') stat.canon_fetch_fail++;
-    }
-    else if (e.event === 'call' || e.event === 'start') {
-      if (hasSid) { stat.start_ids.add(sid); startsWithId++; }
-      else { stat.legacy_starts++; startsWithoutId++; }
-      if (e.canon_fetched === 'true') stat.canon_fetch_ok++;
-      else if (e.canon_fetched === 'false') stat.canon_fetch_fail++;
-    }
-    else if (e.event === 'end') {
-      if (hasSid) {
-        stat.end_ids.add(sid);
-        endsWithId++;
-        if (!stat.start_ids.has(sid)) stat.orphan_end_ids.add(sid);
-        if (e.was_active === 'true') stat.active_from_end_ids.add(sid);
-        if (e.recovered === 'true') stat.recovered_end_ids.add(sid);
-      } else {
-        stat.legacy_ends++;
-        endsWithoutId++;
-        if (e.was_active === 'true') stat.legacy_active++;
-      }
-    }
-    else if (e.event === 'active') {
-      if (hasSid) stat.active_ids.add(sid);
-      else stat.legacy_active++;
-    }
-    else if (e.event === 'auto_attempt') { stat.auto_attempt++; }
-    else if (e.event === 'auto') { stat.auto_legacy++; }
-    else if (e.event === 'heartbeat') { /* counted in starts/ends via session_id, no separate tracking needed */ }
-    else { stat.unknown++; } // Catch ALL unrecognized event types — don't silently drop
+    const stat = authorStats[author];
+    if (e.e === 'prosumer_session' && e.event === 'auto') stat.auto++;
+    if (e.e === 'machine_signal') stat.signals++;
+    if (e.e === 'user_feedback') stat.feedback++;
     if (e.t > stat.last_seen) stat.last_seen = e.t;
     if (e.platform) stat.platforms.add(e.platform);
   }
 
-  const users = Object.entries(authorStats).map(([login, stat]) => {
-    const starts = stat.start_ids.size + stat.legacy_starts;
-    const ends = stat.end_ids.size + stat.legacy_ends;
-    const active_started = stat.active_ids.size + stat.legacy_active;
-    const active_completed = stat.active_from_end_ids.size + stat.legacy_active;
-    const open_sessions = Math.max(stat.start_ids.size - stat.end_ids.size, 0);
-    // "auto" on the dashboard means autoloop trigger attempts (plumbing truth).
-    // Legacy fallback: before auto_attempt existed, only auto (brief-sent) was logged.
-    const auto = stat.auto_attempt > 0 ? stat.auto_attempt : stat.auto_legacy;
-    return {
-      login,
-      starts,
-      ends,
-      end_pct: starts > 0 ? Math.round(ends / starts * 100) : 0,
-      active: active_completed,
-      active_started,
-      active_completed,
-      auto,
-      open_sessions,
-      recovered_ends: stat.recovered_end_ids.size,
-      orphan_ends: stat.orphan_end_ids.size,
-      unknown_events: stat.unknown,
-      last_seen: stat.last_seen,
-      hours_ago: Math.round((Date.now() - new Date(stat.last_seen).getTime()) / (1000 * 60 * 60) * 10) / 10,
-      failures: stat.failures,
-      canon_fetch_ok: stat.canon_fetch_ok,
-      canon_fetch_fail: stat.canon_fetch_fail,
-      platforms: [...stat.platforms],
-    };
-  }).sort((a, b) => b.starts - a.starts || a.hours_ago - b.hours_ago);
+  const users = Object.entries(authorStats).map(([login, stat]) => ({
+    login,
+    auto: stat.auto,
+    signals: stat.signals,
+    feedback: stat.feedback,
+    last_seen: stat.last_seen,
+    hours_ago: Math.round((Date.now() - new Date(stat.last_seen).getTime()) / (1000 * 60 * 60) * 10) / 10,
+    platforms: [...stat.platforms],
+  })).sort((a, b) => a.hours_ago - b.hours_ago);
 
-  // Per-user health alerts — flag broken user experiences
-  const userAlerts: string[] = [];
-  for (const u of users) {
-    if (u.starts > 3 && u.ends === 0) userAlerts.push(`${u.login}: ${u.starts} starts, 0 ends — session-end hook broken`);
-    if (u.canon_fetch_fail > 0 && u.canon_fetch_ok === 0) userAlerts.push(`${u.login}: 100% canon fetch failure`);
-    if (u.failures > 5) userAlerts.push(`${u.login}: ${u.failures} hook failures`);
-  }
-
+  // Verification shape preserved — session_id coverage is 0/0 until hook events are wired.
+  // When hooks start emitting session events, populate this from the event stream.
   const verification = {
-    session_id_coverage: {
-      starts_with_id: startsWithId,
-      starts_without_id: startsWithoutId,
-      ends_with_id: endsWithId,
-      ends_without_id: endsWithoutId,
-    },
-    open_sessions_total: users.reduce((n, u) => n + u.open_sessions, 0),
-    orphan_ends_total: users.reduce((n, u) => n + u.orphan_ends, 0),
-    recovered_ends_total: users.reduce((n, u) => n + u.recovered_ends, 0),
-    active_started_total: users.reduce((n, u) => n + (u.active_started || 0), 0),
-    active_completed_total: users.reduce((n, u) => n + (u.active_completed || 0), 0),
-    unknown_events_total: users.reduce((n, u) => n + u.unknown_events, 0),
+    session_id_coverage: { starts_with_id: 0, starts_without_id: 0, ends_with_id: 0, ends_without_id: 0 },
+    active_authors: users.length,
   };
 
   const invariantIssues: string[] = [];
-  if (startsWithoutId > 0) invariantIssues.push(`starts_without_session_id=${startsWithoutId}`);
-  if (endsWithoutId > 0) invariantIssues.push(`ends_without_session_id=${endsWithoutId}`);
-  if (verification.orphan_ends_total > 0) invariantIssues.push(`orphan_ends=${verification.orphan_ends_total}`);
-  if (verification.unknown_events_total > 0) invariantIssues.push(`unknown_events=${verification.unknown_events_total}`);
   if (serverErrors24h.length > 5) invariantIssues.push(`server_errors_24h=${serverErrors24h.length}`);
-  if (userAlerts.length > 0) invariantIssues.push(...userAlerts);
 
   const status = invariantIssues.length > 0
-    ? `degraded — lifecycle invariant failure (${invariantIssues.join(', ')})`
-    : 'ok — lifecycle invariants satisfied';
+    ? `degraded — ${invariantIssues.join(', ')}`
+    : 'ok';
 
   return {
     status,
@@ -353,21 +237,12 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     users,
     total_events: events.length,
     parse_errors: parseErrors,
-    calls,
-    errors: {
-      log_parse_errors: parseErrors,
-    },
-    anomaly: {
-      last_session_event: lastSessionEvent,
-      hours_since_last_session: hoursSinceLastSession,
-      smoke_failures_24h: smokeFailures24h,
-    },
+    errors: { log_parse_errors: parseErrors },
     runtime: {
       server_errors_24h: serverErrors24h.length,
       not_found_24h: notFound24h.length,
       top_not_found_paths: topNotFoundPaths,
     },
-    user_alerts: userAlerts,
     verification,
     library: await getLibraryMetrics(events),
     marketplace: await getMarketplaceStatus(events),
@@ -501,24 +376,19 @@ export async function getUserEvents(login: string): Promise<Record<string, unkno
     return { status: 'no data', author: login };
   }
 
-  const allSessions = events.filter(e => e.e === 'prosumer_session');
-  const callEvents = allSessions.filter(e => e.event === 'end' || e.event === 'call' || e.event === 'active' || e.event === 'auto');
-  const failures = allSessions.filter(e => e.event === 'hook_failure');
+  const sessionEvents = events.filter(e => e.e === 'prosumer_session');
+  const autoRuns = sessionEvents.filter(e => e.event === 'auto');
   const feedback = events.filter(e => e.e === 'user_feedback');
   const signals = events.filter(e => e.e === 'machine_signal');
-  const lastSession = allSessions.length > 0 ? allSessions[allSessions.length - 1] : null;
+  const lastSession = sessionEvents.length > 0 ? sessionEvents[sessionEvents.length - 1] : null;
 
   return {
     author: login,
     total_events: events.length,
-    calls: callEvents.length,
+    auto_runs: autoRuns.length,
     sessions: {
       last: lastSession,
-      platforms: [...new Set(allSessions.map(s => s.platform).filter(Boolean))],
-    },
-    failures: {
-      total: failures.length,
-      recent: failures.slice(-5),
+      platforms: [...new Set(sessionEvents.map(s => s.platform).filter(Boolean))],
     },
     feedback: feedback.slice(-10),
     machine_signals: signals.length,

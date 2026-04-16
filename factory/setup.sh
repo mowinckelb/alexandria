@@ -206,6 +206,6 @@ else
   echo ""
   echo "Alexandria installed. ~/.alexandria/ — your mind, on your machine."
   echo ""
-  echo "Now paste the block into a new tab:"
-  echo "  cat ~/.alexandria/.block"
+  echo "Open a new Claude Code or Cursor tab and paste the block."
+  echo "If it's not in your clipboard: cat ~/.alexandria/.block"
 fi
