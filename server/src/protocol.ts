@@ -133,11 +133,10 @@ export function registerProtocol(app: Hono) {
     }
     if (rows.length === 0) return c.json({ error: 'no valid modules' }, 400);
 
-    for (const r of rows) {
-      await db.prepare(
-        'INSERT INTO protocol_calls (module_id, account_id, time, text) VALUES (?, ?, ?, ?)'
-      ).bind(r.mod, id, now, r.text).run();
-    }
+    const inserts = rows.map((r) => db.prepare(
+      'INSERT INTO protocol_calls (module_id, account_id, time, text) VALUES (?, ?, ?, ?)'
+    ).bind(r.mod, id, now, r.text));
+    await db.batch(inserts);
 
     return c.json({ ok: true });
   });

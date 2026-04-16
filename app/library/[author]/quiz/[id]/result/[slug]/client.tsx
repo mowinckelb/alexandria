@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ThemeToggle } from '../../../../../../components/ThemeToggle';
 import { SERVER_URL } from '../../../../../../lib/config';
 
@@ -61,7 +62,7 @@ export default function ResultPageClient({ params }: { params: Promise<{ author:
         </p>
 
         <div style={{ margin: '4rem 0', display: 'flex', flexDirection: 'column', gap: '1.2rem', alignItems: 'center' }}>
-          <a
+          <Link
             href={`/library/${authorId}/quiz/${quizId}`}
             style={{
               textDecoration: 'none', color: 'var(--text-primary)',
@@ -70,21 +71,21 @@ export default function ResultPageClient({ params }: { params: Promise<{ author:
             className="hover:opacity-60"
           >
             take the quiz
-          </a>
+          </Link>
 
-          <a href={`/library/${authorId}`} style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.82rem' }} className="hover:opacity-60">
-            explore {data.author_name}'s mind
-          </a>
+          <Link href={`/library/${authorId}`} style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.82rem' }} className="hover:opacity-60">
+            {`explore ${data.author_name}'s mind`}
+          </Link>
         </div>
 
         <p style={{ fontSize: '0.75rem', color: 'var(--text-whisper)', marginTop: '4rem' }}>
-          <a href={`/join?ref=${authorId}`} style={{ color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">
+          <Link href={`/join?ref=${authorId}`} style={{ color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">
             want your own?
-          </a>
+          </Link>
         </p>
 
         <p style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', marginTop: '3rem' }}>
-          <a href="/" style={{ color: 'var(--text-whisper)', textDecoration: 'none' }}>a.</a>
+          <Link href="/" style={{ color: 'var(--text-whisper)', textDecoration: 'none' }}>a.</Link>
         </p>
 
       </main>

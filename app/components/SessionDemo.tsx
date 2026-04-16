@@ -140,7 +140,12 @@ export default function SessionDemo() {
     }
 
     play();
-    return () => { ++runId.current; };
+    const activeRunId = runId.current;
+    return () => {
+      if (runId.current === activeRunId) {
+        runId.current = activeRunId + 1;
+      }
+    };
   }, [play]);
 
   const renderBlock = (block: Block, i: number) => {

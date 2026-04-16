@@ -83,7 +83,7 @@ if [ "$MODE" = "session-start" ]; then
   constitution=""
   if [ -d "$ALEX_DIR/constitution" ]; then
     for f in "$ALEX_DIR/constitution/"*.md; do
-      [ -f "$f" ] && constitution="${constitution}$(cat "$f")
+      [ -f "$f" ] && [ "$(basename "$f")" != "README.md" ] && constitution="${constitution}$(cat "$f")
 "
     done
   fi
@@ -256,13 +256,13 @@ if [ "$MODE" = "subagent" ]; then
   has_content=false
   if [ -d "$ALEX_DIR/constitution" ]; then
     for f in "$ALEX_DIR/constitution/"*.md; do
-      if [ -f "$f" ] && [ $(wc -c < "$f" | tr -d ' ') -gt 10 ]; then has_content=true; break; fi
+      if [ -f "$f" ] && [ "$(basename "$f")" != "README.md" ] && [ $(wc -c < "$f" | tr -d ' ') -gt 10 ]; then has_content=true; break; fi
     done
   fi
 
   if [ "$has_content" = "true" ]; then
     echo "--- AUTHOR CONTEXT (from Alexandria) ---"
-    for f in "$ALEX_DIR/constitution/"*.md; do [ -f "$f" ] && cat "$f"; done
+    for f in "$ALEX_DIR/constitution/"*.md; do [ -f "$f" ] && [ "$(basename "$f")" != "README.md" ] && cat "$f"; done
 
     if [ -d "$ALEX_DIR/ontology" ]; then
       for f in "$ALEX_DIR/ontology/"*.md; do

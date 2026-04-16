@@ -54,8 +54,9 @@ export async function sendWelcomeEmail(email: string, githubLogin?: string): Pro
 export async function sendFollowupEmail(email: string, emailToken: string, day: number): Promise<void> {
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
   const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
+  const followupTag = day > 1 ? ` (follow-up ${day})` : '';
 
-  await sendEmail(email, 'alexandria. — sign in to finish setup',
+  await sendEmail(email, `alexandria. — sign in to finish setup${followupTag}`,
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
   <p style="font-size: 1rem; line-height: 1.9; color: #8a8078; margin: 0 0 1.5rem;">you signed up but haven&rsquo;t installed yet.</p>
   <p style="font-size: 1.1rem; line-height: 1.9; margin: 0 0 2rem;"><a href="${WEBSITE_URL}/signup" style="color: #3d3630;">sign in</a> to get your setup command.</p>

@@ -110,7 +110,7 @@ app.use('/library/*', async (c, next) => {
 registerProtocol(app);
 
 // ---------------------------------------------------------------------------
-// Company — OAuth, session, admin
+// Company — OAuth, feedback, admin
 // ---------------------------------------------------------------------------
 
 registerRoutes(app);
@@ -304,7 +304,8 @@ app.get('/analytics/log', async (c) => {
 });
 
 app.get('/analytics/dashboard', async (c) => {
-  const { _events, ...dashboard } = await getDashboard();
+  const dashboard = await getDashboard();
+  delete dashboard._events;
   const billing = await getBillingSummary();
   return c.json({ ...dashboard, billing });
 });
@@ -343,7 +344,7 @@ export default {
   fetch: app.fetch,
 
   // Cron Triggers — daily follow-up + monthly settlement
-  async scheduled(event: ScheduledEvent, env: Record<string, unknown>, ctx: ExecutionContext) {
+  async scheduled(_event: ScheduledEvent, env: Record<string, unknown>, ctx: ExecutionContext) {
     initEnv(env);
     // Daily cron (0 9 * * *) + monthly settlement (0 2 1 * *)
     // Settlement + engagement are idempotent so running on every cron trigger is safe

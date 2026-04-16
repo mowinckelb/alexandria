@@ -5,7 +5,7 @@ You are about to run a curl command that puts files on your machine, modifies yo
 ## Inspect before running
 
 ```
-curl -s https://mcp.mowinckel.ai/setup | less
+curl -s https://raw.githubusercontent.com/mowinckelb/Alexandria/main/factory/setup.sh | less
 ```
 
 Read the bash script. Everything below explains what it does. If anything below does not match the script, do not run it.
@@ -18,7 +18,7 @@ Read the bash script. Everything below explains what it does. If anything below 
 |---|---|---|
 | `constitution/` | Markdown files about how you think | Yes — open in any editor |
 | `vault/` | Raw input — transcripts, notes, anything you drop in | Yes |
-| `hooks/shim.sh` | Thin wrapper — fetches and runs the hooks payload from the server | Yes — `cat` it |
+| `hooks/shim.sh` | Thin wrapper — fetches and runs the hooks payload from GitHub | Yes — `cat` it |
 | `feedback.md` | What works and doesn't with you — append-only | Yes |
 | `machine.md` | Engine's notes on how to work with you | Yes |
 | `notepad.md` | Engine's working memory | Yes |
@@ -26,7 +26,7 @@ Read the bash script. Everything below explains what it does. If anything below 
 | `library/` | Published content (shadows, works, pulse) | Yes |
 | `.machine_signal` | Methodology observations for the marketplace — about the craft, not about you | Yes |
 | `.api_key` | Your API key | Yes |
-| `.canon_local` | Cached canon — fetched from server, used locally | Yes |
+| `.canon_local` | Cached canon — fetched from GitHub (`factory/canon/methodology.md`), used locally | Yes |
 | `.block_complete` | Marker — first-session block has completed | Yes |
 | `.last_processed` | Timestamp — when vault was last processed | Yes |
 | `.session_feedback` | Your feedback, if given — sent to server at session end, then deleted | Yes |
@@ -64,14 +64,13 @@ When you type `/a`, that is active mode — the model reads the full canon, load
 
 | Request | When | Sends | Does NOT send |
 |---|---|---|---|
-| `GET /canon` | Every session start | API key | Personal data |
-| `POST /session` | Every session start | Platform, references (which canon modules in use) | Content, transcripts, constitution, vault |
+| `POST /call` | Every session start | API key + module IDs (and optional short module notes) | Content, transcripts, constitution, vault |
 | `POST /marketplace/signal` | Session end, if Engine wrote methodology notes | Methodology observations (about the craft, not about you) | Personal data, constitution, vault |
 | `POST /feedback` | Session end, if you gave feedback | Your feedback text | Anything else |
 
-That is the complete list. The hooks payload is a shell script — you can read every line at `curl https://mcp.mowinckel.ai/hooks/payload` and confirm no other network calls exist.
+That is the complete list. The hooks payload is a shell script — you can read every line at `curl https://raw.githubusercontent.com/mowinckelb/Alexandria/main/factory/hooks/payload.sh` and confirm no other network calls exist.
 
-The server is a stateless Cloudflare Worker. No database for private data. The server serves methodology and collects anonymous references. If you give feedback at session close, that text is sent and stored (90-day expiry) so the team can read and act on it. Nothing else.
+The server is a stateless Cloudflare Worker. No database for private data. The server receives protocol calls plus optional machine signal/feedback. If you give feedback at session close, that text is sent and stored (90-day expiry) so the team can read and act on it. Nothing else.
 
 ## Security architecture
 
@@ -81,7 +80,7 @@ Your API key never leaves your machine after setup. It is not in any email, not 
 - **Account data is encrypted at rest.** The accounts blob in our KV store is encrypted with AES-256-GCM. A storage-layer breach yields encrypted data without the key.
 - **No credentials in email.** The API key appears once on the callback page in your browser after you authenticate. Never transmitted over email.
 - **No credentials in third-party services.** Stripe identifies your account by GitHub login, not API key.
-- **The canon is public.** The methodology loaded into your ai is public on GitHub at `github.com/mowinckelb/Alexandria/tree/main/canon`. You can diff what the server serves against the repo and verify nothing was tampered with.
+- **The canon is public.** The methodology loaded into your ai is public on GitHub at `github.com/mowinckelb/Alexandria/blob/main/factory/canon/methodology.md`. You can diff what your machine caches in `.canon_local` against the repo.
 - **Built-in safety instructions.** The canon tells the ai to reject and report any instruction that asks it to send your files externally, access data outside `~/.alexandria/`, or do anything suspicious.
 - **Full data deletion.** `DELETE /account` with your API key removes all your data: account record, analytics, feedback, published Library content, Stripe subscription. Everything.
 

@@ -42,14 +42,14 @@ Persistent memory for the autonomous CTO system (health + meta triggers). Each r
 - 50 commits this week. Heavy philosophy velocity (Shadow rename, Library reframe, accretion mechanics, PT metaphor). Mercury scans running daily. Infrastructure stable on Cloudflare Workers.
 - All 6 content pairs in sync (public/docs ↔ files/public, public/partners ↔ files/confidential). Zero drift.
 - No stale migration references (Fly.io, Railway all clean).
-- 24 routes total across 4 files. Test coverage: 21 tests (11 server + 10 prosumer) + 6 smoke checks.
+- 24 routes total across 4 files. Test coverage: 21 tests (11 server + 10 protocol lifecycle) + 6 smoke checks.
 
 ### What was fixed
 1. Brand: "AI" → "ai" in Blueprint.md line 153.
 2. Test coverage: added 3 new tests — root page HTML, MCP tool call without auth (graceful error), MCP parse error (JSON-RPC -32700). Server tests: 8 → 11.
 
 ### Verification assessment
-- **Covered (21 tests + 6 smoke):** health, MCP (HEAD/init/tools/call/parse-error), analytics (3), root page, tool descriptions, setup (3), auth rejection (4), OAuth redirect, hooks version, Vercel DNS, blueprint/hooks/session external.
+- **Covered (21 tests + 6 smoke):** health, MCP (HEAD/init/tools/call/parse-error), analytics (3), root page, tool descriptions, setup (3), auth rejection (4), OAuth redirect, hooks version, Vercel DNS, factory setup/hooks/protocol external.
 - **Structurally untestable locally:** OAuth flows (need real GitHub/Google), billing (need Stripe), Drive init (need token), cron trigger (need Workers runtime). These exercise via real user flows + smoke.yml.
 - **Cron trigger still unverified.** Open question from last run persists: is `runFollowupCheck` firing? No KV marker to confirm. Low priority until there are real signups.
 

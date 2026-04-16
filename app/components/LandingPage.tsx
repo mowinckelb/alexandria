@@ -1,6 +1,7 @@
 'use client';
 
 import { ThemeToggle } from './ThemeToggle';
+import Link from 'next/link';
 import FooterSection from './FooterSection';
 import ScrollPhilosophy from './ScrollPhilosophy';
 
@@ -19,7 +20,7 @@ export default function LandingPage() {
             <span className="text-[0.65rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>
               code with ai?
             </span>
-            <a
+            <Link
               href="/join"
               className="bg-transparent border-none cursor-pointer transition-opacity hover:opacity-60 no-underline cta-float"
               style={{ color: 'var(--text-primary)' }}
@@ -27,7 +28,7 @@ export default function LandingPage() {
               <span className="text-[1rem] sm:text-[1.15rem] tracking-wide font-medium">
                 press here
               </span>
-            </a>
+            </Link>
           </div>
 
         </div>
@@ -59,12 +60,12 @@ export default function LandingPage() {
 
           <div className="flex flex-col items-center gap-2">
             <span className="text-[0.6rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>code with ai?</span>
-            <a href="/join" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>try now</a>
+            <Link href="/join" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>try now</Link>
           </div>
 
           <div className="flex flex-col items-center gap-2">
             <span className="text-[0.6rem] tracking-widest" style={{ color: 'var(--text-ghost)', letterSpacing: '0.15em' }}>don&rsquo;t code with ai?</span>
-            <a href="/patron" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>join anyway</a>
+            <Link href="/patron" className="text-[1rem] tracking-wide font-medium no-underline transition-opacity hover:opacity-60" style={{ color: 'var(--text-primary)' }}>join anyway</Link>
           </div>
 
           <div className="flex flex-col items-center gap-2">

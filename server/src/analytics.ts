@@ -46,7 +46,7 @@ const summary: Summary = {
 
 // Pending JSONL lines — collected during request, flushed as one KV write.
 // Batching avoids read-modify-write races between concurrent appends.
-let pendingLines: string[] = [];
+const pendingLines: string[] = [];
 
 /**
  * Log an event. One JSONL line queued in memory, update in-memory summary.
@@ -105,7 +105,7 @@ export async function getEventLog(): Promise<string> {
  * Monitoring dashboard — verification signals.
  */
 export async function getDashboard(): Promise<Record<string, unknown> & { _events?: Record<string, string>[] }> {
-  let events: Record<string, string>[] = [];
+  const events: Record<string, string>[] = [];
   let parseErrors = 0;
   try {
     const raw = await getRecentDaysEvents(30);
@@ -173,7 +173,7 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     .map(([path, count]) => ({ path, count }));
 
   // Cron execution status
-  let cronStatus: Record<string, unknown> = {};
+  const cronStatus: Record<string, unknown> = {};
   try {
     const kv = getKV();
     for (const job of ['followup', 'engagement', 'health_digest']) {
@@ -486,7 +486,7 @@ async function getLibraryMetrics(events: Record<string, string>[]): Promise<Reco
  * Per-user event history — drill into a specific author's sessions and errors.
  */
 export async function getUserEvents(login: string): Promise<Record<string, unknown>> {
-  let events: Record<string, string>[] = [];
+  const events: Record<string, string>[] = [];
   try {
     const raw = await getRecentDaysEvents(30);
     if (!raw) return { status: 'no data', author: login };

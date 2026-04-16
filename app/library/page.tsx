@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { SERVER_URL, FETCH_TIMEOUT_MS } from '../lib/config';
 
@@ -93,16 +94,16 @@ export default function LibraryPage() {
               </p>
               {authors.length === 0 && (
                 <p style={{ color: 'var(--text-whisper)', fontSize: '0.8rem', marginTop: '2rem' }}>
-                  <a href="/join" style={{ color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">
+                  <Link href="/join" style={{ color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">
                     be the first.
-                  </a>
+                  </Link>
                 </p>
               )}
             </div>
           ) : (
             <div>
               {filtered.map(author => (
-                <a
+                <Link
                   key={author.id}
                   href={`/library/${author.id}`}
                   style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 2.5rem', transition: 'opacity 0.15s' }}
@@ -119,14 +120,14 @@ export default function LibraryPage() {
                       {author.location}
                     </p>
                   )}
-                </a>
+                </Link>
               ))}
             </div>
           )}
         </div>
 
         <footer style={{ marginTop: '6rem' }}>
-          <a href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</a>
+          <Link href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</Link>
         </footer>
 
       </main>

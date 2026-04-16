@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, type ReactNode } from 'react';
+import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ThemeToggle } from '../../components/ThemeToggle';
@@ -213,9 +214,9 @@ export default function DocPage({ params }: { params: Promise<{ doc: string }> }
           margin: '0 auto',
           padding: '0 2rem 4rem',
         }}>
-          <a href="/partners" style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.85rem' }} className="hover:opacity-60 transition-opacity">
+          <Link href="/partners" style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.85rem' }} className="hover:opacity-60 transition-opacity">
             a.
-          </a>
+          </Link>
         </nav>
       </main>
     </>

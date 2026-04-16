@@ -167,6 +167,14 @@ MISSING=""
 [ ! -f "$ALEX_DIR/.api_key" ] && MISSING="$MISSING api_key"
 [ ! -f "$ALEX_DIR/hooks/shim.sh" ] && MISSING="$MISSING hooks"
 [ ! -f "$ALEX_DIR/.canon_local" ] && MISSING="$MISSING canon"
+[ ! -f "$ALEX_DIR/.hooks_payload" ] && MISSING="$MISSING hooks_payload"
+[ ! -f "$ALEX_DIR/.block" ] && MISSING="$MISSING block"
+for f in machine.md notepad.md feedback.md; do
+  [ ! -f "$ALEX_DIR/$f" ] && MISSING="$MISSING $f"
+done
+for f in constitution/README.md ontology/README.md vault/README.md library/README.md; do
+  [ ! -f "$ALEX_DIR/$f" ] && MISSING="$MISSING $f"
+done
 
 if [ -n "$MISSING" ]; then
   echo ""

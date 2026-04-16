@@ -6,7 +6,7 @@ import { logEvent } from './analytics.js';
 import { countActiveKin, createCheckoutSession, createPortalSession, getStripe } from './billing.js';
 import { callbackPageHtml } from './templates.js';
 import { getDB, getR2 } from './db.js';
-import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex } from './kv.js';
+import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex } from './kv.js';
 import { hashApiKey, generateToken } from './crypto.js';
 import { AccountStore, extractApiKey, findByApiKey, requireAuth } from './auth.js';
 import { generateApiKey, getAccounts, requireAdmin } from './accounts.js';
@@ -333,8 +333,12 @@ export function registerRoutes(app: Hono) {
     const { key, account } = auth;
 
     const keyHash = hashApiKey(key);
-    const accounts = await getAccounts();
-    const storeKey = Object.keys(accounts).find(k => accounts[k].api_key_hash === keyHash);
+    let storeKey = await getAuthIndex(keyHash);
+    if (!storeKey) {
+      // Legacy fallback for accounts created before auth indexing.
+      const accounts = await getAccounts();
+      storeKey = Object.keys(accounts).find(k => accounts[k].api_key_hash === keyHash) || null;
+    }
 
     // Cancel Stripe subscription before deleting account data
     if (account.subscription_id) {
@@ -380,10 +384,12 @@ export function registerRoutes(app: Hono) {
       const r2 = getR2();
       const login = account.github_login;
       for (const prefix of [`shadows/${login}/`, `pulses/${login}/`, `quizzes/${login}/`, `works/${login}/`]) {
-        const listed = await r2.list({ prefix });
-        for (const obj of listed.objects) {
-          await r2.delete(obj.key);
-        }
+        let cursor: string | undefined;
+        do {
+          const listed = await r2.list({ prefix, cursor });
+          await Promise.all(listed.objects.map(obj => r2.delete(obj.key)));
+          cursor = listed.truncated ? listed.cursor : undefined;
+        } while (cursor);
       }
     } catch (e) {
       console.error('[account] R2 cleanup failed:', e);
@@ -394,16 +400,21 @@ export function registerRoutes(app: Hono) {
       const kv = getKV();
       const login = account.github_login;
       for (const prefix of ['feedback:', 'marketplace:signal:', 'marketplace:archive:']) {
-        const list = await kv.list({ prefix });
-        for (const k of list.keys) {
-          try {
-            const raw = await kv.get(k.name);
-            if (raw) {
+        let cursor: string | undefined;
+        do {
+          const page = await kv.list({ prefix, cursor });
+          const entries = await Promise.all(
+            page.keys.map(async (k) => ({ name: k.name, raw: await kv.get(k.name) }))
+          );
+          await Promise.all(entries.map(async ({ name, raw }) => {
+            try {
+              if (!raw) return;
               const data = JSON.parse(raw);
-              if (data.author === login) await kv.delete(k.name);
-            }
-          } catch { /* skip */ }
-        }
+              if (data.author === login) await kv.delete(name);
+            } catch { /* skip */ }
+          }));
+          cursor = page.list_complete ? undefined : page.cursor;
+        } while (cursor);
       }
     } catch (e) {
       console.error('[account] KV cleanup failed:', e);
@@ -533,14 +544,17 @@ export function registerRoutes(app: Hono) {
 
     try {
       const kv = getKV();
-      const list = await kv.list({ prefix: 'feedback:' });
       const items: unknown[] = [];
-      for (const k of list.keys) {
-        const raw = await kv.get(k.name);
-        if (raw) {
+      let cursor: string | undefined;
+      do {
+        const page = await kv.list({ prefix: 'feedback:', cursor });
+        const raws = await Promise.all(page.keys.map(k => kv.get(k.name)));
+        for (const raw of raws) {
+          if (!raw) continue;
           try { items.push(JSON.parse(raw)); } catch { /* skip corrupted */ }
         }
-      }
+        cursor = page.list_complete ? undefined : page.cursor;
+      } while (cursor);
       // Sort newest first
       items.sort((a: any, b: any) => new Date(b.t).getTime() - new Date(a.t).getTime());
       return c.json({ feedback: items });
@@ -646,21 +660,17 @@ export function registerRoutes(app: Hono) {
     if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
 
     const kv = getKV();
-    const allKeys: { name: string }[] = [];
+    const signals: { t: string; author: string; signal: string }[] = [];
     let cursor: string | undefined;
     do {
       const page = await kv.list({ prefix: 'marketplace:archive:', cursor });
-      allKeys.push(...page.keys);
-      cursor = page.list_complete ? undefined : (page as any).cursor;
+      const raws = await Promise.all(page.keys.map(k => kv.get(k.name)));
+      for (const raw of raws) {
+        if (!raw) continue;
+        try { signals.push(JSON.parse(raw)); } catch { continue; }
+      }
+      cursor = page.list_complete ? undefined : page.cursor;
     } while (cursor);
-
-    const signals: { t: string; author: string; signal: string }[] = [];
-    for (const key of allKeys) {
-      try {
-        const raw = await kv.get(key.name);
-        if (raw) signals.push(JSON.parse(raw));
-      } catch { continue; }
-    }
 
     // Strip author for anonymity — meta trigger sees signal content only
     const anonymous = signals.map(s => ({ t: s.t, signal: s.signal }));
@@ -673,7 +683,7 @@ export function registerRoutes(app: Hono) {
     if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
 
     // Read window — default last 30 days, configurable
-    const days = parseInt(c.req.query('days') || '30');
+    const days = parseInt(c.req.query('days') || '30', 10);
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
     try {

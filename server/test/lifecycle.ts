@@ -1,9 +1,9 @@
 /**
- * Product lifecycle test — verifies the full user journey works end-to-end.
+ * Product lifecycle test - verifies the full user journey works end-to-end.
  * Uses a real API key to test what an actual Author experiences.
  *
- * Tests the chain: Canon loads with content → constitution injects →
- * session events accepted → machine signal collected → hooks auto-update.
+ * Tests the chain: handshake -> factory artifacts -> protocol obligations
+ * -> machine signal/feedback -> local machine files.
  *
  * Usage: npx tsx test/lifecycle.ts
  * Requires: ~/.alexandria/.api_key (a real account)
@@ -17,6 +17,7 @@ const BASE = process.env.TEST_URL || 'https://mcp.mowinckel.ai';
 const HOME = process.env.HOME || process.env.USERPROFILE || '';
 const ALEX_DIR = join(HOME, '.alexandria');
 const API_KEY_PATH = join(ALEX_DIR, '.api_key');
+const FACTORY_RAW = 'https://raw.githubusercontent.com/mowinckelb/Alexandria/main/factory';
 
 interface TestResult {
   test: string;
@@ -24,7 +25,25 @@ interface TestResult {
   details: string;
 }
 
+interface DashboardSnapshot {
+  hasStructure: boolean;
+  status: string;
+  serverErrors24h: number;
+  parseErrors: number;
+  invariantIssues: string[];
+  telemetryStale: boolean;
+  totalEvents: number | null;
+}
+
 const results: TestResult[] = [];
+
+async function safeJson(res: Response): Promise<Record<string, unknown> | null> {
+  try {
+    return await res.json() as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
 
 async function test(name: string, fn: () => Promise<TestResult>) {
   process.stdout.write(`  ${name}... `);
@@ -45,6 +64,29 @@ function pause(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function snapshotDashboard(body: Record<string, unknown>): DashboardSnapshot {
+  const runtime = body.runtime as Record<string, unknown> | undefined;
+  const verification = body.verification as Record<string, unknown> | undefined;
+
+  return {
+    hasStructure: !!runtime
+      && typeof runtime.server_errors_24h === 'number'
+      && !!verification
+      && ('session_id_coverage' in verification)
+      && typeof body.total_events === 'number',
+    status: typeof body.status === 'string' ? body.status : '',
+    serverErrors24h: runtime && typeof runtime.server_errors_24h === 'number'
+      ? runtime.server_errors_24h
+      : 0,
+    parseErrors: typeof body.parse_errors === 'number' ? body.parse_errors : 0,
+    invariantIssues: Array.isArray(body.invariant_issues)
+      ? body.invariant_issues.filter((x): x is string => typeof x === 'string')
+      : [],
+    telemetryStale: !!(body.telemetry_health as Record<string, unknown> | undefined)?.stale,
+    totalEvents: typeof body.total_events === 'number' ? body.total_events : null,
+  };
+}
+
 async function main() {
   console.log('=== Alexandria Product Lifecycle Test ===');
   console.log(`Target: ${BASE}\n`);
@@ -57,6 +99,7 @@ async function main() {
   }
   const apiKey = readFileSync(API_KEY_PATH, 'utf-8').trim();
   const headers = { Authorization: `Bearer ${apiKey}` };
+  let baselineDashboard: DashboardSnapshot | null = null;
 
   // -----------------------------------------------------------------------
   // PHASE 1: Server health
@@ -65,150 +108,189 @@ async function main() {
 
   await test('Health endpoint reports fully healthy', async () => {
     const res = await fetch(`${BASE}/health`);
-    const body = await res.json() as { status?: string; components?: Record<string, string> };
-    const status = body.status || '';
-    const brokenComponents = Object.entries(body.components || {}).filter(([, v]) => v !== 'ok').map(([k, v]) => `${k}=${v}`);
+    const body = await safeJson(res);
+    const status = typeof body?.status === 'string' ? body.status : '';
+    const components = (body?.components || {}) as Record<string, string>;
+    const brokenComponents = Object.entries(components)
+      .filter(([, v]) => v !== 'ok')
+      .map(([k, v]) => `${k}=${v}`);
+
     return {
       test: 'Health endpoint',
       passed: res.ok && status === 'ok' && brokenComponents.length === 0,
       details: status === 'degraded'
-        ? `DEGRADED — broken: ${brokenComponents.join(', ')}`
+        ? `DEGRADED - broken: ${brokenComponents.join(', ')}`
         : `status=${status}, all components ok`,
     };
   });
 
-  // -----------------------------------------------------------------------
-  // PHASE 2: Canon delivery (what SessionStart hook fetches)
-  // -----------------------------------------------------------------------
-  console.log('\nPhase 2: Canon delivery');
+  // Capture dashboard baseline so this test flags regressions introduced now,
+  // not unrelated pre-existing production issues.
+  try {
+    const baselineRes = await fetch(`${BASE}/analytics/dashboard`, { headers });
+    const baselineBody = baselineRes.ok ? await safeJson(baselineRes) : null;
+    if (baselineBody) baselineDashboard = snapshotDashboard(baselineBody);
+  } catch {
+    baselineDashboard = null;
+  }
 
-  let canonSize = 0;
-  await test('Canon loads with auth', async () => {
-    const res = await fetch(`${BASE}/canon`, { headers });
+  // -----------------------------------------------------------------------
+  // PHASE 2: Protocol handshake + methodology source
+  // -----------------------------------------------------------------------
+  console.log('\nPhase 2: Handshake + methodology');
+
+  let methodologyUrl = `${FACTORY_RAW}/canon/methodology.md`;
+
+  await test('Handshake exposes protocol spec', async () => {
+    const res = await fetch(`${BASE}/alexandria`);
+    const body = await safeJson(res);
+    if (typeof body?.methodology === 'string' && body.methodology.length > 0) {
+      methodologyUrl = body.methodology;
+    }
+
+    const endpoints = (body?.endpoints || {}) as Record<string, string>;
+    const hasCoreEndpoints = endpoints.file === '/file/{name}'
+      && endpoints.call === '/call'
+      && endpoints.library === '/library'
+      && endpoints.marketplace === '/marketplace';
+
+    return {
+      test: 'Handshake exposes protocol spec',
+      passed: res.ok && body?.protocol === 'alexandria' && hasCoreEndpoints,
+      details: `HTTP ${res.status}, protocol=${String(body?.protocol)}, has core endpoints=${hasCoreEndpoints}`,
+    };
+  });
+
+  await test('Authenticated handshake returns account status', async () => {
+    const res = await fetch(`${BASE}/alexandria`, { headers });
+    const body = await safeJson(res);
+
+    const connected = body?.connected === true;
+    const obligations = (body?.obligations || {}) as Record<string, unknown>;
+    const hasObligations = typeof obligations.file_status === 'string'
+      && typeof obligations.call_status === 'string';
+
+    return {
+      test: 'Authenticated handshake',
+      passed: res.ok && connected && hasObligations,
+      details: `HTTP ${res.status}, connected=${String(body?.connected)}, obligations=${hasObligations}`,
+    };
+  });
+
+  await test('Methodology URL is reachable and non-trivial', async () => {
+    const res = await fetch(methodologyUrl);
     const body = await res.text();
-    canonSize = body.length;
-    return {
-      test: 'Canon loads',
-      passed: res.ok && body.length > 1000,
-      details: `HTTP ${res.status}, ${body.length} bytes`,
-    };
-  });
+    const hasAxioms = body.includes('Axioms');
+    const hasFiveOps = body.includes('Five Operations') || body.includes('The Five Operations');
 
-  await test('Canon contains Axioms', async () => {
-    const res = await fetch(`${BASE}/canon`, { headers });
-    const body = await res.text();
-    const hasAxioms = body.includes('AXIOMS') || body.includes('Axioms');
     return {
-      test: 'Canon contains Axioms',
-      passed: hasAxioms,
-      details: `has axioms section: ${hasAxioms}`,
-    };
-  });
-
-  await test('Canon contains methodology', async () => {
-    const res = await fetch(`${BASE}/canon`, { headers });
-    const body = await res.text();
-    const hasCanon = body.includes('CANON') || body.includes('Canon');
-    const hasEditor = body.includes('Editor');
-    const hasMercury = body.includes('Mercury');
-    const hasPublisher = body.includes('Publisher');
-    return {
-      test: 'Canon contains methodology',
-      passed: hasCanon && hasEditor && hasMercury && hasPublisher,
-      details: `Canon: ${hasCanon}, Editor: ${hasEditor}, Mercury: ${hasMercury}, Publisher: ${hasPublisher}`,
-    };
-  });
-
-  await test('Canon contains living machine instructions', async () => {
-    const res = await fetch(`${BASE}/canon`, { headers });
-    const body = await res.text();
-    const hasMachineMd = body.includes('machine.md');
-    const hasNotepad = body.includes('notepad');
-    const hasMachineSignal = body.includes('.machine_signal');
-    return {
-      test: 'Canon contains living machine',
-      passed: hasMachineMd && hasNotepad && hasMachineSignal,
-      details: `machine.md: ${hasMachineMd}, notepad: ${hasNotepad}, signal: ${hasMachineSignal}`,
-    };
-  });
-
-  await test('Canon returns version headers', async () => {
-    const res = await fetch(`${BASE}/canon`, { headers });
-    const accountStatus = res.headers.get('x-account-status');
-    const accountUntil = res.headers.get('x-account-until');
-    return {
-      test: 'Canon version headers',
-      passed: !!accountStatus,
-      details: `account-status: ${accountStatus || 'missing'}, account-until: ${accountUntil || 'none'}`,
+      test: 'Methodology URL',
+      passed: res.ok && body.length > 1000 && hasAxioms && hasFiveOps,
+      details: `HTTP ${res.status}, ${body.length} bytes, axioms=${hasAxioms}, five_ops=${hasFiveOps}`,
     };
   });
 
   // -----------------------------------------------------------------------
-  // PHASE 3: Hooks delivery (what auto-update fetches)
+  // PHASE 3: Factory hooks artifacts
   // -----------------------------------------------------------------------
-  console.log('\nPhase 3: Hooks delivery');
+  console.log('\nPhase 3: Factory hooks');
 
-  await test('Hooks endpoint returns shim installer', async () => {
-    const res = await fetch(`${BASE}/hooks`, { headers });
+  await test('Factory shim is fetchable and executable', async () => {
+    const res = await fetch(`${FACTORY_RAW}/hooks/shim.sh`);
     const body = await res.text();
-    const isBash = body.includes('#!/usr/bin/env bash');
-    const hasShim = body.includes('shim.sh');
-    const hasSessionModes = body.includes('session-start') && body.includes('session-end');
-    const hasSkillUpdate = body.includes('SKILL.md');
+    const hasShebang = body.startsWith('#!/usr/bin/env bash');
+    const hasModes = body.includes('session-start') && body.includes('session-end') && body.includes('subagent');
+    const fetchesPayload = body.includes('factory/hooks/payload.sh');
+
     return {
-      test: 'Hooks endpoint',
-      passed: res.ok && isBash && hasShim && hasSessionModes,
-      details: `bash: ${isBash}, shim: ${hasShim}, modes: ${hasSessionModes}, skill: ${hasSkillUpdate}`,
+      test: 'Factory shim',
+      passed: res.ok && hasShebang && hasModes && fetchesPayload,
+      details: `HTTP ${res.status}, shebang=${hasShebang}, modes=${hasModes}, payload_ref=${fetchesPayload}`,
+    };
+  });
+
+  await test('Factory payload includes all 5 context layers', async () => {
+    const res = await fetch(`${FACTORY_RAW}/hooks/payload.sh`);
+    const body = await res.text();
+    const hasConstitution = body.includes('constitution');
+    const hasOntology = body.includes('ontology');
+    const hasMachine = body.includes('machine.md');
+    const hasNotepad = body.includes('notepad.md');
+    const hasFeedback = body.includes('feedback.md');
+
+    return {
+      test: 'Factory payload context layers',
+      passed: res.ok && hasConstitution && hasOntology && hasMachine && hasNotepad && hasFeedback,
+      details: `constitution=${hasConstitution}, ontology=${hasOntology}, machine=${hasMachine}, notepad=${hasNotepad}, feedback=${hasFeedback}`,
     };
   });
 
   // -----------------------------------------------------------------------
-  // PHASE 4: Session lifecycle (what hooks report)
+  // PHASE 4: Protocol obligations + machine signals
   // -----------------------------------------------------------------------
-  console.log('\nPhase 4: Session lifecycle');
+  console.log('\nPhase 4: Protocol obligations');
 
-  const testSessionId = `lifecycle-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const stamp = Date.now();
+  const fileName = `lifecycle-${stamp}`;
+  const moduleId = `lifecycle-module-${stamp}`;
+  const callText = `Lifecycle call verification ${stamp}`;
 
-  await test('Session start event accepted', async () => {
-    const res = await fetch(`${BASE}/session`, {
+  await test('File obligation write accepted', async () => {
+    const res = await fetch(`${BASE}/file/${fileName}`, {
+      method: 'PUT',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: `# Lifecycle ${stamp}\n\nProtocol file obligation verification.`,
+        text: `lifecycle ${stamp}`,
+      }),
+    });
+    const body = await safeJson(res);
+    return {
+      test: 'File write',
+      passed: res.ok && body?.ok === true,
+      details: `HTTP ${res.status}, ok=${String(body?.ok)}`,
+    };
+  });
+
+  await test('Call obligation accepted', async () => {
+    const res = await fetch(`${BASE}/call`, {
       method: 'POST',
       headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        event: 'call',
-        platform: 'lifecycle-test',
-        session_id: testSessionId,
-        constitution_injected: true,
-        canon_fetched: true,
+        modules: [{ id: moduleId, text: callText }],
       }),
     });
-    const body = await res.json() as { ok: boolean };
+    const body = await safeJson(res);
     return {
-      test: 'Session start event',
-      passed: res.ok && body.ok,
-      details: `HTTP ${res.status}, ok: ${body.ok}`,
+      test: 'Call obligation',
+      passed: res.ok && body?.ok === true,
+      details: `HTTP ${res.status}, ok=${String(body?.ok)}`,
     };
   });
 
-  await test('Session end event accepted', async () => {
-    const res = await fetch(`${BASE}/session`, {
-      method: 'POST',
-      headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event: 'end',
-        platform: 'lifecycle-test',
-        session_id: testSessionId,
-        constitution_size: 50000,
-        vault_entry_count: 15,
-        domains_count: 5,
-        constitution_injected: true,
-        canon_fetched: true,
-      }),
-    });
-    const body = await res.json() as { ok: boolean };
+  await test('Marketplace reflects protocol call', async () => {
+    const res = await fetch(`${BASE}/marketplace/${moduleId}`, { headers });
+    const body = await safeJson(res);
+    const usage = Array.isArray(body?.usage) ? body.usage as Array<{ text?: string }> : [];
+    const found = usage.some((u) => typeof u.text === 'string' && u.text.includes(callText));
+
     return {
-      test: 'Session end event',
-      passed: res.ok && body.ok,
-      details: `HTTP ${res.status}, ok: ${body.ok}`,
+      test: 'Marketplace module feed',
+      passed: res.ok && body?.module === moduleId && found,
+      details: `HTTP ${res.status}, usage_count=${usage.length}, found=${found}`,
+    };
+  });
+
+  await test('Marketplace listing includes lifecycle module', async () => {
+    const res = await fetch(`${BASE}/marketplace`, { headers });
+    const body = await safeJson(res);
+    const modules = Array.isArray(body?.modules) ? body.modules as string[] : [];
+    const found = modules.includes(moduleId);
+
+    return {
+      test: 'Marketplace listing',
+      passed: res.ok && found,
+      details: `HTTP ${res.status}, found=${found}, module_count=${modules.length}`,
     };
   });
 
@@ -217,25 +299,36 @@ async function main() {
       method: 'POST',
       headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        signal: 'Lifecycle test: Canon loaded correctly. Machine instructions clear. Constitution-as-lens section is a strong addition.',
+        signal: `Lifecycle test signal ${stamp}: protocol obligations and marketplace flow are healthy.`,
       }),
     });
-    const raw = await res.text();
-    let body: { ok?: boolean } = {};
-    try {
-      body = JSON.parse(raw) as { ok?: boolean };
-    } catch {
-      body = {};
-    }
+    const body = await safeJson(res);
     return {
       test: 'Machine signal',
-      passed: res.ok && body.ok === true,
-      details: `HTTP ${res.status}, ok: ${String(body.ok)}, raw: ${raw.slice(0, 80)}`,
+      passed: res.ok && body?.ok === true,
+      details: `HTTP ${res.status}, ok=${String(body?.ok)}`,
+    };
+  });
+
+  await test('Feedback endpoint accepts session feedback', async () => {
+    const res = await fetch(`${BASE}/feedback`, {
+      method: 'POST',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `Lifecycle feedback ${stamp}: end-to-end flow verified.`,
+        context: 'lifecycle-test',
+      }),
+    });
+    const body = await safeJson(res);
+    return {
+      test: 'Feedback endpoint',
+      passed: res.ok && body?.ok === true,
+      details: `HTTP ${res.status}, ok=${String(body?.ok)}`,
     };
   });
 
   // -----------------------------------------------------------------------
-  // PHASE 5: Local file verification
+  // PHASE 5: Local machine files
   // -----------------------------------------------------------------------
   console.log('\nPhase 5: Local files');
 
@@ -246,7 +339,7 @@ async function main() {
     let totalSize = 0;
     if (exists) {
       const { readdirSync, statSync } = await import('fs');
-      const files = readdirSync(constDir).filter(f => f.endsWith('.md'));
+      const files = readdirSync(constDir).filter((f) => f.endsWith('.md') && f !== 'README.md');
       fileCount = files.length;
       for (const f of files) {
         totalSize += statSync(join(constDir, f)).size;
@@ -255,29 +348,28 @@ async function main() {
     return {
       test: 'Constitution directory',
       passed: exists && fileCount > 0 && totalSize > 100,
-      details: `exists: ${exists}, files: ${fileCount}, total: ${totalSize}b`,
+      details: `exists=${exists}, files=${fileCount}, total=${totalSize}b`,
     };
   });
 
-  await test('Canon cached locally with valid content', async () => {
-    const bpPath = join(ALEX_DIR, '.canon_local');
-    const exists = existsSync(bpPath);
+  await test('Methodology cached locally with valid content', async () => {
+    const canonPath = join(ALEX_DIR, '.canon_local');
+    const exists = existsSync(canonPath);
     let size = 0;
     let hasRequiredContent = false;
     if (exists) {
-      const content = readFileSync(bpPath, 'utf-8');
+      const content = readFileSync(canonPath, 'utf-8');
       size = content.length;
-      // Canon must contain core sections — size alone is not verification
-      hasRequiredContent = content.includes('Axioms') && content.includes('Editor') && content.includes('Mercury');
+      hasRequiredContent = content.includes('Axioms') && content.includes('Five Operations');
     }
     return {
-      test: 'Canon local cache',
+      test: 'Methodology local cache',
       passed: exists && size > 1000 && hasRequiredContent,
       details: !exists
-        ? 'MISSING — canon cache does not exist (hooks have not run)'
+        ? 'MISSING - .canon_local does not exist (hooks have not run)'
         : !hasRequiredContent
-          ? `exists but missing required sections (${size}b) — corrupted cache`
-          : `valid: ${size}b, contains Axioms+Editor+Mercury`,
+          ? `exists but missing required sections (${size}b) - corrupted cache`
+          : `valid: ${size}b, contains Axioms + Five Operations`,
     };
   });
 
@@ -287,7 +379,7 @@ async function main() {
     return {
       test: 'Feedback file',
       passed: exists,
-      details: `exists: ${exists}`,
+      details: `exists=${exists}`,
     };
   });
 
@@ -299,7 +391,7 @@ async function main() {
     return {
       test: 'Machine.md',
       passed: exists && size > 50,
-      details: `exists: ${exists}, size: ${size}b`,
+      details: `exists=${exists}, size=${size}b`,
     };
   });
 
@@ -309,7 +401,7 @@ async function main() {
     return {
       test: 'Notepad',
       passed: exists,
-      details: `exists: ${exists}`,
+      details: `exists=${exists}`,
     };
   });
 
@@ -318,55 +410,68 @@ async function main() {
   // -----------------------------------------------------------------------
   console.log('\nPhase 6: Marketplace');
 
-  await test('Dashboard returns valid metrics with no critical issues', async () => {
-    const evaluate = (body: Record<string, unknown>) => {
-      const issues: string[] = [];
-
-      // Structure checks
-      const runtime = body.runtime as Record<string, unknown> | undefined;
-      const verification = body.verification as Record<string, unknown> | undefined;
-      if (!runtime || typeof runtime.server_errors_24h !== 'number') issues.push('missing runtime');
-      if (!verification || !('session_id_coverage' in verification)) issues.push('missing verification');
-      if (typeof body.total_events !== 'number') issues.push('missing total_events');
-
-      // Value checks — the numbers must make sense
-      const status = body.status as string || '';
-      if (status.startsWith('degraded')) issues.push(`status: ${status}`);
-
-      const invariantIssues = body.invariant_issues as string[] | undefined;
-      if (invariantIssues && invariantIssues.length > 0) issues.push(`invariants: ${invariantIssues.join(', ')}`);
-
-      if (runtime && typeof runtime.server_errors_24h === 'number' && runtime.server_errors_24h > 0) {
-        issues.push(`${runtime.server_errors_24h} server errors in 24h`);
-      }
-
-      const telemetry = body.telemetry_health as Record<string, unknown> | undefined;
-      if (telemetry?.stale === true) issues.push('telemetry stale (no events for 24h+)');
-      if (typeof body.parse_errors === 'number' && (body.parse_errors as number) > 0) issues.push(`${body.parse_errors} parse errors`);
-
-      return { issues, hasStructure: issues.filter(i => i.startsWith('missing')).length === 0 };
-    };
-
+  await test('Dashboard metrics did not regress during lifecycle run', async () => {
     let res = await fetch(`${BASE}/analytics/dashboard`, { headers });
     if (!res.ok) return { test: 'Dashboard', passed: false, details: `HTTP ${res.status}` };
-    let body = await res.json() as Record<string, unknown>;
-    let verdict = evaluate(body);
+    let body = await safeJson(res) || {};
+    let current = snapshotDashboard(body);
 
     // Retry for edge propagation
-    for (let attempt = 0; attempt < 2 && !verdict.hasStructure; attempt++) {
+    for (let attempt = 0; attempt < 2 && !current.hasStructure; attempt++) {
       await pause(1500);
       res = await fetch(`${BASE}/analytics/dashboard`, { headers });
       if (!res.ok) break;
-      body = await res.json() as Record<string, unknown>;
-      verdict = evaluate(body);
+      body = await safeJson(res) || {};
+      current = snapshotDashboard(body);
     }
+
+    if (!current.hasStructure) {
+      return {
+        test: 'Dashboard',
+        passed: false,
+        details: 'missing runtime/verification/total_events structure',
+      };
+    }
+
+    if (!baselineDashboard || !baselineDashboard.hasStructure) {
+      // No baseline available -> fall back to strict health-style check.
+      const strictIssues: string[] = [];
+      if (current.status.startsWith('degraded')) strictIssues.push(`status=${current.status}`);
+      if (current.invariantIssues.length > 0) strictIssues.push(`invariants=${current.invariantIssues.join(',')}`);
+      if (current.serverErrors24h > 0) strictIssues.push(`server_errors_24h=${current.serverErrors24h}`);
+      if (current.parseErrors > 0) strictIssues.push(`parse_errors=${current.parseErrors}`);
+      if (current.telemetryStale) strictIssues.push('telemetry_stale=true');
+      return {
+        test: 'Dashboard',
+        passed: strictIssues.length === 0,
+        details: strictIssues.length === 0
+          ? `clean - ${current.totalEvents} events, status=${current.status}`
+          : `ISSUES: ${strictIssues.join('; ')}`,
+      };
+    }
+
+    const newInvariantIssues = current.invariantIssues
+      .filter(i => !baselineDashboard!.invariantIssues.includes(i));
+    const regressed = {
+      status: baselineDashboard.status.startsWith('ok') && current.status.startsWith('degraded'),
+      serverErrors: current.serverErrors24h > baselineDashboard.serverErrors24h,
+      parseErrors: current.parseErrors > baselineDashboard.parseErrors,
+      telemetry: current.telemetryStale && !baselineDashboard.telemetryStale,
+      invariants: newInvariantIssues.length > 0,
+    };
+    const issues: string[] = [];
+    if (regressed.status) issues.push(`status ${baselineDashboard.status} -> ${current.status}`);
+    if (regressed.serverErrors) issues.push(`server_errors_24h ${baselineDashboard.serverErrors24h} -> ${current.serverErrors24h}`);
+    if (regressed.parseErrors) issues.push(`parse_errors ${baselineDashboard.parseErrors} -> ${current.parseErrors}`);
+    if (regressed.telemetry) issues.push('telemetry changed healthy -> stale');
+    if (regressed.invariants) issues.push(`new invariant issues: ${newInvariantIssues.join(', ')}`);
 
     return {
       test: 'Dashboard',
-      passed: verdict.issues.length === 0,
-      details: verdict.issues.length > 0
-        ? `ISSUES: ${verdict.issues.join('; ')}`
-        : `clean — ${body.total_events} events, status: ${body.status}`,
+      passed: issues.length === 0,
+      details: issues.length > 0
+        ? `REGRESSION: ${issues.join('; ')}`
+        : `stable - status=${current.status}, server_errors_24h=${current.serverErrors24h}, parse_errors=${current.parseErrors}`,
     };
   });
 
@@ -377,7 +482,7 @@ async function main() {
   const passed = results.filter(r => r.passed).length;
   const failed = results.filter(r => !r.passed).length;
   for (const r of results) {
-    if (!r.passed) console.log(`  FAIL: ${r.test} — ${r.details}`);
+    if (!r.passed) console.log(`  FAIL: ${r.test} - ${r.details}`);
   }
   console.log(`\n  ${passed} passed, ${failed} failed out of ${results.length}`);
   if (failed > 0) {

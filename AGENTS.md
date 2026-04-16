@@ -77,7 +77,7 @@ factory/
     methodology.md          # The canon — how to develop human cognition
   hooks/
     shim.sh                 # Immutable local shim
-    payload.sh              # Server-delivered hook logic
+    payload.sh              # GitHub-delivered hook logic
   skills/
     claudecode.md           # Claude Code skill definition
     codex.md                # Codex skill definition

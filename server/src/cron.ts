@@ -3,7 +3,7 @@
 import { loadAccounts, saveAccounts, getKV } from './kv.js';
 import { getRecentEvents } from './analytics.js';
 import { sendEmail, sendFollowupEmail, sendEngagementEmail, MAX_FOLLOWUPS, DEFAULT_ENGAGEMENT_DAYS, FOUNDER_EMAIL } from './email.js';
-import type { Account, AccountStore } from './auth.js';
+import type { AccountStore } from './auth.js';
 
 // ---------------------------------------------------------------------------
 // Follow-up check — nudge signed-up users who haven't installed

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import PhilosophyFiveWays from './PhilosophyFiveWays';
 
 function Fade({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -153,13 +154,13 @@ export default function ScrollPhilosophy() {
 
         <Fade>
           <div className="flex flex-col items-center gap-16 py-12 sm:py-16">
-            <a
+            <Link
               href="/signup"
               className="text-[0.95rem] sm:text-[1.05rem] tracking-wide no-underline transition-opacity hover:opacity-60"
               style={{ color: 'var(--text-primary)' }}
             >
               try now
-            </a>
+            </Link>
             <PhilosophyFiveWays current="frame" />
           </div>
         </Fade>

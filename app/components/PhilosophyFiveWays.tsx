@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Link from 'next/link';
 
 function CopyConcreteButton({ ghost }: { ghost?: boolean }) {
   const [copied, setCopied] = useState(false);
@@ -57,11 +58,11 @@ export default function PhilosophyFiveWays({ current }: { current?: Way }) {
       <span style={{ color: 'var(--text-ghost)' }}>the philosophy, six ways</span>
       <div className="flex flex-col gap-2">
         <p style={{ color: 'var(--text-muted)' }}>
-          <a href="/#philosophy" className={linkClass} style={linkStyle('frame')}>frame</a>
+          <Link href="/#philosophy" className={linkClass} style={linkStyle('frame')}>frame</Link>
           {' '}&mdash; two minutes
         </p>
         <p style={{ color: 'var(--text-muted)' }}>
-          <a href="/join" className={linkClass} style={linkStyle('pitch')}>pitch</a>
+          <Link href="/join" className={linkClass} style={linkStyle('pitch')}>pitch</Link>
           {' '}&mdash; one page
         </p>
         <p style={{ color: 'var(--text-muted)' }}>
@@ -69,7 +70,7 @@ export default function PhilosophyFiveWays({ current }: { current?: Way }) {
           {' '}&mdash; one prompt
         </p>
         <p style={{ color: 'var(--text-muted)' }}>
-          <a href="/vision" className={linkClass} style={linkStyle('vision')}>vision</a>
+          <Link href="/vision" className={linkClass} style={linkStyle('vision')}>vision</Link>
           {' '}&mdash; twenty minutes
         </p>
         <p style={{ color: 'var(--text-muted)' }}>
@@ -77,7 +78,7 @@ export default function PhilosophyFiveWays({ current }: { current?: Way }) {
           {' '}&mdash; one breath
         </p>
         <p style={{ color: 'var(--text-muted)' }}>
-          <a href="/library" className={linkClass} style={linkStyle('library')}>library</a>
+          <Link href="/library" className={linkClass} style={linkStyle('library')}>library</Link>
           {' '}&mdash; in action
         </p>
       </div>

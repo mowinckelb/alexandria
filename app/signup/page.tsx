@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { SERVER_URL } from '../lib/config';
 
@@ -22,11 +23,11 @@ function SignupPageContent() {
       <section className="flex flex-col items-center justify-center px-8 min-h-screen relative">
         <div className="max-w-[420px] flex flex-col items-center" style={{ marginTop: '-4vh' }}>
 
-          <a href="/" className="no-underline">
+          <Link href="/" className="no-underline">
             <p className="text-[1.3rem] sm:text-[1.5rem] font-normal leading-none tracking-tight text-center" style={{ color: 'var(--text-primary)' }}>
               alexandria.
             </p>
-          </a>
+          </Link>
 
           <div className="mt-14 sm:mt-16">
             <a

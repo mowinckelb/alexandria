@@ -2,18 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import Link from 'next/link';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import type { PulseCard } from '../types';
 import { SERVER_URL } from '../../../lib/config';
 
-const mdComponents = {
-  h1: ({ children }: any) => <h1 style={{ fontSize: '1.3rem', fontWeight: 400, margin: '2rem 0 0.8rem', color: 'var(--text-primary)' }}>{children}</h1>,
-  h2: ({ children }: any) => <h2 style={{ fontSize: '1rem', fontWeight: 400, margin: '1.8rem 0 0.6rem', color: 'var(--text-primary)' }}>{children}</h2>,
-  h3: ({ children }: any) => <h3 style={{ fontSize: '0.88rem', fontWeight: 400, margin: '1.2rem 0 0.4rem', color: 'var(--text-muted)' }}>{children}</h3>,
-  p: ({ children }: any) => <p style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8, margin: '0 0 0.8rem' }}>{children}</p>,
-  li: ({ children }: any) => <li style={{ fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: 1.7, margin: '0 0 0.3rem' }}>{children}</li>,
-  strong: ({ children }: any) => <strong style={{ fontWeight: 500 }}>{children}</strong>,
+const mdComponents: Components = {
+  h1: ({ children }) => <h1 style={{ fontSize: '1.3rem', fontWeight: 400, margin: '2rem 0 0.8rem', color: 'var(--text-primary)' }}>{children}</h1>,
+  h2: ({ children }) => <h2 style={{ fontSize: '1rem', fontWeight: 400, margin: '1.8rem 0 0.6rem', color: 'var(--text-primary)' }}>{children}</h2>,
+  h3: ({ children }) => <h3 style={{ fontSize: '0.88rem', fontWeight: 400, margin: '1.2rem 0 0.4rem', color: 'var(--text-muted)' }}>{children}</h3>,
+  p: ({ children }) => <p style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.8, margin: '0 0 0.8rem' }}>{children}</p>,
+  li: ({ children }) => <li style={{ fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: 1.7, margin: '0 0 0.3rem' }}>{children}</li>,
+  strong: ({ children }) => <strong style={{ fontWeight: 500 }}>{children}</strong>,
   hr: () => <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', margin: '2rem 0' }} />,
 };
 
@@ -53,14 +55,14 @@ function SimilarityCard({ card, authorName, authorId }: { card: PulseCard; autho
       </div>
 
       <div style={{ margin: '1.2rem 0 0', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <a href={`/library/${authorId}`}
+        <Link href={`/library/${authorId}`}
           style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
           className="hover:opacity-60"
-        >mowinckel.ai/library/{authorId}</a>
-        <a href={`/signup?ref=${authorId}&ref_source=library`}
+        >mowinckel.ai/library/{authorId}</Link>
+        <Link href={`/signup?ref=${authorId}&ref_source=library`}
           style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
           className="hover:opacity-60"
-        >mowinckel.ai — use code {authorId}</a>
+        >mowinckel.ai — use code {authorId}</Link>
       </div>
     </div>
   );
@@ -91,14 +93,14 @@ function FragmentCard({ card, authorName, authorId }: { card: PulseCard; authorN
       ))}
 
       <div style={{ margin: '1.2rem 0 0', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <a href={`/library/${authorId}`}
+        <Link href={`/library/${authorId}`}
           style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
           className="hover:opacity-60"
-        >mowinckel.ai/library/{authorId}</a>
-        <a href={`/signup?ref=${authorId}&ref_source=library`}
+        >mowinckel.ai/library/{authorId}</Link>
+        <Link href={`/signup?ref=${authorId}&ref_source=library`}
           style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
           className="hover:opacity-60"
-        >mowinckel.ai — use code {authorId}</a>
+        >mowinckel.ai — use code {authorId}</Link>
       </div>
     </div>
   );
@@ -139,9 +141,9 @@ export default function PulsePageClient({ params }: { params: Promise<{ author: 
       <main style={{ maxWidth: '640px', margin: '0 auto', padding: '6rem 2rem 4rem', fontFamily: 'var(--font-eb-garamond)' }}>
 
         <div style={{ margin: '0 0 3rem' }}>
-          <a href={`/library/${authorId}`} style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s' }} className="hover:opacity-60">
+          <Link href={`/library/${authorId}`} style={{ fontSize: '0.72rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s' }} className="hover:opacity-60">
             {displayName || authorId}
-          </a>
+          </Link>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 300, margin: '0.5rem 0 0', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
             pulse
           </h1>
@@ -164,8 +166,8 @@ export default function PulsePageClient({ params }: { params: Promise<{ author: 
         )}
 
         <footer style={{ margin: '4rem 0 0', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-          <a href={`/library/${authorId}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">{displayName || authorId}</a>
-          <a href="/library" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">library</a>
+          <Link href={`/library/${authorId}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">{displayName || authorId}</Link>
+          <Link href="/library" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">library</Link>
         </footer>
 
       </main>

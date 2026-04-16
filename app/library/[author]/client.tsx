@@ -1,107 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import Link from 'next/link';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import type { PulseCard } from './types';
 import { SERVER_URL, FETCH_TIMEOUT_MS } from '../../lib/config';
-
-const mdComponents = {
-  h1: ({ children }: any) => <h1 className="pdoc-h1">{children}</h1>,
-  h2: ({ children }: any) => <h2 className="pdoc-h2">{children}</h2>,
-  h3: ({ children }: any) => <h3 className="pdoc-h3">{children}</h3>,
-  p: ({ children }: any) => <p className="pdoc-p">{children}</p>,
-  strong: ({ children }: any) => <strong className="pdoc-strong">{children}</strong>,
-  blockquote: ({ children }: any) => <blockquote className="pdoc-bq">{children}</blockquote>,
-  hr: () => <hr className="pdoc-hr" />,
-};
-
-function PulseCardSimilarity({ card, authorName, authorId }: { card: PulseCard; authorName: string; authorId: string }) {
-  return (
-    <div style={{
-      border: '1px solid var(--border-light)',
-      borderRadius: '6px',
-      padding: '1.5rem',
-      maxWidth: '360px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', margin: '0 0 1.5rem' }}>
-        <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', margin: 0, fontWeight: 400 }}>{authorName}</p>
-        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>{card.month}</p>
-      </div>
-
-      <div style={{ margin: '0 0 1.2rem' }}>
-        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.5rem' }}>similar thinker — all time</p>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>{card.alltime.name}</span>
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-ghost)', fontWeight: 300 }}>{card.alltime.pct}%</span>
-        </div>
-        <div style={{ height: '2px', background: 'var(--border-light)', marginTop: '0.3rem', borderRadius: '1px' }}>
-          <div style={{ height: '2px', background: 'var(--text-ghost)', width: `${card.alltime.pct}%`, borderRadius: '1px' }} />
-        </div>
-        <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.3rem 0 0', lineHeight: 1.5 }}>{card.alltime.why}</p>
-      </div>
-
-      <div style={{ margin: '0 0 1.5rem', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)' }}>
-        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.6rem' }}>similar thinkers — this month</p>
-        {card.this_month.map((mind, i) => (
-          <div key={i} style={{ margin: '0 0 0.5rem' }}>
-            <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{mind.name}</span>
-            <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>{mind.why}</span>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ margin: '1.2rem 0 0', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <a href={`/library/${authorId}`}
-          style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
-          className="hover:opacity-60"
-        >mowinckel.ai/library/{authorId}</a>
-        <a href={`/signup?ref=${authorId}&ref_source=library`}
-          style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
-          className="hover:opacity-60"
-        >mowinckel.ai — use code {authorId}</a>
-      </div>
-    </div>
-  );
-}
-
-function PulseCardFragments({ card, authorName, authorId }: { card: PulseCard; authorName: string; authorId: string }) {
-  if (!card.fragments || card.fragments.length === 0) return null;
-  return (
-    <div style={{
-      border: '1px solid var(--border-light)',
-      borderRadius: '6px',
-      padding: '1.5rem',
-      maxWidth: '360px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', margin: '0 0 1.2rem' }}>
-        <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', margin: 0, fontWeight: 400 }}>{authorName}</p>
-        <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: 0 }}>{card.month}</p>
-      </div>
-
-      <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>ideas i engaged with this month</p>
-
-      {card.fragments.map((frag, i) => (
-        <div key={i} style={{ margin: '0 0 0.7rem' }}>
-          <p style={{ fontSize: '0.88rem', color: 'var(--text-primary)', margin: 0 }}>{frag.source}</p>
-          <p style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', margin: '0.15rem 0 0', lineHeight: 1.5 }}>{frag.idea}</p>
-        </div>
-      ))}
-
-      <div style={{ margin: '1.2rem 0 0', padding: '0.8rem 0 0', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <a href={`/library/${authorId}`}
-          style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
-          className="hover:opacity-60"
-        >mowinckel.ai/library/{authorId}</a>
-        <a href={`/signup?ref=${authorId}&ref_source=library`}
-          style={{ fontSize: '0.58rem', color: 'var(--text-ghost)', textDecoration: 'none', transition: 'opacity 0.15s', letterSpacing: '0.02em' }}
-          className="hover:opacity-60"
-        >mowinckel.ai — use code {authorId}</a>
-      </div>
-    </div>
-  );
-}
 
 interface SocialLink { platform: string; url: string }
 
@@ -194,14 +97,15 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   if (error || !data) return (
     <main style={{ maxWidth: '640px', margin: '0 auto', padding: '40vh 2rem', fontFamily: 'var(--font-eb-garamond)', textAlign: 'center' }}>
       <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{error === 'unreachable' ? 'could not reach Alexandria.' : 'this mind is not yet published.'}</p>
-      <p style={{ marginTop: '2rem' }}><a href="/library" style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.8rem' }}>library</a></p>
+      <p style={{ marginTop: '2rem' }}><Link href="/library" style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.8rem' }}>library</Link></p>
     </main>
   );
 
   const { author } = data;
   const displayName = author.display_name || author.id;
-  let settings: Record<string, any> = {};
+  let settings: Record<string, unknown> = {};
   try { settings = JSON.parse(author.settings || '{}'); } catch {}
+  const libraryId = typeof settings['library_id'] === 'string' ? settings['library_id'] : null;
   const gatedShadow = data.shadows.find(s => s.visibility !== 'public');
   const publicShadow = data.shadows.find(s => s.visibility === 'public');
   const hasGated = !!gatedShadow;
@@ -226,8 +130,8 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             <h1 style={{ fontSize: '1.6rem', fontWeight: 400, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
               {displayName}
             </h1>
-            {settings.library_id && (
-              <span style={{ fontSize: '0.65rem', color: 'var(--text-whisper)', letterSpacing: '0.05em' }}>{settings.library_id}</span>
+            {libraryId && (
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-whisper)', letterSpacing: '0.05em' }}>{libraryId}</span>
             )}
           </div>
           {author.location && (
@@ -254,31 +158,31 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             <div style={{ margin: '0 0 2rem' }}>
               <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>pulse</p>
               {pulseCard?.alltime && (
-                <a
+                <Link
                   href={`/library/${authorId}/pulse`}
                   style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
                   className="hover:opacity-60"
                 >
                   <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>similar thinker — {pulseCard.alltime.name}, {pulseCard.alltime.pct}%</span>
-                </a>
+                </Link>
               )}
               {pulseCard?.fragments && pulseCard.fragments.length > 0 && (
-                <a
+                <Link
                   href={`/library/${authorId}/pulse`}
                   style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
                   className="hover:opacity-60"
                 >
                   <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>ideas this month — {pulseCard.fragments.slice(0, 3).map(f => f.source).join(', ')}, ...</span>
-                </a>
+                </Link>
               )}
               {pulse && !pulseCard?.alltime && (
-                <a
+                <Link
                   href={`/library/${authorId}/pulse`}
                   style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
                   className="hover:opacity-60"
                 >
                   <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>view pulse</span>
-                </a>
+                </Link>
               )}
             </div>
           )}
@@ -288,14 +192,14 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             <div style={{ margin: '0 0 2rem' }}>
               <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>games</p>
               {visibleQuizzes.map(quiz => (
-                <a
+                <Link
                   key={quiz.id}
                   href={`/library/${authorId}/quiz/${quiz.id}`}
                   style={{ textDecoration: 'none', color: 'inherit', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
                   className="hover:opacity-60"
                 >
                   <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{quiz.title}</span>
-                </a>
+                </Link>
               ))}
               {data.quizzes.length > 3 && !showAllGames && (
                 <span
@@ -354,13 +258,13 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                     </div>
                   )}
                   {hasGated && (
-                    <a
+                    <Link
                       href={`/library/${authorId}/checkout/shadow`}
                       style={{ fontSize: '0.88rem', color: 'var(--text-primary)', textDecoration: 'none', transition: 'opacity 0.15s' }}
                       className="hover:opacity-60"
                     >
                       {gatedShadow?.title || 'the full shadow'}
-                    </a>
+                    </Link>
                   )}
                 </div>
               )}
@@ -378,19 +282,30 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                 <p style={{ fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--text-ghost)', textTransform: 'uppercase', margin: '0 0 0.8rem' }}>works</p>
                 {data.works.map(work => {
                   const isPaid = work.tier === 'paid';
-                  const href = isPaid
-                    ? `/library/${authorId}/checkout/work?work_id=${work.id}`
-                    : work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`;
+                  if (isPaid) {
+                    return (
+                      <Link
+                        key={work.id}
+                        href={`/library/${authorId}/checkout/work?work_id=${work.id}`}
+                        style={{ textDecoration: 'none', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
+                        className="hover:opacity-60"
+                      >
+                        <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{work.title}</span>
+                        <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>premium</span>
+                      </Link>
+                    );
+                  }
+                  const externalHref = work.url || `${SERVER_URL}/library/${authorId}/work/${work.id}`;
                   return (
                     <a
                       key={work.id}
-                      href={href}
-                      {...(!isPaid ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      href={externalHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{ textDecoration: 'none', display: 'block', margin: '0 0 0.6rem', transition: 'opacity 0.15s' }}
                       className="hover:opacity-60"
                     >
                       <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{work.title}</span>
-                      {isPaid && <span style={{ fontSize: '0.62rem', color: 'var(--text-ghost)', marginLeft: '0.5rem' }}>premium</span>}
                     </a>
                   );
                 })}
@@ -439,9 +354,9 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
 
         {/* ── FOOTER ── */}
         <footer style={{ margin: '4rem 0 0', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-          <a href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</a>
-          <a href="/library" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">library</a>
-          <a href={`/signup?${signupRef}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">start yours</a>
+          <Link href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</Link>
+          <Link href="/library" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">library</Link>
+          <Link href={`/signup?${signupRef}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">start yours</Link>
         </footer>
 
       </main>

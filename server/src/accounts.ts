@@ -1,7 +1,7 @@
 /** Company account management — billing, admin, key generation, account operations. */
 
 import { randomBytes } from 'crypto';
-import { loadAccounts, saveAccount } from './kv.js';
+import { getAuthIndex, loadAccount, loadAccounts, saveAccount } from './kv.js';
 import { hashApiKey } from './crypto.js';
 import { requireAuth } from './auth.js';
 import type { Account, AccountStore } from './auth.js';
@@ -11,15 +11,22 @@ export async function getAccounts(): Promise<AccountStore> {
 }
 
 export async function updateAccountBilling(identifier: string, billing: Partial<Pick<Account, 'stripe_customer_id' | 'subscription_status' | 'subscription_id' | 'current_period_end'>>): Promise<void> {
-  const accounts = await loadAccounts<AccountStore>();
-  let storeKey: string | undefined;
+  // Fast path: API key lookup is indexed (auth:{hash} -> github key)
   if (identifier.startsWith('alex_')) {
     const keyHash = hashApiKey(identifier);
-    storeKey = Object.keys(accounts).find(k => accounts[k].api_key_hash === keyHash);
+    const storeKey = await getAuthIndex(keyHash);
+    if (storeKey) {
+      const account = await loadAccount(storeKey);
+      if (account) {
+        await saveAccount(storeKey, { ...account, ...billing });
+        return;
+      }
+    }
   }
-  if (!storeKey) {
-    storeKey = Object.keys(accounts).find(k => accounts[k].github_login === identifier);
-  }
+
+  // Fallback: identifier is a GitHub login (legacy/webhook metadata path)
+  const accounts = await loadAccounts<AccountStore>();
+  const storeKey = Object.keys(accounts).find(k => accounts[k].github_login === identifier);
   if (!storeKey) return;
   Object.assign(accounts[storeKey], billing);
   await saveAccount(storeKey, accounts[storeKey] as unknown as Record<string, unknown>);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ThemeToggle } from '../../../../components/ThemeToggle';
 import { SERVER_URL } from '../../../../lib/config';
 
@@ -188,14 +189,14 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
 
         <div style={{ margin: '3rem 0 0', display: 'flex', flexDirection: 'column', gap: '1.2rem', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <a
+            <Link
               href={`/library/${authorId}/checkout/shadow`}
               style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', textDecoration: 'none', transition: 'opacity 0.15s' }}
               className="hover:opacity-60"
             >
               <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>read the shadow</span>
               <span style={{ fontSize: '0.68rem', color: 'var(--text-whisper)' }}>$</span>
-            </a>
+            </Link>
             <span
               onClick={() => {
                 const el = document.getElementById('shadow-info');
@@ -207,15 +208,15 @@ export default function QuizPageClient({ params }: { params: Promise<{ author: s
           <p id="shadow-info" style={{ display: 'none', fontSize: '0.7rem', color: 'var(--text-ghost)', fontStyle: 'italic', margin: 0, lineHeight: 1.6, maxWidth: '280px' }}>
             the shadow is a published mind — a file that maps how someone actually thinks. each chapter is a different dimension.
           </p>
-          <a href={`/signup?ref=${authorId}`} style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.78rem', transition: 'opacity 0.15s' }} className="hover:opacity-60">
+          <Link href={`/signup?ref=${authorId}`} style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.78rem', transition: 'opacity 0.15s' }} className="hover:opacity-60">
             make your own
-          </a>
+          </Link>
         </div>
 
         <div style={{ marginTop: '4rem', textAlign: 'center' }}>
-          <a href="/" style={{ color: 'var(--text-whisper)', textDecoration: 'none', fontSize: '0.72rem', transition: 'opacity 0.15s' }} className="hover:opacity-60">
+          <Link href="/" style={{ color: 'var(--text-whisper)', textDecoration: 'none', fontSize: '0.72rem', transition: 'opacity 0.15s' }} className="hover:opacity-60">
             alexandria.
-          </a>
+          </Link>
         </div>
 
       </main>

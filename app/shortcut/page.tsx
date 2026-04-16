@@ -1,6 +1,7 @@
 'use client';
 
 import { ThemeToggle } from '../components/ThemeToggle';
+import Link from 'next/link';
 
 export default function ShortcutPage() {
   return (
@@ -10,11 +11,11 @@ export default function ShortcutPage() {
       <section className="flex flex-col items-center justify-center px-8 min-h-screen">
         <div className="max-w-[420px] flex flex-col items-center text-center">
 
-          <a href="/" className="no-underline">
+          <Link href="/" className="no-underline">
             <p className="text-[1.3rem] sm:text-[1.5rem] font-normal leading-none tracking-tight" style={{ color: 'var(--text-primary)' }}>
               alexandria.
             </p>
-          </a>
+          </Link>
 
           <div className="mt-14 sm:mt-16 space-y-10">
 

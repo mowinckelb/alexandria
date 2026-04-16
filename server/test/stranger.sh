@@ -119,7 +119,7 @@ DIRTY
 echo "[stranger] pre-populated settings.json with existing hooks"
 
 # ═══════════════════════════════════════════════════════════
-# Phase 2 — Setup script (curl /setup | bash)
+# Phase 2 — Setup script (curl factory/setup.sh | bash)
 # ═══════════════════════════════════════════════════════════
 
 echo ""
@@ -198,6 +198,13 @@ When tradeoffs appear, they optimize for clarity, speed, and direct customer tru
 They want concrete execution and short feedback loops.
 They dislike process theater and default to deletion before addition.
 CONSTITUTION_TEST
+
+# Seed ontology so all five context layers can be verified
+mkdir -p "$HOME/.alexandria/ontology"
+cat > "$HOME/.alexandria/ontology/test.md" << 'ONTOLOGY_TEST'
+Early signal: this Author sees software architecture as compressed philosophy.
+ONTOLOGY_TEST
+
 touch "$HOME/.alexandria/.block_complete"
 
 # Run the shim exactly as Claude Code would
@@ -207,6 +214,10 @@ SESSION_START_EXIT=$?
 check "session-start ran"                [ "$SESSION_START_EXIT" -eq 0 ]
 check_output "constitution injected"     "AUTHOR CONTEXT"        "$SESSION_START_OUTPUT"
 check_output "test content present"      "first principles"      "$SESSION_START_OUTPUT"
+check_output "ontology injected"         "ONTOLOGY"              "$SESSION_START_OUTPUT"
+check_output "machine injected"          "HOW TO WORK WITH THIS AUTHOR" "$SESSION_START_OUTPUT"
+check_output "notepad injected"          "NOTEPAD"               "$SESSION_START_OUTPUT"
+check_output "feedback injected"         "ENGINE FEEDBACK"       "$SESSION_START_OUTPUT"
 check "hooks_payload cached"             [ -f "$HOME/.alexandria/.hooks_payload" ]
 check "hooks_payload non-empty"          [ -s "$HOME/.alexandria/.hooks_payload" ]
 check "canon cached"                     [ -f "$HOME/.alexandria/.canon_local" ]

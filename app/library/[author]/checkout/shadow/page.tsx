@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ThemeToggle } from '../../../../components/ThemeToggle';
 import { SERVER_URL } from '../../../../lib/config';
 
@@ -87,9 +88,9 @@ export default function ShadowCheckoutPage({ params }: { params: Promise<{ autho
       <ThemeToggle />
       <main style={{ maxWidth: '420px', margin: '0 auto', padding: '8rem 2rem 4rem', fontFamily: 'var(--font-eb-garamond)' }}>
 
-        <a href={`/library/${authorId}`} style={{ textDecoration: 'none' }}>
+        <Link href={`/library/${authorId}`} style={{ textDecoration: 'none' }}>
           <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', margin: '0 0 0.2rem' }}>{authorName}</p>
-        </a>
+        </Link>
         <p style={{ fontSize: '0.78rem', color: 'var(--text-ghost)', margin: '0 0 3rem' }}>{authorId}-paid.md</p>
 
         {/* Amount */}
@@ -149,8 +150,8 @@ export default function ShadowCheckoutPage({ params }: { params: Promise<{ autho
 
         {/* Footer */}
         <div style={{ margin: '4rem 0 0', display: 'flex', gap: '1.5rem' }}>
-          <a href={`/library/${authorId}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">back</a>
-          <a href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</a>
+          <Link href={`/library/${authorId}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">back</Link>
+          <Link href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</Link>
         </div>
 
       </main>

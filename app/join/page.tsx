@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
 import FooterSection from '../components/FooterSection';
 import PhilosophyFiveWays from '../components/PhilosophyFiveWays';
@@ -23,11 +24,11 @@ function JoinPageContent() {
       <section className="flex flex-col items-center justify-center px-8 min-h-screen" style={{ paddingTop: '6vh' }}>
         <div className="max-w-[420px]">
 
-          <a href="/" className="no-underline">
+          <Link href="/" className="no-underline">
             <p className="text-[1.3rem] sm:text-[1.5rem] font-normal leading-none tracking-tight text-center" style={{ color: 'var(--text-primary)' }}>
               alexandria.
             </p>
-          </a>
+          </Link>
 
           <div className="mt-14 sm:mt-16 space-y-10 text-[0.85rem] sm:text-[0.9rem] tracking-wide">
 

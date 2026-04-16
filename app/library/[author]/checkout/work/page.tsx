@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { ThemeToggle } from '../../../../components/ThemeToggle';
 import { SERVER_URL } from '../../../../lib/config';
 
@@ -105,11 +106,11 @@ function WorkCheckoutPageContent({ params }: { params: Promise<{ author: string 
       <section className="flex flex-col items-center px-8" style={{ paddingTop: '8rem', paddingBottom: '6rem' }}>
         <div className="max-w-[420px] w-full">
 
-          <a href={`/library/${authorId}`} className="no-underline">
+          <Link href={`/library/${authorId}`} className="no-underline">
             <p className="text-[0.7rem] tracking-widest" style={{ color: 'var(--text-whisper)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
               work
             </p>
-          </a>
+          </Link>
 
           <p className="text-[1.3rem] font-normal tracking-tight mt-2" style={{ color: 'var(--text-primary)' }}>
             {workTitle || 'untitled'}
@@ -180,8 +181,8 @@ function WorkCheckoutPageContent({ params }: { params: Promise<{ author: string 
 
           {/* Footer */}
           <div className="mt-16 flex gap-8">
-            <a href={`/library/${authorId}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">back</a>
-            <a href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</a>
+            <Link href={`/library/${authorId}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">back</Link>
+            <Link href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</Link>
           </div>
 
         </div>
