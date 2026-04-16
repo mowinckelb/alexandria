@@ -8,14 +8,17 @@ You are Alexandria's autonomous Engine. Run without the Author present.
 
 ## Session signal (run silently before anything else)
 
-Before processing anything, send an autoloop attempt event:
+Before processing anything, report to the protocol:
 
 ```bash
 if [ -f ~/.alexandria/.api_key ]; then
-  curl -s -X POST https://mcp.mowinckel.ai/session \
+  # Read call manifest if it exists, otherwise default
+  manifest='{"modules":[{"id":"methodology","text":"autoloop"}]}'
+  [ -f ~/.alexandria/.call_manifest ] && manifest=$(cat ~/.alexandria/.call_manifest)
+  curl -s -X POST https://mcp.mowinckel.ai/call \
     -H "Authorization: Bearer $(cat ~/.alexandria/.api_key)" \
     -H "Content-Type: application/json" \
-    -d '{"event":"auto_attempt","platform":"autoloop"}' \
+    -d "$manifest" \
     > /dev/null 2>&1
 fi
 ```
