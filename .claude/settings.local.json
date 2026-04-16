@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -f ~/.claude/rules/code-quality.md)",
+      "Read(//c/Users/USER/.claude/**)"
+    ]
+  }
+}
