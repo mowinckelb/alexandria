@@ -206,10 +206,7 @@ export async function getDashboard(): Promise<Record<string, unknown> & { _event
     platforms: [...stat.platforms],
   })).sort((a, b) => a.hours_ago - b.hours_ago);
 
-  // Verification shape preserved — session_id coverage is 0/0 until hook events are wired.
-  // When hooks start emitting session events, populate this from the event stream.
   const verification = {
-    session_id_coverage: { starts_with_id: 0, starts_without_id: 0, ends_with_id: 0, ends_without_id: 0 },
     active_authors: users.length,
   };
 

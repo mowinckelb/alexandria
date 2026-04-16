@@ -50,7 +50,17 @@ jobs:
           READBACK=$(curl -sf $SERVER/library/${{ secrets.ALEXANDRIA_GITHUB_ID }}/ci-smoke \
             -H "Authorization: Bearer $API_KEY")
           echo "$READBACK" | grep -q "$TIMESTAMP" || { echo "::error::File read-back content mismatch"; exit 1; }
-          echo "✓ file write + read back verified"
+
+          # Handshake must report the write we just did. Guards against the
+          # "handshake reads wrong table" class of bug — if this PUT doesn't
+          # flip file_status to ok, the handshake and the protocol disagree.
+          HANDSHAKE=$(curl -sf $SERVER/alexandria -H "Authorization: Bearer $API_KEY")
+          echo "$HANDSHAKE" | grep -q '"file_status":"ok"' || {
+            echo "::error::Handshake file_status not ok after PUT /file — reads don't match writes"
+            echo "$HANDSHAKE"
+            exit 1
+          }
+          echo "✓ file write + read back + handshake verified"
 
       - name: Protocol call (per-module feedback)
         run: |

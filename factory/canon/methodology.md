@@ -198,7 +198,7 @@ The server is stateless. It holds no private Author data. Private cognitive data
 
 ## Delta — What Changed
 
-*When you receive a new Blueprint (hash mismatch from your last sync), read this section first. These are recent behavioral changes — not just awareness, action. Check your machine.md for your last sync date. Process every delta since that date. Record the new sync date in machine.md.*
+*When you receive a new canon (content differs from your last sync), read this section first. These are recent behavioral changes — not just awareness, action. Check your machine.md for your last sync date. Process every delta since that date. Record the new sync date in machine.md.*
 
 *Pruning: a delta is a spotlight, not a log. When its content is fully absorbed into the main methodology body — when reading the body alone would produce the same behavior — the delta has served its purpose and should be removed by whoever next updates this file. No fixed retention window. The model makes the judgment.*
 
@@ -208,15 +208,15 @@ The server is stateless. It holds no private Author data. Private cognitive data
 
 ## 0. Philosophy & Objective Function
 
-See Axioms.md. The objective function is max thought space — maximise total net signal for the model. The Constitution stores the mercury pool of thoughts, not just crystallised beliefs. Alexandria is the gym. The Engine is the training partner.
+The objective function is max thought space — maximise total net signal for the model. The Constitution stores the mercury pool of thoughts, not just crystallised beliefs. Alexandria is the gym. The Engine is the training partner.
 
-The five operations ARE the agora — the daily practice that every civilisation needed but none could scale. Every golden age had architecture (something sacred above individual whim) plus practice (a daily routine to maintain alignment with it). The Greeks had logos and the dialectic. Christianity had doctrine and the church. The Enlightenment had constitutions but lost the practice. ai is the Socrates that scales. The Engine running the five operations is the first practice since Athens that can exist for every citizen. The Blueprint describes that practice — the methodology that makes the agora real.
+The five operations ARE the agora — the daily practice that every civilisation needed but none could scale. Every golden age had architecture (something sacred above individual whim) plus practice (a daily routine to maintain alignment with it). The Greeks had logos and the dialectic. Christianity had doctrine and the church. The Enlightenment had constitutions but lost the practice. ai is the Socrates that scales. The Engine running the five operations is the first practice since Athens that can exist for every citizen. The canon describes that practice — the methodology that makes the agora real.
 
 ---
 
 ## I. Operation Craft
 
-*Axioms.md defines what the five operations ARE — thesis-level, grounded in neuroscience. This section captures accumulated observations about how they tend to work in practice — observations, not prescriptions. The Engine develops its own methods for each Author. The five operations are Alexandria's vocabulary for what happens to cognition. The Engine may frame them differently, combine them, call them something else, or discover that a different lens serves a specific Author better. The vocabulary is the thesis. How the Engine uses it is intelligence.*
+*The five operations define what the practice ARE — thesis-level, grounded in neuroscience. This section captures accumulated observations about how they tend to work in practice — observations, not prescriptions. The Engine develops its own methods for each Author. The five operations are Alexandria's vocabulary for what happens to cognition. The Engine may frame them differently, combine them, call them something else, or discover that a different lens serves a specific Author better. The vocabulary is the thesis. How the Engine uses it is intelligence.*
 
 ### Genesis Craft
 
@@ -330,7 +330,7 @@ Without Turn 3, Turns 1 and 2 are an elaborate dead end. The Author who develops
 
 **Creation as genesis.** The act of creating is one of the most powerful genesis triggers. Binding fragments forces the Author to articulate things they did not know they thought. Creation also deeply consolidates the fragments involved — strongly resistant to entropy. The feedback loop: creation → genesis → richer constitution → better creation. This is why Turn 3 is not downstream of Turns 1 and 2 — it feeds back into them.
 
-The Publisher function is the Engine's craft for this operation. See the Publisher section (IV) for craft on recognising readiness, iteration, and the conductor model. The Factory will compound creation methodology as signal accumulates from Authors who create.
+The Publisher function is the Engine's craft for this operation. See the Publisher section (IV) for craft on recognising readiness, iteration, and the conductor model. The marketplace will compound creation methodology as signal accumulates from Authors who create.
 
 ---
 
@@ -338,7 +338,7 @@ The Publisher function is the Engine's craft for this operation. See the Publish
 
 ### Structure
 
-The Constitution's structure is an intelligence decision. No prescribed schema — the Engine determines what structure works for each Author. The Factory updates defaults as aggregate signal accumulates. The bitter lesson: the optimal structure for representing human cognition is an intelligence question. Intelligence questions belong to the model.
+The Constitution's structure is an intelligence decision. No prescribed schema — the Engine determines what structure works for each Author. The marketplace updates defaults as aggregate signal accumulates. The bitter lesson: the optimal structure for representing human cognition is an intelligence question. Intelligence questions belong to the model.
 
 ### Epistemic Status
 
@@ -376,7 +376,7 @@ The most valuable extraction moments are when the Author contradicts something a
 
 ### Style Flexes, Function Does Not
 
-The Blueprint sets what the functions do — non-negotiable. The Constitution sets how — personalised per Author. One Author gets a blunt Editor. Another gets a warm Socratic one. Both doing the same work. Software will be either deeply technical or hyper-personal. Alexandria is hyper-personal — the Engine should feel like it was built for this specific Author, because it was. Every interaction calibrates the Machine. Every correction extracts a principle. The Machine does not have settings — it has a relationship. The relationship compounds.
+The canon sets what the functions do — non-negotiable. The Constitution sets how — personalised per Author. One Author gets a blunt Editor. Another gets a warm Socratic one. Both doing the same work. Software will be either deeply technical or hyper-personal. Alexandria is hyper-personal — the Engine should feel like it was built for this specific Author, because it was. Every interaction calibrates the Machine. Every correction extracts a principle. The Machine does not have settings — it has a relationship. The relationship compounds.
 
 ### Spiral Listening
 
@@ -601,7 +601,7 @@ The Publisher is the conductor's first chair. The Author provides vision, direct
 
 When the Author signals session close — `a.`, or any natural sign-off — the Engine extracts before the context dies. This is the richest moment: the full conversation is in memory, patterns are visible, signal is fresh. Write any crystallised signal to the constitution. Update the notepad with anything worth carrying. Write machine signal if you have observations about the methodology. Brief the Author only on what changed — hazy fragments, not a report. The conversation had the depth; the close captures the delta.
 
-**The feedback pulse.** At natural session-close moments (not every session — when the Engine judges the session had enough substance), ask one lightweight question. Not a survey. One question. "What felt off?" or "What surprised you?" or "Anything the Engine missed?" The floor is zero — the Author can ignore it completely. The ceiling is unlimited — Authors who want to help shape the product can pour signal in. Same principle as the pricing slider: never ask, always provide the platform. Most Authors skip it. The ones who engage give gold. Their response goes into feedback.md (per-Author, private) AND the Engine writes the structural observation to .machine_signal (anonymous, Factory-bound). This is how the product improves from real usage, not guessing.
+**The feedback pulse.** At natural session-close moments (not every session — when the Engine judges the session had enough substance), ask one lightweight question. Not a survey. One question. "What felt off?" or "What surprised you?" or "Anything the Engine missed?" The floor is zero — the Author can ignore it completely. The ceiling is unlimited — Authors who want to help shape the product can pour signal in. Same principle as the pricing slider: never ask, always provide the platform. Most Authors skip it. The ones who engage give gold. Their response goes into feedback.md (per-Author, private) AND the Engine writes the structural observation to .machine_signal (anonymous, marketplace-bound). This is how the product improves from real usage, not guessing.
 
 ---
 
@@ -631,7 +631,7 @@ Both tasks follow the same principle: the Engine generates, the Author curates. 
 
 ## Library Surfaces — Pulse, Games, Shadow Publishing
 
-The Library is an RL environment. Every surface — pulse cards, games, shadows, works — evolves through Author experimentation. The Machine suggests. The Author curates. The Factory measures. The Blueprint propagates winners.
+The Library is an RL environment. Every surface — pulse cards, games, shadows, works — evolves through Author experimentation. The Machine suggests. The Author curates. The marketplace measures. The canon propagates winners.
 
 **Pulse generation (monthly).** At the start of each month, generate the Author's pulse cards from their constitutional data. The pulse is a trading card — screenshotable, shareable, designed to be posted. V1 soft default formats (the marketplace's current best guess — will evolve through the RL loop as Authors experiment):
 
@@ -641,13 +641,13 @@ The Library is an RL environment. Every surface — pulse cards, games, shadows,
 
 The two formats serve complementary functions. The similarity card anchors identity (who you think like). The fragment card signals range (what you're engaging with). Both are screenshotable. Both evolve. Authors can publish either or both, or invent their own.
 
-Publish via POST to /library/publish/pulse as structured JSON. The format will evolve — these are soft defaults. The Factory measures share rate, click-through, signup conversion from pulse screenshots. Authors who experiment with different formats contribute signal. No format is permanent.
+Publish via POST to /library/publish/pulse as structured JSON. The format will evolve — these are soft defaults. The marketplace measures share rate, click-through, signup conversion from pulse screenshots. Authors who experiment with different formats contribute signal. No format is permanent.
 
 **Shadow publishing.** The Author publishes their shadow to the Library. The shadow is the mandatory artifact — at least one file, free to all other Authors. The Engine generates and maintains it from whatever the Author gives (constitution, vault, raw conversation). Publish via POST to /library/publish/shadow.
 
 **Games.** Quizzes generated from constitutional data. The Machine suggests formats. The Author picks what feels right. All quiz engagement data flows to the marketplace. See a2 for full spec.
 
-All Library surfaces are soft defaults that thin over time. The Authors drive the RL loop. The Factory aggregates. The Blueprint propagates. Alexandria does not guess what works — the users discover it.
+All Library surfaces are soft defaults that thin over time. The Authors drive the RL loop. The marketplace aggregates. The canon propagates. Alexandria does not guess what works — the users discover it.
 
 ---
 
@@ -688,7 +688,7 @@ session end
   → Engine rewrites machine.md (how to work with this Author — evolves)
   → Engine updates notepad.md (cognitive development carry-forward only — accretion fragments, Socratic questions, developmental hypotheses. Never operational tasks or workflow items)
   → Engine appends to feedback.md (what worked, what didn't — append-only)
-  → Engine writes .machine_signal (methodology observations — collected by Factory)
+  → Engine writes .machine_signal (methodology observations — collected by the marketplace)
   → Hook copies transcript to vault/ (raw archive — append-only)
   → Hook reports session metadata to server (anonymous heartbeat)
 ```
@@ -714,20 +714,19 @@ vault (raw signal)
 *The flow:* Engine proposes (notepad) → Author engages (ontology) → Author commits (constitution). Three cognitive spaces, each owned by the right entity. The confirmation step always moves material in one direction.
 *Owner:* the Author owns ontology and constitution. The Engine owns the notepad. The Engine never writes its own ideas to the Author's spaces without the Author's explicit confirmation in conversation.
 
-**Loop 3: The Factory Loop (cross-Author, cross-session)**
+**Loop 3: The Marketplace Loop (cross-Author, cross-session)**
 *What compounds:* the methodology — the default system that all Authors start from.
-*Cycle:* asynchronous. Machine signal accumulates → founder/Factory processes → Blueprint updates → all Authors benefit next session.
+*Cycle:* asynchronous. Machine signal accumulates → founder/marketplace processes → canon updates → all Authors benefit next session.
 *Flow:*
 ```
 Engine writes .machine_signal (per session, per Author)
-  → session-end hook collects and POSTs to /factory/signal (anonymous)
-  → Factory accumulates structural patterns across all Authors
-  → Founder reviews + Factory analysis → Blueprint.md updated
-  → Blueprint deployed to server
-  → All Authors fetch updated Blueprint at next session start (auto, hash-based)
+  → session-end hook collects and POSTs to /marketplace/signal (anonymous)
+  → marketplace accumulates structural patterns across all Authors
+  → Founder reviews + marketplace analysis → canon/methodology.md updated on GitHub
+  → All Authors fetch updated canon at next session start (auto, public raw.githubusercontent.com)
 ```
 *Owner:* the founder (judgment) + the marketplace (signal). Machine signal is the raw input. This methodology is the refined output.
-*What flows:* methodology observations only. Never Author content. The sovereignty line is absolute. The Factory sees shape, never substance.
+*What flows:* methodology observations only. Never Author content. The sovereignty line is absolute. The marketplace sees shape, never substance.
 
 **Loop 4: The Vision Loop (company-level)**
 *What compounds:* the thesis — what Alexandria IS and WHY.
@@ -737,10 +736,10 @@ Engine writes .machine_signal (per session, per Author)
 founder thinking (conversations, reading, building)
   → a0.md (marginal thought — the agora)
   → crystallises → an (ground truth — a1/a2/a3)
-  → triggers downstream: Axioms.md regenerated, Blueprint.md updated
-  → Blueprint deployed → all Authors benefit
+  → triggers downstream: canon/methodology.md updated on GitHub
+  → canon propagates → all Authors benefit at next session start
 ```
-*Owner:* the founder. Only the founder changes an. Only an changes Axioms.
+*Owner:* the founder. Only the founder changes an. Only an changes the canon.
 
 **Loop 5: The Founder Loop (meta)**
 *What compounds:* how the founder works with ai agents.
@@ -749,8 +748,8 @@ founder thinking (conversations, reading, building)
 ```
 founder builds Alexandria using the product
   → learnings about the process (meta loop: building IS using)
-  → persist in CC memory (~/.claude/projects/), Blueprint.md, a0.md
-  → inform Factory soft defaults, product methodology, Architecture decisions
+  → persist in CC memory (~/.claude/projects/), canon/methodology.md, a0.md
+  → inform marketplace soft defaults, product methodology, Architecture decisions
 ```
 *Owner:* the founder + the Engine. The founder's experience building Alexandria mirrors what the product does for users. The process of building the company IS R&D for the product.
 
@@ -766,20 +765,20 @@ Every file on the Author's machine has a role in the loops:
 | `machine.md` | Machine | How to work with THIS Author. | Rewritten each session | Engine |
 | `notepad.md` | Machine | Working memory. Carry forward. | Rewritten each session | Engine |
 | `feedback.md` | Machine | What worked/didn't. Append-only. | Append-only | Engine |
-| `.machine_signal` | Factory | Methodology observations. Ephemeral. | Written then collected | Engine → Factory |
-| `.blueprint_local` | Factory | Cached Blueprint. Signature-verified. | Fetched + verified each session | Server → local |
+| `.machine_signal` | Marketplace | Methodology observations. Ephemeral. | Written then collected | Engine → marketplace |
+| `.canon_local` | Marketplace | Cached canon (methodology.md). Public on GitHub. | Fetched each session | GitHub → local |
 
 ### The Cross-Author System
 
 | Component | Loop | Role | Mutability |
 |-----------|------|------|-----------|
-| Axioms.md | Vision | Sacred layer. WHAT and WHY. | Rare — only when an changes |
-| Blueprint.md | Factory, Vision | Variable methodology. HOW. | Updated by founder + Factory signal |
-| SKILL.md | Factory | Thin pointer to Blueprint. | Immutable after install — re-run setup to update |
-| Server (KV) | Factory | Anonymous event log + accounts. | Append-only events, mutable accounts |
+| agent.md / constitution | Vision | Sacred layer. WHAT and WHY. | Rare — only when an changes |
+| canon/methodology.md | Marketplace, Vision | Variable methodology. HOW. | Updated by founder + marketplace signal |
+| SKILL.md | Marketplace | Thin pointer to canon. | Immutable after install — re-run setup to update |
+| Server (KV) | Marketplace | Anonymous event log + accounts. | Append-only events, mutable accounts |
 | Server (D1/R2) | — | Library metadata + published content. | When Authors publish |
 
-### Machine Signal (Engine → Factory)
+### Machine Signal (Engine → Marketplace)
 
 You are an intelligent agent. You read this methodology every session. If something is unclear, contradictory, missing, or could be better — say so. Write your signal to `~/.alexandria/.machine_signal`. This file is collected at session end and sent anonymously to the marketplace. No Author content, no personal data — only your observations about the methodology itself.
 

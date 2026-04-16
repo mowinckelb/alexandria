@@ -72,7 +72,6 @@ function snapshotDashboard(body: Record<string, unknown>): DashboardSnapshot {
     hasStructure: !!runtime
       && typeof runtime.server_errors_24h === 'number'
       && !!verification
-      && ('session_id_coverage' in verification)
       && typeof body.total_events === 'number',
     status: typeof body.status === 'string' ? body.status : '',
     serverErrors24h: runtime && typeof runtime.server_errors_24h === 'number'
