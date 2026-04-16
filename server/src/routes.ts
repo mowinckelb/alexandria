@@ -8,7 +8,7 @@ import { callbackPageHtml } from './templates.js';
 import { getDB, getR2 } from './db.js';
 import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex } from './kv.js';
 import { hashApiKey, generateToken } from './crypto.js';
-import { AccountStore, extractApiKey, findByApiKey, requireAuth } from './auth.js';
+import { Account, AccountStore, extractApiKey, findByApiKey, requireAuth } from './auth.js';
 import { generateApiKey, getAccounts, requireAdmin } from './accounts.js';
 import { sendEmail, sendWelcomeEmail, sendMorningBrief, FOUNDER_EMAIL, DEFAULT_ENGAGEMENT_DAYS } from './email.js';
 
@@ -54,18 +54,18 @@ export function registerRoutes(app: Hono) {
 
     const thirtyDays = 30 * 24 * 60 * 60 * 1000;
 
-    // File obligation — ground truth from D1 Library (shadow updated_at)
+    // File obligation — ground truth from protocol_files (where PUT /file/{name} writes)
     let fileLastEdit: string | null = null;
     let fileStatus: 'ok' | 'stale' | 'missing' = 'missing';
     try {
       const db = (globalThis as any).__d1 as D1Database | undefined;
       if (db) {
-        const shadow = await db.prepare(
-          `SELECT MAX(updated_at) as last_edit FROM shadows WHERE author_id = ?`
-        ).bind(account.github_login).first<{ last_edit: string | null }>();
-        if (shadow?.last_edit) {
-          fileLastEdit = shadow.last_edit;
-          fileStatus = (Date.now() - new Date(shadow.last_edit).getTime()) < thirtyDays ? 'ok' : 'stale';
+        const file = await db.prepare(
+          `SELECT MAX(updated_at) as last_edit FROM protocol_files WHERE account_id = ?`
+        ).bind(String(account.github_id)).first<{ last_edit: string | null }>();
+        if (file?.last_edit) {
+          fileLastEdit = file.last_edit;
+          fileStatus = (Date.now() - new Date(file.last_edit).getTime()) < thirtyDays ? 'ok' : 'stale';
         }
       }
     } catch { /* D1 unavailable — degrade gracefully */ }
@@ -216,16 +216,14 @@ export function registerRoutes(app: Hono) {
         email = primary?.email || emails[0]?.email || '';
       }
 
-      // Create or update account — match by ID first, fall back to login (handles GitHub username renames)
+      // Create or update account — direct lookup by github_id key. O(1) for the common case.
+      // Fall back to full scan only for legacy accounts keyed by login (pre-github_id migration).
       const key = `github_${user.id}`;
-      const accounts = await loadAccounts<AccountStore>();
-      let existing = accounts[key];
+      let existing = await loadAccount(key) as Account | null;
       if (!existing) {
-        const legacyKey = Object.keys(accounts).find(k => accounts[k].github_login === user.login);
-        if (legacyKey) {
-          existing = accounts[legacyKey];
-          delete accounts[legacyKey];
-        }
+        const allAccounts = await loadAccounts<AccountStore>();
+        const legacyKey = Object.keys(allAccounts).find(k => allAccounts[k].github_login === user.login);
+        if (legacyKey) existing = allAccounts[legacyKey];
       }
 
       // Key is shown once on the callback page, then only the hash is stored.
@@ -247,7 +245,6 @@ export function registerRoutes(app: Hono) {
         last_session: new Date().toISOString(),
       };
       delete updatedAccount.api_key;
-      accounts[key] = updatedAccount;
       await saveAccount(key, updatedAccount as unknown as Record<string, unknown>);
       if (needsKey) await setAuthIndex(apiKeyHash, key);
       await setEmailTokenIndex(emailToken, key);
@@ -279,7 +276,7 @@ export function registerRoutes(app: Hono) {
       }
 
       // Skip Stripe if user already has payment info
-      if (accounts[key]?.stripe_customer_id) {
+      if (updatedAccount.stripe_customer_id) {
         return c.html(callbackPageHtml(user.login, apiKey));
       }
 
@@ -290,7 +287,7 @@ export function registerRoutes(app: Hono) {
           const checkoutUrl = await createCheckoutSession({
             email,
             githubLogin: user.login,
-            stripeCustomerId: accounts[key]?.stripe_customer_id,
+            stripeCustomerId: updatedAccount.stripe_customer_id,
           });
           if (checkoutUrl) {
             return c.redirect(checkoutUrl);

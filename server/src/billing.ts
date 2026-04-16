@@ -186,17 +186,10 @@ export async function countActiveKin(githubLogin: string, preloadedAccounts?: Re
 
   // Compliant kin = meets all three obligations this month:
   // 1. Account exists (they have an account)
-  // 2. File edited this month (shadow updated in current month)
+  // 2. File edited this month (protocol_files updated in current month)
   // 3. Call made this month (protocol_calls table)
   const accounts = preloadedAccounts || await loadAccounts<Record<string, any>>();
   const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
-
-  // Batch D1 query for file freshness — one query for all kin
-  const placeholders = kinLogins.map(() => '?').join(',');
-  const { results: shadows } = await db.prepare(
-    `SELECT author_id, MAX(updated_at) as last_edit FROM shadows WHERE author_id IN (${placeholders}) GROUP BY author_id`
-  ).bind(...kinLogins).all<{ author_id: string; last_edit: string }>();
-  const fileEdits = new Map((shadows || []).map(s => [s.author_id, s.last_edit]));
 
   // Build login→github_id map for kin that have accounts
   const kinWithAccounts: { login: string; githubId: string }[] = [];
@@ -208,18 +201,26 @@ export async function countActiveKin(githubLogin: string, preloadedAccounts?: Re
 
   if (kinWithAccounts.length === 0) return { count: kinLogins.length, compliant: 0 };
 
-  // Batch D1 query for protocol calls — one query for all kin
-  const callPlaceholders = kinWithAccounts.map(() => '?').join(',');
+  const githubIds = kinWithAccounts.map(k => k.githubId);
+  const idPlaceholders = githubIds.map(() => '?').join(',');
   const monthStart = currentMonth + '-01';
+
+  // Batch D1 query for file freshness — protocol_files keyed by github_id
+  const { results: files } = await db.prepare(
+    `SELECT account_id, MAX(updated_at) as last_edit FROM protocol_files WHERE account_id IN (${idPlaceholders}) GROUP BY account_id`
+  ).bind(...githubIds).all<{ account_id: string; last_edit: string }>();
+  const fileEdits = new Map((files || []).map(f => [f.account_id, f.last_edit]));
+
+  // Batch D1 query for protocol calls — one query for all kin
   const { results: callResults } = await db.prepare(
-    `SELECT DISTINCT account_id FROM protocol_calls WHERE account_id IN (${callPlaceholders}) AND time > ?`
-  ).bind(...kinWithAccounts.map(k => k.githubId), monthStart).all<{ account_id: string }>();
+    `SELECT DISTINCT account_id FROM protocol_calls WHERE account_id IN (${idPlaceholders}) AND time > ?`
+  ).bind(...githubIds, monthStart).all<{ account_id: string }>();
   const hasCallSet = new Set((callResults || []).map(r => r.account_id));
 
   let compliant = 0;
-  for (const { login, githubId } of kinWithAccounts) {
+  for (const { githubId } of kinWithAccounts) {
     const hasCall = hasCallSet.has(githubId);
-    const lastEdit = fileEdits.get(login);
+    const lastEdit = fileEdits.get(githubId);
     const hasFile = lastEdit?.startsWith(currentMonth);
 
     if (hasCall && hasFile) compliant++;
@@ -244,10 +245,10 @@ async function recalculateKinPricing(githubLogin: string, preloadedAccounts?: Re
       `SELECT 1 FROM protocol_calls WHERE account_id = ? AND time > ? LIMIT 1`
     ).bind(String(user.github_id), currentMonth + '-01').first();
     authorHasCall = !!callCheck;
-    const shadow = await db.prepare(
-      `SELECT MAX(updated_at) as last_edit FROM shadows WHERE author_id = ?`
-    ).bind(githubLogin).first<{ last_edit: string | null }>();
-    authorHasFile = !!shadow?.last_edit?.startsWith(currentMonth);
+    const file = await db.prepare(
+      `SELECT MAX(updated_at) as last_edit FROM protocol_files WHERE account_id = ?`
+    ).bind(String(user.github_id)).first<{ last_edit: string | null }>();
+    authorHasFile = !!file?.last_edit?.startsWith(currentMonth);
   } catch { /* D1 unavailable — treat as non-compliant */ }
   const authorCompliant = authorHasCall && authorHasFile;
 

@@ -80,16 +80,17 @@ export async function deleteAccount(githubKey: string, apiKeyHash: string): Prom
   await kv.delete(`auth:${apiKeyHash}`);
 }
 
-/** List all accounts (for admin/cron — iterates KV keys). */
+/** List all accounts (for admin/cron — iterates KV keys). Batches reads per page. */
 async function listAllAccounts(): Promise<Record<string, Record<string, unknown>>> {
   const kv = getKV();
   const result: Record<string, Record<string, unknown>> = {};
   let cursor: string | undefined;
   do {
     const page = await kv.list({ prefix: 'account:', cursor });
-    for (const key of page.keys) {
-      const account = await loadAccount(key.name.replace('account:', ''));
-      if (account) result[key.name.replace('account:', '')] = account;
+    const keys = page.keys.map(k => k.name.replace('account:', ''));
+    const accounts = await Promise.all(keys.map(loadAccount));
+    for (let i = 0; i < keys.length; i++) {
+      if (accounts[i]) result[keys[i]] = accounts[i] as Record<string, unknown>;
     }
     cursor = page.list_complete ? undefined : page.cursor;
   } while (cursor);

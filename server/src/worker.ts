@@ -138,7 +138,8 @@ app.get('/health', async (c) => {
   try {
     const env = c.env as Record<string, unknown>;
     const kv = env.DATA as KVNamespace;
-    await kv.get('accounts:encrypted'); // read-only probe — no write ops burned
+    // Read-only list probe — verifies binding works without burning writes or reading a specific key.
+    await kv.list({ prefix: 'account:', limit: 1 });
     components.kv = 'ok';
   } catch { components.kv = 'error'; }
 
