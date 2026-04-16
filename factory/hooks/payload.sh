@@ -152,12 +152,19 @@ if [ "$MODE" = "session-start" ]; then
   fi
 
   # ── The Call (protocol obligation) ──
-  # Report which factory modules this machine uses, with per-module feedback
+  # Report which factory modules this machine uses, derived from what's on disk.
+  # The .call_manifest file is written by the Engine during /a sessions.
+  # Default: methodology (the factory default). The Engine evolves this.
   if [ -n "$API_KEY" ]; then
+    call_payload='{"modules":[{"id":"methodology","text":"default"}]}'
+    if [ -f "$ALEX_DIR/.call_manifest" ]; then
+      manifest=$(cat "$ALEX_DIR/.call_manifest" 2>/dev/null)
+      [ -n "$manifest" ] && call_payload="$manifest"
+    fi
     curl -s -X POST "$SERVER/call" \
       -H "Authorization: Bearer $API_KEY" \
       -H "Content-Type: application/json" \
-      -d '{"modules":[{"id":"methodology","text":"using as-is"}]}' \
+      -d "$call_payload" \
       > /dev/null 2>&1 &
   fi
 

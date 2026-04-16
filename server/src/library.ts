@@ -62,14 +62,28 @@ export function registerLibraryRoutes(app: Hono): void {
 
   app.get('/library/authors', async (c) => {
     const db = getDB();
-    const { results } = await db.prepare(
-      `SELECT a.id, a.display_name, a.bio, a.settings, a.website, a.location, a.social_links, a.published_at, a.updated_at,
+    // Read from both old authors table and protocol_files (union of both sources)
+    const { results: legacyAuthors } = await db.prepare(
+      `SELECT a.id, a.display_name, a.bio, a.location, a.updated_at,
               (SELECT COUNT(*) FROM shadows WHERE author_id = a.id) as shadow_count,
-              (SELECT COUNT(*) FROM quizzes WHERE author_id = a.id AND active = 1) as quiz_count,
-              (SELECT COUNT(*) FROM works WHERE author_id = a.id) as work_count
+              (SELECT COUNT(*) FROM quizzes WHERE author_id = a.id AND active = 1) as quiz_count
        FROM authors a ORDER BY a.updated_at DESC`
     ).all();
-    return c.json({ authors: results });
+
+    const { results: protocolAuthors } = await db.prepare(
+      `SELECT account_id, text, updated_at FROM protocol_files GROUP BY account_id ORDER BY MAX(updated_at) DESC`
+    ).all<{ account_id: string; text: string | null; updated_at: string }>();
+
+    // Merge: protocol authors that aren't in legacy get added
+    const legacyIds = new Set((legacyAuthors || []).map((a: any) => a.id));
+    const merged = [...(legacyAuthors || [])];
+    for (const pa of protocolAuthors || []) {
+      if (!legacyIds.has(pa.account_id)) {
+        merged.push({ id: pa.account_id, display_name: pa.text, bio: null, location: null, updated_at: pa.updated_at, shadow_count: 0, quiz_count: 0 });
+      }
+    }
+
+    return c.json({ authors: merged });
   });
 
   // =========================================================================

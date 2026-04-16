@@ -1,6 +1,6 @@
 /** Company account management — billing, admin, key generation, account operations. */
 
-import { randomBytes, timingSafeEqual } from 'crypto';
+import { randomBytes } from 'crypto';
 import { loadAccounts, saveAccount } from './kv.js';
 import { hashApiKey } from './crypto.js';
 import { requireAuth } from './auth.js';
@@ -8,16 +8,6 @@ import type { Account, AccountStore } from './auth.js';
 
 export async function getAccounts(): Promise<AccountStore> {
   return await loadAccounts<AccountStore>();
-}
-
-export function findAccountByEmailToken(accounts: AccountStore, token: string): string | null {
-  const tokenBuf = Buffer.from(token);
-  for (const [storeKey, acct] of Object.entries(accounts)) {
-    if (!acct.email_token) continue;
-    const expectedBuf = Buffer.from(acct.email_token);
-    if (tokenBuf.length === expectedBuf.length && timingSafeEqual(tokenBuf, expectedBuf)) return storeKey;
-  }
-  return null;
 }
 
 export async function updateAccountBilling(identifier: string, billing: Partial<Pick<Account, 'stripe_customer_id' | 'subscription_status' | 'subscription_id' | 'current_period_end'>>): Promise<void> {
