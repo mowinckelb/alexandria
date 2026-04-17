@@ -318,16 +318,6 @@ app.get('/analytics/user/:login', async (c) => {
   return c.json(data);
 });
 
-app.post('/analytics/test-digest', async (c) => {
-  const adminLogin = process.env.ADMIN_GITHUB_LOGIN || '';
-  const account = (c as any).get('account') as { github_login?: string } | undefined;
-  if (!account?.github_login || !adminLogin || account.github_login !== adminLogin) {
-    return c.json({ error: 'Forbidden' }, 403);
-  }
-  await runHealthDigest(true);
-  return c.json({ ok: true, message: 'Health digest sent (forced).' });
-});
-
 app.notFound((c) => {
   const path = new URL(c.req.url).pathname;
   const criticalPaths = new Set(['/alexandria', '/marketplace/signal']);

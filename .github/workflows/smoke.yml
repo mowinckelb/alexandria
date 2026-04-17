@@ -128,11 +128,3 @@ jobs:
             exit 1
           fi
           echo "✓ stripe webhook reachable (HTTP $status — expected 400/500 without signature)"
-
-      - name: Email delivery
-        run: |
-          # Force a health digest to test email delivery end-to-end
-          result=$(curl -sf -X POST $SERVER/analytics/test-digest \
-            -H "Authorization: Bearer $API_KEY" 2>/dev/null || echo "FAILED")
-          echo "$result" | grep -q '"ok":true' || { echo "::error::Health digest / email delivery failed"; exit 1; }
-          echo "✓ email delivery (health digest sent)"

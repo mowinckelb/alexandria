@@ -100,7 +100,7 @@ export async function runEngagementCheck(): Promise<void> {
 
 type Urgency = 'sprint' | 'stroll';
 
-export async function runHealthDigest(force = false): Promise<void> {
+export async function runHealthDigest(): Promise<void> {
   try {
     const kv = getKV();
     const issues: string[] = [];
@@ -228,8 +228,7 @@ export async function runHealthDigest(force = false): Promise<void> {
       }), { expirationTtl: 30 * 24 * 60 * 60 });
     } catch { /* non-fatal */ }
 
-    if (!urgency && !force) return;
-    if (!urgency && force) urgency = 'stroll';
+    if (!urgency) return;
 
     // Subject carries both signals: email-exists = come chat, urgency = how fast.
     // Full issue list lives in the KV marker above (cron:health_digest).
