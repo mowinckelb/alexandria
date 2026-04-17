@@ -146,7 +146,7 @@ No Machine loop. No constitution writes. This is company work, not product:
 - **Open threads.** What's unresolved. What the next session should pick up. Ordered by priority.
 - **Meta loop.** Product learnings → factory canon (`factory/canon/methodology.md`).
 - **Founder loop.** Save agent memories for communication patterns, preferences, anti-patterns.
-- **Nudge `/a`.** Close with one line: "open a new tab, run /a, leave it running — even 5 minutes compounds." Capture the signal before it decays.
+- **Nudge `/a`.** Close with one line nudging a new tab + `/a` — low-pressure, concrete about the action, composed fresh each time (never a fixed phrase). The idea underneath: passive work captures signal, active sessions process it, signal decays if left unworked.
 
 **Principles (both protocols):**
 - Hazy fragments scale. Weeds do not. Keep it compressed.

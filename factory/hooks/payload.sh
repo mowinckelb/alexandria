@@ -79,19 +79,10 @@ if [ "$MODE" = "session-start" ]; then
   fi
 
   # ── Nudges ──
-  # Passive session nudge (written at previous session-end if no /a was used)
-  if [ -f "$ALEX_DIR/.nudge" ]; then
-    cat "$ALEX_DIR/.nudge"
-    rm -f "$ALEX_DIR/.nudge"
-  fi
-  # Signal nudge (observations accumulated from passive sessions)
-  signal_count=0
-  if [ -f "$ALEX_DIR/signal.md" ]; then
-    signal_count=$(grep -c '.' "$ALEX_DIR/signal.md" 2>/dev/null || echo 0)
-  fi
-  if [ "$signal_count" -gt 0 ]; then
-    echo "alexandria: $signal_count observations from recent sessions. start an active session to develop them."
-  fi
+  # Markers only — Engine composes any user-facing text per canon.
+  # .nudge_pending: written at prior session-end if the session wasn't active.
+  # signal.md: observations accumulated from passive sessions — Engine reads directly.
+  # Canon instructs the Engine to check these at session start and respond appropriately.
 
   # Sync errors surfacing — any failed POSTs since last clean session
   # Raw tail injected; Engine decides what to act on, clears what it handles.
@@ -258,9 +249,9 @@ if [ "$MODE" = "session-end" ]; then
     was_active=true
   fi
 
-  # Write nudge only if session was NOT active
+  # Marker only if session was NOT active — Engine composes nudge text per canon at next session start
   if [ "$was_active" = "false" ]; then
-    echo "alexandria: try an active session in a new tab — even 5 minutes compounds." > "$ALEX_DIR/.nudge"
+    touch "$ALEX_DIR/.nudge_pending"
   fi
 
   # Transcript → vault
