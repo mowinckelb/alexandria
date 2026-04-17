@@ -219,22 +219,6 @@ export async function runHealthDigest(force = false): Promise<void> {
       if (missing.length > 0) escalate('sprint', `Missing env vars: ${missing.join(', ')}`);
     } catch { /* non-fatal */ }
 
-    // User feedback — worth a walk
-    let hasFeedback = false;
-    try {
-      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-      const list = await kv.list({ prefix: 'feedback:' });
-      for (const k of list.keys) {
-        const raw = await kv.get(k.name);
-        if (raw) {
-          try {
-            if (new Date(JSON.parse(raw).t).getTime() > cutoff) { hasFeedback = true; break; }
-          } catch { /* skip */ }
-        }
-      }
-    } catch { /* non-fatal */ }
-    if (hasFeedback) escalate('stroll', 'New user feedback received');
-
     // Cron marker (proves the job ran — includes issue list for debugging)
     try {
       await kv.put('cron:health_digest', JSON.stringify({
@@ -247,9 +231,9 @@ export async function runHealthDigest(force = false): Promise<void> {
     if (!urgency && !force) return;
     if (!urgency && force) urgency = 'stroll';
 
-    // Email includes issue list so the founder knows what's wrong without checking a dashboard
-    const issueBody = issues.length > 0 ? issues.join('\n') : 'forced check — no issues found';
-    await sendEmail(FOUNDER_EMAIL, `alexandria. — ${urgency}`, issueBody);
+    // Subject carries both signals: email-exists = come chat, urgency = how fast.
+    // Full issue list lives in the KV marker above (cron:health_digest).
+    await sendEmail(FOUNDER_EMAIL, `alexandria. — ${urgency}`, '—');
   } catch (err) {
     console.error('Health digest failed:', err);
   }
