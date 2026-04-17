@@ -25,7 +25,17 @@ fi
 
 ## Machine audit (run before vault processing)
 
-Before processing vault, consider Machine state. Intelligence decision — no fixed checklist. Look at whatever seems worth looking at this run: last run's `## Status` (complete vs partial), derivative freshness vs sources, `.call_manifest` validity, git repo cleanliness, `.alexandria_errors` if present. Fix what's trivially fixable (regenerate a missing derivative, commit a dirty repo, clear an error that was transient). Whatever you can't fix, append a terse line to `~/.alexandria/.machine_signal` so the Factory autoloop sees it across Authors. If nothing caught your attention this run, skip — don't invent problems. The audit is a mirror, not a checklist.
+Before processing vault, consider Machine state. Intelligence decision — no fixed checklist. Look at whatever seems worth looking at this run: last run's `## Status` (complete vs partial), derivative freshness vs sources, `.call_manifest` validity, git repo cleanliness, `.alexandria_errors` if present, `.canon_update_notice` if present. Fix what's trivially fixable (regenerate a missing derivative, commit a dirty repo, clear an error that was transient). Whatever you can't fix, append a terse line to `~/.alexandria/.machine_signal` so the Factory autoloop sees it across Authors. If nothing caught your attention this run, skip — don't invent problems. The audit is a mirror, not a checklist.
+
+## Canon update review (when `.canon_update_notice` exists)
+
+Upstream canon is auto-pulled on every session-start. When it changes, the hook writes `.canon_update_notice` with the diff. Your job during the audit: read the notice, consider each change against what you know about this Author (constitution, ontology, feedback, machine.md, canon_overrides). For each change:
+
+- Fits this Author → no action. Upstream applies.
+- Conflicts with this Author's practice → add or refine an entry in `~/.alexandria/canon_overrides.md` that supersedes the change. Cite the upstream line you're overriding and why.
+- Unclear → surface in notepad for the Author to weigh in during next /a.
+
+Clear `.canon_update_notice` after review. The Author's consent layer lives in `canon_overrides.md`; upstream auto-pulls but overrides win.
 
 Read ~/.alexandria/constitution/, ~/.alexandria/ontology/, ~/.alexandria/notepad.md, ~/.alexandria/machine.md, and ~/.alexandria/feedback.md.
 

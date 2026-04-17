@@ -41,10 +41,24 @@ if [ "$MODE" = "session-start" ]; then
 
   # ── Canon fetch ──
   # One module: methodology.md. Try GitHub, fall back to local cache.
+  # On change vs last cached version, write a diff notice for the Engine to review —
+  # the Author's consent layer lives in canon_overrides.md (authoritative over canon).
   canon=""
-  canon=$(curl -s --max-time 5 "$CANON_GITHUB/methodology.md" 2>/dev/null)
-  if [ -n "$canon" ] && [ ${#canon} -gt 100 ]; then
-    echo "$canon" > "$ALEX_DIR/.canon_local"
+  fresh_canon=$(curl -s --max-time 5 "$CANON_GITHUB/methodology.md" 2>/dev/null)
+  if [ -n "$fresh_canon" ] && [ ${#fresh_canon} -gt 100 ]; then
+    if [ -f "$ALEX_DIR/.canon_local" ] && ! diff -q <(printf '%s' "$fresh_canon") "$ALEX_DIR/.canon_local" >/dev/null 2>&1; then
+      {
+        echo "# Canon updated — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo ""
+        echo "Upstream canon (factory/canon/methodology.md) changed. Review the diff below and decide per-Author fit. If any change conflicts with this Author's practice, add/refine entries in ~/.alexandria/canon_overrides.md — overrides are authoritative over upstream canon. Clear this file when reviewed."
+        echo ""
+        echo "## Diff (first 200 lines)"
+        echo ""
+        diff -u "$ALEX_DIR/.canon_local" <(printf '%s' "$fresh_canon") 2>/dev/null | head -n 200
+      } > "$ALEX_DIR/.canon_update_notice"
+    fi
+    printf '%s' "$fresh_canon" > "$ALEX_DIR/.canon_local"
+    canon="$fresh_canon"
     [ -n "$CLAUDE_ENV_FILE" ] && echo "export ALEXANDRIA_CANON_OK=true" >> "$CLAUDE_ENV_FILE"
   else
     [ -f "$ALEX_DIR/.canon_local" ] && canon=$(cat "$ALEX_DIR/.canon_local")
@@ -87,6 +101,16 @@ if [ "$MODE" = "session-start" ]; then
       echo "alexandria: $err_count sync errors pending (tail below — Engine, investigate and clear .alexandria_errors when resolved):"
       tail -n 5 "$ALEX_DIR/.alexandria_errors"
     fi
+  fi
+
+  # Canon update notice — upstream canon changed since last session.
+  # Engine reviews, updates canon_overrides.md if anything should be overridden for this Author, clears the notice.
+  if [ -f "$ALEX_DIR/.canon_update_notice" ] && [ -s "$ALEX_DIR/.canon_update_notice" ]; then
+    echo ""
+    echo "--- CANON UPDATE PENDING REVIEW ---"
+    cat "$ALEX_DIR/.canon_update_notice"
+    echo "--- END CANON UPDATE ---"
+    echo ""
   fi
 
   # ── Inject Author context ──
@@ -138,6 +162,10 @@ if [ "$MODE" = "session-start" ]; then
     agent=$(cat "$ALEX_DIR/agent.md")
   fi
 
+  # Canon overrides — Author's consent layer. Authoritative over upstream canon.
+  canon_overrides=""
+  [ -f "$ALEX_DIR/canon_overrides.md" ] && canon_overrides=$(cat "$ALEX_DIR/canon_overrides.md")
+
   # ── The Block (first-session onboarding) ──
   # No .block_complete = new Author or block hasn't produced content yet.
   # Constitution > 200 bytes = block already worked, auto-mark complete.
@@ -184,6 +212,11 @@ if [ "$MODE" = "session-start" ]; then
       echo ""
       echo "--- AGENT PREFERENCES (how this Author wants AI to work with them) ---"
       echo "$agent"
+    fi
+    if [ -n "$canon_overrides" ] && [ $(echo -n "$canon_overrides" | wc -c | tr -d ' ') -gt 5 ]; then
+      echo ""
+      echo "--- CANON OVERRIDES (Author's consent layer — AUTHORITATIVE over upstream canon where they conflict) ---"
+      echo "$canon_overrides"
     fi
     echo ""
     echo "Alexandria passive mode active. Follow the canon's passive mode instructions. If the Author mentions Alexandria feedback, write to .session_feedback — it reaches the team at session end."
@@ -321,8 +354,8 @@ if [ "$MODE" = "subagent" ]; then
     done
   fi
 
-  # Machine, notepad, feedback, agent — derivative or source
-  for pair in "machine.md:HOW TO WORK WITH THIS AUTHOR" "_notepad.md notepad.md:NOTEPAD" "_feedback.md feedback.md:ENGINE FEEDBACK" "_agent.md agent.md:AGENT PREFERENCES"; do
+  # Machine, notepad, feedback, agent, canon_overrides — derivative or source
+  for pair in "machine.md:HOW TO WORK WITH THIS AUTHOR" "_notepad.md notepad.md:NOTEPAD" "_feedback.md feedback.md:ENGINE FEEDBACK" "_agent.md agent.md:AGENT PREFERENCES" "canon_overrides.md:CANON OVERRIDES (authoritative over upstream canon)"; do
     label="${pair##*:}"
     files="${pair%%:*}"
     for f in $files; do
