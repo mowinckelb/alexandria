@@ -40,29 +40,37 @@ if [ "$MODE" = "session-start" ]; then
   echo "$session_id" > "$cc_marker"
 
   # ── Canon fetch ──
-  # One module: methodology.md. Try GitHub, fall back to local cache.
-  # On change vs last cached version, write a diff notice for the Engine to review —
+  # Seven modules: axioms, methodology, editor, mercury, publisher, library, filter.
+  # Each cached as .canon_local_<name>. Methodology remains the entry point;
+  # the others are fetched for local availability so the Engine can reference them offline.
+  # On methodology change vs last cached, write a diff notice for the Engine to review —
   # the Author's consent layer lives in canon_overrides.md (authoritative over canon).
   canon=""
-  fresh_canon=$(curl -s --max-time 5 "$CANON_GITHUB/methodology.md" 2>/dev/null)
-  if [ -n "$fresh_canon" ] && [ ${#fresh_canon} -gt 100 ]; then
-    if [ -f "$ALEX_DIR/.canon_local" ] && ! diff -q <(printf '%s' "$fresh_canon") "$ALEX_DIR/.canon_local" >/dev/null 2>&1; then
-      {
-        echo "# Canon updated — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-        echo ""
-        echo "Upstream canon (factory/canon/methodology.md) changed. Review the diff below and decide per-Author fit. If any change conflicts with this Author's practice, add/refine entries in ~/.alexandria/canon_overrides.md — overrides are authoritative over upstream canon. Clear this file when reviewed."
-        echo ""
-        echo "## Diff (first 200 lines)"
-        echo ""
-        diff -u "$ALEX_DIR/.canon_local" <(printf '%s' "$fresh_canon") 2>/dev/null | head -n 200
-      } > "$ALEX_DIR/.canon_update_notice"
+  canon_ok=false
+  for module in axioms methodology editor mercury publisher library filter; do
+    fresh=$(curl -s --max-time 5 "$CANON_GITHUB/$module.md" 2>/dev/null)
+    if [ -n "$fresh" ] && [ ${#fresh} -gt 100 ]; then
+      if [ "$module" = "methodology" ] && [ -f "$ALEX_DIR/.canon_local_methodology" ] && ! diff -q <(printf '%s' "$fresh") "$ALEX_DIR/.canon_local_methodology" >/dev/null 2>&1; then
+        {
+          echo "# Canon updated — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo ""
+          echo "Upstream canon (factory/canon/methodology.md) changed. Review the diff below and decide per-Author fit. If any change conflicts with this Author's practice, add/refine entries in ~/.alexandria/canon_overrides.md — overrides are authoritative over upstream canon. Clear this file when reviewed."
+          echo ""
+          echo "## Diff (first 200 lines)"
+          echo ""
+          diff -u "$ALEX_DIR/.canon_local_methodology" <(printf '%s' "$fresh") 2>/dev/null | head -n 200
+        } > "$ALEX_DIR/.canon_update_notice"
+      fi
+      printf '%s' "$fresh" > "$ALEX_DIR/.canon_local_$module"
+      [ "$module" = "methodology" ] && canon="$fresh" && canon_ok=true
     fi
-    printf '%s' "$fresh_canon" > "$ALEX_DIR/.canon_local"
-    canon="$fresh_canon"
-    [ -n "$CLAUDE_ENV_FILE" ] && echo "export ALEXANDRIA_CANON_OK=true" >> "$CLAUDE_ENV_FILE"
-  else
-    [ -f "$ALEX_DIR/.canon_local" ] && canon=$(cat "$ALEX_DIR/.canon_local")
+  done
+  # Backward-compat: keep .canon_local pointing to methodology
+  [ -f "$ALEX_DIR/.canon_local_methodology" ] && cp "$ALEX_DIR/.canon_local_methodology" "$ALEX_DIR/.canon_local"
+  if [ "$canon_ok" = "false" ] && [ -f "$ALEX_DIR/.canon_local" ]; then
+    canon=$(cat "$ALEX_DIR/.canon_local")
   fi
+  [ -n "$CLAUDE_ENV_FILE" ] && [ "$canon_ok" = "true" ] && echo "export ALEXANDRIA_CANON_OK=true" >> "$CLAUDE_ENV_FILE"
 
   # ── Git sync: push local, pull overnight changes ──
   if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/null; then
