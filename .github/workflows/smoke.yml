@@ -97,7 +97,7 @@ jobs:
 
       - name: Factory (GitHub raw — all critical files)
         run: |
-          for file in setup.sh canon/methodology.md hooks/shim.sh hooks/payload.sh skills/claudecode.md skills/scheduled.md skills/cursor.mdc skills/codex.md; do
+          for file in setup.sh canon/axioms.md canon/methodology.md canon/editor.md canon/mercury.md canon/publisher.md canon/library.md canon/filter.md hooks/shim.sh hooks/payload.sh skills/claudecode.md skills/scheduled.md skills/cursor.mdc skills/codex.md; do
             status=$(curl -s -o /dev/null -w '%{http_code}' "$FACTORY/$file")
             if [ "$status" != "200" ]; then
               echo "::error::Factory file $file returned $status"
@@ -107,7 +107,7 @@ jobs:
           # Verify content, not just 200
           curl -sf "$FACTORY/setup.sh" | head -1 | grep -q "bash" || { echo "::error::setup.sh not valid bash"; exit 1; }
           curl -sf "$FACTORY/canon/methodology.md" | wc -c | xargs test 1000 -lt || { echo "::error::methodology.md too small"; exit 1; }
-          echo "✓ factory (8 files, content verified)"
+          echo "✓ factory (14 files, content verified)"
 
       - name: Website
         run: |
