@@ -221,8 +221,8 @@ export async function runHealthDigest(): Promise<void> {
 
     // Factory autoloop liveness — two markers: fired (JOB 0) + completed (end of JOB 4).
     // Fired stale → trigger dead. Completed stale while fired fresh → JOB 4 silently broken.
-    // Soft default 14 days (Factory autoloop may reconsider this).
     try {
+      // Soft default — owned by Factory autoloop (see factory/skills/factory.md). Reconsiderable.
       const factoryStaleDays = 14;
       const staleMs = factoryStaleDays * 24 * 60 * 60 * 1000;
       const markerAgeMs = async (key: string): Promise<number | null> => {
