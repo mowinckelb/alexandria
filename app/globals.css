@@ -22,7 +22,12 @@
   
   --border-light: #e2dbd2;
   --border-dashed: #d4cdc4;
-  
+
+  /* tyrian imperial purple — matches landing */
+  --accent: #5B1F47;
+  --accent-hover: #7A2F5F;
+  --accent-faint: rgba(91, 31, 71, 0.12);
+
   --toggle-bg: rgba(60, 50, 40, 0.06);
   --toggle-pill: rgba(255, 252, 245, 0.55);
   
@@ -52,6 +57,10 @@
 
   --border-light: #3e3d3a;
   --border-dashed: #4a4945;
+
+  --accent: #B07294;
+  --accent-hover: #D08BB0;
+  --accent-faint: rgba(176, 114, 148, 0.15);
 
   --toggle-bg: rgba(255, 255, 255, 0.06);
   --toggle-pill: rgba(255, 255, 255, 0.1);
@@ -286,66 +295,173 @@ html.app-shell input:focus {
 }
 
 /* ============================================
-   Long-form documents (Memo, Logic, Alexandria)
-   The --- is a door between rooms.
+   Long-form documents — editorial prose
+   Inherits the landing's classical register.
    ============================================ */
+
+/* Document shell — header, article, nav share the same measure */
+.mdoc {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-eb-garamond);
+  min-height: 100vh;
+}
+.mdoc-frame {
+  max-width: 680px;
+  margin: 0 auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+.mdoc-header {
+  padding-top: 2.5rem;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+.mdoc-article {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+.mdoc-footnav {
+  padding-bottom: 4rem;
+}
+.mdoc-home {
+  color: var(--text-ghost);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: opacity 300ms ease;
+}
+.mdoc-home:hover { opacity: 0.6; }
+
+/* H1 — the title. Hero-scale, italic, balanced. */
 .pdoc-longform .pdoc-h1 {
-  font-size: 1.5rem;
-  font-weight: 500;
-  margin: 0 0 0.2rem;
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.4rem, 4.5vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  margin: 0 0 1.5rem;
+  text-wrap: balance;
 }
 
-/* Section headings — chapter entrances */
+/* First paragraph after H1 — the dek (subtitle). In markdown, *italic* wraps entire line. */
+.pdoc-longform .pdoc-h1 + .pdoc-p {
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0 0 2rem;
+  text-wrap: pretty;
+}
+
+/* Section H2s — the chapter labels. "telos · the purpose" */
 .pdoc-longform .pdoc-h2 {
-  font-size: 0.8rem;
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
   font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  margin: 0 0 1.8rem;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  color: var(--accent);
+  margin: 0 0 1rem;
   padding-bottom: 0;
 }
 
-/* First h2 (subtitle like "Alexandria") stays as-is */
+/* First h2 after h1 (the subtitle slot) — plain, not accent */
 .pdoc-longform .pdoc-h1 + .pdoc-h2 {
-  text-transform: none;
+  font-size: 1.15rem;
   letter-spacing: 0.01em;
-  font-size: 1rem;
   color: var(--text-muted);
+  font-style: italic;
+  font-weight: 400;
   margin: 0 0 2.5rem;
+  text-transform: none;
 }
 
+/* H3 — the layer tagline. "expand human consciousness." */
 .pdoc-longform .pdoc-h3 {
-  font-size: 1rem;
-  margin: 2rem 0 0.7rem;
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.65rem;
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin: 0.2rem 0 1.5rem;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
 }
 
-/* The door between sections — generous breathing room */
+/* Section divider — dinkus, matches the landing */
 .pdoc-longform .pdoc-hr {
   background: none;
   height: auto;
-  margin: 4rem 0;
-  text-align: center;
-  position: relative;
+  margin: 4.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  color: var(--accent);
+  opacity: 0.55;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
 }
+.pdoc-longform .pdoc-hr::before,
 .pdoc-longform .pdoc-hr::after {
-  content: '·';
-  color: var(--text-whisper);
-  font-size: 1.2rem;
-  letter-spacing: 0.5em;
+  content: '';
+  display: block;
+  width: 2rem;
+  height: 0.5px;
+  background: var(--border-dashed);
 }
 
-/* First paragraph after title — the hook */
-.pdoc-longform .pdoc-h1 + .pdoc-p,
-.pdoc-longform .pdoc-h2 + .pdoc-p:first-of-type {
-  margin-top: 0;
-}
-
-/* Paragraphs — comfortable reading */
+/* Paragraphs — comfortable, editorial rhythm */
 .pdoc-longform .pdoc-p {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  margin: 1rem 0;
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  margin: 1.1rem 0;
+  text-wrap: pretty;
+}
+
+.pdoc-longform .pdoc-p em {
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+/* Strong — layer names ("sustainably abundant", "ami", "pax") pop in accent */
+.pdoc-longform .pdoc-p .pdoc-strong {
+  color: var(--accent);
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Blockquote — versatile call-out: works for short epigraphs and longer thesis blocks. */
+.pdoc-longform .pdoc-bq {
+  border-left: 2px solid var(--accent);
+  margin: 2.5rem 0;
+  padding: 0.2rem 0 0.2rem 1.5rem;
+}
+
+.pdoc-longform .pdoc-bq .pdoc-p {
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.pdoc-longform .pdoc-bq .pdoc-p .pdoc-strong {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* Mobile — tighter rhythm, smaller scale */
+@media (max-width: 640px) {
+  .pdoc-longform .pdoc-hr { margin: 3rem 0; }
+  .pdoc-longform .pdoc-h3 { font-size: 1.45rem; }
+  .pdoc-longform .pdoc-bq { margin: 1.8rem 0; padding-left: 1.1rem; }
+  .pdoc-longform .pdoc-bq .pdoc-p { font-size: 1.02rem; }
 }
 
 /* ============================================

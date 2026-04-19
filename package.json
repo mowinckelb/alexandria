@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node -e \"const fs=require('fs'),p=require('path');const s='files/confidential',d='public/partners';fs.mkdirSync(d,{recursive:true});['Memo.md','Numbers.md','Logic.md','Alexandria.md'].forEach(f=>{const src=p.join(s,f);if(fs.existsSync(src))fs.copyFileSync(src,p.join(d,f))});if(fs.existsSync('AGENTS.md')){fs.copyFileSync('AGENTS.md','CLAUDE.md');fs.copyFileSync('AGENTS.md','.cursorrules');}\"",
+    "prebuild": "node -e \"const fs=require('fs');if(fs.existsSync('AGENTS.md')){fs.copyFileSync('AGENTS.md','CLAUDE.md');fs.copyFileSync('AGENTS.md','.cursorrules');}\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

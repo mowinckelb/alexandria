@@ -7,7 +7,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/join`, lastModified: new Date(), priority: 0.9 },
     { url: `${SITE_URL}/vision`, lastModified: new Date(), priority: 0.8 },
     { url: `${SITE_URL}/library`, lastModified: new Date(), priority: 0.8 },
-    { url: `${SITE_URL}/partners`, lastModified: new Date(), priority: 0.6 },
     { url: `${SITE_URL}/privacy`, lastModified: new Date(), priority: 0.3 },
     { url: `${SITE_URL}/terms`, lastModified: new Date(), priority: 0.3 },
   ];

@@ -47,9 +47,6 @@ files/private/Vault/
 .font_cache/
 server/.next/
 
-# prebuild copies confidential docs here — build artifact only, never commit
-public/partners/*.md
-
 # prebuild generates from AGENTS.md (canonical) — not source
 CLAUDE.md
 .cursorrules
