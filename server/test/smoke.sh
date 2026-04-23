@@ -30,11 +30,16 @@ if [ ! -f "$API_KEY_FILE" ]; then
 fi
 API_KEY=$(tr -d '[:space:]' < "$API_KEY_FILE")
 
-# 1. Health
+# 1. Health — each infra component must be ok. Top-level status may be
+#    'degraded' when the awareness digest is non-zero (stale clients etc.);
+#    that's signal, not a smoke failure, so we check components directly.
 health_out=$(curl -sS -w "\n%{http_code}" "$BASE/health" 2>&1) || true
 health_status=$(echo "$health_out" | tail -1)
 health_body=$(echo "$health_out" | sed '$d')
-if [ "$health_status" = "200" ] && echo "$health_body" | grep -q '"status":"ok"'; then
+if [ "$health_status" = "200" ] && echo "$health_body" | grep -q '"kv":"ok"' \
+  && echo "$health_body" | grep -q '"d1":"ok"' \
+  && echo "$health_body" | grep -q '"r2":"ok"' \
+  && echo "$health_body" | grep -q '"env":"ok"'; then
   check "health" 200
 else
   check "health" "${health_status:-0}"

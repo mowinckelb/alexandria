@@ -188,7 +188,7 @@ app.get('/health', async (c) => {
   const digestUrgency = (awareness as { urgency?: string }).urgency;
 
   return c.json({
-    status: !infraHealthy ? 'degraded' : digestUrgency ? digestUrgency : 'ok',
+    status: infraHealthy && !digestUrgency ? 'ok' : 'degraded',
     components,
     awareness,
     server: 'alexandria',
