@@ -30,7 +30,12 @@ jobs:
           sleep 5
           body=$(curl -sf https://mcp.mowinckel.ai/health)
           echo "$body"
-          echo "$body" | grep -q '"status":"ok"' || { echo "::error::Health degraded after deploy"; exit 1; }
-          echo "✓ health ok"
+          # Top-level status can be 'degraded' when the awareness digest flags
+          # stale clients / deprecated hits — signal, not an infra failure.
+          # Verify each infra component directly.
+          for comp in kv d1 r2 env; do
+            echo "$body" | grep -q "\"$comp\":\"ok\"" || { echo "::error::Component $comp not ok after deploy"; exit 1; }
+          done
+          echo "✓ health (all components)"
 
       # Smoke workflow auto-triggers after Deploy via workflow_run
