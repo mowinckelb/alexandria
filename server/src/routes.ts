@@ -770,12 +770,16 @@ export function registerRoutes(app: Hono) {
   // Manual digest trigger. Scheduled daily at 09:00 UTC, but that's a 24h feedback
   // loop for any digest-logic change. This shortens it: make changes, curl this,
   // read the email / cron:health_digest KV marker. Admin-only.
+  //
+  // ?email=true sends the alarm email (default: suppressed, so CI smoke can hammer
+  // this every 6h without flooding the inbox). Scheduled-cron path always sends.
   app.post('/admin/cron/health-digest', async (c) => {
     if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
-    await runHealthDigest();
+    const sendEmailOnAlarm = c.req.query('email') === 'true';
+    await runHealthDigest({ sendEmailOnAlarm });
     const kv = getKV();
     const raw = await kv.get('cron:health_digest');
-    return c.json({ ok: true, result: raw ? JSON.parse(raw) : null });
+    return c.json({ ok: true, email_sent: sendEmailOnAlarm, result: raw ? JSON.parse(raw) : null });
   });
 
   // --- Library signal (RL aggregation for meta trigger) ---

@@ -100,7 +100,7 @@ export async function runEngagementCheck(): Promise<void> {
 
 type Urgency = 'sprint' | 'stroll';
 
-export async function runHealthDigest(): Promise<void> {
+export async function runHealthDigest(opts: { sendEmailOnAlarm?: boolean } = { sendEmailOnAlarm: true }): Promise<void> {
   try {
     const kv = getKV();
     const issues: string[] = [];
@@ -285,6 +285,22 @@ export async function runHealthDigest(): Promise<void> {
       }
     } catch { /* non-fatal */ }
 
+    // Orphan signups — account created >48h ago but never fired /call (never installed).
+    // Either setup broke for them or they bailed. Either way, product-health signal
+    // the founder wants to see. /call now stamps installed_at (ground truth); before
+    // that fix this field was always null, so this alarm was meaningless.
+    try {
+      const accounts = await loadAccounts<AccountStore>();
+      const cutoff = Date.now() - 48 * 60 * 60 * 1000;
+      const orphans = Object.values(accounts).filter(a =>
+        !a.installed_at && a.created_at && new Date(a.created_at).getTime() < cutoff
+      );
+      if (orphans.length > 0) {
+        const sample = orphans.slice(0, 3).map(o => o.github_login).join(', ');
+        escalate('stroll', `${orphans.length} signup${orphans.length > 1 ? 's' : ''} >48h without install (${sample}${orphans.length > 3 ? '…' : ''})`);
+      }
+    } catch { /* non-fatal */ }
+
     // Cron marker (proves the job ran — includes issue list for debugging)
     try {
       await kv.put('cron:health_digest', JSON.stringify({
@@ -295,6 +311,7 @@ export async function runHealthDigest(): Promise<void> {
     } catch { /* non-fatal */ }
 
     if (!urgency) return;
+    if (opts.sendEmailOnAlarm === false) return;
 
     // Subject carries urgency; body carries the issue list. Awareness axiom:
     // a notification without actionable content is just a notification.

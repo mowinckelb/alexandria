@@ -11,10 +11,21 @@ SERVER="https://mcp.mowinckel.ai"
 CANON_GITHUB="https://raw.githubusercontent.com/mowinckelb/Alexandria/main/factory/canon"
 PAYLOAD_FRESH="$5"
 
-# Sent as X-Alexandria-Client on every authed POST. Lets the server detect
-# installs on old payloads — its absence == pre-upgrade shim.
-# Bump when payload.sh changes meaningfully (new endpoint, protocol shift).
-CLIENT_VERSION="2026-04-23"
+# Sent as X-Alexandria-Client on every authed POST. Server uses this to
+# detect stale installs — unset = pre-versioning shim, drift = partial upgrade.
+# Computed as a hash of the cached payload itself, so every meaningful change
+# to payload.sh auto-bumps the version with zero manual touch.
+if [ -f "$ALEX_DIR/.hooks_payload" ]; then
+  if command -v sha256sum &>/dev/null; then
+    CLIENT_VERSION=$(sha256sum "$ALEX_DIR/.hooks_payload" | cut -c1-7)
+  elif command -v shasum &>/dev/null; then
+    CLIENT_VERSION=$(shasum -a 256 "$ALEX_DIR/.hooks_payload" | cut -c1-7)
+  else
+    CLIENT_VERSION="unhashed"
+  fi
+else
+  CLIENT_VERSION="no-cache"
+fi
 
 # ─── SESSION START ───────────────────────────────────────────────
 
