@@ -173,11 +173,24 @@ app.get('/health', async (c) => {
     console.error(`[health] Missing env vars: ${missingEnv.join(', ')}`);
   }
 
-  const healthy = Object.values(components).every(v => v === 'ok');
+  // Awareness — last scheduled digest's urgency + issue list. Cheap KV read,
+  // cached by cron.ts. Lets external monitors see stale-client/deprecated-hit
+  // signal without needing auth on /analytics/dashboard.
+  let awareness: Record<string, unknown> = { status: 'no_digest_yet' };
+  try {
+    const env = c.env as Record<string, unknown>;
+    const kv = env.DATA as KVNamespace;
+    const raw = await kv.get('cron:health_digest');
+    if (raw) awareness = JSON.parse(raw);
+  } catch { /* non-fatal */ }
+
+  const infraHealthy = Object.values(components).every(v => v === 'ok');
+  const digestUrgency = (awareness as { urgency?: string }).urgency;
 
   return c.json({
-    status: healthy ? 'ok' : 'degraded',
+    status: !infraHealthy ? 'degraded' : digestUrgency ? digestUrgency : 'ok',
     components,
+    awareness,
     server: 'alexandria',
     version: '0.4.0',
   });

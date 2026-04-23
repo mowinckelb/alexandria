@@ -296,9 +296,14 @@ export async function runHealthDigest(): Promise<void> {
 
     if (!urgency) return;
 
-    // Subject carries both signals: email-exists = come chat, urgency = how fast.
-    // Full issue list lives in the KV marker above (cron:health_digest).
-    await sendEmail(FOUNDER_EMAIL, `alexandria. — ${urgency}`, '—');
+    // Subject carries urgency; body carries the issue list. Awareness axiom:
+    // a notification without actionable content is just a notification.
+    const body = `<div style="font-family:'EB Garamond',Georgia,serif;max-width:520px;margin:0 auto;padding:40px 20px;color:#3d3630;">` +
+      `<p style="margin:0 0 1rem;font-size:0.85rem;opacity:0.5">` + new Date().toISOString() + `</p>` +
+      issues.map(i => `<p style="margin:0 0 0.5rem;line-height:1.5;">${i.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>`).join('') +
+      `<p style="margin:2rem 0 0;font-size:0.75rem;opacity:0.4"><a href="https://mcp.mowinckel.ai/analytics/dashboard" style="color:#8a8078">dashboard</a></p>` +
+      `</div>`;
+    await sendEmail(FOUNDER_EMAIL, `alexandria. — ${urgency}`, body);
   } catch (err) {
     console.error('Health digest failed:', err);
   }
