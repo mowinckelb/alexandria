@@ -219,8 +219,12 @@ export async function runHealthDigest(opts: { sendEmailOnAlarm?: boolean } = { s
         if (staleClientCalls > 0) {
           escalate('sprint', `${staleClientCalls} /call requests without X-Alexandria-Client header — pre-upgrade shims`);
         }
-        if (clientVersions.size > 1) {
-          const dist = [...clientVersions.entries()].sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v}=${n}`).join(', ');
+        // Drift = more than one version among REAL traffic. Test tags are known
+        // synthetic sources (CI smoke, manual checks) and don't count.
+        const testTags = new Set(['smoke-test', 'ci-smoke', 'check-script', 'check-install', 'scheduled-agent']);
+        const realVersions = [...clientVersions.entries()].filter(([v]) => !testTags.has(v));
+        if (realVersions.length > 1) {
+          const dist = realVersions.sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v}=${n}`).join(', ');
           escalate('stroll', `client version drift: ${dist}`);
         }
       }

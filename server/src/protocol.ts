@@ -134,10 +134,15 @@ export function registerProtocol(app: Hono) {
     // Install ground truth: /call firing proves the shim → payload → auth flow
     // works end-to-end. First successful /call per account stamps installed_at.
     // Unblocks followup/engagement cron paths that gated on this field.
+    // waitUntil so the KV write doesn't add latency to the /call response.
     if (!auth.account.installed_at) {
       auth.account.installed_at = new Date().toISOString();
-      await saveAccount(auth.account.github_login, auth.account as unknown as Record<string, unknown>);
-      logEvent('install_completed', { author: auth.account.github_login });
+      const login = auth.account.github_login;
+      const payload = auth.account as unknown as Record<string, unknown>;
+      c.executionCtx.waitUntil(
+        saveAccount(login, payload).catch(err => console.error('[install_completed] saveAccount failed:', err))
+      );
+      logEvent('install_completed', { author: login });
     }
 
     const body = await c.req.json().catch(() => null);
