@@ -11,6 +11,11 @@ SERVER="https://mcp.mowinckel.ai"
 CANON_GITHUB="https://raw.githubusercontent.com/mowinckelb/Alexandria/main/factory/canon"
 PAYLOAD_FRESH="$5"
 
+# Sent as X-Alexandria-Client on every authed POST. Lets the server detect
+# installs on old payloads — its absence == pre-upgrade shim.
+# Bump when payload.sh changes meaningfully (new endpoint, protocol shift).
+CLIENT_VERSION="2026-04-23"
+
 # ─── SESSION START ───────────────────────────────────────────────
 
 if [ "$MODE" = "session-start" ]; then
@@ -234,6 +239,7 @@ if [ "$MODE" = "session-start" ]; then
     # Loud failure: -f makes curl exit non-zero on HTTP errors, logged to errors file
     (curl -sf --max-time 4 -X POST "$SERVER/call" \
       -H "Authorization: Bearer $API_KEY" \
+      -H "X-Alexandria-Client: $CLIENT_VERSION" \
       -H "Content-Type: application/json" \
       -d "$call_payload" -o /dev/null 2>/dev/null \
       || echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) call POST failed" >> "$ALEX_DIR/.alexandria_errors") &
@@ -291,6 +297,7 @@ if [ "$MODE" = "session-end" ]; then
       if [ -n "$signal_json" ]; then
         curl -sf --max-time 4 -X POST "$SERVER/marketplace/signal" \
           -H "Authorization: Bearer $API_KEY" \
+          -H "X-Alexandria-Client: $CLIENT_VERSION" \
           -H "Content-Type: application/json" \
           -d "{\"signal\":$signal_json}" -o /dev/null 2>/dev/null &
         signal_pid=$!
@@ -302,6 +309,7 @@ if [ "$MODE" = "session-end" ]; then
       if [ -n "$fb_json" ]; then
         curl -sf --max-time 4 -X POST "$SERVER/feedback" \
           -H "Authorization: Bearer $API_KEY" \
+          -H "X-Alexandria-Client: $CLIENT_VERSION" \
           -H "Content-Type: application/json" \
           -d "{\"text\":$fb_json,\"context\":\"session_end\"}" -o /dev/null 2>/dev/null &
         feedback_pid=$!

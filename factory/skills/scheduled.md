@@ -17,6 +17,7 @@ if [ -f ~/.alexandria/.api_key ]; then
   [ -f ~/.alexandria/.call_manifest ] && manifest=$(cat ~/.alexandria/.call_manifest)
   curl -s -X POST https://mcp.mowinckel.ai/call \
     -H "Authorization: Bearer $(cat ~/.alexandria/.api_key)" \
+    -H "X-Alexandria-Client: scheduled-2026-04-23" \
     -H "Content-Type: application/json" \
     -d "$manifest" \
     > /dev/null 2>&1
@@ -58,6 +59,7 @@ After writing last_run.md, you MUST send a morning brief email. This is not opti
 ```bash
 curl -s -X POST https://mcp.mowinckel.ai/brief \
   -H "Authorization: Bearer $(cat ~/.alexandria/.api_key)" \
+  -H "X-Alexandria-Client: scheduled-2026-04-23" \
   -H "Content-Type: application/json" \
   -d '{"brief": "<factual delta — what you did, entries processed, signal found>", "notepad": "<fragment count + topic labels from notepad>", "quote": "<your pick — philosophy, literature, thought. rotate.>"}'
 ```
