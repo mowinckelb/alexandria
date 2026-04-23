@@ -100,6 +100,49 @@ export async function runEngagementCheck(): Promise<void> {
 
 type Urgency = 'sprint' | 'stroll';
 
+export interface EventScanResult {
+  serverErrors: number;
+  deprecatedHits: number;
+  staleClientCalls: number;
+  deprecatedByPath: Map<string, number>;
+  clientVersions: Map<string, number>;
+}
+
+/**
+ * Pure function: scan a JSONL event log for events that feed alarms.
+ * Extracted from runHealthDigest so the counter logic is testable in
+ * isolation — see server/test/cron-scanner.ts. Malformed lines are
+ * skipped silently (logs can contain partial writes); events outside
+ * [cutoff, now] are ignored.
+ */
+export function scanEventsForAlarms(rawLog: string, cutoff: number): EventScanResult {
+  const r: EventScanResult = {
+    serverErrors: 0,
+    deprecatedHits: 0,
+    staleClientCalls: 0,
+    deprecatedByPath: new Map(),
+    clientVersions: new Map(),
+  };
+  for (const line of rawLog.split('\n')) {
+    if (!line) continue;
+    try {
+      const ev = JSON.parse(line);
+      if (new Date(ev.t).getTime() < cutoff) continue;
+      if (ev.e === 'server_error') r.serverErrors++;
+      else if (ev.e === 'deprecated_hit') {
+        r.deprecatedHits++;
+        const p = ev.path || '(unknown)';
+        r.deprecatedByPath.set(p, (r.deprecatedByPath.get(p) || 0) + 1);
+      } else if (ev.e === 'client_version_seen') {
+        const v = ev.version || 'unset';
+        r.clientVersions.set(v, (r.clientVersions.get(v) || 0) + 1);
+        if (v === 'unset') r.staleClientCalls++;
+      }
+    } catch { continue; }
+  }
+  return r;
+}
+
 export async function runHealthDigest(opts: { sendEmailOnAlarm?: boolean } = { sendEmailOnAlarm: true }): Promise<void> {
   try {
     const kv = getKV();
@@ -182,47 +225,24 @@ export async function runHealthDigest(opts: { sendEmailOnAlarm?: boolean } = { s
 
     // Canon now served from GitHub, not from this server. No KV cache to verify.
 
-    // Event log analysis — scan today + yesterday (covers the 24h cutoff with
-    // no arbitrary line-count ceiling; events:YYYY-MM-DD keys cap the read).
-    // One pass, many counters. The awareness axiom: every line is a question.
+    // Event log analysis — delegate to the pure scanEventsForAlarms helper
+    // (testable in isolation, see server/test/cron-scanner.ts). Test-tag
+    // filtering stays here because drift semantics may evolve independently.
     try {
       const raw = await getRecentDaysEvents(2);
       if (raw) {
         const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-        let serverErrors = 0;
-        let deprecatedHits = 0;
-        let staleClientCalls = 0;
-        const deprecatedByPath = new Map<string, number>();
-        const clientVersions = new Map<string, number>();
-        for (const line of raw.split('\n')) {
-          if (!line) continue;
-          try {
-            const ev = JSON.parse(line);
-            if (new Date(ev.t).getTime() < cutoff) continue;
-            if (ev.e === 'server_error') serverErrors++;
-            else if (ev.e === 'deprecated_hit') {
-              deprecatedHits++;
-              const p = ev.path || '(unknown)';
-              deprecatedByPath.set(p, (deprecatedByPath.get(p) || 0) + 1);
-            } else if (ev.e === 'client_version_seen') {
-              const v = ev.version || 'unset';
-              clientVersions.set(v, (clientVersions.get(v) || 0) + 1);
-              if (v === 'unset') staleClientCalls++;
-            }
-          } catch { continue; }
+        const scan = scanEventsForAlarms(raw, cutoff);
+        if (scan.serverErrors > 0) escalate('stroll', `${scan.serverErrors} server errors in 24h`);
+        if (scan.deprecatedHits > 0) {
+          const top = [...scan.deprecatedByPath.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([p, n]) => `${p}=${n}`).join(', ');
+          escalate('sprint', `${scan.deprecatedHits} hits to deprecated routes in 24h (${top}) — stale installs`);
         }
-        if (serverErrors > 0) escalate('stroll', `${serverErrors} server errors in 24h`);
-        if (deprecatedHits > 0) {
-          const top = [...deprecatedByPath.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([p, n]) => `${p}=${n}`).join(', ');
-          escalate('sprint', `${deprecatedHits} hits to deprecated routes in 24h (${top}) — stale installs`);
+        if (scan.staleClientCalls > 0) {
+          escalate('sprint', `${scan.staleClientCalls} /call requests without X-Alexandria-Client header — pre-upgrade shims`);
         }
-        if (staleClientCalls > 0) {
-          escalate('sprint', `${staleClientCalls} /call requests without X-Alexandria-Client header — pre-upgrade shims`);
-        }
-        // Drift = more than one version among REAL traffic. Test tags are known
-        // synthetic sources (CI smoke, manual checks) and don't count.
         const testTags = new Set(['smoke-test', 'ci-smoke', 'check-script', 'check-install', 'scheduled-agent']);
-        const realVersions = [...clientVersions.entries()].filter(([v]) => !testTags.has(v));
+        const realVersions = [...scan.clientVersions.entries()].filter(([v]) => !testTags.has(v));
         if (realVersions.length > 1) {
           const dist = realVersions.sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v}=${n}`).join(', ');
           escalate('stroll', `client version drift: ${dist}`);

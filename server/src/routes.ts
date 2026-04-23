@@ -13,6 +13,29 @@ import { generateApiKey, getAccounts, requireAdmin } from './accounts.js';
 import { sendEmail, sendEmailsBatched, sendWelcomeEmail, sendMorningBrief, FOUNDER_EMAIL, DEFAULT_ENGAGEMENT_DAYS } from './email.js';
 import { runHealthDigest } from './cron.js';
 
+/**
+ * KV-backed rate limit for destructive/expensive admin endpoints.
+ * Global (not per-account) since admin is single-user today; the
+ * threat model is "admin key leaks, attacker hammers send-email or
+ * delete-data endpoints." Cheap reads (GET /admin/...) and factory
+ * markers are unrestricted — they're cheap and called frequently
+ * by the scheduled autoloop.
+ * Returns true if the request should be blocked.
+ */
+async function checkAdminRateLimit(endpoint: string, limit = 10, windowSec = 60): Promise<boolean> {
+  try {
+    const kv = getKV();
+    const key = `rate:admin:${endpoint}`;
+    const raw = await kv.get(key);
+    const count = raw ? parseInt(raw, 10) : 0;
+    if (count >= limit) return true;
+    await kv.put(key, String(count + 1), { expirationTtl: windowSec });
+    return false;
+  } catch {
+    return false; // don't block on KV failure
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Company routes — registered on Hono app
 // ---------------------------------------------------------------------------
@@ -637,6 +660,7 @@ export function registerRoutes(app: Hono) {
   app.post('/admin/nudge', async (c) => {
     const auth = await requireAdmin(c);
     if (!auth) return c.text('Unauthorized', 403);
+    if (await checkAdminRateLimit('nudge', 3, 300)) return c.json({ error: 'Rate limited (sends emails, capped 3/5min)' }, 429);
 
     const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
     const SERVER_URL = process.env.SERVER_URL || 'https://mcp.mowinckel.ai';
@@ -685,6 +709,7 @@ export function registerRoutes(app: Hono) {
   // Signal arriving after <before> survives the drain for the next run.
   app.delete('/admin/marketplace/signals', async (c) => {
     if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
+    if (await checkAdminRateLimit('drain-signals', 5, 60)) return c.json({ error: 'Rate limited (destructive, capped 5/min)' }, 429);
     const before = c.req.query('before');
     if (!before) return c.json({ error: 'before=<iso> required' }, 400);
     const cutoff = Date.parse(before);
@@ -716,6 +741,7 @@ export function registerRoutes(app: Hono) {
   // Factory autoloop drains processed feedback. ?before=<iso> required.
   app.delete('/admin/feedback', async (c) => {
     if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
+    if (await checkAdminRateLimit('drain-feedback', 5, 60)) return c.json({ error: 'Rate limited (destructive, capped 5/min)' }, 429);
     const before = c.req.query('before');
     if (!before) return c.json({ error: 'before=<iso> required' }, 400);
     const cutoff = Date.parse(before);
@@ -775,6 +801,7 @@ export function registerRoutes(app: Hono) {
   // this every 6h without flooding the inbox). Scheduled-cron path always sends.
   app.post('/admin/cron/health-digest', async (c) => {
     if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
+    if (await checkAdminRateLimit('health-digest', 20, 60)) return c.json({ error: 'Rate limited (20/min)' }, 429);
     const sendEmailOnAlarm = c.req.query('email') === 'true';
     await runHealthDigest({ sendEmailOnAlarm });
     const kv = getKV();
@@ -919,6 +946,7 @@ export function registerRoutes(app: Hono) {
 
   app.post('/admin/email', async (c) => {
     if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
+    if (await checkAdminRateLimit('admin-email', 10, 60)) return c.json({ error: 'Rate limited (sends emails, capped 10/min)' }, 429);
 
     const { to, subject, body } = await c.req.json<{ to?: string; subject: string; body: string }>();
     if (!subject || !body) return c.text('missing subject or body', 400);
