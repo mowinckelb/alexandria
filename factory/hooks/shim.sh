@@ -13,11 +13,26 @@ if [ "$MODE" = "session-start" ]; then
   # -f: exit non-zero on HTTP errors (else a 404 HTML page would satisfy the
   # >100-byte defensive check and corrupt .hooks_payload).
   payload=$(curl -sf --max-time 5 "$PAYLOAD_URL" 2>/dev/null)
+  fetch_status=$?
   fresh=false
   if [ -n "$payload" ] && [ ${#payload} -gt 100 ]; then
     echo "$payload" > "$ALEX_DIR/.hooks_payload" && fresh=true
-  else
-    [ -f "$ALEX_DIR/.hooks_payload" ] && payload=$(cat "$ALEX_DIR/.hooks_payload")
+  elif [ -f "$ALEX_DIR/.hooks_payload" ]; then
+    # Never silent: a cached payload from before X-Alexandria-Client was added
+    # is invisible to the server drift alarm. Shim stdout is the one channel
+    # that reaches the AI regardless of cached-payload vintage.
+    payload=$(cat "$ALEX_DIR/.hooks_payload")
+    fresh=stale
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) shim payload fetch failed (curl=$fetch_status); using cached payload" >> "$ALEX_DIR/.alexandria_errors"
+    mtime=$(stat -f %m "$ALEX_DIR/.hooks_payload" 2>/dev/null || stat -c %Y "$ALEX_DIR/.hooks_payload" 2>/dev/null || echo 0)
+    now=$(date -u +%s)
+    if [ "$mtime" -gt 0 ]; then cache_age_days=$(( (now - mtime) / 86400 )); else cache_age_days="?"; fi
+    echo ""
+    echo "--- ALEXANDRIA UPGRADE NEEDED ---"
+    echo "Cached hooks payload is ${cache_age_days} days old; fresh fetch from GitHub failed (curl exit ${fetch_status})."
+    echo "Reinstall: curl -fsSL https://raw.githubusercontent.com/mowinckelb/Alexandria/main/factory/setup.sh | bash"
+    echo "--- END UPGRADE ---"
+    echo ""
   fi
 
   if [ -n "$payload" ]; then

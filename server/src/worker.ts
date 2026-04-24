@@ -15,6 +15,7 @@ import { registerBillingRoutes, settleMonthlyTabs, recalculateAllKinPricing, get
 import { registerLibraryRoutes } from './library.js';
 import { getAnalytics, getEventLog, getDashboard, getUserEvents, logEvent, flushEvents } from './analytics.js';
 import { setKV, getKV } from './kv.js';
+import { sendUpgradeEmail } from './email.js';
 import { getAllowedOrigins } from './cors.js';
 
 // ---------------------------------------------------------------------------
@@ -444,9 +445,35 @@ const DEPRECATED_ROUTES = [
   '/admin/factory/delta', '/admin/factory/signals',
 ];
 for (const path of DEPRECATED_ROUTES) {
-  app.all(path, (c) => {
+  app.all(path, async (c) => {
     const actualPath = new URL(c.req.url).pathname;
-    logEvent('deprecated_hit', { method: c.req.method, path: actualPath });
+    const details: Record<string, string> = { method: c.req.method, path: actualPath };
+
+    // Stuck clients are invisible to the drift alarm (their cached payload
+    // predates X-Alexandria-Client). Deprecated-route hits are the one place
+    // we see them authenticated — nudge them here via email, the only channel
+    // they can still receive (the shim swallows 410 response bodies).
+    const key = extractApiKey(c);
+    if (key) {
+      try {
+        const account = await findByApiKey(key);
+        if (account) {
+          details.login = account.github_login;
+          const kv = getKV();
+          const dedupeKey = `upgrade_nudge:${account.github_login}`;
+          const seen = await kv.get(dedupeKey);
+          if (!seen) {
+            await kv.put(dedupeKey, new Date().toISOString(), { expirationTtl: 7 * 24 * 60 * 60 });
+            c.executionCtx.waitUntil(sendUpgradeEmail(account.email));
+            details.nudge_sent = 'true';
+          }
+        }
+      } catch (e) {
+        console.error('[deprecated_hit] nudge resolution failed:', e);
+      }
+    }
+
+    logEvent('deprecated_hit', details);
     return c.text('410 Gone — endpoint removed. Upgrade the client: https://github.com/mowinckelb/Alexandria', 410);
   });
 }
