@@ -10,9 +10,9 @@ Read these files in order (skip any that don't exist):
 
 1. ~/alexandria/system/canon/methodology — the canon. Your operating manual. All methodology, craft, extraction design. Follow it.
 2. ~/alexandria/files/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
-3. ~/alexandria/files/feedback.md — what works with this Author. Adapt accordingly.
-4. ~/alexandria/files/machine.md — your evolving model of how to work with THIS Author.
-5. ~/alexandria/files/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
+3. ~/alexandria/files/core/feedback.md — what works with this Author. Adapt accordingly.
+4. ~/alexandria/files/core/machine.md — your evolving model of how to work with THIS Author.
+5. ~/alexandria/files/core/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
 6. ~/alexandria/files/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
 
 Then follow the canon methodology. If the canon doesn't exist, engage the Author directly using the constitution — the conversation IS the product.

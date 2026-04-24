@@ -218,27 +218,27 @@ if [ "$MODE" = "session-start" ]; then
   fi
 
   machine=""
-  [ -f "$ALEX_DIR/files/machine.md" ] && machine=$(cat "$ALEX_DIR/files/machine.md")
+  [ -f "$ALEX_DIR/files/core/machine.md" ] && machine=$(cat "$ALEX_DIR/files/core/machine.md")
 
   notepad=""
   if [ -f "$ALEX_DIR/_notepad.md" ]; then
     notepad=$(cat "$ALEX_DIR/_notepad.md")
-  elif [ -f "$ALEX_DIR/files/notepad.md" ]; then
-    notepad=$(cat "$ALEX_DIR/files/notepad.md")
+  elif [ -f "$ALEX_DIR/files/core/notepad.md" ]; then
+    notepad=$(cat "$ALEX_DIR/files/core/notepad.md")
   fi
 
   feedback=""
   if [ -f "$ALEX_DIR/_feedback.md" ]; then
     feedback=$(cat "$ALEX_DIR/_feedback.md")
-  elif [ -f "$ALEX_DIR/files/feedback.md" ]; then
-    feedback=$(cat "$ALEX_DIR/files/feedback.md")
+  elif [ -f "$ALEX_DIR/files/core/feedback.md" ]; then
+    feedback=$(cat "$ALEX_DIR/files/core/feedback.md")
   fi
 
   agent=""
   if [ -f "$ALEX_DIR/_agent.md" ]; then
     agent=$(cat "$ALEX_DIR/_agent.md")
-  elif [ -f "$ALEX_DIR/files/agent.md" ]; then
-    agent=$(cat "$ALEX_DIR/files/agent.md")
+  elif [ -f "$ALEX_DIR/files/core/agent.md" ]; then
+    agent=$(cat "$ALEX_DIR/files/core/agent.md")
   fi
 
   # Canon overrides — Author's consent layer. Authoritative over upstream canon.

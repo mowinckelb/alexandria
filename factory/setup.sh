@@ -28,7 +28,7 @@ echo "Setting up Alexandria..."
 
 # ── 1. Directory structure ────────────────────────────────────────
 
-mkdir -p "$ALEX_DIR/files/vault" "$ALEX_DIR/system/hooks" "$ALEX_DIR/files/constitution" "$ALEX_DIR/files/ontology" "$ALEX_DIR/files/library" "$ALEX_DIR/files/vault/input" "$ALEX_DIR/system/.autoloop"
+mkdir -p "$ALEX_DIR/files/vault" "$ALEX_DIR/system/hooks" "$ALEX_DIR/files/constitution" "$ALEX_DIR/files/ontology" "$ALEX_DIR/files/library" "$ALEX_DIR/files/core" "$ALEX_DIR/files/vault/input" "$ALEX_DIR/system/.autoloop"
 echo "$API_KEY" > "$ALEX_DIR/system/.api_key"
 chmod 600 "$ALEX_DIR/system/.api_key"
 touch "$ALEX_DIR/system/.last_processed"
@@ -38,7 +38,7 @@ date +%s > "$ALEX_DIR/system/.last_maintenance"
 
 # Templates → files/ (don't overwrite existing)
 for f in machine.md notepad.md feedback.md agent.md; do
-  [ -f "$ALEX_DIR/files/$f" ] || curl -sS "$FACTORY_RAW/templates/$f" -o "$ALEX_DIR/files/$f" 2>/dev/null
+  [ -f "$ALEX_DIR/files/core/$f" ] || curl -sS "$FACTORY_RAW/templates/$f" -o "$ALEX_DIR/files/core/$f" 2>/dev/null
 done
 for d in constitution ontology vault library; do
   [ -f "$ALEX_DIR/files/$d/README.md" ] || curl -sS "$FACTORY_RAW/templates/$d/README.md" -o "$ALEX_DIR/files/$d/README.md" 2>/dev/null
@@ -182,7 +182,7 @@ MISSING=""
 [ ! -f "$ALEX_DIR/system/.hooks_payload" ] && MISSING="$MISSING hooks_payload"
 [ ! -f "$ALEX_DIR/system/.block" ] && MISSING="$MISSING block"
 for f in machine.md notepad.md feedback.md; do
-  [ ! -f "$ALEX_DIR/files/$f" ] && MISSING="$MISSING $f"
+  [ ! -f "$ALEX_DIR/files/core/$f" ] && MISSING="$MISSING $f"
 done
 for f in constitution/README.md ontology/README.md vault/README.md library/README.md; do
   [ ! -f "$ALEX_DIR/files/$f" ] && MISSING="$MISSING $f"

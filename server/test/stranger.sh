@@ -143,9 +143,9 @@ check "ontology dir exists"        [ -d "$HOME/alexandria/files/ontology" ]
 check "library dir exists"         [ -d "$HOME/alexandria/files/library" ]
 
 # Verify files
-check "feedback.md exists"         [ -f "$HOME/alexandria/files/feedback.md" ]
-check "notepad.md exists"          [ -f "$HOME/alexandria/files/notepad.md" ]
-check "machine.md exists"          [ -f "$HOME/alexandria/files/machine.md" ]
+check "feedback.md exists"         [ -f "$HOME/alexandria/files/core/feedback.md" ]
+check "notepad.md exists"          [ -f "$HOME/alexandria/files/core/notepad.md" ]
+check "machine.md exists"          [ -f "$HOME/alexandria/files/core/machine.md" ]
 check "api_key written"            [ -f "$HOME/alexandria/system/.api_key" ]
 check "api_key correct"            [ "$(cat "$HOME/alexandria/system/.api_key")" = "$API_KEY" ]
 check "setup_complete marker"      [ -f "$HOME/alexandria/system/.setup_complete" ]

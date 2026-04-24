@@ -17,6 +17,7 @@ const BASE = process.env.TEST_URL || 'https://mcp.mowinckel.ai';
 const HOME = process.env.HOME || process.env.USERPROFILE || '';
 const ALEX_DIR = join(HOME, 'alexandria');
 const FILES_DIR = join(ALEX_DIR, 'files');
+const CORE_DIR = join(FILES_DIR, 'core');
 const SYS_DIR = join(ALEX_DIR, 'system');
 const API_KEY_PATH = join(SYS_DIR, '.api_key');
 const FACTORY_RAW = 'https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory';
@@ -377,7 +378,7 @@ async function main() {
   });
 
   await test('Feedback file exists', async () => {
-    const fbPath = join(FILES_DIR, 'feedback.md');
+    const fbPath = join(CORE_DIR, 'feedback.md');
     const exists = existsSync(fbPath);
     return {
       test: 'Feedback file',
@@ -387,7 +388,7 @@ async function main() {
   });
 
   await test('Machine.md exists', async () => {
-    const machinePath = join(FILES_DIR, 'machine.md');
+    const machinePath = join(CORE_DIR, 'machine.md');
     const exists = existsSync(machinePath);
     let size = 0;
     if (exists) size = readFileSync(machinePath).length;
@@ -399,7 +400,7 @@ async function main() {
   });
 
   await test('Notepad exists', async () => {
-    const notepadPath = join(FILES_DIR, 'notepad.md');
+    const notepadPath = join(CORE_DIR, 'notepad.md');
     const exists = existsSync(notepadPath);
     return {
       test: 'Notepad',

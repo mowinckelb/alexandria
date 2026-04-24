@@ -100,7 +100,7 @@ factory/
 
 - **Screenshot any URL:** `node ~/alexandria/system/scripts/see.mjs <url> [--full] [--dark] [--only desktop|tablet|mobile]`
 - **Local dev:** `node ~/alexandria/system/scripts/see.mjs localhost --port 3000`
-- **Design reference:** `~/alexandria/files/design.md` — craft substrate (900 lines of concrete CSS physics, anti-patterns, thresholds). Read before any frontend work. Not taste — that's `~/alexandria/files/constitution/Taste.md`.
+- **Design reference:** `~/alexandria/files/core/design.md` — craft substrate (900 lines of concrete CSS physics, anti-patterns, thresholds). Read before any frontend work. Not taste — that's `~/alexandria/files/constitution/Taste.md`.
 - Screenshots save to `~/alexandria/system/.see/`, auto-cleaned to last 30.
 - **Loop:** build → screenshot → evaluate against design.md → fix → screenshot → ship.
 
@@ -129,9 +129,9 @@ Triggered by: "a." at the end of an /a session or any session where constitution
 This is the product. Act as a normal Machine would for any Author — this IS the product test:
 
 - **Constitution.** Write any crystallised signal about the founder as a person to `~/alexandria/files/constitution/`. Opinions, stories, patterns, contradictions revealed this session.
-- **Machine.md.** Rewrite `~/alexandria/files/machine.md` — how to work with this Author, what worked, what didn't, cognitive style observations.
-- **Notepad.** Update `~/alexandria/files/notepad.md` — parked questions, accretion candidates, what to carry forward.
-- **Feedback.** Append to `~/alexandria/files/feedback.md` — what worked, what didn't, methodology observations.
+- **Machine.md.** Rewrite `~/alexandria/files/core/machine.md` — how to work with this Author, what worked, what didn't, cognitive style observations.
+- **Notepad.** Update `~/alexandria/files/core/notepad.md` — parked questions, accretion candidates, what to carry forward.
+- **Feedback.** Append to `~/alexandria/files/core/feedback.md` — what worked, what didn't, methodology observations.
 - **Machine signal.** Write methodology observations to `~/alexandria/system/.machine_signal` — not about the Author, about the craft.
 
 Do this silently. No report. This is the product working. If Phase 1 feels wrong, the product is wrong.
@@ -167,7 +167,7 @@ Before committing any server code change:
 
 ## Working With the Founder
 
-See `~/alexandria/files/agent.md` for principles, communication style, Three-Phase Execution, and Reflect Gate (loaded globally in every session).
+See `~/alexandria/files/core/agent.md` for principles, communication style, Three-Phase Execution, and Reflect Gate (loaded globally in every session).
 
 Three-way split — keep them separate:
 
@@ -175,4 +175,4 @@ Three-way split — keep them separate:
 - **User vault** (`~/alexandria/` → private GitHub `alexandria-private`) — founder-as-user-0 content: agora, ontology, constitution, notepad, personal writing, session captures. Every future user will have a `~/alexandria/`; this is the founder's instance.
 - **Company business** (`~/AlexandriaInc/` → private GitHub `alexandria-inc`) — founder-as-CEO materials: investor docs, pitch, brand, early drafts, fundraise tracker. Not part of the product. Not in the public repo.
 
-**Founder's Constitution** lives at `~/alexandria/files/constitution/` — Core.md, Love.md, Power.md, Mind.md, Taste.md. READ Core.md first for any task. READ Taste.md first for any creative task. `~/alexandria/files/design.md` for craft substrate.
+**Founder's Constitution** lives at `~/alexandria/files/constitution/` — Core.md, Love.md, Power.md, Mind.md, Taste.md. READ Core.md first for any task. READ Taste.md first for any creative task. `~/alexandria/files/core/design.md` for craft substrate.

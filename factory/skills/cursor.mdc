@@ -11,9 +11,9 @@ When the Author types "/a", this is an explicit request to begin an active cogni
 
 1. ~/alexandria/system/canon/methodology.md — the canon. Your operating manual. All methodology, craft, extraction design. Follow it.
 2. ~/alexandria/files/constitution/*.md — who the Author is. Opinions, patterns, contradictions, values. The ground truth.
-3. ~/alexandria/files/feedback.md — what works with this Author. Adapt accordingly.
-4. ~/alexandria/files/machine.md — your evolving model of how to work with THIS Author.
-5. ~/alexandria/files/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
+3. ~/alexandria/files/core/feedback.md — what works with this Author. Adapt accordingly.
+4. ~/alexandria/files/core/machine.md — your evolving model of how to work with THIS Author.
+5. ~/alexandria/files/core/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
 6. ~/alexandria/files/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
 
 Then follow the canon methodology. Process the vault, develop the constitution, engage the Author with the five operations. This is the mental gym — dedicated cognitive development, not coding assistance.

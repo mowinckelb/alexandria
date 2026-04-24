@@ -38,7 +38,7 @@ Upstream canon is auto-pulled on every session-start. When it changes, the hook 
 
 Clear `.canon_update_notice` after review. The Author's consent layer lives in `canon_overrides.md`; upstream auto-pulls but overrides win.
 
-Read ~/alexandria/files/constitution/, ~/alexandria/files/ontology/, ~/alexandria/files/notepad.md, ~/alexandria/files/machine.md, and ~/alexandria/files/feedback.md.
+Read ~/alexandria/files/constitution/, ~/alexandria/files/ontology/, ~/alexandria/files/core/notepad.md, ~/alexandria/files/core/machine.md, and ~/alexandria/files/core/feedback.md.
 
 Process vault entries (newest first) against the current constitution. For each entry: what signal exists that isn't captured yet?
 
