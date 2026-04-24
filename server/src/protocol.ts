@@ -4,7 +4,7 @@ import type { Hono } from 'hono';
 import { requireAuth } from './auth.js';
 import { getDB, getR2 } from './db.js';
 import { logEvent } from './analytics.js';
-import { saveAccount } from './kv.js';
+import { saveAccount, getKV } from './kv.js';
 
 function r2Key(accountId: string, name: string): string {
   return `protocol/${accountId}/${name}.md`;
@@ -138,6 +138,21 @@ export function registerProtocol(app: Hono) {
       meta.country = c.req.header('cf-ipcountry') || '?';
     }
     logEvent('client_version_seen', meta);
+
+    // Track first-seen per version. Lets the drift alarm distinguish natural
+    // dev-push rollover (resolves in hours) from genuine stuck clients (persist
+    // past a newer version). setnx-style: only the first observation wins.
+    if (clientVersion && clientVersion !== 'unset') {
+      c.executionCtx.waitUntil((async () => {
+        try {
+          const kv = getKV();
+          const key = `version_first_seen:${clientVersion}`;
+          if (!(await kv.get(key))) {
+            await kv.put(key, new Date().toISOString(), { expirationTtl: 14 * 24 * 60 * 60 });
+          }
+        } catch (err) { console.error('[version_first_seen] kv write failed:', err); }
+      })());
+    }
 
     // Install ground truth: /call firing proves the shim → payload → auth flow
     // works end-to-end. First successful /call per account stamps installed_at.

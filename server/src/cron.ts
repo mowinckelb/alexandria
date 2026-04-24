@@ -303,8 +303,26 @@ export async function runHealthDigest(opts: { sendEmailOnAlarm?: boolean } = { s
         const testTags = new Set(['smoke-test', 'ci-smoke', 'check-script', 'check-install', 'scheduled-agent']);
         const realVersions = [...scan.clientVersions.entries()].filter(([v]) => !testTags.has(v));
         if (realVersions.length > 1) {
-          const dist = realVersions.sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v}=${n}`).join(', ');
-          escalate('stroll', `client version drift: ${dist}`);
+          // Natural drift (clients upgrading across a push) resolves in hours.
+          // Stuck = a version still appearing >24h after a newer version was
+          // first observed. Filter via per-version first-seen tracked in KV.
+          const firstSeen = new Map<string, number>();
+          for (const [v] of realVersions) {
+            try {
+              const raw = await kv.get(`version_first_seen:${v}`);
+              if (raw) firstSeen.set(v, new Date(raw).getTime());
+            } catch { /* non-fatal */ }
+          }
+          const newestFirstSeen = Math.max(0, ...Array.from(firstSeen.values()));
+          const stuckThreshold = newestFirstSeen - 24 * 60 * 60 * 1000;
+          const stuckVersions = realVersions.filter(([v]) => {
+            const fs = firstSeen.get(v);
+            return fs !== undefined && fs < stuckThreshold;
+          });
+          if (stuckVersions.length > 0) {
+            const dist = stuckVersions.sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v}=${n}`).join(', ');
+            escalate('stroll', `stuck clients >24h behind current: ${dist}`);
+          }
         }
       }
     } catch { /* non-fatal */ }
