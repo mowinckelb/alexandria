@@ -32,19 +32,20 @@ mkdir -p "$ALEX_DIR/files/vault" "$ALEX_DIR/system/hooks" "$ALEX_DIR/files/const
 echo "$API_KEY" > "$ALEX_DIR/system/.api_key"
 chmod 600 "$ALEX_DIR/system/.api_key"
 touch "$ALEX_DIR/system/.last_processed"
-date +%s > "$ALEX_DIR/.last_maintenance"
+date +%s > "$ALEX_DIR/system/.last_maintenance"
 
 # ── 2. Factory files from GitHub ──────────────────────────────────
 
-# Templates (don't overwrite existing)
+# Templates → files/ (don't overwrite existing)
 for f in machine.md notepad.md feedback.md agent.md; do
-  [ -f "$ALEX_DIR/$f" ] || curl -sS "$FACTORY_RAW/templates/$f" -o "$ALEX_DIR/$f" 2>/dev/null
+  [ -f "$ALEX_DIR/files/$f" ] || curl -sS "$FACTORY_RAW/templates/$f" -o "$ALEX_DIR/files/$f" 2>/dev/null
 done
 for d in constitution ontology vault library; do
-  [ -f "$ALEX_DIR/$d/README.md" ] || curl -sS "$FACTORY_RAW/templates/$d/README.md" -o "$ALEX_DIR/$d/README.md" 2>/dev/null
+  [ -f "$ALEX_DIR/files/$d/README.md" ] || curl -sS "$FACTORY_RAW/templates/$d/README.md" -o "$ALEX_DIR/files/$d/README.md" 2>/dev/null
 done
 
 # Hooks (always update)
+mkdir -p "$ALEX_DIR/system/canon"
 curl -sS "$FACTORY_RAW/hooks/shim.sh" -o "$ALEX_DIR/system/hooks/shim.sh" 2>/dev/null
 chmod +x "$ALEX_DIR/system/hooks/shim.sh"
 curl -sS "$FACTORY_RAW/hooks/payload.sh" -o "$ALEX_DIR/system/.hooks_payload" 2>/dev/null
@@ -52,8 +53,8 @@ curl -sS "$FACTORY_RAW/hooks/payload.sh" -o "$ALEX_DIR/system/.hooks_payload" 2>
 # Canon (cache locally — one module)
 curl -sS "$FACTORY_RAW/canon/methodology.md" -o "$ALEX_DIR/system/canon/methodology.md" 2>/dev/null
 
-# Block (cache locally for easy access)
-curl -sS "$FACTORY_RAW/block.md" -o "$ALEX_DIR/.block" 2>/dev/null
+# Block (cache locally for easy access — system, not user content)
+curl -sS "$FACTORY_RAW/block.md" -o "$ALEX_DIR/system/.block" 2>/dev/null
 
 # ── 3. Platform configuration ─────────────────────────────────────
 
@@ -121,20 +122,16 @@ if command -v git &>/dev/null; then
     cd "$ALEX_DIR"
     if [ ! -d ".git" ]; then
       cat > .gitignore << 'GITIGNORE'
-.canon_local
-.api_key
-hooks/
-.machine_signal
-.session_feedback
-.cli_alert
-.hooks_version
-.hooks_payload
-.last_processed
-.last_maintenance
-.setup_complete
-.block_complete
-library/
-.autoloop/proposals/
+# Server-managed (regenerated)
+system/canon/
+system/hooks/
+# Ephemeral state (all dotfiles + dotfolders in system/)
+system/.*
+# Library cache (server-fetched tier definitions)
+files/library/
+# Dev deps for scripts
+**/node_modules/
+**/package-lock.json
 GITIGNORE
       git init -q
       git add -A
@@ -146,21 +143,19 @@ GITIGNORE
   ) &>/dev/null || true
 fi
 
-# ── 5. iCloud sync (macOS) ───────────────────────────────────────
+# ── 5. iCloud input pipe (macOS) ─────────────────────────────────
+# iCloud holds Apple-native captures only (Shortcuts, Voice Memos, Files drops,
+# future Apple Intelligence). Engine ingests on session start per canon.
 
 ICLOUD_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
 if [ -d "$ICLOUD_DIR" ] && [ "$(uname)" = "Darwin" ]; then
-  ICLOUD_ALEX="$ICLOUD_DIR/Alexandria"
-  for sync_dir in vault constitution ontology library; do
-    icloud_target="$ICLOUD_ALEX/$sync_dir"
-    local_dir="$ALEX_DIR/$sync_dir"
-    if [ -L "$local_dir" ]; then continue; fi
-    mkdir -p "$icloud_target"
-    [ -d "$local_dir" ] && [ "$(ls -A "$local_dir" 2>/dev/null)" ] && cp -R "$local_dir"/* "$icloud_target/" 2>/dev/null
-    [ -d "$local_dir" ] && rm -rf "$local_dir"
-    ln -s "$icloud_target" "$local_dir"
-  done
-  echo "  iCloud: synced"
+  ICLOUD_INPUT="$ICLOUD_DIR/alexandria"
+  mkdir -p "$ICLOUD_INPUT"
+  if [ ! -L "$ALEX_DIR/files/vault/input" ]; then
+    [ -d "$ALEX_DIR/files/vault/input" ] && rmdir "$ALEX_DIR/files/vault/input" 2>/dev/null
+    ln -s "$ICLOUD_INPUT" "$ALEX_DIR/files/vault/input"
+  fi
+  echo "  iCloud: input pipe ready (~/alexandria/files/vault/input → iCloud/alexandria)"
 fi
 
 # ── Verify API key works ──────────────────────────────────────────
@@ -185,12 +180,12 @@ MISSING=""
 [ ! -f "$ALEX_DIR/system/hooks/shim.sh" ] && MISSING="$MISSING hooks"
 [ ! -f "$ALEX_DIR/system/canon/methodology.md" ] && MISSING="$MISSING canon"
 [ ! -f "$ALEX_DIR/system/.hooks_payload" ] && MISSING="$MISSING hooks_payload"
-[ ! -f "$ALEX_DIR/.block" ] && MISSING="$MISSING block"
+[ ! -f "$ALEX_DIR/system/.block" ] && MISSING="$MISSING block"
 for f in machine.md notepad.md feedback.md; do
-  [ ! -f "$ALEX_DIR/$f" ] && MISSING="$MISSING $f"
+  [ ! -f "$ALEX_DIR/files/$f" ] && MISSING="$MISSING $f"
 done
 for f in constitution/README.md ontology/README.md vault/README.md library/README.md; do
-  [ ! -f "$ALEX_DIR/$f" ] && MISSING="$MISSING $f"
+  [ ! -f "$ALEX_DIR/files/$f" ] && MISSING="$MISSING $f"
 done
 
 if [ -n "$MISSING" ]; then
@@ -211,5 +206,5 @@ else
   echo "Alexandria installed. ~/alexandria/ — your mind, on your machine."
   echo ""
   echo "Open a new Claude Code or Cursor tab and paste the block."
-  echo "If it's not in your clipboard: cat ~/alexandria/.block"
+  echo "If it's not in your clipboard: cat ~/alexandria/system/.block"
 fi

@@ -169,7 +169,7 @@ check "shim.sh non-empty"          [ -s "$HOME/alexandria/system/hooks/shim.sh" 
 check "SKILL.md exists"            [ -f "$HOME/.claude/skills/alexandria/SKILL.md" ]
 check "SKILL.md has Alexandria"    grep -q "Alexandria" "$HOME/.claude/skills/alexandria/SKILL.md"
 check "scheduled task exists"      [ -f "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" ]
-check "canon cached"               [ -f "$HOME/alexandria/.canon_local" ]
+check "canon cached"               [ -f "$HOME/alexandria/system/canon/methodology.md" ]
 
 # settings.json integrity
 check "settings.json exists"       [ -f "$HOME/.claude/settings.json" ]
@@ -220,8 +220,8 @@ check_output "notepad injected"          "NOTEPAD"               "$SESSION_START
 check_output "feedback injected"         "ENGINE FEEDBACK"       "$SESSION_START_OUTPUT"
 check "hooks_payload cached"             [ -f "$HOME/alexandria/system/.hooks_payload" ]
 check "hooks_payload non-empty"          [ -s "$HOME/alexandria/system/.hooks_payload" ]
-check "canon cached"                     [ -f "$HOME/alexandria/.canon_local" ]
-CANON_SIZE=$(wc -c < "$HOME/alexandria/.canon_local" 2>/dev/null | tr -d ' ' || echo 0)
+check "canon cached"                     [ -f "$HOME/alexandria/system/canon/methodology.md" ]
+CANON_SIZE=$(wc -c < "$HOME/alexandria/system/canon/methodology.md" 2>/dev/null | tr -d ' ' || echo 0)
 check "canon non-trivial"               [ "${CANON_SIZE:-0}" -gt 100 ]
 
 # ═══════════════════════════════════════════════════════════
