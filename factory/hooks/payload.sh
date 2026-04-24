@@ -161,6 +161,7 @@ if [ "$MODE" = "session-start" ]; then
       fi
     }
     check_drift "$HOME/.claude/skills/alexandria/SKILL.md" "skills/claudecode.md" "  /a skill (~/.claude/skills/alexandria/SKILL.md)"
+    check_drift "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" "skills/scheduled-bootstrap.md" "  scheduled agent (~/.claude/scheduled-tasks/alexandria/SKILL.md)"
     check_drift "$HOME/.cursor/rules/alexandria.mdc" "skills/cursor.mdc" "  cursor rules (~/.cursor/rules/alexandria.mdc)"
     check_drift "$HOME/.alexandria/hooks/shim.sh" "hooks/shim.sh" "  hook shim (~/.alexandria/hooks/shim.sh)"
     if [ -n "$drift_found" ]; then
