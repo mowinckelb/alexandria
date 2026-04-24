@@ -24,7 +24,7 @@ Everything in Alexandria maps to one of four layers:
   - Stateless server. No private user data stored. KV for accounts/events, D1 for Library metadata + protocol data, R2 for published content.
 - **Factory:** `factory/` — public, forkable. Canon methodology, hooks, skills, templates, setup, onboarding block.
 - **Static assets:** `public/` (includes `public/docs/` for public artifacts).
-- **Investor docs:** kept out of this public repo. Backed up locally at `~/Alexandria/files/private/partners/`. Shared directly with partners (email/DM) when needed — no public URL, no `/partners/` route.
+- **Investor docs:** kept out of this public repo. Live in `~/AlexandriaCo/partners/` (founder business materials, iCloud-synced). Shared directly with partners (email/DM) when needed — no public URL, no `/partners/` route.
 - **Pre-commit hook:** `scripts/pre-commit` gates server type check + app build (mirrors CI). Activate on fresh clone: `git config core.hooksPath scripts`.
 - **Build:** `cd server && npx wrangler deploy --dry-run --outdir=dist` (server). **Deploy:** `cd server && npx wrangler deploy` then check health. **Push:** `bash scripts/push.sh` (pushes + waits for CI + reports results). Always use `push.sh` instead of raw `git push`.
 - **Server health:** `curl https://mcp.mowinckel.ai/health`
@@ -169,6 +169,10 @@ Before committing any server code change:
 
 See `~/Alexandria/agent.md` for principles, communication style, Three-Phase Execution, and Reflect Gate (loaded globally in every session).
 
-Private company files (a0, a1-a4, investor docs, founder writing) live in a separate private repo (`alexandria-private`). This repo is public.
+Three-way split — keep them separate:
+
+- **This repo** (`~/code/Alexandria/` → public GitHub `Alexandria`) — product source code. Intentionally open. No secrets (use env vars).
+- **User vault** (`~/Alexandria/` → private GitHub `alexandria-private`) — founder-as-user-0 content: agora, ontology, constitution, notepad, personal writing, session captures. Every future user will have a `~/Alexandria/`; this is the founder's instance.
+- **Company business** (`~/AlexandriaCo/` → iCloud, Apple ID private) — founder-as-CEO materials: investor docs, pitch, brand, early drafts, fundraise tracker. Not part of the product. Not in any public repo.
 
 **Founder's Constitution** lives at `~/Alexandria/constitution/` — Core.md, Love.md, Power.md, Mind.md, Taste.md. READ Core.md first for any task. READ Taste.md first for any creative task. `~/Alexandria/design.md` for craft substrate.
