@@ -501,20 +501,28 @@ export default function LandingPageDraft({ brandClassName = '' }: Props) {
           </div>
 
           {/* LOWER BAND — the anchor.
-                LEFT  : HUGE wordmark + dict (Fleet's signature move)
+                LEFT  : HUGE wordmark + dict stack (Fleet's signature)
+                        — wordmark, phon, I. n., II. n., footnote
                 CENTER: motto, italic
                 RIGHT : legal row, copyright, founder line */}
           <div className="lower">
             <div className="wordmark-block">
               <h2 className="big-word">
                 alexandria<span className="big-word-dot">.</span>
+                <sup className="big-word-sup">1</sup>
               </h2>
+              <p className="phon">/ˌæl.ɪɡˈzæn.dri.ə/</p>
               <p className="dict-line">
-                <em>n.</em>{' '}
-                <a href="/vision">
-                  The vanished library of antiquity
-                </a>{' '}
-                &mdash; rebuilt in markdown, one Author at a time.
+                <em>I. n.</em> The vanished library of antiquity, rebuilt
+                in markdown.
+              </p>
+              <p className="dict-line">
+                <em>II. n.</em> A tribe of humans putting their minds
+                into writing &mdash; so ai thinks with them, not for them.
+              </p>
+              <p className="footnote">
+                <sup>1</sup>{' '}Also See:{' '}
+                <a href="/vision">Library of Alexandria</a>, the singularity.
               </p>
             </div>
 
