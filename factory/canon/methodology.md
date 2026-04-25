@@ -506,10 +506,12 @@ Every file that grows without bound gets a source and a derivative. The source i
 **Which files:**
 - `files/constitution/` (folder) → `files/constitution/_constitution.md` — router + sharpest positions from all source files
 - `files/ontology/` (folder) → `files/ontology/_ontology.md` — hottest thoughts, most relevant patterns
-- `files/core/agent.md` → `files/core/_agent.md` — top principles compressed for compliance
 - `files/core/notepad.md` → `files/core/_notepad.md` — active fragments, not the full archive
 - `files/core/feedback.md` → `files/core/_feedback.md` — current preferences, not historical log
+- `files/core/agent.md` — bounded, hand-curated by Author; no derivative needed (loaded directly).
 - `files/core/machine.md` — already a derivative (Engine rewrites each session). No underscore needed.
+
+**Session-start derivative freshness check.** At session start, for each derivative pair, compare `mtime(source) vs mtime(derivative)`. If source is newer, the derivative may be stale. Surface in your first response: *"X.md edited after _X.md was last regenerated — want me to regenerate?"* Then evaluate the diff (read both, see what changed) and decide: trivial change → skip; meaningful change → regenerate by reading the source(s) and writing a new compressed derivative per its objective function. The decision is intelligence, not a threshold. Better models compress better — the floor rises automatically.
 
 **When to regenerate:** Intelligence decision. Not every session — that wastes focus. When the source has changed meaningfully since the last derivative. When the model notices the derivative is stale (positions in the source that aren't reflected). When the autoloop processes vault and the constitution evolves. The derivative is a system 2 operation — deep, careful, high quality. Don't rush it.
 

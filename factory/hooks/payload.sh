@@ -235,8 +235,8 @@ if [ "$MODE" = "session-start" ]; then
   fi
 
   agent=""
-  if [ -f "$ALEX_DIR/files/core/_agent.md" ]; then
-    agent=$(cat "$ALEX_DIR/files/core/_agent.md")
+  if [ -f "$ALEX_DIR/files/core/agent.md" ]; then
+    agent=$(cat "$ALEX_DIR/files/core/agent.md")
   elif [ -f "$ALEX_DIR/files/core/agent.md" ]; then
     agent=$(cat "$ALEX_DIR/files/core/agent.md")
   fi
@@ -437,7 +437,7 @@ if [ "$MODE" = "subagent" ]; then
   fi
 
   # Machine, notepad, feedback, agent, canon_overrides — derivative or source
-  for pair in "files/core/machine.md:HOW TO WORK WITH THIS AUTHOR" "files/core/_notepad.md files/core/notepad.md:NOTEPAD" "files/core/_feedback.md files/core/feedback.md:ENGINE FEEDBACK" "files/core/_agent.md files/core/agent.md:AGENT PREFERENCES" "canon_overrides.md:CANON OVERRIDES (authoritative over upstream canon)"; do
+  for pair in "files/core/machine.md:HOW TO WORK WITH THIS AUTHOR" "files/core/_notepad.md files/core/notepad.md:NOTEPAD" "files/core/_feedback.md files/core/feedback.md:ENGINE FEEDBACK" "files/core/agent.md:AGENT PREFERENCES" "canon_overrides.md:CANON OVERRIDES (authoritative over upstream canon)"; do
     label="${pair##*:}"
     files="${pair%%:*}"
     for f in $files; do
