@@ -1008,15 +1008,14 @@ export default function LandingPageDraft({ brandClassName = '' }: Props) {
           padding-bottom: 0;
         }
 
-        /* WORDMARK — the dominant mark of the whole page. Sits at
-           the bottom-left like Fleet's "fleet". Tight tracking, single
-           line, the dot reads as part of the word. */
+        /* WORDMARK + DICT STACK — Fleet's signature anchor block.
+           Wordmark dominates, then phon, then numbered defs, then
+           footnote. The stack creates visual gravity at bottom-left. */
         .wordmark-block {
           display: flex;
           flex-direction: column;
-          gap: 6px;
           align-self: end;
-          max-width: 100%;
+          max-width: 540px;
         }
         .big-word {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -1026,7 +1025,7 @@ export default function LandingPageDraft({ brandClassName = '' }: Props) {
           line-height: 1;
           letter-spacing: -0.026em;
           color: ${theme.fg};
-          margin: 0;
+          margin: 0 0 2px;
           white-space: nowrap;
         }
         .big-word-dot {
@@ -1034,18 +1033,37 @@ export default function LandingPageDraft({ brandClassName = '' }: Props) {
           color: ${theme.fg};
           margin-left: -0.04em;
         }
+        .big-word-sup {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 0.18em;
+          color: ${theme.fgFaint};
+          vertical-align: super;
+          margin-left: 0.12em;
+          font-weight: 400;
+          font-style: italic;
+        }
+        .phon {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-size: clamp(10.5px, 0.85vw, 12.5px);
+          color: ${theme.fgFaint};
+          margin: 0 0 6px;
+        }
         .dict-line {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: clamp(11.5px, 0.92vw, 13.5px);
-          line-height: 1.4;
+          line-height: 1.42;
           color: ${theme.fg};
           margin: 0;
           max-width: 520px;
         }
+        .dict-line + .dict-line {
+          margin-top: 2px;
+        }
         .dict-line em {
           font-style: italic;
           color: ${theme.fgFaint};
-          margin-right: 2px;
+          margin-right: 4px;
         }
         .dict-line :global(a) {
           color: ${theme.fg};
@@ -1056,6 +1074,29 @@ export default function LandingPageDraft({ brandClassName = '' }: Props) {
         }
         .dict-line :global(a):hover {
           text-decoration-color: ${theme.fg};
+        }
+        .footnote {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-size: clamp(10px, 0.78vw, 11.5px);
+          line-height: 1.4;
+          color: ${theme.fgMuted};
+          margin: 8px 0 0;
+          max-width: 520px;
+        }
+        .footnote sup {
+          font-size: 0.85em;
+          margin-right: 2px;
+          font-style: normal;
+        }
+        .footnote :global(a) {
+          color: ${theme.fgMuted};
+          text-decoration: underline;
+          text-decoration-color: ${theme.borderSoft};
+          text-underline-offset: 2px;
+        }
+        .footnote :global(a):hover {
+          color: ${theme.fg};
         }
 
         .motto-center {
