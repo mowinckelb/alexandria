@@ -1,6 +1,35 @@
 #!/bin/bash
 # Pre-commit gate: block commits that would fail CI
 # Install: git config core.hooksPath scripts
+# Order: cheap gates first (fail fast), expensive last.
+
+# Smoke-coverage gate: if this commit deletes an exact-match route, smoke.yml
+# must not still reference the same literal path. Closes the "deleted route
+# + forgotten smoke probe" loop (the 2026-04-26 /library/authors regression).
+# Only gates exact-match routes (no :param, no *) — parametric routes are too
+# soft to gate on; they're caught by the in-CI meta-loop step instead.
+if git diff --cached --name-only | grep -qE '^server/src/.*\.ts$'; then
+  DELETED_ROUTES=$(git diff --cached -U0 -- 'server/src/*.ts' \
+    | grep -E '^-[[:space:]]*app\.(get|post|put|delete)[[:space:]]*\(' \
+    | sed -nE "s/.*app\.(get|post|put|delete)\(\s*['\"]([^'\"]+)['\"].*/\2/p" \
+    | grep -vE ':|\*' \
+    | sort -u)
+  SMOKE=.github/workflows/smoke.yml
+  if [ -n "$DELETED_ROUTES" ] && [ -f "$SMOKE" ]; then
+    blocked=0
+    for r in $DELETED_ROUTES; do
+      if grep -qE "\\\$SERVER${r}(\$|[^a-zA-Z0-9/_-])" "$SMOKE"; then
+        echo "BLOCKED: this commit deletes route $r but $SMOKE still references \$SERVER$r"
+        blocked=1
+      fi
+    done
+    if [ $blocked -eq 1 ]; then
+      echo ""
+      echo "Fix: remove the matching probe from $SMOKE in this same commit."
+      exit 1
+    fi
+  fi
+fi
 
 # Server type check (matches CI: "cd server && npm ci && npx tsc --noEmit")
 if git diff --cached --name-only | grep -q '^server/src/'; then
@@ -21,33 +50,5 @@ if git diff --cached --name-only | grep -qE '^(app/|next\.config|package\.json)'
     echo ""
     echo "BLOCKED: app build failed. Fix before committing."
     exit 1
-  fi
-fi
-
-# Smoke-coverage gate: if this commit deletes an exact-match route, smoke.yml
-# must not still reference the same literal path. Closes the "deleted route
-# + forgotten smoke probe" loop (the 2026-04-26 /library/authors regression).
-# Only gates exact-match routes (no :param, no *) — parametric routes are too
-# soft to gate on; they're caught by the in-CI meta-loop step instead.
-if git diff --cached --name-only | grep -qE '^server/src/.*\.ts$'; then
-  DELETED_ROUTES=$(git diff --cached -U0 -- 'server/src/*.ts' \
-    | grep -E '^-[^-].*app\.(get|post|put|delete)\s*\(' \
-    | sed -nE "s/.*app\.(get|post|put|delete)\(\s*['\"]([^'\"]+)['\"].*/\2/p" \
-    | grep -vE ':|\*' \
-    | sort -u)
-  SMOKE=.github/workflows/smoke.yml
-  if [ -n "$DELETED_ROUTES" ] && [ -f "$SMOKE" ]; then
-    blocked=0
-    for r in $DELETED_ROUTES; do
-      if grep -qE "\\\$SERVER${r}(\$|[^a-zA-Z0-9/_-])" "$SMOKE"; then
-        echo "BLOCKED: this commit deletes route $r but $SMOKE still references \$SERVER$r"
-        blocked=1
-      fi
-    done
-    if [ $blocked -eq 1 ]; then
-      echo ""
-      echo "Fix: remove the matching probe from $SMOKE in this same commit."
-      exit 1
-    fi
   fi
 fi
