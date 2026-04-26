@@ -8,7 +8,7 @@ Founder: Benjamin Mowinckel. Solo founder + ai agents. Relocating to SF April 20
 
 Everything in Alexandria maps to one of four layers:
 
-1. **Protocol** (`server/src/protocol.ts` + `auth.ts` + `kv.ts` + `crypto.ts` + `db.ts`) — The incompressible core. ~6 endpoints. Three obligations: account (payment), file (publish monthly), call (communicate). This is what makes Alexandria a protocol, not a product.
+1. **Protocol** (`server/src/protocol.ts` + `auth.ts` + `kv.ts` + `crypto.ts` + `db.ts`) — The incompressible core. ~455 lines, 7 endpoints. Three obligations: account (payment), file (publish monthly), call (communicate). This is what makes Alexandria a protocol, not a product.
 
 2. **Factory** (`factory/`) — The founder's system, public on GitHub, forkable. 19 files: canon (methodology), hooks (shim + payload), setup script, skills (claudecode, cursor, codex, scheduled), templates (agent, machine, notepad, feedback, constitution/, ontology/, vault/, library/), onboarding block. Any Author can fork and modify. The marketplace evolves canon defaults from cross-Author signal.
 
@@ -33,18 +33,17 @@ Everything in Alexandria maps to one of four layers:
 
 ### Protocol Endpoints
 
-Six endpoints. The protocol core:
+Seven endpoints. The protocol core:
 
 | Method | Path | Purpose |
 |--------|------|---------|
 | PUT | `/file/{name}` | Publish a file (the file obligation) |
+| GET | `/library` | Browse all published files |
 | GET | `/library/{id}` | List one Author's files |
 | GET | `/library/{id}/{name}` | Read a specific file |
 | POST | `/call` | Report module usage (the call obligation) |
 | GET | `/marketplace` | Browse module usage |
 | GET | `/marketplace/{module}` | Read usage for one module |
-
-The Library is per-Author, not a public catalog. Discovery is via direct URL only — no `GET /library` browse-all, no Authors enumeration. (Decision 2026-04-25: kill the public catalog.)
 
 ### Company Endpoints
 
