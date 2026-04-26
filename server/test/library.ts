@@ -53,21 +53,11 @@ async function main() {
   // -----------------------------------------------------------------------
   console.log('Phase 1: Public Library endpoints');
 
-  let authorId = '';
-  await test('Authors list returns data', async () => {
-    const res = await fetch(`${BASE}/library/authors`);
-    const body = await res.json() as { authors: Array<{ id: string }> };
-    const hasAuthors = Array.isArray(body.authors) && body.authors.length > 0;
-    if (hasAuthors) authorId = body.authors[0].id;
-    return {
-      test: 'Authors list',
-      passed: res.ok && hasAuthors,
-      details: `HTTP ${res.status}, authors: ${body.authors?.length || 0}`,
-    };
-  });
+  // Per-Author URLs survive; the public catalog does not. Tests use a known
+  // Author id (the founder's GitHub login) as the fixture.
+  const authorId = process.env.TEST_AUTHOR_ID || 'mowinckelb';
 
   await test('Author profile returns structured data', async () => {
-    if (!authorId) return { test: 'Author profile', passed: false, details: 'No author to test' };
     const res = await fetch(`${BASE}/library/${authorId}`);
     const body = await res.json() as { author: { id: string; display_name: string }; shadows: unknown[]; quizzes: unknown[] };
     const hasAuthor = !!body.author?.id;
@@ -81,7 +71,6 @@ async function main() {
   });
 
   await test('Free shadow accessible without auth', async () => {
-    if (!authorId) return { test: 'Free shadow', passed: false, details: 'No author to test' };
     const res = await fetch(`${BASE}/library/${authorId}/shadow/free`);
     if (res.status === 404) {
       return { test: 'Free shadow', passed: true, details: 'No free shadow published (acceptable)' };
@@ -95,7 +84,6 @@ async function main() {
   });
 
   await test('Paid shadow blocked without access', async () => {
-    if (!authorId) return { test: 'Paid shadow', passed: false, details: 'No author to test' };
     const res = await fetch(`${BASE}/library/${authorId}/shadow/paid`);
     // Should return 401 or 403 or metadata without content
     return {
@@ -120,7 +108,6 @@ async function main() {
   console.log('\nPhase 2: Pulse and quizzes');
 
   await test('Pulse returns data or 404', async () => {
-    if (!authorId) return { test: 'Pulse', passed: false, details: 'No author' };
     const res = await fetch(`${BASE}/library/${authorId}/pulse`);
     if (res.status === 404) {
       return { test: 'Pulse', passed: true, details: 'No pulse published (acceptable)' };
@@ -135,7 +122,6 @@ async function main() {
 
   let quizId = '';
   await test('Quizzes list returns data', async () => {
-    if (!authorId) return { test: 'Quizzes', passed: false, details: 'No author' };
     const res = await fetch(`${BASE}/library/${authorId}/quizzes`);
     const body = await res.json() as { quizzes: Array<{ quiz_id: string }> };
     const hasQuizzes = Array.isArray(body.quizzes);
@@ -202,7 +188,6 @@ async function main() {
   });
 
   await test('Author stats accessible with auth', async () => {
-    if (!authorId) return { test: 'Stats', passed: false, details: 'No author' };
     const res = await fetch(`${BASE}/library/${authorId}/stats`, { headers });
     if (res.status === 404) {
       return { test: 'Stats', passed: true, details: 'No stats yet (acceptable)' };

@@ -46,36 +46,7 @@ export function registerProtocol(app: Hono) {
     return c.json({ ok: true });
   });
 
-  // ── Library: browse and read ───────────────────────────────────
-
-  app.get('/library', async (c, next) => {
-    if (new URL(c.req.url).pathname !== '/library') return next();
-
-    const auth = await requireAuth(c);
-    if (!auth) return c.text('Unauthorized', 401);
-
-    // Pagination — ?limit=N&offset=M. Defaults handle the common case; explicit
-    // params let clients walk the full set.
-    const limit = Math.min(Math.max(parseInt(c.req.query('limit') || '200', 10) || 200, 1), 1000);
-    const offset = Math.max(parseInt(c.req.query('offset') || '0', 10) || 0, 0);
-
-    const { results } = await getDB().prepare(
-      `SELECT account_id, name, text, visibility, updated_at FROM protocol_files ORDER BY updated_at DESC LIMIT ? OFFSET ?`
-    ).bind(limit, offset).all<{ account_id: string; name: string; text: string | null; visibility: string; updated_at: string }>();
-
-    // Group by author
-    const authors: Record<string, { files: typeof results }> = {};
-    for (const f of results || []) {
-      if (!authors[f.account_id]) authors[f.account_id] = { files: [] };
-      authors[f.account_id].files.push(f);
-    }
-
-    const returned = (results || []).length;
-    return c.json({
-      authors,
-      pagination: { limit, offset, returned, next_offset: returned === limit ? offset + limit : null },
-    });
-  });
+  // ── Library: read per Author ───────────────────────────────────
 
   app.get('/library/:id', async (c, next) => {
     const id = c.req.param('id');

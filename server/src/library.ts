@@ -11,8 +11,6 @@ import { getDB, getR2, generateId } from './db.js';
 import { logEvent } from './analytics.js';
 import { extractApiKey, findByApiKey } from './auth.js';
 import { getAllowedOrigins } from './cors.js';
-import { loadAccounts } from './kv.js';
-import type { AccountStore } from './auth.js';
 
 // ---------------------------------------------------------------------------
 // CORS-safe R2 response
@@ -57,47 +55,6 @@ export function registerLibraryRoutes(app: Hono): void {
   };
   app.use('/library/:author/*', validateAuthor);
   app.use('/library/:author', validateAuthor);
-
-  // =========================================================================
-  // LIST AUTHORS (must be before /:author catch-all)
-  // =========================================================================
-
-  app.get('/library/authors', async (c) => {
-    const db = getDB();
-    // Legacy authors table (has rich profile fields)
-    const { results: legacyAuthors } = await db.prepare(
-      `SELECT a.id, a.display_name, a.bio, a.location, a.updated_at,
-              (SELECT COUNT(*) FROM shadows WHERE author_id = a.id) as shadow_count,
-              (SELECT COUNT(*) FROM quizzes WHERE author_id = a.id AND active = 1) as quiz_count
-       FROM authors a ORDER BY a.updated_at DESC`
-    ).all();
-
-    // Protocol authors keyed by github_id. Resolve to github_login via accounts KV
-    // so /library/{login} links actually work. Skip entries without accounts.
-    const { results: protocolAuthors } = await db.prepare(
-      `SELECT account_id, MAX(updated_at) as updated_at FROM protocol_files GROUP BY account_id ORDER BY MAX(updated_at) DESC`
-    ).all<{ account_id: string; updated_at: string }>();
-
-    const legacyIds = new Set((legacyAuthors || []).map((a: any) => a.id));
-    const merged = [...(legacyAuthors || [])];
-
-    if (protocolAuthors && protocolAuthors.length > 0) {
-      const accounts = await loadAccounts<AccountStore>();
-      const idToLogin = new Map<string, string>();
-      for (const acct of Object.values(accounts)) {
-        if (acct.github_id && acct.github_login) {
-          idToLogin.set(String(acct.github_id), acct.github_login);
-        }
-      }
-      for (const pa of protocolAuthors) {
-        const login = idToLogin.get(pa.account_id);
-        if (!login || legacyIds.has(login)) continue;
-        merged.push({ id: login, display_name: login, bio: null, location: null, updated_at: pa.updated_at, shadow_count: 0, quiz_count: 0 });
-      }
-    }
-
-    return c.json({ authors: merged });
-  });
 
   // =========================================================================
   // AUTHOR PROFILE

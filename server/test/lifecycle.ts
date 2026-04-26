@@ -153,7 +153,7 @@ async function main() {
     const endpoints = (body?.endpoints || {}) as Record<string, string>;
     const hasCoreEndpoints = endpoints.file === '/file/{name}'
       && endpoints.call === '/call'
-      && endpoints.library === '/library'
+      && endpoints.library === '/library/{id}'
       && endpoints.marketplace === '/marketplace';
 
     return {

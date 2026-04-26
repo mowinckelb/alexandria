@@ -97,7 +97,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   if (error || !data) return (
     <main style={{ maxWidth: '640px', margin: '0 auto', padding: '40vh 2rem', fontFamily: 'var(--font-eb-garamond)', textAlign: 'center' }}>
       <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{error === 'unreachable' ? 'could not reach Alexandria.' : 'this mind is not yet published.'}</p>
-      <p style={{ marginTop: '2rem' }}><Link href="/library" style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.8rem' }}>library</Link></p>
+      <p style={{ marginTop: '2rem' }}><Link href="/" style={{ color: 'var(--text-ghost)', textDecoration: 'none', fontSize: '0.8rem' }}>alexandria.</Link></p>
     </main>
   );
 
@@ -355,7 +355,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         {/* ── FOOTER ── */}
         <footer style={{ margin: '4rem 0 0', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
           <Link href="/" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">alexandria.</Link>
-          <Link href="/library" style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">library</Link>
           <Link href={`/signup?${signupRef}`} style={{ fontSize: '0.72rem', color: 'var(--text-whisper)', textDecoration: 'none' }} className="hover:opacity-60">start yours</Link>
         </footer>
 

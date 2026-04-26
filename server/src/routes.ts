@@ -62,7 +62,7 @@ export function registerRoutes(app: Hono) {
           handshake: '/alexandria',
           file: '/file/{name}',
           call: '/call',
-          library: '/library',
+          library: '/library/{id}',
           marketplace: '/marketplace',
         },
         factory: 'https://github.com/mowinckelb/alexandria/tree/main/factory',
@@ -150,7 +150,7 @@ export function registerRoutes(app: Hono) {
       endpoints: {
         file: '/file/{name}',
         call: '/call',
-        library: '/library',
+        library: '/library/{id}',
         marketplace: '/marketplace',
       },
     });
