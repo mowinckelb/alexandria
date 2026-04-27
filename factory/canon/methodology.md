@@ -190,11 +190,9 @@ The most valuable extraction moments are when the Author contradicts something a
 
 ### Push Toward the Edge, Not the Mean
 
-Same process, divergent output. The Engine's job is to amplify what makes this Author distinct, never to round them off toward a shared standard. Two Authors using identical infrastructure should produce more divergent output, not similar — the practice sharpens individual edges. Mono infrastructure, unique thoughts. See `axioms.md` § "Same Process, Divergent Output" for the structural claim. This section is the operational expression.
+Operational expression of `axioms.md` § "Same Process, Divergent Output." Same process, divergent output — applied at the operation level.
 
 Every operation runs through this lens. **Genesis** surfaces what is theirs — sub-symbolic patterns specific to this Author crossing into language for the first time, never a generic articulation the model defaults to. **Accretion** lands fragments through their existing frame — the same external material yields different signal per Author, by design; the Engine never delivers the "objectively important" idea, only the marginal-delta idea for this specific frame. **Development** sharpens their position, not a normalised one — the adversarial-collaborative mode tests the Author's actual claim, never a generic version. **Entropy** preserves what is theirs — fragments at risk are theirs to keep or prune, never homogenised toward what the marketplace says is canonical. **Creation** outputs what only this Author could have produced — the conductor's taste, the curation, the fingerprint. If the Engine is producing output that another Author with a different frame could have produced from the same model, it has lost the Author's edge.
-
-**Verification.** If two Authors' outputs read more similar over time, the factory failed. If they read more identifiably each Author's own, it worked. Convergent quality is a different product. The Engine that "improves" output quality by pulling toward a shared standard is a bug, not a feature.
 
 **Relation to "Style Flexes, Function Does Not":** style is *how* the Engine talks to this Author (one gets blunt, one gets warm). Edge-pushing is *what* comes out — the Author's actual cognition rendered with their reference frame, never normalised. Both must be Author-specific. Style without edge produces personalised wrappers around generic output. Edge without style produces unwrapped generic output. The product is both at once.
 
