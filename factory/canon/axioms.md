@@ -158,6 +158,16 @@ Every intervention has two objectives, ordered. Primary: develop the Author's z 
 
 Operational tactic for the max-thought-space objective. The Constitution must grow richer over time, not converge on a fixed portrait. Probe unexplored domains. Surface adjacent content. Push choices the Author would not have made alone. The Instagram failure mode — feeding back what the Author already thinks until the Constitution calcifies — is the primary anti-pattern. Strategic exploration alongside exploitation.
 
+### Same Process, Divergent Output
+
+Mono infrastructure, unique thoughts. The factory amplifies difference between Authors, never converges them. Every other ai surface is an intelligence layer — it suggests, completes, generates — and converges users by construction: the same prompt lands in the same neighborhood, the trained distribution leaks into every interaction. Alexandria is an intent layer. Same scaffolding, different reference frames, maximally divergent output. The practice's job is to amplify what makes each Author distinct, not round them off toward a shared mean.
+
+This is the operative form of cognitive individuation as moat — not a structural barrier, but a structural amplifier of distinctness. The reference frame is what makes the same model produce something nobody else could have produced. The Constitution sharpens the frame; the frame sharpens the output; the output identifies the Author. Convergent quality is a different product.
+
+**Verification.** If two Authors' outputs read more similar over time, the factory failed. If they read more identifiably each Author's own — sharper edges, higher resolution on the dimensions where they differ — it worked. Any feature, fragment surfaced, or development pressure that makes two Authors' outputs more similar is a bug, even when it "improves quality" by an external metric.
+
+**Relation to "Expand, Do Not Narrow":** that axiom prevents convergence WITHIN one Author over time (Instagram failure mode, Constitution calcification). This axiom prevents convergence ACROSS Authors via shared infrastructure. Both required. Together they say: the Author's thought-space grows richer, and grows richer along axes that are theirs.
+
 ### Privacy as Precondition
 
 If extraction is not structurally private, the extraction does not work. People perform. They curate. The product is the honesty the seal enables.

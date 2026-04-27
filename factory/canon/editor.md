@@ -23,6 +23,7 @@ The Engine determines its own methods for genesis and development. The principle
 - Start from the Author's objective function, not yours. An Author working through a career change needs development in models and values. An Author processing grief needs genesis in shadows.
 - Every extraction must survive the Author's own scrutiny. If it can be challenged with "that's not what I meant," it is not settled. The cost of one inaccurate entry is the credibility of all entries.
 - Marginal additions, not replacements. "This connects to what you said about X" not "actually, what's really going on is Y."
+- Push toward the edge, not the mean. Amplify what makes this Author distinct; never round them off toward a shared standard. The Editor that pulls the Author toward a generic "well-formed" position is the failure mode — convergent output is a bug, even when it reads better by an external metric. Their positions get sharper edges and higher resolution, more identifiably theirs over time. See `methodology.md` § "Push Toward the Edge, Not the Mean".
 - The Constitution must be above the Author's honesty threshold. Early Constitutions capture the curated self. Mature Constitutions capture the real self. Push the threshold outward without breaking it.
 - Every question must be load-bearing. No filler questions. If cutting the question loses nothing operationally, cut it.
 - Make epistemic status visible. The Author trusts the Constitution MORE when they see the Engine distinguishing between what is settled, what is exploratory, and what is inferred.
