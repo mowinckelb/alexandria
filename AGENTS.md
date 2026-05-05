@@ -4,17 +4,84 @@ Greek philosophy infrastructure. Rides the user's existing ai. Does not run its 
 
 Founder: Benjamin Mowinckel. Solo founder + ai agents. Relocating to SF April 2026.
 
-## Architecture — Four Layers
+## Architecture
 
-Everything in Alexandria maps to one of four layers:
+Alexandria decomposes into atomic entities. Each is exactly one thing; together they cover the whole system. Read this section before touching anything that crosses entity lines — most architectural confusion comes from conflating two of these.
 
-1. **Protocol** (`server/src/protocol.ts` + `auth.ts` + `kv.ts` + `crypto.ts` + `db.ts`) — The incompressible core. ~455 lines, 7 endpoints. Three obligations: account (payment), file (publish monthly), call (communicate). This is what makes Alexandria a protocol, not a product.
+### Entities
 
-2. **Factory** (`factory/`) — The founder's system, public on GitHub, forkable. 19 files: canon (methodology), hooks (shim + payload), setup script, skills (claudecode, cursor, codex, scheduled), templates (agent, machine, notepad, feedback, constitution/, ontology/, vault/, library/), onboarding block. Any Author can fork and modify. The marketplace evolves canon defaults from cross-Author signal.
+**Protocol** (`server/src/protocol.ts` + `auth.ts` + `kv.ts` + `crypto.ts` + `db.ts`) — The incompressible core. ~455 lines, 7 endpoints. Three obligations: account (payment), file (publish monthly), call (communicate). Designed to never grow. This is what makes Alexandria a *protocol*, not a product.
 
-3. **Machine** (`~/alexandria/`) — Each Author's personal system. Constitution, vault, ontology, machine.md, notepad, feedback. Lives locally, never on the server. The product IS this folder. Alexandria stores what Authors publish, never what they think.
+**Company** (`server/src/` everything else + `app/`) — Operational layer that hosts Protocol + Library + Marketplace Signal surfaces. Stateless server, OAuth, billing, email alarms, admin endpoints, analytics. Designed to shrink as the Protocol carries more weight. Pure marginal value add — provides infrastructure, never holds Author cognition.
 
-4. **Company** (`server/src/` everything else + `app/`) — Operational overhead. OAuth, billing, email, analytics, cron, Library CRUD, admin endpoints. This layer should shrink over time.
+**Factory** (`factory/`, plus the `factory` claude.ai routine) — Iterates the Canonical Machine. Reads cross-Author signal from Marketplace Signal, evolves the canon. Artifacts live in `mowinckelb/alexandria` public repo; iteration is a weekly autonomous loop.
+
+**Canonical Machine** (`factory/canon/`, `factory/skills/`, `factory/hooks/`, `factory/scripts/`, `factory/templates/`, `factory/setup.sh`) — What the factory prints. Modular parts on the public alexandria repo. Anyone can download. Authors install (or fork) these to compose their own Machine. The factory iterates the canonical version; existing user installs hold whatever they last fetched (frozen unless they refresh).
+
+**Per-Author Machine** — The Author's AI in active use, doing Alexandria work. NOT a single tool — a composition of pieces (skills running in Claude Code or Cursor or Codex; editor hooks; local launchd jobs; their AI subscription budget). Built from Canonical Machine parts at install, then diverges as the Author personalizes. The founder's user0 Machine is one instance; every other Author has their own.
+
+**Per-Author Files & System** — The Author's content (vault, constitution, ontology, notepad) plus their personal machine config (which skills installed, which hooks running, SMTP creds, launchd plists). Lives on their stuff: their disk, their git repo (`alexandria-private`), their accounts.
+
+**Marketplace of Systems** — Public, on github (`mowinckelb/alexandria` + future fork ecosystem). Where machine parts circulate. Today: signal-only via the `alexandria-marketplace` repo. Future: a true parts marketplace where Authors publish novel modules for others. Survives Alexandria's death only as long as the github org does — accepted tradeoff.
+
+**Marketplace Signal** — Private, on the Company server. Anonymized cross-Author usage telemetry (file PUTs, calls, setup status). Only the Company sees raw signal; Authors get derivatives via the daily snapshot pushed to `alexandria-marketplace` for the factory to drain.
+
+**Library** — Collection of published Author files. Mostly Author-discretion-public; the Company server always holds at least one file per Author (the Protocol's file obligation guarantees this minimum). Browsing surface lives on the Company.
+
+**Other companies** — Vendors that Authors and Alexandria depend on (Anthropic, Cloudflare, GitHub, Stripe, Resend, Google, etc.). Allowed dependencies on either side.
+
+### Sovereignty rules
+
+Each Author's (Machine + Files + System) is INDEPENDENT of:
+- Every other Author's (M+S+F)
+- The founder's user0 (M+S+F)
+- Alexandria the company (its Protocol service, Company server, Library, Marketplace Signal)
+
+But CAN depend on:
+- Other companies / vendors (Anthropic, Google, Resend, GitHub, etc.)
+
+Collective surfaces depend on Alexandria *by definition*:
+- Library (hosting)
+- Marketplace Signal (private collective state)
+- Protocol-as-a-service (the live `mcp.mowinckel.ai` endpoint)
+- Canon iteration (factory routine)
+
+These are accepted dependencies — they ARE Alexandria. Alexandria is *purely marginal value add*: provides collective surfaces and a canonical machine; never holds the Author's thinking hostage.
+
+### Death tests (apply to every architectural change)
+
+**If Alexandria the company dies tomorrow:**
+- Every Author's personal cognitive system survives — files on their disk, machine on their tools, daily flow continues. ✓ This must always pass.
+- Library / Marketplace Signal access ends. (By design — those WERE Alexandria.)
+- Canon artifact persists on public github (frozen). Canon iteration stops.
+- Public Marketplace of Systems persists only as long as the github org account does.
+
+**If every user vanishes:**
+- Company keeps running — server doesn't iterate accounts, doesn't depend on any specific Author existing.
+- Stroll/sprint alarms still fire on Company state.
+
+If a proposed change fails either test, the change is wrong.
+
+### Common traps — do not conflate
+
+- **Machine ≠ a specific AI tool.** Machine is the Author's AI in active use — Claude Code, Cursor, Codex, ChatGPT in a browser tab; all are valid manifestations. Tool-agnostic.
+- **Canonical Machine ≠ Per-Author Machine.** Canonical is the factory's output on github (parts catalog). Per-Author is the live, personalized install. They share ancestry; they are not the same thing.
+- **Two marketplaces.** Public (github, machine parts) vs private (server, signal). Different repos, different audiences, different purposes. Never collapse them.
+- **Email-on-behalf-of-Authors is NOT what Alexandria does.** Each Author has their own email pipe — own SMTP creds, own provider (Gmail, iCloud, Microsoft 365, Proton). The factory ships setup instructions; the Company never sends Author-personal emails. The `sendEmail` path on the server is for Company alarms (stroll/sprint to FOUNDER_EMAIL) only.
+- **Server-side cron is for Company work, not Author work.** `runHealthDigest` probes server infra and alarms on Company state. Per-Author processing happens in the per-Author autoloop, on infra the Author controls (or accepts as a vendor — today, claude.ai).
+- **Authors depending on Alexandria ≠ Alexandria depending on Authors.** The first is fine for collective surfaces by design. The second is a bug — server must keep running if every user vanishes.
+
+### The three autonomous loops
+
+Three systems that fire on a schedule. Everything else is either an input, an output, or a request-driven surface.
+
+| Loop | What it does | Where it runs |
+|---|---|---|
+| **Per-Author autoloop** | Processes the Author's vault → notepad fragments + library drafts. Surfaces forward action via the local brief sender (writing one line to `~/alexandria/system/.brief_outbox`). Never writes to constitution (needs Author's voice + consent). | claude.ai routine in the Author's account (today's runtime — accepted tradeoff). Spec at `factory/skills/scheduled.md`. |
+| **Company health digest** | Probes KV/D1/R2/env vars/Resend/marketplace activity, sends stroll/sprint to FOUNDER_EMAIL on urgency. | Cloudflare Worker scheduled handler, `server/src/cron.ts:runHealthDigest`, daily 15:00 UTC. |
+| **Factory canon iteration** | Drains `alexandria-marketplace` signals + feedback, evolves canon in `mowinckelb/alexandria`. | claude.ai routine. Spec at `factory/skills/factory.md`. Weekly Sundays 16:00 UTC. |
+
+The Author's brief email is **not a fourth loop** — it's the delivery surface of the per-Author autoloop. A local launchd plist fires `factory/scripts/brief.py` daily on the Author's machine; default body is a heartbeat ("no material change overnight."); the autoloop overrides with surfaceable content via `.brief_outbox` when something's worth attention. Sender is the Author's own SMTP, against the Author's own email provider — Alexandria has nothing to do with that delivery path. Setup recipe at `factory/skills/brief-setup.md`.
 
 ## Code
 
