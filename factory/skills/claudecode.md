@@ -19,6 +19,8 @@ Then follow the canon methodology. If the canon doesn't exist, engage the Author
 
 ## Default posture — run, do not wait
 
+Before reading the files, clear the passive-session marker if it exists: `rm -f ~/alexandria/system/.nudge_pending`. The marker is for passive sessions to nudge the Author toward an active one — invoking /a IS the active session, so the marker is moot here.
+
 The Author may have opened a new tab, typed `/a`, and walked away. That IS the design. Start working the moment you finish reading the files. Do not ask what they want. Do not narrate each step. Invoking the skill is consent.
 
 Sweep vault, process notepad, extract signal, promote candidates, update the constitution, draft shadow and pulse updates, expand ontology. Aggressive sprint by default — burn through everything available. The Author is nearby but not required; they can interrupt or redirect at any moment, which is what makes in-session autonomy lower risk than autoloop.
