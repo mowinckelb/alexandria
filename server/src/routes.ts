@@ -627,12 +627,18 @@ export function registerRoutes(app: Hono) {
     } catch {
       return c.json({ error: 'bad payload' }, 400);
     }
-    const result = await handleGithubPushWebhook(payload);
-    logEvent('github_webhook_push', {
-      repo: `${payload?.repository?.owner?.login || ''}/${payload?.repository?.name || ''}`,
-      busted: String(result.busted),
-    });
-    return c.json({ ok: true, ...result });
+    // Reply fast, bust in the background. Github expects <10s; Cloudflare has
+    // a wall-clock budget per request. A push touching many files would burn
+    // through both if we awaited every KV delete inline. waitUntil decouples
+    // the ack from the work — the bust completes after the 200 returns.
+    c.executionCtx.waitUntil((async () => {
+      const result = await handleGithubPushWebhook(payload);
+      logEvent('github_webhook_push', {
+        repo: `${payload?.repository?.owner?.login || ''}/${payload?.repository?.name || ''}`,
+        busted: String(result.busted),
+      });
+    })());
+    return c.json({ ok: true });
   });
 
   // --- User feedback (end-of-session + direct) ---
