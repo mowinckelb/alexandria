@@ -15,7 +15,6 @@ import { getKV } from './kv.js';
 export interface ModuleMeta {
   name: string;
   description: string;
-  body?: string;
   status: 'ok' | 'unreachable' | 'parse_error';
   last_fetched: string;
 }
@@ -150,13 +149,16 @@ async function refreshCache(id: string, parsed: ParsedModuleId): Promise<ModuleM
   // the first body paragraph. Schema-free by construction (bitter lesson):
   // when models can lift more from raw markdown, the same data yields more
   // with no migration.
+  //
+  // Cache stores only the catalog fields (name, description, status). Module
+  // bodies live at raw.githubusercontent.com — agents fetch source from
+  // github directly rather than re-reading it from KV.
   const fm = parseFrontmatter(fetched.content);
   const name = fm.name && SLUG_RE.test(fm.name) ? fm.name : fallbackName(parsed, id);
   const description = fm.description || deriveDescription(fm.body);
   const meta: ModuleMeta = {
     name,
     description,
-    body: fm.body,
     status: 'ok',
     last_fetched: now,
   };

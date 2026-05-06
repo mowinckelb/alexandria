@@ -148,10 +148,7 @@ export function registerRoutes(app: Hono) {
             response: '{ modules: [{ id, name, description, author_github_login, kind, status }], total, next_cursor }',
             filters: { kind: 'skill|canon|hook|script|template|system|module', author: 'github_login' },
             cache: 'public 5 min; KV-backed 24h with github webhook invalidation on push',
-          },
-          detail: {
-            path: '/marketplace/{user}/{repo}/{path}',
-            response: '{ id, name, description, body, author_github_login, kind, status }',
+            note: 'module bodies live at raw.githubusercontent.com — fetch source from github',
           },
           usage_history: {
             path: '/marketplace/{module_id}',

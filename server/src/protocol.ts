@@ -5,7 +5,7 @@ import { requireAuth } from './auth.js';
 import { getDB, getR2 } from './db.js';
 import { logEvent } from './analytics.js';
 import { saveAccount, getKV } from './kv.js';
-import { resolveModule, authorFromModuleId, buildModuleId, deriveKind } from './marketplace-catalog.js';
+import { resolveModule, authorFromModuleId, deriveKind } from './marketplace-catalog.js';
 
 function r2Key(accountId: string, name: string): string {
   return `protocol/${accountId}/${name}.md`;
@@ -174,12 +174,14 @@ export function registerProtocol(app: Hono) {
 
   // ── Marketplace: browse module usage ───────────────────────────
   //
-  // Three routes, intentionally distinct:
-  //   GET /marketplace                  — public catalog (enriched listing)
-  //   GET /marketplace/:user/:repo/*    — public module detail (3+ segments)
-  //   GET /marketplace/:module          — auth-required usage history (1 segment)
+  // Two routes:
+  //   GET /marketplace          — public catalog
+  //   GET /marketplace/:module  — auth-required usage history
   //
-  // No /publish endpoint — modules surface via /call. The act of using is the contribution.
+  // Module bodies live at raw.githubusercontent.com — agents fetch from
+  // github directly. The catalog returns metadata only.
+  //
+  // No /publish endpoint — modules surface via /call. Use is the contribution.
 
   app.get('/marketplace', async (c, next) => {
     if (new URL(c.req.url).pathname !== '/marketplace') return next();
@@ -226,31 +228,6 @@ export function registerProtocol(app: Hono) {
     // today; when paginated, clients that already iterate via cursor
     // continue working unchanged.
     return c.json({ modules, total: modules.length, next_cursor: null });
-  });
-
-  app.get('/marketplace/:user/:repo/*', async (c) => {
-    const user = c.req.param('user');
-    const repo = c.req.param('repo');
-    const url = new URL(c.req.url);
-    const prefix = `/marketplace/${user}/${repo}/`;
-    const path = url.pathname.startsWith(prefix) ? url.pathname.slice(prefix.length) : '';
-    if (!user || !repo || !path) return c.json({ error: 'Not found' }, 404);
-
-    // Public detail mirrors the listing — catalog only. Usage history lives
-    // behind auth at `/marketplace/:module`.
-    const id = buildModuleId(user, repo, path);
-    const meta = await resolveModule(id);
-
-    c.header('Cache-Control', 'public, max-age=300, s-maxage=300');
-    return c.json({
-      id,
-      name: meta?.name || path.split('/').pop() || id,
-      description: meta?.description || '',
-      body: meta?.body || '',
-      author_github_login: user,
-      kind: deriveKind(id),
-      status: meta?.status || 'unreachable',
-    });
   });
 
   app.get('/marketplace/:module', async (c, next) => {
