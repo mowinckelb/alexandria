@@ -51,6 +51,11 @@ const MD_COMPONENTS = {
   strong: ({ children }: { children?: React.ReactNode }) => <strong className="pdoc-strong">{children}</strong>,
   table: ({ children }: { children?: React.ReactNode }) => <table className="pdoc-table">{children}</table>,
   blockquote: ({ children }: { children?: React.ReactNode }) => <blockquote className="pdoc-bq">{children}</blockquote>,
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+    <a href={href} className="pdoc-a" target={href?.startsWith('http') ? '_blank' : undefined} rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}>
+      {children}
+    </a>
+  ),
 };
 
 function statusLabel(status: ModuleDetail['status']): string | null {
@@ -121,26 +126,9 @@ export default async function MarketplaceModulePage({
         <div className="mdoc-frame mdoc-header">
           {m.name}
           {canonical && <span style={CANONICAL_BADGE_STYLE}>canonical</span>}
-          {m.description && (
-            <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.4rem', fontWeight: 400 }}>
-              {m.description}
-            </span>
-          )}
         </div>
 
         <article className="mdoc-frame mdoc-article pdoc">
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-ghost)', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-            <span>{author}</span>
-            <span>·</span>
-            <a href={githubUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)' }}>
-              source on github
-            </a>
-          </div>
-
-          <pre style={{ background: 'var(--bg-tertiary)', padding: '0.6rem 0.8rem', borderRadius: 4, fontSize: '0.82rem', overflow: 'auto', marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
-            <code>{m.id}</code>
-          </pre>
-
           {banner && (
             <p className="pdoc-p" style={{ color: 'var(--text-ghost)', fontStyle: 'italic', fontSize: '0.85rem' }}>
               ({banner})
@@ -155,6 +143,15 @@ export default async function MarketplaceModulePage({
             <p className="pdoc-p" style={{ color: 'var(--text-ghost)' }}>no body content.</p>
           )}
         </article>
+
+        <footer className="mdoc-frame mdoc-meta">
+          <pre className="mdoc-meta-id"><code>{m.id}</code></pre>
+          <div className="mdoc-meta-row">
+            <span>{author}</span>
+            <span>·</span>
+            <a href={githubUrl} target="_blank" rel="noopener noreferrer">source on github</a>
+          </div>
+        </footer>
 
         <nav className="mdoc-frame mdoc-footnav">
           <Link href="/" className="mdoc-home">a.</Link>

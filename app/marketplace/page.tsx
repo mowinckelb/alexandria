@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'marketplace — alexandria.',
-  description: 'reusable Alexandria machinery — skills, scripts, prompts, filters. installed from public github.',
+  description: "each Author's system decomposes into modules — pooled here so others can learn, share signal, and refine their own.",
 };
 
 interface MarketplaceModule {
@@ -78,7 +78,7 @@ export default async function MarketplacePage() {
             marketplace
           </h1>
           <p style={{ color: 'var(--text-ghost)', fontSize: '0.88rem', lineHeight: 1.5, margin: '0.6rem 0 0' }}>
-            reusable Alexandria machinery — skills, scripts, prompts, filters. installed from public github.
+            each Author&apos;s system decomposes into modules — pooled here so others can learn, share signal, and refine their own.
           </p>
         </header>
 
