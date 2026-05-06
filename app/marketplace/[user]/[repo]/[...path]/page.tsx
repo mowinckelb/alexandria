@@ -91,7 +91,9 @@ export default async function MarketplaceModulePage({
     );
   }
 
-  const githubUrl = `https://github.com/${user}/${repo}/blob/main/${pathStr}.md`;
+  // /blob/HEAD/... — github.com redirects to the repo's default branch.
+  // (Don't use main hardcoded; some repos use master.)
+  const githubUrl = `https://github.com/${user}/${repo}/blob/HEAD/${pathStr}.md`;
   const banner = statusLabel(m.status);
 
   return (

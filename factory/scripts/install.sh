@@ -22,10 +22,17 @@ if [[ ! "$MOD" =~ ^github:[^/]+/[^#]+#.+$ ]] && [[ ! "$MOD" =~ ^local:[^/]+/.+$ 
 fi
 
 # Reachability check — github: only. Local IDs are pre-publish placeholders.
+# Try main first, fall back to master.
 if [[ "$MOD" =~ ^github:([^/]+)/([^#]+)#(.+)$ ]]; then
-  url="https://raw.githubusercontent.com/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}/main/${BASH_REMATCH[3]}.md"
-  if ! curl -sfI -o /dev/null "$url"; then
-    echo "install: $url unreachable on github" >&2
+  user="${BASH_REMATCH[1]}"; repo="${BASH_REMATCH[2]}"; path="${BASH_REMATCH[3]}"
+  reached=0
+  for branch in main master; do
+    if curl -sfI -o /dev/null "https://raw.githubusercontent.com/$user/$repo/$branch/$path.md"; then
+      reached=1; break
+    fi
+  done
+  if [[ $reached -eq 0 ]]; then
+    echo "install: $user/$repo#$path unreachable on github (tried main, master)" >&2
     exit 1
   fi
 fi

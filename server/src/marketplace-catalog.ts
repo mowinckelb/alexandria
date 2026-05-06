@@ -71,15 +71,19 @@ async function fetchFromGithub(parsed: ParsedModuleId): Promise<{ ok: true; cont
   if (parsed.kind !== 'github' || !parsed.user || !parsed.repo || !parsed.path) {
     return { ok: false };
   }
-  const url = `https://raw.githubusercontent.com/${parsed.user}/${parsed.repo}/main/${parsed.path}.md`;
-  let resp: Response;
-  try {
-    resp = await fetch(url, { headers: { 'User-Agent': 'alexandria-server' } });
-  } catch {
-    return { ok: false };
+  // Try main first, fall back to master. raw.githubusercontent.com requires a
+  // branch name (HEAD doesn't resolve there like it does on github.com).
+  for (const branch of ['main', 'master']) {
+    const url = `https://raw.githubusercontent.com/${parsed.user}/${parsed.repo}/${branch}/${parsed.path}.md`;
+    let resp: Response;
+    try {
+      resp = await fetch(url, { headers: { 'User-Agent': 'alexandria-server' } });
+    } catch {
+      continue;
+    }
+    if (resp.ok) return { ok: true, content: await resp.text() };
   }
-  if (!resp.ok) return { ok: false };
-  return { ok: true, content: await resp.text() };
+  return { ok: false };
 }
 
 function fallbackName(parsed: ParsedModuleId, id: string): string {
