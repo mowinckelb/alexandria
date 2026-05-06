@@ -1999,6 +1999,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             display: none;
           }
           .top-slide,
+          .middle-slide,
           .bottom-slide {
             position: relative;
             inset: auto;
@@ -2015,8 +2016,51 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              they weren't there, and the existing mobile rules below take
              over the inner elements directly. */
           .stage-top,
+          .stage-middle,
           .stage-bottom {
             display: contents;
+          }
+          .middle-slide {
+            padding: 60px clamp(20px, 5vw, 64px) 60px;
+            display: flex;
+            align-items: center;
+          }
+          /* Slide 2 marginalia on mobile — the desktop gutter layout
+             (label absolute-positioned at left:0, body padded 280px)
+             collapses on phone widths. Stack vertically: numeral + label
+             on their own line above each body. */
+          .middle-slide .statement {
+            max-width: 100%;
+            padding: 0;
+            gap: 32px;
+          }
+          .middle-slide .statement > p {
+            padding: 0 0 28px 0;
+            font-size: 17px;
+            line-height: 1.55;
+            min-height: 0;
+          }
+          .middle-slide .statement > p:not(:last-child)::after {
+            left: 0;
+          }
+          .middle-slide .statement > p:not(.statement-close):not(.continuation)::before {
+            position: static;
+            display: inline;
+            margin-right: 6px;
+          }
+          .middle-slide .statement .beat-title {
+            position: static;
+            display: inline;
+            width: auto;
+            font-size: 14px;
+          }
+          .middle-slide .statement .beat-title::after {
+            content: ' — ';
+            color: var(--theme-fg-faint);
+          }
+          /* Drop the manuscript ruling — there's no gutter to anchor on. */
+          .middle-slide .statement::before {
+            content: none;
           }
           .bottom-slide {
             padding: 60px clamp(20px, 5vw, 64px) 36px;
@@ -2042,18 +2086,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             padding: 18px 18px;
           }
           .nav-brand {
-            font-size: 24px;
+            font-size: 22px;
+          }
+          /* Library/marketplace shelf and the tagline both hide on mobile
+             to keep the row from crashing into the brand. Library and
+             marketplace remain reachable via the dict on slide 3 and via
+             direct URL; the tagline is repeated in the dict. */
+          .nav-shelf,
+          .nav-tagline {
+            display: none;
           }
           .nav-links {
-            gap: 12px;
-          }
-          .nav-shelf {
-            padding-right: 12px;
-            margin-right: 0;
-          }
-          .nav-links .nav-shelf-link {
-            font-size: 13px;
-            letter-spacing: 0.06em;
+            gap: 14px;
           }
           .nav-links a {
             font-size: 13px;
@@ -2124,11 +2168,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             justify-content: flex-start;
             transform: none;
           }
-          .right-lower {
+          /* Selector includes .right-col so it beats the desktop
+             .right-col .right-lower rule (squeezed 680px width +
+             126px margin-top) — mobile reverts to full-width flow. */
+          .right-col .right-lower {
             align-self: stretch;
             width: 100%;
             gap: 24px;
-            margin: 0 0 0 0;
+            margin: 0;
           }
           .wordmark-block {
             order: 3;
