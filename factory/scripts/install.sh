@@ -11,7 +11,7 @@ MOD="${1:-}"
 MANIFEST="$HOME/alexandria/.call_manifest"
 
 if ! command -v jq >/dev/null 2>&1; then
-  echo "install: jq required (https://stedolan.github.io/jq/)" >&2
+  echo "install: jq required (https://jqlang.org)" >&2
   exit 1
 fi
 
