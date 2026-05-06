@@ -197,12 +197,15 @@ app.get('/health', async (c) => {
 
   // Stripe mode derived from the secret key prefix. Surfaced so we can verify
   // live-vs-test from /health without ever exposing the key value itself.
+  // Handles both standard (sk_*) and restricted (rk_*) keys.
   const stripeKey = process.env.STRIPE_SECRET_KEY || '';
-  const stripe_mode = stripeKey.startsWith('sk_live_')
-    ? 'live'
-    : stripeKey.startsWith('sk_test_')
-      ? 'test'
-      : 'unset';
+  const stripe_mode = !stripeKey
+    ? 'unset'
+    : /^(sk|rk)_live_/.test(stripeKey)
+      ? 'live'
+      : /^(sk|rk)_test_/.test(stripeKey)
+        ? 'test'
+        : `unrecognized:${stripeKey.slice(0, 8)}…`;
 
   return c.json({
     status: infraHealthy && digestUrgency !== 'sprint' ? 'ok' : 'degraded',
