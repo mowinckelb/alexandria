@@ -587,7 +587,14 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
       }
       event = stripe.webhooks.constructEvent(rawBody, sig, WEBHOOK_SECRET);
     } catch (err) {
-      console.error('Webhook signature verification failed:', err);
+      // Surface enough info to triage signature drift without exposing the
+      // secret. First/last 4 chars of bound secret + length + first chars of
+      // the signature header. Compare against Stripe Dashboard's revealed
+      // secret to see if the right value got into wrangler.
+      const fp = WEBHOOK_SECRET
+        ? `${WEBHOOK_SECRET.slice(0, 8)}…${WEBHOOK_SECRET.slice(-4)} (len=${WEBHOOK_SECRET.length})`
+        : '<unset>';
+      console.error(`[webhook] signature mismatch — bound=${fp} sig_prefix=${sig.slice(0, 24)}`);
       return c.text('Invalid signature', 400);
     }
 
