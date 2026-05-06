@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'marketplace — alexandria.',
-  description: 'Reusable Alexandria machinery — skills, scripts, prompts, filters. Installed from public github.',
+  description: 'reusable Alexandria machinery — skills, scripts, prompts, filters. installed from public github.',
 };
 
 interface MarketplaceModule {
