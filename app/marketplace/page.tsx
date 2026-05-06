@@ -33,6 +33,17 @@ function parseGithubId(id: string): ParsedId | null {
   return { user: m[1], repo: m[2], path: m[3] };
 }
 
+// Canonical Machine — the factory's output repo. Items here are Alexandria's;
+// items in any other repo are forks / community contributions.
+function isCanonical(parsed: ParsedId | null): boolean {
+  return !!parsed && parsed.user === 'mowinckelb' && parsed.repo === 'alexandria';
+}
+
+function authorLabel(parsed: ParsedId | null, fallback: string | null): string | null {
+  if (isCanonical(parsed)) return 'alexandria';
+  return fallback;
+}
+
 async function loadModules(): Promise<MarketplaceModule[]> {
   try {
     const res = await fetch(`${SERVER_URL}/marketplace`, { cache: 'no-store' });
@@ -49,6 +60,19 @@ function statusBadge(status: MarketplaceModule['status']): string | null {
   if (status === 'parse_error') return 'parse error';
   return null;
 }
+
+const CANONICAL_BADGE_STYLE: React.CSSProperties = {
+  marginLeft: '0.5rem',
+  fontSize: '0.7rem',
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: 'var(--text-muted)',
+  border: '1px solid var(--border-light)',
+  borderRadius: '2px',
+  padding: '1px 6px',
+  verticalAlign: '2px',
+  fontWeight: 400,
+};
 
 export default async function MarketplacePage() {
   const modules = await loadModules();
@@ -79,11 +103,14 @@ export default async function MarketplacePage() {
               const parsed = parseGithubId(m.id);
               const href = parsed ? `/marketplace/${parsed.user}/${parsed.repo}/${parsed.path}` : null;
               const badge = statusBadge(m.status);
+              const canonical = isCanonical(parsed);
+              const author = authorLabel(parsed, m.author_github_login);
               const inner = (
                 <>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
                     <h2 style={{ fontSize: '1.1rem', fontWeight: 400, color: 'var(--text-primary)', margin: 0 }}>
                       {m.name}
+                      {canonical && <span style={CANONICAL_BADGE_STYLE}>canonical</span>}
                       {badge && (
                         <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: 'var(--text-ghost)', fontStyle: 'italic' }}>
                           ({badge})
@@ -99,9 +126,9 @@ export default async function MarketplacePage() {
                       {m.description}
                     </p>
                   )}
-                  {m.author_github_login && (
+                  {author && (
                     <p style={{ fontSize: '0.82rem', color: 'var(--text-ghost)', margin: '0.6rem 0 0' }}>
-                      {m.author_github_login}
+                      {author}
                     </p>
                   )}
                 </>

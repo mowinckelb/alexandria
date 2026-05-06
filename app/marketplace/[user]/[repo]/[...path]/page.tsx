@@ -62,6 +62,25 @@ function statusLabel(status: ModuleDetail['status']): string | null {
   return null;
 }
 
+// Canonical Machine — items in mowinckelb/alexandria are Alexandria's;
+// everything else is fork / community. Mirrors the listing page's logic.
+function isCanonical(user: string, repo: string): boolean {
+  return user === 'mowinckelb' && repo === 'alexandria';
+}
+
+const CANONICAL_BADGE_STYLE: React.CSSProperties = {
+  marginLeft: '0.6rem',
+  fontSize: '0.7rem',
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: 'var(--text-muted)',
+  border: '1px solid var(--border-light)',
+  borderRadius: '2px',
+  padding: '1px 6px',
+  verticalAlign: '3px',
+  fontWeight: 400,
+};
+
 export default async function MarketplaceModulePage({
   params,
 }: {
@@ -75,7 +94,7 @@ export default async function MarketplaceModulePage({
     return (
       <>
         <ThemeToggle />
-        <Link href="/marketplace" className="mdoc-shelf-link">marketplace</Link>
+        <Link href="/marketplace" className="mdoc-shelf-link">← marketplace</Link>
         <main className="mdoc">
           <div className="mdoc-frame mdoc-header">module not found.</div>
           <article className="mdoc-frame mdoc-article pdoc">
@@ -95,14 +114,17 @@ export default async function MarketplaceModulePage({
   // (Don't use main hardcoded; some repos use master.)
   const githubUrl = `https://github.com/${user}/${repo}/blob/HEAD/${pathStr}.md`;
   const banner = statusLabel(m.status);
+  const canonical = isCanonical(user, repo);
+  const author = canonical ? 'alexandria' : m.author_github_login;
 
   return (
     <>
       <ThemeToggle />
-      <Link href="/marketplace" className="mdoc-shelf-link">marketplace</Link>
+      <Link href="/marketplace" className="mdoc-shelf-link">← marketplace</Link>
       <main className="mdoc">
         <div className="mdoc-frame mdoc-header">
           {m.name}
+          {canonical && <span style={CANONICAL_BADGE_STYLE}>canonical</span>}
           {m.description && (
             <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.4rem', fontWeight: 400 }}>
               {m.description}
@@ -112,7 +134,7 @@ export default async function MarketplaceModulePage({
 
         <article className="mdoc-frame mdoc-article pdoc">
           <div style={{ fontSize: '0.85rem', color: 'var(--text-ghost)', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-            <span>{m.author_github_login}</span>
+            <span>{author}</span>
             <span>·</span>
             <span>{m.usage_count} {m.usage_count === 1 ? 'use' : 'uses'}</span>
             {m.last_used && (

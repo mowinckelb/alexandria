@@ -197,7 +197,7 @@ export function registerProtocol(app: Hono) {
     ).all<{ module_id: string; usage_count: number; last_used: string; first_seen: string }>();
 
     const rows = results || [];
-    const modules = await Promise.all(rows.map(async (r) => {
+    const enriched = await Promise.all(rows.map(async (r) => {
       const meta = await resolveModule(r.module_id);
       return {
         id: r.module_id,
@@ -210,6 +210,10 @@ export function registerProtocol(app: Hono) {
         status: meta?.status || 'unreachable',
       };
     }));
+    // Public listing curates to installable modules only — items whose front-matter
+    // failed to parse (canon docs, prose) and unreachable paths stay in the DB for
+    // the factory's signal pipeline but don't surface here.
+    const modules = enriched.filter((m) => m.status === 'ok');
 
     return c.json({ modules });
   });
