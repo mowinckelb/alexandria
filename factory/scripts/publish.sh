@@ -67,6 +67,10 @@ finalize() {
     echo "publish: $file missing — run 'publish.sh setup $slug' first" >&2
     exit 1
   fi
+  if grep -qF '# <Module title>' "$file"; then
+    echo "publish: $file still has the template H1 — edit the body before finalizing" >&2
+    exit 1
+  fi
   cd "$clone_dir"
   git add "$slug.md"
   if git diff --cached --quiet; then

@@ -92,7 +92,6 @@ export default async function MarketplaceModulePage({
   }
 
   const githubUrl = `https://github.com/${user}/${repo}/blob/main/${pathStr}.md`;
-  const installId = m.id;
   const banner = statusLabel(m.status);
 
   return (
@@ -126,8 +125,8 @@ export default async function MarketplaceModulePage({
             </a>
           </div>
 
-          <pre style={{ background: 'var(--surface-soft, rgba(0,0,0,0.04))', padding: '0.6rem 0.8rem', borderRadius: 4, fontSize: '0.82rem', overflow: 'auto', marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
-            <code>{installId}</code>
+          <pre style={{ background: 'var(--bg-tertiary)', padding: '0.6rem 0.8rem', borderRadius: 4, fontSize: '0.82rem', overflow: 'auto', marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
+            <code>{m.id}</code>
           </pre>
 
           {banner && (
