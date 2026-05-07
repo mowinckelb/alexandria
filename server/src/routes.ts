@@ -489,7 +489,7 @@ export function registerRoutes(app: Hono) {
   app.get('/account', async (c) => {
     const auth = await requireAuth(c);
     if (!auth) return c.text('Unauthorized', 401);
-    const { account } = auth;
+    const { account, key } = auth;
     if (!account.stripe_customer_id) {
       return c.text('No billing account found. Complete signup at https://mowinckel.ai/signup', 400);
     }
@@ -498,12 +498,26 @@ export function registerRoutes(app: Hono) {
       return c.redirect(url);
     } catch (err) {
       // Stale customer ID (test→live transition leaves orphan IDs from
-      // setup-mode checkouts). Don't 500 — bounce to /signup, where the
-      // next checkout's defensive retry creates a fresh live customer.
+      // setup-mode checkouts). Clear the stale ID from the account record
+      // so re-entry creates a fresh portal flow instead of looping the
+      // same failing call. Defensive retry in createCheckoutSession then
+      // creates a fresh live customer on next /signup.
       const e = err as { type?: string; code?: string };
       if (e?.type === 'StripeInvalidRequestError' && e?.code === 'resource_missing') {
         const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
-        console.warn(`[account] stale stripe_customer_id ${account.stripe_customer_id} — redirecting to /signup`);
+        console.warn(`[account] stale stripe_customer_id ${account.stripe_customer_id} — clearing and redirecting`);
+        try {
+          const storeKey = await getAuthIndex(hashApiKey(key));
+          if (storeKey) {
+            const cleaned = { ...account } as Record<string, unknown>;
+            delete cleaned.stripe_customer_id;
+            delete cleaned.subscription_id;
+            delete cleaned.subscription_status;
+            await saveAccount(storeKey, cleaned);
+          }
+        } catch (clearErr) {
+          console.error('[account] failed to clear stale customer:', clearErr);
+        }
         return c.redirect(`${WEBSITE_URL}/signup?billing=refresh`);
       }
       console.error('Portal error:', err);
