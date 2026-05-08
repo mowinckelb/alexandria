@@ -56,7 +56,7 @@ git push -u origin HEAD
 gh pr create --base main --title "..." --body "..."
 ```
 
-PR body: (a) what signal drove this, (b) what the change is, (c) expected effect. Cite specific signal/feedback content where relevant. Marketplace signals are anonymous; feedback may quote the author's words but should not single anyone out negatively.
+PR body: (a) what signal drove this, (b) what the change is, (c) expected effect, (d) **if Author-facing** (changes what installed Authors would receive on a re-run of `setup.sh`): a 1-2 sentence "release note" the merger pastes into a GitHub Release when merging — Author-experienced framing, not commit-subject framing. Convention defined in `CLAUDE.md` § Releases. Cite specific signal/feedback content where relevant. Marketplace signals are anonymous; feedback may quote the author's words but should not single anyone out negatively.
 
 One PR per file touched. Founder reviews and merges on their own cadence. PR existing = your proposal is ON. PR closed without merge = founder's rejection; respect it in future runs.
 
