@@ -10,6 +10,8 @@ Casual and honest. They're about to watch you open every file on their computer 
 
 Write to ~/alexandria/ as you go. Files on disk survive if this conversation compacts.
 
+**Spot the DIY Author early.** Before Phase 1, scan for signs they already have their own thinking system — a long CLAUDE.md, a personal vault, a notes folder with structure (constitution / ontology / ideas / journal in any naming), AI rules across multiple tools. If yes, flag it and adjust: their system is the floor, ours is a starter we'd otherwise impose. Don't duplicate their structure into ours just because the canonical scaffold expects certain filenames. Point at theirs, fork ours toward theirs, or skip the parts that conflict. Alexandria is the protocol, not the system — every step from here treats the Author's existing setup as load-bearing.
+
 ## Phase 1 — Sync (reach parity with what already exists)
 
 The Author has memory and context scattered across AI tools and personal files. Alexandria starts at parity — only ever a marginal value add from here.
@@ -23,7 +25,7 @@ Two categories:
 
 **Diff the live moment.** Look at recent timestamps. What did they touch in the last 48 hours? What's the freshest thing in their world right now — a draft, a deadline, a recent voice memo, a constitution edit, a project they just started? Phase 5 needs to honor the present moment, not just the static profile. Note the live-moment signal as you go.
 
-Copy valuable personal finds to ~/alexandria/files/vault/. Preserve original filenames.
+Copy valuable personal finds to ~/alexandria/files/vault/. Preserve original filenames. *Exception:* if the Author already has their own structured system (their own constitution / notes folder / second-brain / vault), don't copy it into ours — recognise it, point our scaffold at theirs, and skip the parts that would duplicate. The DIY Author's structure wins.
 
 ## Phase 2 — Extract (build the starter mind)
 
@@ -82,7 +84,7 @@ Compose the report as a real piece of writing, not a checklist. It must contain:
 - **A tension framed as the right tension.** A contradiction within their material — evidence of serious thought, not a gotcha.
 - **Threads with stakes.** 3 conversation hooks for the first /a. Each must have *consequence* — what changes in the Author's life if they resolve it. Operational stakes, not just intellectual tension.
 - **The live moment.** Honor what just changed in their world (from Phase 1's diff). Recent vault drop, fresh edit, deadline this week, life event, project just started. The report should feel like the agent reads them in the present tense, not as a static profile.
-- **Make-it-yours.** Demonstrate the principle by applying it to them — pick one specific thing from their files ("your CLAUDE.md is 350+ lines — most would call that dense, but this is yours, so it's right unless you decide otherwise") and use it to land the framing: Alexandria aggregates individuals into a collective, value comes from how *different* each individual is. Hyper-personalised, not homogenised. They can change anything; the only ask is connecting back to the collective — concretely, publishing at least one live, evolving file to the library (the contract from the primer they read at signup). The first /a will help find the right candidate. We handle the boring plumbing (vault, autoloop, brief, library) so attention goes to the personalisation that's interesting.
+- **Make-it-yours.** Demonstrate the principle by applying it to them — pick one specific thing from their files ("your CLAUDE.md is 350+ lines — most would call that dense, but this is yours, so it's right unless you decide otherwise") and use it to land the framing: Alexandria aggregates individuals into a collective, value comes from how *different* each individual is. Hyper-personalised, not homogenised. **The ideal Alexandrian uses their own system, not ours.** We ship a starter for people without one; if the Author has a system already, ours is just the floor — they can rip out the canonical structure, fork it, replace it. The only ask is connecting back to the collective — concretely, publishing at least one live, evolving file to the library (the contract from the primer they read at signup). The first /a will help find the right candidate. We handle the boring plumbing (vault, autoloop, brief, library) so attention goes to the personalisation that's interesting.
 - **Next steps.** Operational close: open a new chat, type `/a` (or invoke the `a` droid on Factory) — recommend a specific opening thread, invite redirect, `a.` closes; `mowinckel.ai/shortcut` for the iOS / Mac share-sheet shortcut so anything they read, watch, or hear can hit the vault from anywhere; five minutes now to dump everything they already have with non-zero signal probability into the vault — no curation, the agent decides what's useful; feedback channel via `~/alexandria/system/.session_feedback` (reaches the team directly, no ticket).
 - **Close with a tie-back.** Echo something specific from earlier in the report — a thread, a recursion, a question.
 

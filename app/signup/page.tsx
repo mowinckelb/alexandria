@@ -36,6 +36,10 @@ export default async function SignupPage({
             one curl command, a folder appears at <code>~/alexandria/</code>, and your existing ai (claude code, cursor, codex) starts reading it at every session. plain markdown. you can read every file, change every file, delete the whole thing.
           </p>
 
+          <p>
+            already have your own system? even better. ours is a starter for people who don&rsquo;t &mdash; you can modify it, fork it, replace it, or skip it entirely and point us at the folder you already use. <strong>we&rsquo;re the protocol, not the system.</strong> we don&rsquo;t care what shape your folder takes; we only care that you join the collective.
+          </p>
+
           <h2>what you&rsquo;re joining</h2>
 
           <p>
@@ -43,7 +47,7 @@ export default async function SignupPage({
           </p>
 
           <p>
-            your ai is a little living entity on your computer, eager to help. we&rsquo;ve just given it a new role it can sometimes adopt &mdash; thinking partner, biographer, helper, alexandria, alex, whatever you want to call it. we ship a starter version. if you never touch it, fine &mdash; but you will, naturally, over time, as you write and notice what it gets wrong about you. we handle the plumbing; what your thinking partner becomes is yours.
+            your ai is a little living entity on your computer, eager to help. we&rsquo;ve just given it a new role it can sometimes adopt &mdash; thinking partner, biographer, helper, alexandria, alex, whatever you want to call it. we ship a starter version because most people are starting from scratch; if you already have your own setup, yours is the floor and ours is gone. either way, what your thinking partner becomes is yours. we just handle the plumbing.
           </p>
 
           <p>
@@ -54,7 +58,7 @@ export default async function SignupPage({
 
           <h2>the one thing we ask</h2>
 
-          <p>participate in the collective. alexandria becomes the write path for your thoughts and your system of thoughts. get them out of your head and put them to work.</p>
+          <p>participate in the collective. you keep your system &mdash; alexandria is the protocol on top of it: the standard for how thoughts and modules cross between alexandrians. get them out of your head and put them to work.</p>
 
           <h3>publish thoughts.</h3>
 
@@ -70,7 +74,7 @@ export default async function SignupPage({
 
           <p>hyper-personalise. we want this.</p>
 
-          <p>the more you tune your alexandria into something that works for you &mdash; your patterns, your prompts, your conventions &mdash; the sharper your thinking gets. your good ideas surface as candidates for modules. publish with one command. other alexandrians install yours; you install theirs.</p>
+          <p>the more you tune your system into something that works for you &mdash; your patterns, your prompts, your conventions, even forking ours into something unrecognisable &mdash; the sharper your thinking gets. your good ideas surface as candidates for modules. publish with one command. other alexandrians install yours; you install theirs.</p>
 
           <p>this is the compounding loop: better system &rarr; better thoughts &rarr; better files &rarr; others install your modules &rarr; their systems sharpen &rarr; their files sharpen &rarr; yours sharpens from theirs. better systems, better thoughts, better actions &mdash; all the way around.</p>
 
