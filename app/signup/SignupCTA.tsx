@@ -93,6 +93,9 @@ export default function SignupCTA({ urlRef, refSource }: { urlRef?: string; refS
           </>
         )}
       </form>
+      <span className="sr-only" aria-live="polite">
+        {kinStatus === 'valid' ? 'kin code valid' : kinStatus === 'invalid' ? 'kin code not found' : ''}
+      </span>
       {kinStatus === 'invalid' && <p className="kin-warn">not a kin we know &mdash; double-check the code, or proceed without it.</p>}
     </section>
   );

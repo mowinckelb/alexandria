@@ -254,6 +254,7 @@ export function registerRoutes(app: Hono) {
     if (!code) return c.json({ valid: false }, 400);
     const accounts = await loadAccounts<AccountStore>();
     const valid = Object.values(accounts).some(a => (a.github_login || '').toLowerCase() === code);
+    c.header('Cache-Control', 'public, max-age=60');
     return c.json({ valid });
   });
 
