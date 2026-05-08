@@ -14,6 +14,7 @@ import { callbackPageHtml } from './templates.js';
 import { hashApiKey } from './crypto.js';
 import { requireAuth } from './auth.js';
 import { loadAccounts, getKV } from './kv.js';
+import { getAccountByLogin } from './accounts.js';
 import { getDB } from './db.js';
 import { sendPatronAck } from './email.js';
 
@@ -171,7 +172,7 @@ async function ensureKinCoupon(): Promise<string> {
 // Kin — count active kin for a user, recalculate subscription
 // ---------------------------------------------------------------------------
 
-export async function countActiveKin(githubLogin: string, preloadedAccounts?: Record<string, any>): Promise<{ count: number; compliant: number }> {
+export async function countActiveKin(githubLogin: string): Promise<{ count: number; compliant: number }> {
   if (!githubLogin) return { count: 0, compliant: 0 };
 
   // Find who this user referred (from D1 referrals table)
@@ -189,15 +190,14 @@ export async function countActiveKin(githubLogin: string, preloadedAccounts?: Re
   // 1. Account exists (they have an account)
   // 2. File edited this month (protocol_files updated in current month)
   // 3. Call made this month (protocol_calls table)
-  const accounts = preloadedAccounts || await loadAccounts<Record<string, any>>();
   const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
 
-  // Build login→github_id map for kin that have accounts
+  // Resolve each kin's account via the login index (O(1) per lookup, no full-account scan)
   const kinWithAccounts: { login: string; githubId: string }[] = [];
   for (const login of kinLogins) {
-    const kinAccount = Object.values(accounts).find((a: any) => a.github_login === login);
-    if (!kinAccount) continue; // No account — not compliant
-    kinWithAccounts.push({ login, githubId: String((kinAccount as any).github_id) });
+    const kinResult = await getAccountByLogin(login);
+    if (!kinResult) continue; // No account — not compliant
+    kinWithAccounts.push({ login, githubId: String(kinResult.account.github_id) });
   }
 
   if (kinWithAccounts.length === 0) return { count: kinLogins.length, compliant: 0 };
@@ -230,10 +230,10 @@ export async function countActiveKin(githubLogin: string, preloadedAccounts?: Re
   return { count: kinLogins.length, compliant };
 }
 
-async function recalculateKinPricing(githubLogin: string, preloadedAccounts?: Record<string, any>): Promise<void> {
-  // Find account by github_login
-  const accounts = preloadedAccounts || await loadAccounts<Record<string, any>>();
-  const user = Object.values(accounts).find((a: any) => a.github_login === githubLogin) as any;
+export async function recalculateKinPricing(githubLogin: string): Promise<void> {
+  // Find account by github_login (O(1) via index)
+  const result = await getAccountByLogin(githubLogin);
+  const user = result?.account as any;
   if (!user?.subscription_id) return;
 
   // Author must be compliant themselves (file + call this month) to get kin discount
@@ -253,7 +253,7 @@ async function recalculateKinPricing(githubLogin: string, preloadedAccounts?: Re
   } catch { /* D1 unavailable — treat as non-compliant */ }
   const authorCompliant = authorHasCall && authorHasFile;
 
-  const kinData = await countActiveKin(githubLogin, accounts);
+  const kinData = await countActiveKin(githubLogin);
   const shouldBeFree = authorCompliant && kinData.compliant >= KIN_THRESHOLD;
 
   const stripe = getStripe();
@@ -282,7 +282,7 @@ export async function recalculateAllKinPricing(): Promise<void> {
   for (const account of Object.values(accounts)) {
     if ((account as any).subscription_id && (account as any).github_login) {
       try {
-        await recalculateKinPricing((account as any).github_login, accounts);
+        await recalculateKinPricing((account as any).github_login);
       } catch (err) {
         console.error(`[kin] Recalculation failed for ${(account as any).github_login}:`, err);
       }

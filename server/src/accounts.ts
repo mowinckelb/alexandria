@@ -1,13 +1,43 @@
 /** Company account management — billing, admin, key generation, account operations. */
 
 import { randomBytes } from 'crypto';
-import { getAuthIndex, loadAccount, loadAccounts, saveAccount } from './kv.js';
+import { getAuthIndex, getLoginIndex, deleteLoginIndex, loadAccount, loadAccounts, saveAccount, getKV } from './kv.js';
 import { hashApiKey } from './crypto.js';
 import { requireAuth } from './auth.js';
 import type { Account, AccountStore } from './auth.js';
 
 export async function getAccounts(): Promise<AccountStore> {
   return await loadAccounts<AccountStore>();
+}
+
+/**
+ * Look up an account by github_login. O(1) via the login index, with self-healing
+ * fallback to a full scan if the index is missing or stale (lazy-backfills the index
+ * when the scan finds a match). Use this for any single-login lookup — never
+ * Object.values(accounts).find(...).
+ */
+export async function getAccountByLogin(login: string): Promise<{ storeKey: string; account: Account } | null> {
+  if (!login) return null;
+  const lower = login.toLowerCase();
+
+  const indexedKey = await getLoginIndex(lower);
+  if (indexedKey) {
+    const account = await loadAccount(indexedKey) as Account | null;
+    if (account && (account.github_login || '').toLowerCase() === lower) {
+      return { storeKey: indexedKey, account };
+    }
+    // Index points to a missing or renamed account — clean up.
+    await deleteLoginIndex(lower);
+  }
+
+  // Fallback: full scan (legacy accounts created before the index existed, or
+  // an index entry was lost). Backfills the index on success so the next call is O(1).
+  const accounts = await loadAccounts<AccountStore>();
+  const storeKey = Object.keys(accounts).find(k => (accounts[k].github_login || '').toLowerCase() === lower);
+  if (!storeKey) return null;
+  const kv = getKV();
+  await kv.put(`login:${lower}`, storeKey);
+  return { storeKey, account: accounts[storeKey] as Account };
 }
 
 export async function updateAccountBilling(identifier: string, billing: Partial<Pick<Account, 'stripe_customer_id' | 'subscription_status' | 'subscription_id' | 'current_period_end'>>): Promise<void> {
@@ -25,11 +55,10 @@ export async function updateAccountBilling(identifier: string, billing: Partial<
   }
 
   // Fallback: identifier is a GitHub login (legacy/webhook metadata path)
-  const accounts = await loadAccounts<AccountStore>();
-  const storeKey = Object.keys(accounts).find(k => accounts[k].github_login === identifier);
-  if (!storeKey) return;
-  Object.assign(accounts[storeKey], billing);
-  await saveAccount(storeKey, accounts[storeKey] as unknown as Record<string, unknown>);
+  const result = await getAccountByLogin(identifier);
+  if (!result) return;
+  Object.assign(result.account, billing);
+  await saveAccount(result.storeKey, result.account as unknown as Record<string, unknown>);
 }
 
 export async function getBillingSummary(): Promise<Record<string, number>> {

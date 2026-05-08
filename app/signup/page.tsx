@@ -277,13 +277,18 @@ export default async function SignupPage({
         .kin-status.invalid {
           color: var(--text-muted);
         }
-        .kin-warn {
+        .kin-feedback {
           font-size: 0.7rem;
           letter-spacing: 0.02em;
           text-align: center;
-          color: var(--text-muted);
           margin: 0.5rem 0 0;
           max-width: 280px;
+        }
+        .kin-feedback.valid {
+          color: var(--accent);
+        }
+        .kin-feedback.invalid {
+          color: var(--text-muted);
         }
       `}</style>
     </div>

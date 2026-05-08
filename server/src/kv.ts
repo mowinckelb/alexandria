@@ -4,6 +4,8 @@
  * Key structure:
  *   "account:{github_id}"  → encrypted individual account JSON
  *   "auth:{api_key_hash}"  → github_id (lookup index for O(1) auth)
+ *   "login:{github_login}" → github_id (lookup index for O(1) login → key, lowercased)
+ *   "emailtoken:{token}"   → github_id (lookup index for O(1) email-token auth)
  *   "events:YYYY-MM-DD"    → JSONL string of events for that day
  *   "cron:*"                → cron liveness markers (health digest reads these)
  * (marketplace signals + feedback live in the alexandria-signal github repo
@@ -44,10 +46,12 @@ export async function loadAccount(githubKey: string): Promise<Record<string, unk
   }
 }
 
-/** Save a single account by github_id key. */
+/** Save a single account by github_id key. Maintains login index. */
 export async function saveAccount(githubKey: string, account: Record<string, unknown>): Promise<void> {
   const kv = getKV();
   await kv.put(`account:${githubKey}`, encrypt(JSON.stringify(account)));
+  const login = (account.github_login as string | undefined)?.toLowerCase();
+  if (login) await kv.put(`login:${login}`, githubKey);
 }
 
 /** Set auth lookup index: api_key_hash → github_id key. */
@@ -74,11 +78,29 @@ export async function getEmailTokenIndex(token: string): Promise<string | null> 
   return await kv.get(`emailtoken:${token}`);
 }
 
-/** Delete an account and its auth index. */
+/** Look up github_id key by github_login. O(1). Case-insensitive. */
+export async function getLoginIndex(login: string): Promise<string | null> {
+  if (!login) return null;
+  const kv = getKV();
+  return await kv.get(`login:${login.toLowerCase()}`);
+}
+
+/** Remove a stale login index entry. */
+export async function deleteLoginIndex(login: string): Promise<void> {
+  if (!login) return;
+  const kv = getKV();
+  await kv.delete(`login:${login.toLowerCase()}`);
+}
+
+/** Delete an account and its lookup indexes (auth, login). */
 export async function deleteAccount(githubKey: string, apiKeyHash: string): Promise<void> {
   const kv = getKV();
+  // Load before delete to recover login for index cleanup
+  const existing = await loadAccount(githubKey);
+  const login = (existing?.github_login as string | undefined)?.toLowerCase();
   await kv.delete(`account:${githubKey}`);
   await kv.delete(`auth:${apiKeyHash}`);
+  if (login) await kv.delete(`login:${login}`);
 }
 
 /** List all accounts (for admin/cron — iterates KV keys). Batches reads per page. */

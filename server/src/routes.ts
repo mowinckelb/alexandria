@@ -3,13 +3,13 @@
 import { randomBytes } from 'crypto';
 import type { Hono } from 'hono';
 import { logEvent } from './analytics.js';
-import { countActiveKin, createCheckoutSession, createPortalSession, getStripe } from './billing.js';
+import { countActiveKin, createCheckoutSession, createPortalSession, getStripe, recalculateKinPricing } from './billing.js';
 import { authErrorHtml, callbackPageHtml } from './templates.js';
 import { getDB, getR2 } from './db.js';
 import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex } from './kv.js';
 import { hashApiKey, generateToken } from './crypto.js';
 import { Account, AccountStore, extractApiKey, findByApiKey, requireAuth } from './auth.js';
-import { generateApiKey, getAccounts, requireAdmin } from './accounts.js';
+import { generateApiKey, getAccounts, getAccountByLogin, requireAdmin } from './accounts.js';
 import { sendEmail, sendEmailsBatched, sendWelcomeEmail, FOUNDER_EMAIL } from './email.js';
 import { runHealthDigest } from './cron.js';
 import { publishSignal, publishFeedback } from './marketplace.js';
@@ -250,10 +250,9 @@ export function registerRoutes(app: Hono) {
   // --- Kin code validation (public, called by /signup before OAuth) ---
 
   app.get('/check-kin', async (c) => {
-    const code = (c.req.query('code') || '').trim().toLowerCase();
+    const code = (c.req.query('code') || '').trim();
     if (!code) return c.json({ valid: false }, 400);
-    const accounts = await loadAccounts<AccountStore>();
-    const valid = Object.values(accounts).some(a => (a.github_login || '').toLowerCase() === code);
+    const valid = (await getAccountByLogin(code)) !== null;
     c.header('Cache-Control', 'public, max-age=60');
     return c.json({ valid });
   });
@@ -358,13 +357,12 @@ export function registerRoutes(app: Hono) {
       }
 
       // Create or update account — direct lookup by github_id key. O(1) for the common case.
-      // Fall back to full scan only for legacy accounts keyed by login (pre-github_id migration).
+      // Fall back to login-indexed lookup for legacy accounts keyed by login (pre-github_id migration).
       const key = `github_${user.id}`;
       let existing = await loadAccount(key) as Account | null;
       if (!existing) {
-        const allAccounts = await loadAccounts<AccountStore>();
-        const legacyKey = Object.keys(allAccounts).find(k => allAccounts[k].github_login === user.login);
-        if (legacyKey) existing = allAccounts[legacyKey];
+        const legacy = await getAccountByLogin(user.login);
+        if (legacy) existing = legacy.account;
       }
 
       // Key is shown once on the callback page, then only the hash is stored.
@@ -444,17 +442,23 @@ export function registerRoutes(app: Hono) {
       const refId = stateData.ref_id || c.req.query('ref_id');
       if (ref && isNewAccount) {
         // Validate ref maps to an existing github_login before inserting — drop dangling rows
-        const allForRefCheck = await loadAccounts<AccountStore>();
-        const refValid = Object.values(allForRefCheck).some(a => (a.github_login || '').toLowerCase() === ref.toLowerCase());
-        if (!refValid) {
+        const refResult = await getAccountByLogin(ref);
+        if (!refResult) {
           logEvent('library_signup_referral_invalid', { attempted_ref: ref, source: refSource || 'direct', referred: user.login });
         } else {
           try {
             const db = getDB();
             await db.prepare(
               `INSERT INTO referrals (author_id, source_type, source_id, referred_github_login, created_at) VALUES (?, ?, ?, ?, ?)`
-            ).bind(ref, refSource || 'direct', refId || null, user.login, new Date().toISOString()).run();
-            logEvent('library_signup_referral', { author: ref, source: refSource || 'direct', referred: user.login });
+            ).bind(refResult.account.github_login, refSource || 'direct', refId || null, user.login, new Date().toISOString()).run();
+            logEvent('library_signup_referral', { author: refResult.account.github_login, source: refSource || 'direct', referred: user.login });
+            // New referral may push the kin sender across the threshold — recalc their pricing now
+            // so the next invoice (typically days away) reflects the change instead of waiting a full cycle.
+            try {
+              await recalculateKinPricing(refResult.account.github_login);
+            } catch (e) {
+              console.error('[routes] Kin pricing recalc after referral failed:', e);
+            }
           } catch (e) {
             console.error('[routes] Referral tracking failed:', e);
           }
@@ -579,13 +583,12 @@ export function registerRoutes(app: Hono) {
     }
     if (login === adminLogin) return c.json({ error: 'Cannot remove admin account' }, 400);
 
-    const accounts = await loadAccounts<AccountStore>();
-    const storeKey = Object.keys(accounts).find(k => accounts[k].github_login === login);
-    if (!storeKey) return c.json({ error: 'Account not found' }, 404);
+    const result = await getAccountByLogin(login);
+    if (!result) return c.json({ error: 'Account not found' }, 404);
 
-    const victim = accounts[storeKey] as Account;
+    const victim = result.account;
     const apiKeyHash = typeof victim.api_key_hash === 'string' ? victim.api_key_hash : null;
-    await purgeAuthorAccount(victim, storeKey, apiKeyHash);
+    await purgeAuthorAccount(victim, result.storeKey, apiKeyHash);
 
     logEvent('admin_account_removed', { github_login: login });
     return c.json({ ok: true, removed: login });
@@ -796,11 +799,9 @@ export function registerRoutes(app: Hono) {
 
     let recipientEmail: string;
     if (to) {
-      // Look up user by GitHub login
-      const accounts = await loadAccounts<AccountStore>();
-      const target = Object.values(accounts).find(a => a.github_login === to);
-      if (!target?.email) return c.text(`no email found for ${to}`, 404);
-      recipientEmail = target.email;
+      const target = await getAccountByLogin(to);
+      if (!target?.account.email) return c.text(`no email found for ${to}`, 404);
+      recipientEmail = target.account.email;
     } else {
       recipientEmail = FOUNDER_EMAIL;
     }

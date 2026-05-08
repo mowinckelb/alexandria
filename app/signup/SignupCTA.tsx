@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SERVER_URL } from '../lib/config';
 
 const ICON_ARROW = (
@@ -28,45 +28,51 @@ type KinStatus = 'idle' | 'checking' | 'valid' | 'invalid';
 export default function SignupCTA({ urlRef, refSource }: { urlRef?: string; refSource?: string }) {
   const [kinCode, setKinCode] = useState('');
   const [kinStatus, setKinStatus] = useState<KinStatus>('idle');
+  const checkSeq = useRef(0);
 
-  // Debounced kin code validation
-  useEffect(() => {
-    const trimmed = kinCode.trim();
+  const checkKin = useCallback(async (code: string) => {
+    const trimmed = code.trim();
     if (!trimmed) { setKinStatus('idle'); return; }
     setKinStatus('checking');
-    const ctrl = new AbortController();
-    const t = setTimeout(async () => {
-      try {
-        const res = await fetch(`${SERVER_URL}/check-kin?code=${encodeURIComponent(trimmed)}`, { signal: ctrl.signal });
-        if (!res.ok) { setKinStatus('idle'); return; }
-        const data = await res.json() as { valid?: boolean };
-        setKinStatus(data.valid ? 'valid' : 'invalid');
-      } catch (e) {
-        if ((e as Error).name !== 'AbortError') setKinStatus('idle');
-      }
-    }, 350);
-    return () => { ctrl.abort(); clearTimeout(t); };
-  }, [kinCode]);
+    const seq = ++checkSeq.current;
+    try {
+      const res = await fetch(`${SERVER_URL}/check-kin?code=${encodeURIComponent(trimmed)}`);
+      if (seq !== checkSeq.current) return; // a newer check superseded this one
+      if (!res.ok) { setKinStatus('idle'); return; }
+      const data = await res.json() as { valid?: boolean };
+      setKinStatus(data.valid ? 'valid' : 'invalid');
+    } catch {
+      if (seq === checkSeq.current) setKinStatus('idle');
+    }
+  }, []);
 
-  // Include ref in auth URL unless we explicitly know it's invalid; server-side gate is the actual loop-closer.
-  // This handles both "user clicks before debounce fires" and "network error during check" without dropping valid refs.
+  // Passive debounced check while typing — for users who never press enter
+  useEffect(() => {
+    if (!kinCode.trim()) { setKinStatus('idle'); return; }
+    const t = setTimeout(() => checkKin(kinCode), 350);
+    return () => clearTimeout(t);
+  }, [kinCode, checkKin]);
+
+  // Include ref unless we know it's invalid; server callback gate is the actual loop-closer.
   const ref = urlRef || (kinStatus !== 'invalid' && kinCode.trim() ? kinCode.trim() : '');
   const authParams = [ref && `ref=${encodeURIComponent(ref)}`, refSource && `ref_source=${encodeURIComponent(refSource)}`].filter(Boolean).join('&');
   const authUrl = `${SERVER_URL}/auth/github${authParams ? `?${authParams}` : ''}`;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Form submit (Enter or arrow click) triggers an immediate check — does NOT navigate.
+  // Navigation is reserved for the "sign up with github" button so the user always sees feedback first.
+  const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = authUrl;
+    checkKin(kinCode);
   };
 
-  const showSubmit = kinCode.trim().length > 0;
+  const showSubmit = kinCode.trim().length > 0 && kinStatus !== 'valid';
   const statusIcon = kinStatus === 'valid' ? ICON_CHECK : kinStatus === 'invalid' ? ICON_X : null;
-  const statusClass = kinStatus === 'valid' ? 'kin-status valid' : kinStatus === 'invalid' ? 'kin-status invalid' : 'kin-status';
+  const statusClass = `kin-status ${kinStatus === 'valid' ? 'valid' : 'invalid'}`;
 
   return (
     <section className="cta-section">
       <a href={authUrl} className="primary-cta">sign up with github</a>
-      <form onSubmit={handleSubmit} className="kin-form">
+      <form onSubmit={handleConfirm} className="kin-form">
         {urlRef ? (
           <p className="kin-via">via {urlRef}</p>
         ) : (
@@ -85,7 +91,7 @@ export default function SignupCTA({ urlRef, refSource }: { urlRef?: string; refS
             <button
               type="submit"
               className="kin-submit"
-              aria-label="continue with kin code"
+              aria-label="check kin code"
               hidden={!showSubmit}
             >
               {ICON_ARROW}
@@ -94,9 +100,10 @@ export default function SignupCTA({ urlRef, refSource }: { urlRef?: string; refS
         )}
       </form>
       <span className="sr-only" aria-live="polite">
-        {kinStatus === 'valid' ? 'kin code valid' : kinStatus === 'invalid' ? 'kin code not found' : ''}
+        {kinStatus === 'valid' ? `kin code confirmed: ${kinCode.trim()}` : kinStatus === 'invalid' ? 'kin code not found' : ''}
       </span>
-      {kinStatus === 'invalid' && <p className="kin-warn">not a kin we know &mdash; double-check the code, or proceed without it.</p>}
+      {kinStatus === 'valid' && !urlRef && <p className="kin-feedback valid">confirmed via {kinCode.trim()}.</p>}
+      {kinStatus === 'invalid' && <p className="kin-feedback invalid">not a kin we know &mdash; double-check the code, or proceed without it.</p>}
     </section>
   );
 }
