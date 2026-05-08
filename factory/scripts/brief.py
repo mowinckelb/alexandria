@@ -21,8 +21,11 @@ ALEX = Path.home() / "alexandria" / "system"
 CREDS = ALEX / ".brief_email"
 OUTBOX = ALEX / ".brief_outbox"
 LOG = ALEX / ".brief_log"
+LAST_RUN = ALEX / ".autoloop" / "last_run.md"
 
 DEFAULT_BODY = "no material change overnight."
+# Daily routine + buffer for sync lag and timezone offset between brief and routine.
+STALE_HOURS = 30
 
 
 def log(line: str) -> None:
@@ -53,6 +56,17 @@ def main() -> int:
         else:
             # Empty file — clean up; nothing to preserve.
             OUTBOX.unlink()
+
+    # If falling back to default, verify the upstream routine is alive. The
+    # default body is meaningful only when the machine routine ran and decided
+    # nothing was worth surfacing — otherwise it silently masks a stalled loop.
+    if body == DEFAULT_BODY:
+        if not LAST_RUN.exists():
+            body = "alarm: machine routine has never run — no last_run.md found."
+        else:
+            age_h = (datetime.now(timezone.utc).timestamp() - LAST_RUN.stat().st_mtime) / 3600
+            if age_h > STALE_HOURS:
+                body = f"alarm: machine routine stale — last_run.md is {age_h:.0f}h old."
 
     msg = EmailMessage()
     msg["Subject"] = creds.get("subject", "alexandria.")
