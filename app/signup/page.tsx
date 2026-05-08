@@ -30,7 +30,7 @@ export default async function SignupPage({
         <article className="primer">
           <h1>alexandria is a folder, not an app.</h1>
 
-          <p className="aside">(sorry &mdash; you have to read this. only takes a couple minutes.)</p>
+          <p className="aside">(yes, you should read all of this... sorry. it&rsquo;s only 5 minutes.)</p>
 
           <p>
             one curl command, a folder appears at <code>~/alexandria/</code>, and your existing ai (claude code, cursor, codex) starts reading it at every session. plain markdown. you can read every file, change every file, delete the whole thing.
