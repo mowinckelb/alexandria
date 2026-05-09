@@ -86,9 +86,16 @@ function processNumbered(md: string): { pre: string; post: string; toc: TocEntry
           out.push(line);
           continue;
         }
+        const text = h1[1];
+        // Abstract is a preamble, not a numbered part. Pass through
+        // unchanged so the abstract-class detection in MD_COMPONENTS
+        // recognises it (text === 'abstract' after strip).
+        if (/^abstract\.?\s*$/i.test(text.trim())) {
+          out.push(line);
+          continue;
+        }
         part++;
         chapter = 0;
-        const text = h1[1];
         const num = String(part);
         out.push(`# ${num} ${text}`);
         toc.push({ level: 1, text, slug: slugify(`${num} ${text}`), num });
@@ -131,12 +138,37 @@ function TocBlock({ entries }: { entries: TocEntry[] }) {
   );
 }
 
+// Cycle through manuscript-style ornament glyphs for section breaks so
+// the page reads as a typeset book (different ornaments at different
+// rhythms) rather than a wall of identical horizontal rules.
+const FLEURONS = ['❦', '❧', '※', '§', '⁂'];
+let fleuronIdx = 0;
+
 const MD_COMPONENTS = {
-  h1: ({ children }: { children?: React.ReactNode }) => <h1 id={slugify(children)} className="pdoc-h1">{children}</h1>,
+  h1: ({ children }: { children?: React.ReactNode }) => {
+    const text = flattenText(children).trim().toLowerCase().replace(/\.$/, '');
+    const isAbstract = text === 'abstract';
+    return (
+      <h1
+        id={slugify(children)}
+        className={isAbstract ? 'pdoc-h1 pdoc-h1-abstract' : 'pdoc-h1'}
+      >
+        {children}
+      </h1>
+    );
+  },
   h2: ({ children }: { children?: React.ReactNode }) => <h2 id={slugify(children)} className="pdoc-h2">{children}</h2>,
   h3: ({ children }: { children?: React.ReactNode }) => <h3 id={slugify(children)} className="pdoc-h3">{children}</h3>,
   h4: ({ children }: { children?: React.ReactNode }) => <h4 id={slugify(children)} className="pdoc-h4">{children}</h4>,
-  hr: () => <div className="pdoc-hr" />,
+  hr: () => {
+    const glyph = FLEURONS[fleuronIdx % FLEURONS.length];
+    fleuronIdx++;
+    return (
+      <div className="pdoc-hr" aria-hidden>
+        <span className="pdoc-fleuron">{glyph}</span>
+      </div>
+    );
+  },
   p: ({ children }: { children?: React.ReactNode }) => <p className="pdoc-p">{children}</p>,
   strong: ({ children }: { children?: React.ReactNode }) => <strong className="pdoc-strong">{children}</strong>,
   table: ({ children }: { children?: React.ReactNode }) => <table className="pdoc-table">{children}</table>,
@@ -155,14 +187,18 @@ export default function MarkdownDoc({ src, header, homeHref = '/', numbered = fa
     return numbered ? processNumbered(content) : null;
   }, [content, numbered]);
 
+  // Reset the fleuron index each render so the cycle starts fresh and
+  // is deterministic from the top of the document.
+  fleuronIdx = 0;
+
   return (
     <>
       <ThemeToggle />
-      <Link href="/library" className="mdoc-shelf-link">
-        library
+      <Link href={homeHref} className="mdoc-shelf-link">
+        alexandria<span className="mdoc-shelf-dot">.</span>
       </Link>
       <main className="mdoc">
-        <div className="mdoc-frame mdoc-header">{header}</div>
+        {header && <div className="mdoc-frame mdoc-header">{header}</div>}
 
         <article className="mdoc-frame mdoc-article pdoc pdoc-longform">
           {content === null ? (

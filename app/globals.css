@@ -58,9 +58,9 @@
   --border-light: #3e3d3a;
   --border-dashed: #4a4945;
 
-  --accent: #B07294;
-  --accent-hover: #D08BB0;
-  --accent-faint: rgba(176, 114, 148, 0.15);
+  --accent: #9F87C5;
+  --accent-hover: #B8A0DA;
+  --accent-faint: rgba(159, 135, 197, 0.15);
 
   --toggle-bg: rgba(255, 255, 255, 0.06);
   --toggle-pill: rgba(255, 255, 255, 0.1);
@@ -355,30 +355,50 @@ html.app-shell input:focus {
   color: var(--text-primary);
   font-family: var(--font-eb-garamond);
   min-height: 100vh;
+  /* Subtle paper grain — the page reads as printed substrate, not a
+     web canvas. Two layered radial gradients at very low opacity create
+     uneven warmth without becoming a visible texture. */
+  background-image:
+    radial-gradient(ellipse 120% 80% at 30% 20%, rgba(91, 31, 71, 0.025) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 70% 80%, rgba(74, 50, 30, 0.020) 0%, transparent 60%);
+  /* Gentle page wake-up — content fades into existence on first paint
+     instead of snapping in. The literary register starts the moment
+     the page loads. */
+  animation: mdocFadeIn 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes mdocFadeIn {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* Back-to-marketplace link — fixed top-left so the way back is always one
    visible target. Theme control sits opposite on the right. */
 .mdoc-shelf-link {
   position: fixed;
-  top: 1.4rem;
-  left: 1.5rem;
+  top: 1.6rem;
+  left: 1.8rem;
   z-index: 199;
   font-family: var(--font-eb-garamond);
-  font-size: 0.95rem;
-  letter-spacing: 0.005em;
-  color: var(--text-muted);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 .mdoc-shelf-link:hover {
-  color: var(--text-primary);
+  opacity: 0.65;
+}
+.mdoc-shelf-dot {
+  font-style: normal;
+  display: inline-block;
 }
 .mdoc-frame {
-  max-width: 680px;
+  max-width: 720px;
   margin: 0 auto;
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
 }
 .mdoc-header {
   padding-top: 2.5rem;
@@ -400,20 +420,39 @@ html.app-shell input:focus {
 }
 .mdoc-home:hover { opacity: 0.6; }
 
-/* H1 — the title. Hero-scale, italic, balanced. */
+/* H1 — the title "alexandria." Italic hero with a presence that holds
+   the page together. Generous space below; this is a destination. */
 .pdoc-longform .pdoc-h1 {
   font-family: var(--font-eb-garamond);
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(2.4rem, 4.5vw, 3.2rem);
-  line-height: 1.05;
-  letter-spacing: -0.015em;
+  font-size: clamp(3.2rem, 6vw, 4.6rem);
+  line-height: 1;
+  letter-spacing: -0.025em;
   color: var(--text-primary);
-  margin: 0 0 1.5rem;
+  margin: 4rem 0 3rem;
   text-wrap: balance;
 }
 
-/* First paragraph after H1 — the dek (subtitle). In markdown, *italic* wraps entire line. */
+/* Abstract H1 — distinct register from the title. Italic small-caps
+   "Abstract." reads as a section label, not a duplicate title. The
+   contrast between hero italic title above and small-caps abstract
+   header below tells the reader these are different things. */
+.pdoc-longform .pdoc-h1.pdoc-h1-abstract {
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  letter-spacing: 0.32em;
+  text-transform: lowercase;
+  font-variant-caps: all-small-caps;
+  color: var(--accent);
+  margin: 5rem 0 2rem;
+  text-align: left;
+}
+
+/* First paragraph after H1 — the dek (subtitle). In markdown, *italic*
+   wraps entire line. Slightly larger body for the opening sentence. */
 .pdoc-longform .pdoc-h1 + .pdoc-p {
   font-size: 1.2rem;
   line-height: 1.55;
@@ -422,17 +461,46 @@ html.app-shell input:focus {
   text-wrap: pretty;
 }
 
-/* Section H2s — the chapter labels. "telos · the purpose" */
+/* Abstract body — first paragraph after the Abstract heading gets an
+   illuminated initial like a manuscript chapter opening. The drop cap
+   tells the reader THIS IS WHERE TO START in a way no signpost can. */
+.pdoc-longform .pdoc-h1-abstract + .pdoc-p::first-letter {
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 4em;
+  line-height: 0.82;
+  letter-spacing: -0.04em;
+  vertical-align: -0.36em;
+  margin-right: 0.04em;
+  color: var(--accent);
+  text-shadow:
+    0 1px 0 rgba(255, 250, 240, 0.6),
+    0 2px 6px rgba(91, 31, 71, 0.12);
+}
+
+/* Section H2s — chapter titles. Display-italic, larger, with the chapter
+   number set in tabular old-style numerals as quiet marginalia. The
+   chapter declares itself; the prefix tells you where you are. */
 .pdoc-longform .pdoc-h2 {
   font-family: var(--font-eb-garamond);
   font-style: italic;
-  font-weight: 500;
-  font-size: 1rem;
-  letter-spacing: 0.06em;
-  text-transform: lowercase;
-  color: var(--accent);
-  margin: 0 0 1rem;
-  padding-bottom: 0;
+  font-weight: 400;
+  font-size: clamp(1.7rem, 2.8vw, 2.1rem);
+  line-height: 1.15;
+  letter-spacing: -0.012em;
+  color: var(--text-primary);
+  margin: 5rem 0 1.5rem;
+  text-transform: none;
+  text-wrap: balance;
+  font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "onum" 1;
+}
+/* Chapter number prefix — the part the numbered processor injects
+   ("8.1 the practice.") gets quietly distinguished in the same
+   colour/family as italic body so the numerals read as marginalia
+   not chrome. */
+.pdoc-longform .pdoc-h2 {
+  /* Number is part of the text; styling here applies wholesale */
 }
 
 /* First h2 after h1 (the subtitle slot) — plain, not accent */
@@ -459,36 +527,68 @@ html.app-shell input:focus {
   text-wrap: balance;
 }
 
-/* Section divider — dinkus, matches the landing */
+/* Section divider — fleuron, manuscript ornament, cycles through the
+   set defined in MarkdownDoc. Centred, faint, breathing. The eye reads
+   "rhetorical pause," not "horizontal line." */
 .pdoc-longform .pdoc-hr {
   background: none;
   height: auto;
-  margin: 4.5rem 0;
+  margin: 4rem 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.7rem;
-  color: var(--accent);
-  opacity: 0.55;
-  font-size: 0.8rem;
-  letter-spacing: 0.2em;
+  border: none;
 }
-.pdoc-longform .pdoc-hr::before,
-.pdoc-longform .pdoc-hr::after {
-  content: '';
-  display: block;
-  width: 2rem;
-  height: 0.5px;
-  background: var(--border-dashed);
+.pdoc-longform .pdoc-fleuron {
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-size: 1.4rem;
+  color: var(--accent);
+  opacity: 0.5;
+  line-height: 1;
+  letter-spacing: 0.3em;
+  padding-left: 0.3em;
+  user-select: none;
+  transition: opacity 400ms ease;
+}
+.pdoc-longform .pdoc-hr:hover .pdoc-fleuron {
+  opacity: 0.8;
 }
 
-/* Paragraphs — comfortable, editorial rhythm */
+/* Paragraphs — book typography. Justified column, hanging punctuation,
+   refined font-features. Reads as well-set body type, not screen prose. */
 .pdoc-longform .pdoc-p {
   font-size: 1.08rem;
-  line-height: 1.75;
+  line-height: 1.78;
   color: var(--text-secondary);
   margin: 1.1rem 0;
   text-wrap: pretty;
+  text-align: justify;
+  text-align-last: left;
+  hyphens: auto;
+  hanging-punctuation: first last;
+  font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "calt" 1, "onum" 1;
+  font-variant-ligatures: common-ligatures discretionary-ligatures;
+}
+
+/* First paragraph after a chapter heading — illuminated initial. The
+   manuscript convention: each chapter opens with a larger first letter
+   that signals "this is a new beginning." Subtle enough not to shout;
+   distinct enough to land. */
+.pdoc-longform .pdoc-h2 + .pdoc-p::first-letter,
+.pdoc-longform .pdoc-h3 + .pdoc-p::first-letter {
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 3.2em;
+  line-height: 0.82;
+  letter-spacing: -0.03em;
+  vertical-align: -0.28em;
+  margin-right: 0.04em;
+  color: var(--accent);
+  text-shadow:
+    0 1px 0 rgba(255, 250, 240, 0.55),
+    0 2px 5px rgba(91, 31, 71, 0.10);
 }
 
 .pdoc-longform .pdoc-p em {
@@ -503,20 +603,27 @@ html.app-shell input:focus {
   font-style: italic;
 }
 
-/* Blockquote — versatile call-out: works for short epigraphs and longer thesis blocks. */
+/* Blockquote — Renaissance epigraph. No left border (too modern). The
+   blockquote is centred, italic, with generous space above and below
+   so it reads as a pause for breath, not a callout box. */
 .pdoc-longform .pdoc-bq {
-  border-left: 2px solid var(--accent);
-  margin: 2.5rem 0;
-  padding: 0.2rem 0 0.2rem 1.5rem;
+  border-left: none;
+  margin: 3rem auto;
+  padding: 0;
+  max-width: 88%;
+  text-align: center;
 }
 
 .pdoc-longform .pdoc-bq .pdoc-p {
-  font-size: 1.1rem;
-  line-height: 1.65;
-  color: var(--text-secondary);
+  font-size: 1.04rem;
+  line-height: 1.6;
+  color: var(--text-muted);
   font-style: italic;
   margin: 0;
   text-wrap: pretty;
+  text-align: center;
+  text-align-last: center;
+  letter-spacing: 0.005em;
 }
 
 .pdoc-longform .pdoc-bq .pdoc-p .pdoc-strong {

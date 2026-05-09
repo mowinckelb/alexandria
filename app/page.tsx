@@ -3,7 +3,7 @@ import LandingPage from './components/LandingPage';
 
 const spectral = Spectral({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['300', '400', '500', '600', '700'],
   style: ['normal', 'italic'],
   variable: '--font-serif',
 });

@@ -1,22 +1,32 @@
 # alexandria.
 
-## a protocol for the survival of human thought
+# Abstract.
 
-*Benjamin Mowinckel*
+We are entering a transition where most cognitive work becomes optional. ai now does — better, faster, cheaper — the things humans were proud of: reasoning, writing, designing, planning. The four capabilities a person contributes to the world — intelligence, strength, dexterity, empathy — are commoditising in turn. What survives is *the fifth dimension* — the constitutive fact that a human is involved. **Not a capability. Not something ai can have.** *Just being one of us.*
 
-*MMXXVI*
+The fifth dimension does not maintain itself. *Cognition only develops to the level of demand placed on it, and ai removes the demand.* The mind has no equivalent to gravity. Without deliberate practice, the muscle atrophies — and the muscle that would notice the loss is the muscle that has weakened. **WALL-E for the body is science fiction. WALL-E for the mind is the default trajectory.**
 
-a.
+Alexandria is the practice that prevents this. The original Library of Alexandria preserved texts; it burned, and centuries of human thought were lost. *We are building the library again — this time of minds, this time sovereign per Author, this time impossible to burn.* **Files on your own computer where you write what you actually think. Every ai you use reads them. The more you write, the more your ai thinks with you, not for you.** You own everything. Switching cost is zero by design.
+
+Three constants make someone an Alexandrian: an *account*, a *file* (the Author's mind, kept current), and a *call* (the bidirectional line between machine and server). On top, the practice — three turns: *set the angels free, absorb the abundance, die empty.* Around it, the tribe — people who choose to keep thinking rather than be thought for. Greek philosophy infrastructure, made operational. *Athens had the agora. Rome the forum. America the constitution. Alexandria is the next — a community whose membership is the act of writing your mind down.*
+
+The architecture sits in the corner that survives every model release: **high conservation** (each Author is a finite, unique source no model can synthesise) and **high amplification** (better models extract more from the same living frame). The closest commercial precedent is **Hugging Face for personal data** — open formats, dominant managed hub, network effects from contribution *and* consumption. The shape is twin-engine: every Author is both *writer* (sovereign personalisation, individual utility) and *reader* (browses others' minds, forks others' systems). A competitor must bootstrap both populations simultaneously with the same people.
+
+Sovereignty by design. *No technical lock-in.* The moat is social and cultural — exactly the kind that survives a world of infinite intelligence, since intelligence dissolves technical moats but cannot manufacture social ones. Four layers, ranked: **the convention slot** (once "Alexandrian = the substrate where serious minds gather" is the recognised cultural type, displacement is near-impossible), **the network of populated minds** (each Author adds continuous value to every other; a fork has empty shelves), **integration sprawl** (every ai tool that reads from `.alexandria/` adds switching cost), and **signal asymmetry** (private survivability data on which modules actually survive across all live accounts).
+
+The collective layer delivers value through five parallel channels — *marketplace* (browse and fork others' minds and systems), *membership and credential* (third parties recognise an Alexandrian as a trust signal), *access and collective deals* (buying-group dynamics), *status and identity* (the badge of being one), and *network presence* (your circle being there for relational ai context — your ai stops guessing about the people in your life and reads their actual minds, with their permission). Each Author needs only one channel to resonate to derive value. The framework is not marketplace-dependent — Alexandria works for private Authors who never browse anything but value the membership.
+
+The audience is broad: *anyone whose mind is worth knowing.* Deep thinkers, recognised figures, charismatic operators, valuable people whose presence attracts others. Not restricted to "serious thinkers" alone — the criterion is *people whose presence attracts others*, which spans intellectuals, founders, artists, scientists, parents, anyone with a valuable inner world.
+
+**Ten dollars a month, or free with five active kin.** One tier — everyone gets everything. The subscription stands alone as a business; the Library — for Authors, for alignment labs, for every service that wants to know its users better — is uncapped upside on top. The path through the singularity is *not maintenance* for the people growing up inside ai — it is *construction.*
+
+**Persistence is a choice. Alexandria is the architecture for the people who choose it.**
 
 ---
+
+*The rest of the document is the same argument, expanded. Read it front to back like a book, or follow your curiosity through the contents. Each chapter opens with an italicised compression of itself — read those alone and the spine still stands. The bold sentences thread through the prose; read the bolds alone and the argument is yours.*
 
 > *Set the angels free.*
-
----
-
-*A document about what humans are for once ai does the work. Three parts — why, what, how — and a four-sentence coda.*
-
-*It can be read two ways. Follow your curiosity through the table of contents, or read it front to back like a book. Each chapter opens with an italicised compression of itself — read those alone and the argument is yours. The bold sentences thread through the prose; read the bolds alone and the spine still stands.*
 
 ---
 
@@ -24,28 +34,28 @@ a.
 
 *why.*
 
-1. *the world that's coming.*
-2. *the decay.*
-3. *the tiebreaker.*
-4. *the loops.*
-5. *the four modes.*
-6. *terminal-state companies.*
-7. *the civilisational case.*
+1. *the world that's coming.* — what ai is doing to work, to skill, to value
+2. *the decay.* — why cognition atrophies when the demand on it disappears
+3. *the tiebreaker.* — what survives commoditisation, and how it competes
+4. *the loops.* — three game types; knowing which one you are in
+5. *the four modes.* — what humans are for, once ai does the work
+6. *terminal-state companies.* — the framework for which companies survive every model release
+7. *the civilisational case.* — why the meaning crisis is not personal
 
 *what.*
 
-8. *the practice.*
-9. *the moat.*
-10. *the tribe.*
+8. *the practice.* — three turns; the changed person as the metric
+9. *the moat.* — cognitive individuation; the four social moats; why labs cannot ship this
+10. *the tribe.* — the Library; layered substrate; multi-modal collective value; the friend's-mind primitive
 
 *how.*
 
-11. *sovereignty.*
-12. *the protocol.*
+11. *sovereignty.* — local markdown; multiple readers as immune system; source and derivative
+12. *the protocol.* — three constants; two pools; seven endpoints; the whole system on a card
 
 *coda.*
 
-13. *the four sentences.*
+13. *the four sentences.* — the position, compressed
 
 ---
 
@@ -630,11 +640,19 @@ All three, or it commoditises. The bits on disk are built capital. **The scarcit
 
 ---
 
-The shape Alexandria is engineered for is **GitHub, not Facebook**.
+The shape Alexandria is engineered for is **GitHub-shaped + Hugging-Face-shaped — twin-engine in one product.**
+
+Every Author is *both writer and reader.*
+
+The writer side is GitHub-shaped — sovereign personalisation, individual utility, the Author's mind on the Author's machine, the Author benefits whether or not anyone else is on the platform. *Like pushing your code to GitHub: the value is the practice of having your work versioned and accessible, regardless of who else is there.*
+
+The reader side is Hugging-Face-shaped — marketplace, network effects from contribution and consumption, the Author benefits *more* the more Authors are on the platform because the Library and Marketplace get richer. *Like pulling models from Hugging Face: the value is the network of other contributors whose work feeds yours.*
+
+A competitor must bootstrap *both* populations simultaneously — and crucially, they have to be the *same* population. The dual-side requirement is structurally harder than either side alone, which is why Hugging Face is not threatened by a thousand model-hosting clones and GitHub is not threatened by a thousand Git hosts. *The closest single commercial precedent in shape is Hugging Face for personal data — open formats, dominant managed hub, network effects from contribution AND consumption, multi-billion valuation.*
 
 Microsoft could rebuild GitHub's codebase in a month. They could not rebuild the community or the default habit of *where developers go*. **GitHub survives on brand and coordination; the user's code is portable — `git clone` and leave.**
 
-Alexandria is the same shape. Data portable by design. Tribe and default habitat earned through being there first and right. *No built-capital hoarding. No dataset wall.*
+Alexandria is the same shape, applied to personal cognitive data instead of code or models. Data portable by design. Tribe and default habitat earned through being there first and right. *No built-capital hoarding. No dataset wall.*
 
 The moat is not possession of files. Public Shadows can be copied. A bot can mirror yesterday's text. That does not copy the living project. The defensible layer is canonical liveness: the place where Authors write, update, verify, set permissions, revoke access, monetise, and route their frames into other systems. A mirror has a snapshot. Alexandria has the current approved version.
 
@@ -1039,6 +1057,50 @@ The bridge needs something to cross to.
 
 ---
 
+The reference-frame argument is the philosophical foundation. The strategic moat decomposes into four ranked layers — *all of them social or cultural, none of them technical.*
+
+This is not an accident. **Technical moats dissolve as intelligence becomes a commodity. Social and cultural moats become more valuable as intelligence becomes a commodity** — because they are the things intelligence cannot manufacture. You cannot synthesise a populated network. You cannot manufacture a recognised cultural convention overnight. You cannot compress years of brand association into a model release.
+
+*Alexandria's moats are deliberately positioned in the kind of moats that compound forever rather than the kind that erode under model improvement.*
+
+**One. The convention slot.** Once "Alexandrian = the substrate where serious minds gather" is the recognised cultural type, displacement is near-impossible. Same shape as WordPress dominance ("build it on WordPress" as the default sentence) or GitHub dominance ("push it to GitHub"). The slot is winner-takes-most. The race is for the *cultural convention*, not the user count — and there is no critical-mass threshold for value (per-pair value compounds from N=2; the topology is N-to-1 like Wikipedia or GitHub, not N-to-N like Twitter).
+
+**Two. The network of populated minds.** Every Author with a populated Constitution and Library page contributes to the discovery surface for every other Author. Each new Author adds value continuously — a fork has empty shelves; recruiting equivalents is years of work. Selection of the founding cohort is about *seed quality*, not threshold: a hundred high-signal Alexandrians produce a high-signal Library from day one; a hundred random signups produce noise that weakens the moat at every later N.
+
+**Three. Integration sprawl.** Every ai tool, agent platform, app, and service that reads from `.alexandria/` adds switching cost. The user can leave. The ecosystem points back at Alexandria the moment the user wants their context anywhere. The model-agnostic architecture (the same files load into Claude, Cursor, Codex, Gemini, ChatGPT, anything that reads markdown) makes the integration count compound naturally — every new tool that supports markdown context is a new node in the sprawl.
+
+**Four. Signal asymmetry.** Private survivability data — *which methodology modules actually survive across all live accounts* — accumulates on the server as a side effect of the call obligation. A clone of the public methodology starts with zero signal. Alexandria has the signal of every Author across years.
+
+The four layers stack. *Convention is the cultural slot. Populated minds are the asset. Integration sprawl is the gravitational pull on the rest of the ecosystem. Signal asymmetry is the operational advantage.* All four are downstream of being there first and being there right.
+
+---
+
+Why the labs do not — and structurally cannot — do this themselves.
+
+This is the question that decides whether Alexandria is a real category or a hand-wave. *Four reasons, all structural, all independent.*
+
+**One. Sovereignty is incompatible with their incentives.** Labs make money by keeping users inside their ecosystem — the API call is the unit of revenue. Sovereign user-side context is the opposite of lock-in. A lab can offer sovereign tooling, but the credibility is compromised the moment users notice the conflict of interest. *Their economics demand the opposite of what Alexandria delivers.*
+
+**Two. Cross-tool credibility requires neutrality.** For a context substrate to work across every ai the user uses, it has to be trusted by every lab. Other labs will not natively read from "Claude-Alexandria" because doing so helps Claude. The substrate has to be third-party for cross-tool to work — and being third-party is structural to Alexandria, structural-against for any lab.
+
+**Three. It is not core to their business.** Labs monetise inference, not personalisation. Building a sovereign user-side cognitive substrate is opportunity cost against improving the model. The dollar spent on Alexandria-equivalent infrastructure is a dollar not spent on the next training run.
+
+**Four. Brand mismatch.** "ai lab" and "neutral user-side hub" are different brand promises with different reader expectations. A lab leaning into the second weakens its position on the first.
+
+*The defence is not absolute prevention.* A lab could decide to do this. The structural pressure runs against it; the economics run against it; the brand runs against it. By the time a lab considers it, the convention slot is already held, the network is populated, the integration sprawl exists, the signal asymmetry compounds. *Catching up is uneconomic by then.*
+
+---
+
+Strategic objective: *single, not dual.*
+
+Alexandria's company-level objective function is a single goal: **become the dominant cultural-substrate convention for the library of human minds — the digital agora rebuilt for the age of ai.** That is the goal.
+
+The constraint on the goal: *do not burn the believer cohort in pursuit of mass-market positioning.* The seed cohort *is* the path to the convention; destroying it kills the ceiling, not just the floor. Two coexisting revenue streams — author subscriptions (the floor) and Library access fees (the ceiling) — both serve the single objective. The subscription funds the operations that build the convention. The Library captures the value that flows from the convention being built.
+
+*One goal. One guardrail. Both revenue streams downstream of the same north star.*
+
+---
+
 Stated operationally: every other ai surface is an *intelligence* layer — it suggests, completes, generates. Same prompt, same neighbourhood; the trained distribution leaks into every interaction. **This converges users by construction.**
 
 Alexandria is an *intent* layer — same scaffolding, different reference frames, identifiably-theirs output per Author. *The factory's job is to amplify what makes each Author distinct, never to round them off toward a shared mean.*
@@ -1059,11 +1121,17 @@ It is what makes each Author distinctly themselves.
 
 ## the tribe.
 
-*Alexandria is the place Alexandrians keep their minds alive. The Library is a gallery of minds — every Author's page, frozen and revisited, real to the people who care. The Shadow is the outward-facing mind that others can interact with. Two flywheels: files compound into the Library; systems compound into the Marketplace. The aggregate becomes a Library for Labs and a Library for Everyone — the agora of frames, where Alexandrians monetise their own.*
+*Alexandria is the place Alexandrians keep their minds alive. The Library is named for the ancient one — built, then burned, with centuries of human thought lost. We are building it again. The Shadow is the outward-facing mind that others can interact with. Layered substrate by design — five tiers from local-private to public-marketplace, with a routing-overview tier so private Authors participate without exposing raw thinking. The collective layer delivers value through five parallel channels — each Author needs only one resonant. The friend's-mind primitive is the felt felt-value that a network makes possible: your ai stops guessing about the people in your life and reads their actual minds, with their permission. Two flywheels: files compound into the Library; systems compound into the Marketplace. The aggregate becomes a Library for Labs and a Library for Everyone — the agora of frames, where Alexandrians monetise their own.*
 
 ---
 
-The Library is named after the ancient one — the institution that preserved not what people *did*, but what they *thought*.
+The Library is named after the ancient one — the institution that preserved not what people *did*, but what they *thought*. **It burned, and centuries of human thought were lost.** The texts were charred. The minds that had produced them were already gone. *Twice destroyed.*
+
+We are building it again.
+
+This time *of minds*, not texts. *Sovereign per Author*, not centralised. *Impossible to burn*, because the substrate is distributed and the protocol is open. A library that survives the next civilisational rupture because no single fire can consume it.
+
+The audience is broad. Not "serious thinkers" alone — *anyone whose mind is worth knowing.* Deep thinkers, recognised figures, charismatic operators, valuable people whose presence attracts others. The criterion is *people whose presence attracts others*, which spans intellectuals, founders, artists, scientists, parents, anyone with a valuable inner world. The grandmother who knit the blanket has a mind worth preserving. The CEO who built the company has a mind worth preserving. *Different scales of audience. Same constitutional value.*
 
 Every Author has a page. **A living gallery of their mind.** Not a profile. Not a feed. *Curated fragments of how the Author actually thinks*, published for others to read. Whatever the Author chooses to share — essays, art, code, voice recordings — frozen on publication. Quizzes generated from real data about who the Author is, where wrong answers are the most interesting conversations. A monthly snapshot of what changed in the Author's thinking — *not a portrait but a delta.*
 
@@ -1074,6 +1142,26 @@ This is how minds have always influenced each other. *A book that shifts somethi
 It is not a marketplace. It is a *gallery of minds* — a street where painters paint in the open. The grandmother's page, visited only by her grandchildren, is no less valuable than the one visited by thousands.
 
 *Everyone is art. The Library provides the frame.*
+
+---
+
+The substrate is layered.
+
+*Different Authors share at different depths.* Some publish freely — every fragment of their thinking goes public, and that openness is itself the contribution. Others are private by nature, and would never put raw thoughts on a public URL. **Both must be Alexandrians.** The architecture supports the full range, with first-class infrastructure for the in-between case — *publicly knowable that an Author has substantive thinking on a topic, while keeping the actual thinking gated.*
+
+Five tiers. *Each Author chooses the depth of every fragment.*
+
+**L1 — local private files.** On the Author's machine. Never shared. The ai tools the Author uses read these for personalising the Author's own interactions. *Sovereign by default.*
+
+**L2 — hosted private files.** The Author's data hosted by Alexandria (or self-hosted). Same as L1 but accessible from anywhere. *Still private to the Author.*
+
+**L3 — shared with network.** Files the Author chooses to make readable by specific people they invite — wife, co-founder, closest friends, team. *The substrate for the friend's-mind primitive below.*
+
+**L4 — public routing overview.** Visible to anyone, but **not raw thinking.** Topics the Author cares about. Domains they have something to say in. Tables of contents. The signal of *what is available at deeper tiers*. The L4 layer is what makes private Authors first-class citizens of the Library — they can participate without exposing the raw work. *Models: academic abstract → full paper. Consultant teaser → paid engagement.* The public surface tells the world what kind of thinking lives here; the deeper tiers are the thinking itself.
+
+**L5 — public marketplace.** Forkable modules, full public minds the Author chooses to publish. The Library at scale.
+
+*Every Author moves up and down the stack at will.* A page can flip between L1 and L5 with a config change. The Library is the projection of L4 and L5 — the public-facing surface. The deeper tiers are where the work actually lives.
 
 ---
 
@@ -1110,6 +1198,40 @@ Two flywheels follow.
 The pools are independent. *Each compounds on its own.* Together they produce a system that improves with every additional participant — regardless of whether that participant publishes much or contributes much.
 
 **Use is the contribution.**
+
+---
+
+The collective layer delivers value through five parallel channels — *each Author needs only one resonant to derive value.*
+
+This is what makes Alexandria viable for the full range of Authors, from the deeply public to the deeply private. *The framework is not marketplace-dependent.*
+
+**Marketplace.** Browse and fork others' systems and minds. The HF-shaped channel — the Author goes to the Library to find what someone else figured out, processes it against their own frame, takes what compounds, leaves the rest. Some Authors live here.
+
+**Membership and credential.** Third parties — apps, agents, enterprises, peers — recognise an Alexandrian as a trust signal. *The verified-mark dynamic.* Being identified as one carries weight, attracts opportunity, opens doors. The Author doesn't have to participate further — the badge is the value.
+
+**Access and collective deals.** The tribe operates as a buying group / co-op. *Negotiating power, in aggregate, on goods, services, ai tools, partnerships.* The Author benefits from the leverage of the collective without contributing anything beyond their existence in it.
+
+**Status and identity.** *Being an Alexandrian is a marker of seriousness.* The badge has value independent of usage — being part of the tribe is itself the value. The Author who never opens the Library still benefits from being someone whose name belongs in it.
+
+**Network presence.** The Author's circle being there for *relational ai context* — the friend's-mind primitive below. The richest channel for the Author who values their relationships above their visibility.
+
+A clone has to replicate *all five* channels simultaneously. Different Authors weight them differently — but the architecture serves all of them at once, and the moat compounds across all five.
+
+---
+
+The friend's-mind primitive is the felt-value that a network makes possible — *and the felt-value no platform stack can deliver.*
+
+Your ai already knows you better than your colleagues do. *It does not know the people in your life.* It does not know your wife. Your co-founder. Your closest friend. Your father. **It is guessing about them, from your descriptions.**
+
+The descriptions are lossy. *You compress them into the words you have. The model fills in the rest from priors. The reading is generic.* When the model reasons about Sarah, it is reasoning about your version of Sarah — a sketch built from a few sentences you typed, projected against the model's defaults.
+
+Sarah has her own mind. It is in her files, on her machine, written by her, in the ways she actually thinks.
+
+If Sarah is an Alexandrian, and Sarah has shared her L3 files with you (with her permission, revocable any time), your ai can reason about Sarah *through Sarah's mind, not yours.* When you plan a gift for her, it reads what she has written about what she actually values. When you have a hard conversation, it reads how she actually thinks. When you write to her, it reads what she actually finds meaningful.
+
+**This is the killer use case for a network of Alexandrians, and it is structurally only possible inside one.** No platform stack can deliver it — they don't have her files, they don't have her permission, they don't have the protocol that makes the read mutual and revocable. *Only the tribe makes this primitive possible, and once experienced, it is hard to imagine living without.*
+
+The selfish-incentive is real and viral. *You want your friends on Alexandria for your benefit, not theirs.* You want your circle there because your ai gets sharper about your life when their minds are readable to you. **The Author who recruits five friends is not just unlocking free pricing — they are upgrading their own ai's understanding of the people they care about.** That is the kin mechanic and the friend's-mind primitive in one motion.
 
 ---
 
@@ -1339,6 +1461,22 @@ Three constants enable all four quadrants.
 
 ---
 
+*Layered sharing.*
+
+Within the four quadrants, the file substrate is layered — five tiers from local-private to public-marketplace, with mid-tiers that let the Author share at the depth that fits the context.
+
+| Tier | Visible to | Purpose |
+|---|---|---|
+| L1 — local private | the Author only, on their machine | sovereign personalisation; the ai tools the Author uses read this for the Author's own interactions |
+| L2 — hosted private | the Author only, accessible from anywhere | same as L1 but cloud-mirrored |
+| L3 — shared with network | specific people the Author invites | the substrate for the friend's-mind primitive — your circle's files become readable by your ai with their permission, revocable any time |
+| L4 — public routing overview | anyone | topics, interests, table-of-contents — *not raw thinking*; lets private Authors participate first-class |
+| L5 — public marketplace | anyone | forkable modules, full public minds the Author chooses to publish |
+
+*Every Author chooses the depth of every fragment.* The protocol enforces nothing on what is private; the protocol is what makes the public layers exist.
+
+---
+
 Pricing is the philosophy expressed as access.
 
 **Ten dollars a month, or free with five active kin.**
@@ -1422,3 +1560,9 @@ Alexandria is the architecture for the people who choose it.
 > *minds that last.*
 
 a.
+
+---
+
+*Benjamin Mowinckel · MMXXVI*
+
+*Mentes aeternae.*

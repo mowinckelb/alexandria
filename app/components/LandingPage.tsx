@@ -159,9 +159,19 @@ const THEMES: Theme[] = [
 export default function LandingPage({ brandClassName = '' }: Props) {
   const [themeIdx, setThemeIdx] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
+  // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
+  // Default (no param) keeps the existing CSS-built window. Read on
+  // mount so the data-attribute picks up the correct CSS branch.
+  const [centerpieceVariant, setCenterpieceVariant] = useState<string | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
   const middleRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const v = params.get('v');
+    if (v === 'arch' || v === 'frame') setCenterpieceVariant(v);
+  }, []);
 
   // Mobile menu — close on outside click + ESC. Listeners only mount
   // while the menu is open so we don't leak handlers in steady state.
@@ -196,30 +206,19 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       if (frame) cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const peelDistance = window.innerHeight;
-        // Dwell — phantom scroll between slide 2 landing and its peel
-        // starting. Lets the reader settle on the argument before the
-        // surface starts moving again.
-        const dwellDistance = peelDistance * 0.4;
         const sy = window.scrollY;
-        // Slide 1 peels in [0, peelDistance]. Slide 2 dwells through
-        // [peelDistance, peelDistance + dwellDistance], then peels in
-        // [peelDistance + dwellDistance, 2*peelDistance + dwellDistance].
+        // Two-slide structure: top peels in [0, peelDistance], revealing
+        // the bottom (colophon) directly. No middle slide, no dwell.
         const y1 = Math.min(sy, peelDistance);
-        const y2 = Math.max(0, Math.min(sy - peelDistance - dwellDistance, peelDistance));
         const progress = y1 / peelDistance;
-        const progress2 = y2 / peelDistance;
         document.documentElement.style.setProperty('--peel-progress', String(progress));
-        document.documentElement.style.setProperty('--peel-progress-2', String(progress2));
+        document.documentElement.style.setProperty('--peel-progress-2', String(progress));
         if (mq.matches) return;
         if (topRef.current) {
           topRef.current.style.transform = `translate3d(0, ${-y1}px, 0)`;
         }
-        if (middleRef.current) {
-          middleRef.current.style.transform = `translate3d(0, ${-y2}px, 0)`;
-        }
-        // on-bottom flips once the FINAL slide is dominant (past midpoint
-        // of the last peel — scrollY past slide-2's peel midpoint).
-        navRef.current?.classList.toggle('on-bottom', progress2 > 0.5);
+        // on-bottom flips once the top slide is past the midpoint of its peel
+        navRef.current?.classList.toggle('on-bottom', progress > 0.5);
       });
     };
 
@@ -227,9 +226,6 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       if (mq.matches) {
         if (topRef.current) {
           topRef.current.style.transform = '';
-        }
-        if (middleRef.current) {
-          middleRef.current.style.transform = '';
         }
         navRef.current?.classList.remove('on-bottom');
       }
@@ -344,48 +340,39 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   const statementBlock = (
     <div className="statement">
       <p>
-        <span className="beat-title">the augmentation</span>
-        ai can&rsquo;t read minds, but it can read words. so if we
-        translate our thoughts into words, our minds can be
-        augmented, not replaced &mdash;{' '}
-        <em>the symbolic layer of our minds transcribed into private
-        files</em>, so the exponential intelligence{' '}
-        <em className="em-strong">thinks with us, not for us</em>.
+        <span className="beat-title">The substrate</span>
+        alexandria is{' '}
+        <em className="em-strong">files on your own computer</em>{' '}
+        where you write what you actually think. You add to them &mdash;
+        thoughts, decisions, notes &mdash; and AI develops them with
+        you in short sessions. The files compound.{' '}
+        <em>Your machine. Your files. Your pace.</em>
       </p>
       <p>
-        <span className="beat-title">the system</span>
-        but the files don&rsquo;t write themselves, so we need a
-        system &mdash; <em>optimised for each individual</em>.
-        impossible to perfect alone. hence,{' '}
-        <span className="hence-name">alexandria<span className="hence-dot">.</span></span>
+        <span className="beat-title">The practice</span>
+        Every AI you use pulls from{' '}
+        <em className="em-strong">the same files</em>. You stop
+        repeating yourself. You stop losing context when you switch
+        models.{' '}
+        <em>The more you write, the sharper your thinking stays.</em>
       </p>
       <p>
-        <span className="beat-title">the protocol</span>
-        we built{' '}
-        <em className="em-strong">the protocol</em>{' '}for aggregating
-        files and systems into a singular collective &mdash; a
-        library of files and marketplace of systems where
-        alexandrians learn from each other and{' '}
-        <em>refine their own</em>.
+        <span className="beat-title">The collective</span>
+        <em className="em-strong">Five friends and your subscription
+        is free.</em>{' '}Share files with friends you choose &mdash;
+        both ways, revocable any time. AI stops guessing about the
+        people in your life.{' '}
+        <em>More authors &rarr; richer AI for everyone.</em>
       </p>
       <p>
-        <span className="beat-title">the floor</span>
-        alexandria distills this collective signal into a{' '}
-        <em>canonical system</em>{' '}offered to new members: a{' '}
-        <em className="em-strong">self-personalising floor</em>{' '}&mdash;{' '}
-        <em>rides the exponential, continuously refined</em>. zero
-        maintenance by default, the optimal foundation for
-        your own system when you have time.
-      </p>
-      <p>
-        <span className="beat-title">the republic</span>
-        it seems we are first, but we didn&rsquo;t come to impose.
-        we built the foundation others will build on &mdash; a
-        founding republic modeled on athens, rome, and america:{' '}
-        <em className="em-strong">natural law applied to thought</em>,
-        tilting the pressures of evolution towards{' '}
-        <em>human survival</em>. founded not on land, but on thought.{' '}
-        <em className="republic-coda">the thinking republic.</em>
+        <span className="beat-title">The founding</span>
+        Greece had the agora. Rome the forum. America the constitution.
+        The original alexandria had the library &mdash; until it
+        burned, and centuries of thought were lost.{' '}
+        <em className="em-strong">We are building it again</em>, this
+        time as a library of human minds.{' '}
+        <em>Early members shape what it becomes &mdash; the practice,
+        the culture, the people.</em>
       </p>
     </div>
   );
@@ -404,7 +391,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
     root.setProperty('--theme-border-soft', theme.borderSoft);
   }, [theme]);
   return (
-    <div className="landing-root" data-theme={theme.id} data-adam="1">
+    <div className="landing-root" data-theme={theme.id} data-adam="1" data-centerpiece={centerpieceVariant ?? undefined}>
       {/* ═════ PERSISTENT NAV — fixed over both slides. Colors switch at
              the peel midpoint so it stays readable on top (cream) and on
              any bottom-slide theme. ═════ */}
@@ -414,14 +401,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             <Link href="/" className={`nav-brand ${brandClassName}`}>
               alexandria<span className="nav-dot">.</span>
             </Link>
-            <span className="nav-tagline" aria-hidden>the thinking republic</span>
+            {/* Frontispiece subtitle — small-caps Roman beneath the italic
+                wordmark. Classical title-block contrast: italic display,
+                roman small-caps subtitle. Tells the cold reader what
+                alexandria IS in three words, without dominating. */}
+            <span className="nav-subtitle nav-subtitle-front" aria-hidden>the library of human minds</span>
+            <span className="nav-subtitle nav-subtitle-back" aria-hidden>mentes aeternae</span>
           </div>
           <div className="nav-links">
-            <span className="nav-shelf">
-              <Link href="/library" className="nav-shelf-link">library</Link>
-              <span className="nav-shelf-sep">·</span>
-              <Link href="/marketplace" className="nav-shelf-link">marketplace</Link>
-            </span>
             <span className="nav-group">
               <a href="/docs/letter.pdf" target="_blank" rel="noopener noreferrer">letter</a>
               <span className="nav-sep">·</span>
@@ -477,67 +464,21 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           <a href="tel:+14155038178" className="alpha-cta">
             investor?{' '}<span className="alpha-cta-underline">call me</span>
           </a>
+          <span className="alpha-mark-loc">san francisco</span>
         </span>
-        <span className="folio" aria-hidden>
-          san francisco · MMXXVI
-        </span>
-        <div className="top-inner">
-          {/* Three-line H1. Italic-normal-italic rhythm with the tribal
-              line tinted in the house burgundy — the identity carries
-              colour; the act is plain ink; the purpose returns to italic.
-              Form is content: the first line is who we are, second is what
-              we do, third is why it matters. */}
-          <h1 className="hero-h1">
-            <span className="hero-bracket bracket-left">
-              we help humans
-            </span>
-            <span className="hero-main">
-              build systems to keep thinking,
-            </span>
-            <span className="hero-bracket bracket-right">
-              and not lose our minds&hellip;
-            </span>
-          </h1>
-
-          {/* Alpha — the opening glyph. Italic Greek α, small and
-              faint, sits between the headline and the manifesto as a
-              section break. Echoes the wordmark's dot-after-letter
-              motif (alexandria.) and signals "this is the start." */}
-          <span className="alpha-glyph" aria-hidden>α.</span>
-
-          {/* Manifesto body. Fleuron separates the stance from the
-              civilisational closer — an old-book ornament earning its
-              place as a rhetorical beat, not a decoration. */}
-          <div className="manifesto">
-            <p>
-              thoughts are the root node.{' '}
-              <em className="em-strong">
-                if we stop thinking, we stop deciding.
-              </em>{' '}
-              if&nbsp;we&nbsp;stop&nbsp;deciding,{' '}
-              <em className="em-strong">our minds atrophy</em>.
-              so&nbsp;if&nbsp;we&nbsp;lose our thoughts,
-              we&nbsp;lose&nbsp;our&nbsp;minds &mdash;
-              and&nbsp;<em className="em-strong">our species</em>.
-            </p>
-            <p className="manifesto-close">
-              <span className="close-faint">
-                the singularity is humanity&rsquo;s last
-                challenge&nbsp;&mdash;
-              </span>{' '}
-              <span className="close-strong">
-                we offer a path through.
-              </span>
-            </p>
-          </div>
-
-        </div>
+        {/* Frontispiece composition. The wall + niche + fresco + tree
+            shadow ARE the slide (background on .top-slide). The title
+            block sits in the top-left nav (wordmark + small-caps
+            subtitle). Imprint marginalia in the corners. Nothing
+            covers the painting. The reader sees a museum tableau:
+            illuminated scene, title plaque beside it, breathing room. */}
+        <div className="top-inner" />
         </div>
       </div>
 
-      {/* Persistent fresco — atmospheric layer across both slides, subtle
-          like the watermark. Stays put when the peel runs. */}
-      <div className="adam-bg" aria-hidden />
+      {/* Persistent fresco removed — replaced by .adam-centerpiece inside
+          .top-inner so the Adam visual flows in the layout (no overlap
+          with text), like Fleet's animated centerpiece. */}
 
       {/* Persistent watermark — sits across both slides like the nav. */}
       <span className="watermark" aria-hidden>
@@ -546,19 +487,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
 
 
-      {/* ═════ MIDDLE SLIDE — carries the 5 argument beats at full
-             canvas width. Peels in the second 100vh of scroll (with a
-             40vh dwell first), after the top slide has fully peeled. ═════ */}
-      <section
-        className="middle-slide"
-        ref={middleRef}
-        aria-label="Argument"
-        style={themeVars(theme)}
-      >
-        <div className="stage-middle">
-          {statementBlock}
-        </div>
-      </section>
+      {/* MIDDLE SLIDE removed — the four argument beats moved to /about
+          so the main site is just hero + colophon. Two slides, true
+          minimalism. The middleRef stays in case the peel logic still
+          references it (gracefully no-ops). */}
 
       {/* ═════ BOTTOM SLIDE — Fleet colophon, theme rotates ═════ */}
       <section
@@ -601,8 +533,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 lost forever.
               </p>
               <p className="dict-line">
-                <em>II. n.</em> the thinking republic; a tribe of
-                humans who put their minds into writing, so ai
+                <em>II. n.</em> its rebuilding; a library of
+                human minds, written by their authors so ai
                 thinks with them, not for them; the path through
                 the singularity.
               </p>
@@ -611,16 +543,27 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
           <div className="right-col">
               <div className="right-lower">
+                <p className="statement-salutation">
+                  <em>to the reader.</em>
+                </p>
+
+                <p className="statement-epigraph">
+                  this is humanity&rsquo;s greatest challenge
+                  &mdash; and perhaps our last. soon, ai will do
+                  most of the thinking. most minds will atrophy
+                  quietly; a few will compound through every model
+                  that comes.
+                </p>
+
                 <p className="statement-close">
-                  if you believe human thought matters through the
-                  singularity,{' '}
-                  <em className="close-em-strong">making it permanent is all
-                  upside</em>. alexandria is the closed-loop system
-                  &mdash;{' '}
-                  <em>one curl command, five minutes, and the
-                  compounding starts; tune it later</em>. low agency is
-                  the only friction&nbsp;left.<br />
-                  <em className="close-strong">welcome to alexandria.</em>
+                  alexandria is for those few. write yourself into
+                  plain files, kept on your own ground, in your
+                  own shape; every ai you <em>ever</em> use will
+                  read them and think <em>with</em> you, not for
+                  you. your mind, alongside an intelligence that
+                  <em>compounds</em> without end.
+                  <br /><br />
+                  you belong here. the door stands open &mdash; low agency is the only friction left.
                 </p>
 
                 <div className="cta-pair">
@@ -632,7 +575,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                       join the tribe
                     </Link>
                     <span className="cta-sub">
-                      free with kin &middot; open source &mdash; works with any ai coding agent
+                      free with kin &middot; open source &middot; works with every ai
                     </span>
                   </div>
                   <div className="cta-block">
@@ -640,8 +583,38 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                       stay close
                     </Link>
                     <span className="cta-sub">
-                      not ready to join, but want to follow along?
+                      friends, family, the curious.
                     </span>
+                  </div>
+                </div>
+
+                {/* Closing footer-cols — Fleet-style 3-column directory.
+                    Rounds off the right column with the tribe (library /
+                    marketplace / github), the company (x / careers), and
+                    legal (privacy / terms). Italic small-caps heads, plain
+                    link text. */}
+                <div className="footer-cols">
+                  <div className="footer-col">
+                    <span className="footer-col-head">tribe</span>
+                    <Link href="/library" className="footer-col-link">library</Link>
+                    <Link href="/marketplace" className="footer-col-link">marketplace</Link>
+                  </div>
+                  <div className="footer-col">
+                    <span className="footer-col-head">company</span>
+                    <a
+                      href="mailto:mowinckel.b@gmail.com?subject=Careers"
+                      className="footer-col-link"
+                    >
+                      careers
+                    </a>
+                    <a
+                      href="https://x.com/benmowinckel"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="footer-col-link"
+                    >
+                      x
+                    </a>
                   </div>
                 </div>
               </div>
@@ -685,9 +658,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         /* Runway provides scroll range for two sequential peels (top →
            middle, then middle → bottom), each a full 100vh, plus a 40vh
            dwell on slide 2 before its peel starts. Total: 100 (peel1)
-           + 40 (dwell) + 100 (peel2) + 100 (viewport) = 340vh. */
+           Two-slide structure now: 100 (peel) + 100 (viewport) = 200vh.
+           (Was 340vh when there was a middle slide between top and bottom.) */
         .runway {
-          height: 340vh;
+          height: 200vh;
         }
 
         /* ─── NAV ─── */
@@ -762,15 +736,6 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .nav-brand .nav-dot {
           font-style: normal;
           display: inline-block;
-          animation: dotBreathe 3.2s ease-in-out infinite;
-        }
-        @keyframes dotBreathe {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.45;
-          }
         }
         .nav-brand:hover {
           opacity: 0.72;
@@ -784,9 +749,49 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           flex-direction: column;
           align-items: flex-start;
         }
-        /* Tagline — italic slogan under the wordmark. Visible only on
-           the front slide; fades out on peel because the bottom slide's
-           dictionary already names "the thinking republic" twice. */
+        /* Frontispiece subtitle — Roman small-caps beneath the italic
+           wordmark. Wide tracking, weight 500, faint colour. Sits as
+           a quiet plaque beside the painting. Visible on top slide;
+           fades out on peel since slide 2's dict carries the same role. */
+        .nav-subtitle {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          margin-top: 6px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: normal;
+          font-weight: 500;
+          font-size: 10.5px;
+          letter-spacing: 0.32em;
+          text-transform: lowercase;
+          font-variant-caps: all-small-caps;
+          font-feature-settings: "smcp" 1, "kern" 1;
+          color: rgba(26, 19, 24, 0.55);
+          line-height: 1;
+          white-space: nowrap;
+          user-select: none;
+          transition: color 320ms ease;
+        }
+        /* Front subtitle ("the library of human minds") fades OUT
+           as you peel; back subtitle ("mentes aeternae") fades IN.
+           Both stack at the same absolute position (top: 100%), so
+           the swap is opacity-only — no layout shift. */
+        .nav-subtitle-front {
+          opacity: calc(1 - var(--peel-progress, 0) * 2);
+        }
+        .nav-subtitle-back {
+          opacity: calc(var(--peel-progress, 0) * 2 - 1);
+          font-style: italic;
+          font-variant-caps: normal;
+          font-feature-settings: "kern" 1;
+          letter-spacing: 0.04em;
+          font-size: 13px;
+        }
+        .nav.on-bottom .nav-subtitle {
+          color: var(--theme-fg-faint, rgba(26, 19, 24, 0.45));
+        }
+
+        /* Tagline — kept for legacy markup if any. Hidden by default. */
         .nav-tagline {
           position: absolute;
           top: 100%;
@@ -1075,7 +1080,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           position: fixed;
           inset: 0;
           z-index: 20;
-          background: #f7f2ec;
+          /* Slide IS the scene — full viewport. Image sized cover so
+             the niche centres horizontally; bg-color matches the
+             image's edge cream so any uncovered area at extreme
+             aspect ratios still reads as the same wall. */
+          background-color: #d8ccb6;
+          background-image: url(/adam-arch-wide.png);
+          background-position: center center;
+          background-size: cover;
+          background-repeat: no-repeat;
           overflow: hidden;
           will-change: transform;
           box-shadow: var(--peel-shadow, 0 0 0 rgba(0, 0, 0, 0));
@@ -1098,15 +1111,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding: 63px 32px 27px;
           box-sizing: border-box;
         }
-        /* Vertical margin rule — like a printed manuscript with a
-           ruling line down the left margin. Very faint, just a hint. */
+        /* Vertical margin rule REMOVED — was distracting against the
+           full-bleed wall scene. Kept the selector with no content so
+           the rest of the cascade is unchanged. */
         .stage-top::after {
-          content: '';
-          position: absolute;
-          left: 72px;
-          top: 99px;
-          bottom: 54px;
-          width: 1px;
+          content: none;
           background: linear-gradient(
             to bottom,
             transparent 0%,
@@ -1125,10 +1134,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           right: 58px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 11px;
-          color: rgba(26, 19, 24, 0.32);
-          letter-spacing: 0.18em;
-          text-transform: lowercase;
+          font-size: 13px;
+          color: rgba(26, 19, 24, 0.42);
+          letter-spacing: 0.02em;
           user-select: none;
           z-index: 2;
         }
@@ -1137,16 +1145,40 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           z-index: 1;
           width: 100%;
           max-width: 980px;
-          max-height: 100%;
+          height: 100%;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 48px;
+          justify-content: space-between;
+          padding: 36px 0;
         }
-        /* Alpha glyph — italic Greek α as a section break between
-           headline and manifesto. Tiny and faint; the eye registers it
-           as a typographic ornament without it competing with the H1
-           or the prose. */
+        /* Adam centerpiece — full-bleed atmospheric scene. The arched
+           stone niche image is sized large to occupy the centre band
+           of the slide; cream marble wall extends to the page bg via
+           radial mask at the edges so the image dissolves into the
+           cream paper rather than sitting in a contained rectangle.
+           Text floats above and below in the cream wall regions. The
+           image already has a baked-in leaf shadow on the lower-left;
+           for movement (the breeze the Author wants), swap the
+           background-image declaration for a <video> in the same slot
+           — same positioning, same purpose, real footage. */
+        .adam-centerpiece {
+           position: relative;
+           width: 100%;
+           max-width: 1320px;
+           height: 560px;
+           background-image: url(/adam-arch.png);
+           background-position: 50% 50%;
+           background-size: cover;
+           background-repeat: no-repeat;
+           /* Wide soft mask — image dissolves into the cream page bg
+              at all edges; centre stays clean and visible. */
+           -webkit-mask-image: radial-gradient(ellipse 80% 88% at 50% 50%, #000 55%, rgba(0,0,0,0.95) 75%, rgba(0,0,0,0) 100%);
+           mask-image: radial-gradient(ellipse 80% 88% at 50% 50%, #000 55%, rgba(0,0,0,0.95) 75%, rgba(0,0,0,0) 100%);
+           pointer-events: none;
+        }
+        /* Alpha glyph — kept in case anywhere else uses it; centerpiece
+           replaces its function on the front slide. */
         .alpha-glyph {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
@@ -1164,53 +1196,108 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            provides the manuscript anchor; the slide reads as one
            continuous folio rather than a card on a page. */
 
-        /* H1 — three lines, three jobs.
-           Tribal line: italic, house burgundy, a hair of tracking.
-           Middle line: roman, plain ink (the matter-of-fact act).
-           Closing line: italic, plain ink (the purpose, the turn).
-           The burgundy tint carries the identity colour through from
-           the CTA; the roman middle is the anchor; the italics frame. */
+        /* H1 — title-page composition.
+           Three registers, deliberately distinct so each line is
+           unmistakably a different VOICE — not just a different size.
+           Outer brackets: small-caps roman with wide tracking → reads
+           like a Roman inscription, declarative, civic.
+           Main line: large italic → the BOOK TITLE, the artifact, the
+           thing being inscribed. Hand of the author.
+           The contrast (geometric small-caps ↔ flowing italic) is what
+           makes the composition feel like a frontispiece, not a banner. */
         .hero-h1 {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-weight: 400;
           font-style: normal;
-          font-size: 52px;
-          line-height: 1.1;
-          letter-spacing: -0.014em;
           color: #1a1318;
           text-align: center;
           margin: 0;
-          max-width: 980px;
+          max-width: 1180px;
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "calt" 1;
+          font-variant-ligatures: common-ligatures discretionary-ligatures;
+          animation: heroFadeIn 1200ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
         }
         .hero-h1 em {
           font-style: italic;
         }
-        /* H1 line variants — asymmetric bracketed layout.
-           Brackets sit at the extremes (left, right), faint and small,
-           framing the load-bearing middle line which gets the full
-           visual weight. */
+        /* Brackets — Roman inscription marginalia. Small caps, wide
+           letter-spacing, lightweight, faint. The tone says "stated
+           plainly, with weight" — like a dateline or a legend. */
         .hero-h1 .hero-bracket {
           display: block;
-          font-size: 22px;
-          font-style: italic;
+          font-size: 14px;
+          font-style: normal;
           font-weight: 400;
-          color: rgba(26, 19, 24, 0.42);
-          letter-spacing: 0.002em;
-          line-height: 1.3;
+          color: rgba(26, 19, 24, 0.55);
+          letter-spacing: 0.32em;
+          line-height: 1;
+          padding-bottom: 2px;
+          text-transform: uppercase;
+          font-feature-settings: "kern" 1, "smcp" 1;
+          font-variant-caps: all-small-caps;
         }
         .hero-h1 .bracket-left {
-          text-align: left;
+          text-align: center;
+          margin-bottom: 26px;
         }
         .hero-h1 .bracket-right {
-          text-align: right;
+          text-align: center;
+          margin-top: 26px;
+          padding-right: 0;
         }
+        /* Main line — the book title. Large italic, generous size,
+           tight tracking, gentle text-shadow that suggests letterforms
+           pressed slightly into the wall. The artifact gets its own
+           voice: italic, hand-drawn, elevated. */
         .hero-h1 .hero-main {
           display: inline-block;
-          font-style: normal;
+          font-style: italic;
+          font-weight: 400;
+          font-size: 76px;
+          line-height: 1.05;
+          letter-spacing: -0.02em;
           color: #1a1318;
           text-align: center;
-          padding: 11px 0 4px;
+          padding: 0;
           position: relative;
+          text-shadow:
+            0 1px 0 rgba(255, 250, 240, 0.55),
+            0 2px 6px rgba(40, 25, 18, 0.05);
+        }
+        /* Hairline rules above and below the main line — manuscript
+           ruling that frames the title without enclosing it. The
+           gradient fades at both ends so the rules dissolve into the
+           cream wall rather than terminating in a hard edge. */
+        .hero-h1 .hero-main::before,
+        .hero-h1 .hero-main::after {
+          content: '';
+          position: absolute;
+          left: 8%;
+          right: 8%;
+          height: 1px;
+          background: linear-gradient(
+            to right,
+            transparent 0%,
+            rgba(26, 19, 24, 0.28) 30%,
+            rgba(26, 19, 24, 0.28) 70%,
+            transparent 100%
+          );
+        }
+        .hero-h1 .hero-main::before {
+          top: -12px;
+        }
+        .hero-h1 .hero-main::after {
+          bottom: -8px;
+        }
+        @keyframes heroFadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(14px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         @keyframes pageFadeIn {
           from {
@@ -1240,32 +1327,110 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           color: #2a1f28;
           text-align: center;
-          max-width: 640px;
+          max-width: 600px;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 13px;
+          gap: 18px;
         }
+        /* Manifesto body — book typography. Justified column, generous
+           leading, optical features on. Reads like the opening of a
+           well-set chapter: narrow column, dense type, breathing room. */
         .manifesto p {
           margin: 0;
-          font-size: 18px;
-          line-height: 1.5;
+          font-size: 20px;
+          line-height: 1.7;
+          letter-spacing: 0.008em;
+          text-align: justify;
+          text-align-last: center;
+          hyphens: auto;
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "calt" 1, "onum" 1;
+          font-variant-ligatures: common-ligatures discretionary-ligatures;
+          hanging-punctuation: first last;
+          animation: manifestoFadeIn 1400ms 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
         }
-        /* Plain emphasis — italic burgundy, regular weight. Used for
-           lighter accents like 'the lever'. */
+        /* Incipit — the first 3 words in small caps after the drop cap.
+           Classical book convention: the eye is led from the illuminated
+           initial through the small-caps opening into the body type.
+           Three typographic registers in one phrase. */
+        .manifesto p .manifesto-incipit {
+          font-feature-settings: "kern" 1, "smcp" 1, "c2sc" 1;
+          font-variant-caps: all-small-caps;
+          letter-spacing: 0.08em;
+          font-weight: 500;
+          color: #1a1318;
+        }
+        @keyframes manifestoFadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        /* Illuminated initial — the "a" of alexandria as the manuscript
+           initial of a chapter. Big enough to clearly be a typographic
+           gesture, not a typo. Italic burgundy with layered text-shadow
+           (highlight + soft halo + drop) creates the embossed feel of
+           a hand-pressed letter. Tuned vertical-align so it descends
+           below the baseline and sits beside the small-caps incipit. */
+        .manifesto p:first-of-type::first-letter {
+          font-size: 4.4em;
+          font-style: italic;
+          font-weight: 600;
+          line-height: 0.78;
+          letter-spacing: -0.04em;
+          vertical-align: -0.36em;
+          margin-right: 0.06em;
+          color: #3a0f3d;
+          text-shadow:
+            0 1px 0 rgba(255, 250, 240, 0.7),
+            0 2px 4px rgba(58, 15, 61, 0.14),
+            0 8px 22px rgba(58, 15, 61, 0.10);
+        }
+        /* Fleuron break — typographic ornament between body and close.
+           A real manuscript element: not decoration, a rhetorical pause.
+           The eye stops here, the next phrase delivers a verdict. */
+        .fleuron-break {
+          margin: 4px 0 0;
+          line-height: 1;
+          opacity: 0;
+          animation: manifestoFadeIn 1400ms 520ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+        }
+        .fleuron-break .fleuron-glyph {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 24px;
+          font-style: italic;
+          color: rgba(58, 15, 61, 0.55);
+          line-height: 1;
+          letter-spacing: 0.4em;
+          padding-left: 0.4em;
+          user-select: none;
+        }
+        /* Plain emphasis — italic burgundy, weight 500. Subtle hover
+           glow when the reader pauses on the phrase. */
         .manifesto p em {
           font-style: italic;
+          font-weight: 500;
           color: #3a0f3d;
-          transition: text-shadow 280ms ease, color 280ms ease;
+          letter-spacing: 0.01em;
+          transition: text-shadow 320ms ease, color 320ms ease;
         }
         .manifesto p em:hover {
           text-shadow: 0 0 14px rgba(58, 15, 61, 0.32);
           color: #2a0a2d;
         }
-        /* Strong emphasis — load-bearing phrases. Bolder italic
-           burgundy, no underline. Lets the weight do the work. */
+        /* Strong emphasis — load-bearing phrases. Heavier italic with
+           a hairline underline that fades from the burgundy. The line
+           reads like an ink-pen stroke beneath a manuscript phrase. */
         .manifesto p em.em-strong {
           font-weight: 600;
+          text-decoration: underline;
+          text-decoration-color: rgba(58, 15, 61, 0.28);
+          text-decoration-thickness: 1px;
+          text-underline-offset: 4px;
         }
         .manifesto em {
           font-style: italic;
@@ -1279,30 +1444,36 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           user-select: none;
           font-style: italic;
         }
-        /* Close — two voices in one line.
-             faint setup: quiet, lighter color, regular weight
-             strong payoff: bold, underlined, ink-dark
-           Body shouts; close splits into setup + verdict. */
+        /* Close — two voices, one line.
+             faint setup: quiet manuscript marginalia (the broader fact)
+             strong payoff: ink-dark italic with a confident underline
+           The split is the whole point — the body argues; the close
+           delivers the verdict, separated by a typographic pause. */
         .manifesto-close {
           font-style: normal;
-          font-size: 17.5px !important;
+          font-size: 18px !important;
           font-weight: 400;
           max-width: 820px;
-          margin: 27px auto 0 !important;
-          letter-spacing: 0.005em;
+          margin: 32px auto 0 !important;
+          letter-spacing: 0.012em;
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1;
         }
         .close-faint {
-          color: rgba(26, 19, 24, 0.5);
+          color: rgba(26, 19, 24, 0.48);
+          font-style: italic;
+          font-weight: 300;
+          letter-spacing: 0.02em;
         }
         .close-strong {
           color: #3a0f3d;
           font-style: italic;
           font-weight: 500;
+          font-size: 1.08em;
           letter-spacing: 0.004em;
           text-decoration: underline;
           text-decoration-color: rgba(58, 15, 61, 0.55);
           text-decoration-thickness: 1px;
-          text-underline-offset: 4px;
+          text-underline-offset: 5px;
         }
         /* Watermark — large faint italic 'a.' sitting behind everything,
            lower portion of the slide, off-centre to the left. Marks the
@@ -1310,7 +1481,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .watermark {
           position: fixed;
           bottom: 12%;
-          left: 32%;
+          left: 68%;
           transform: translateX(-50%);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
@@ -1328,7 +1499,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            the page is bracketed by manuscript marginalia. */
         .alpha-mark {
           position: absolute;
-          bottom: 27px;
+          bottom: 56px;
           left: 58px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
@@ -1354,6 +1525,17 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .alpha-mark a.alpha-cta:hover .alpha-cta-underline {
           text-decoration-color: #3a0f3d;
+        }
+        /* Location line — small italic geographic credit beneath the
+           investor CTA. Reads as a museum credits subtitle. Quieter
+           than the CTA above so the call-me line stays primary. */
+        .alpha-mark-loc {
+          display: block;
+          margin-top: 3px;
+          font-style: italic;
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          color: rgba(26, 19, 24, 0.32);
         }
         /* Scroll cue — soft pulsing chevron beneath the close.
            Tells the reader where to go without saying it. */
@@ -1599,6 +1781,22 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           display: flex;
           flex-direction: column;
         }
+        /* Colophon imprint — Latin motto at the bottom-right of the
+           stage, like a faint mark on the closing page of a book.
+           Subtle: italic, generous letter-spacing for breath. */
+        .colophon-imprint {
+          position: absolute;
+          bottom: 32px;
+          right: 96px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-weight: 400;
+          font-size: 12px;
+          letter-spacing: 0.18em;
+          color: var(--theme-fg-faint);
+          user-select: none;
+          pointer-events: none;
+        }
         .bottom-inner {
           --lower-block-bottom: 14px;
           max-width: 1700px;
@@ -1759,22 +1957,132 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            The spatial break from the upper argument is enough separation;
            keeping this block text-only makes the lower band feel less
            mechanically divided. */
-        .statement-close {
+        /* Epigraph — the WHY beat at the top of the right column.
+           Larger italic register, distinct from the body prose below.
+           Carries the visual top alignment offset (was on .statement-close)
+           so the epigraph's first line aligns with the ornament's top. */
+        .statement-epigraph {
           position: relative;
           margin: 0;
           padding-left: 0;
           padding-top: 14px;
           transform: translateY(-20px);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 23px;
-          line-height: 1.45;
-          font-style: normal;
-          letter-spacing: 0.003em;
+          font-size: 26px;
+          line-height: 1.4;
+          font-style: italic;
+          font-weight: 400;
+          letter-spacing: 0.005em;
           color: var(--theme-fg);
           hanging-punctuation: first last;
         }
+        .statement-close {
+          position: relative;
+          margin: 0;
+          padding-left: 0;
+          padding-top: 0;
+          transform: none;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 20px;
+          line-height: 1.55;
+          font-style: normal;
+          letter-spacing: 0.005em;
+          color: var(--theme-fg);
+          /* Book typography — justify the body so line endings align,
+             with the last line left-aligned (standard book convention).
+             Hanging punctuation lets quotes / dashes hang into the
+             margin. Hyphens enable cleaner justification on narrow
+             lines. Font features turn on ligatures, discretionary
+             ligatures (ct, st), and old-style numerals — character-
+             level quality that registers as "elite type" to the eye
+             without showing off. */
+          text-align: justify;
+          text-align-last: left;
+          hanging-punctuation: first last;
+          hyphens: auto;
+          -webkit-hyphens: auto;
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "onum" 1;
+        }
         .statement-close::before {
           content: none;
+        }
+        /* Salutation — small italic intro, like a Renaissance epistle
+           opener ("Lettore," "To the Reader,"). Letter-spaced lowercase
+           reads as a museum plate — sets the genre as a letter, not
+           a marketing block. */
+        .statement-salutation {
+          margin: 0 0 4px;
+          padding: 0;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 13px;
+          font-style: italic;
+          font-weight: 400;
+          letter-spacing: 0.18em;
+          color: var(--theme-fg-faint);
+          text-transform: lowercase;
+          user-select: none;
+        }
+        /* Section fleuron — manuscript ornament between body and
+           aphorism. Centered, faint, the visual breath that marks
+           the turn from offer to invitation. */
+        .statement-fleuron {
+          margin: 6px 0;
+          text-align: center;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 20px;
+          line-height: 1;
+          color: var(--theme-fg-faint);
+          letter-spacing: 0;
+          user-select: none;
+        }
+        /* Aphorism — the centerpiece self-id line, pulled out of the
+           trust prose into its own centered italic display register.
+           Larger than body, smaller than welcome — the page's quiet
+           climax. */
+        .statement-aphorism {
+          margin: 4px 0;
+          padding: 0;
+          text-align: center;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 22px;
+          line-height: 1.4;
+          font-style: italic;
+          font-weight: 400;
+          color: var(--theme-fg);
+          letter-spacing: 0.005em;
+        }
+        /* Welcome benediction — pulled out of the trust paragraph
+           into its own framed display element. Bracketed by fleurons
+           so it reads as a chapter-close benediction, not a footnote.
+           The frame creates ceremonial weight: ❦ ... ❦ */
+        .statement-welcome-frame {
+          margin: 18px 0 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 22px;
+          user-select: none;
+        }
+        .welcome-flourish {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 20px;
+          font-style: normal;
+          color: var(--theme-fg-faint);
+          letter-spacing: 0;
+          line-height: 1;
+        }
+        .statement-welcome {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-weight: 500;
+          font-size: 30px;
+          line-height: 1.2;
+          letter-spacing: 0;
+          color: var(--theme-fg);
+          text-decoration: underline;
+          text-decoration-color: var(--theme-fg-faint);
+          text-decoration-thickness: 1px;
+          text-underline-offset: 6px;
         }
         /* Forcing function — the single load-bearing claim that converts.
            Same vocabulary as .statement em.em-strong but tuned for the
@@ -1789,15 +2097,22 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           text-shadow: 0 0 18px var(--theme-fg-muted);
         }
         /* Destination — "welcome to alexandria." The reader's eye arrival.
-           Underlined like a place on a map, not a link. */
+           Underlined like a place on a map, not a link. Sized larger
+           than the body so it lands as the climactic destination, not
+           a footnote. */
         .statement-close .close-strong {
+          display: inline-block;
+          margin-top: 6px;
           color: var(--theme-fg);
           font-style: italic;
           font-weight: 500;
+          font-size: 24px;
+          line-height: 1.25;
+          letter-spacing: 0;
           text-decoration: underline;
           text-decoration-color: var(--theme-fg-faint);
           text-decoration-thickness: 1px;
-          text-underline-offset: 4px;
+          text-underline-offset: 5px;
         }
 
         /* COLUMNS — three branches, now in the bottom-right block.
@@ -1869,11 +2184,58 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           align-items: flex-start;
           gap: 36px;
         }
+        /* Breathing room — separate the action from the welcome
+           line so the close lands as a destination, not a button
+           caption. Adds to the 18px flex gap on right-lower. */
+        .right-lower > .cta-pair {
+          margin-top: 30px;
+        }
         .cta-block {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
           gap: 7px;
+        }
+        /* Footer-cols — supplementary nav grouped by intent. Sits below
+           the CTAs as a quiet link directory. Italic small-caps column
+           heads, plain link text. Mirrors the back-slide register Fleet
+           uses but tuned to the warm cream / burgundy palette. */
+        .footer-cols {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, auto));
+          gap: 56px;
+          margin-top: 163px;
+          padding-top: 28px;
+          border-top: 1px solid rgba(26, 19, 24, 0.12);
+        }
+        .footer-col {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .footer-col-head {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-weight: 400;
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          text-transform: lowercase;
+          color: rgba(var(--theme-fg-rgb, 26, 19, 24), 0.5);
+          margin-bottom: 4px;
+          user-select: none;
+        }
+        .footer-col-link {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 13.5px;
+          font-weight: 400;
+          color: var(--theme-fg);
+          text-decoration: none;
+          line-height: 1.5;
+          letter-spacing: 0.005em;
+          transition: color 180ms ease, opacity 180ms ease;
+        }
+        .footer-col-link:hover {
+          opacity: 0.62;
         }
         .cta-pair a.lr-cta {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -2208,33 +2570,33 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
           .nav {
             padding: 18px 18px;
-            /* Frosted backdrop — on mobile the slides flow naturally
+            /* Solid backdrop — on mobile the slides flow naturally
                (no peel), so prose scrolls up THROUGH the fixed nav.
-               Without a backdrop the brand text overlaps the body
-               text behind. Slight tint of the active theme bg + blur
-               keeps the nav legible without committing to a hard bar. */
-            background: color-mix(in srgb, var(--theme-bg, #f7f2ec) 78%, transparent);
-            backdrop-filter: blur(10px) saturate(1.05);
-            -webkit-backdrop-filter: blur(10px) saturate(1.05);
+               Need an opaque-enough background that body text behind
+               doesn't bleed through and overlap the brand. Blur stays
+               for the soft frosted edge feel. */
+            background: color-mix(in srgb, var(--theme-bg, #f7f2ec) 94%, transparent);
+            backdrop-filter: blur(14px) saturate(1.05);
+            -webkit-backdrop-filter: blur(14px) saturate(1.05);
           }
           .nav-brand {
             font-size: 22px;
           }
           /* Mobile collapses the inline links into a hamburger menu.
-             The nav-links stay in the DOM (still rendered for desktop)
-             but hide visually; the toggle button appears in their place
-             and reveals the panel below the nav. */
+             Mobile shows the same letter · whitepaper inline as desktop
+             — the desktop nav was already trimmed to 2 links, which fits
+             on a phone without a hamburger. The toggle + menu panel are
+             dropped on mobile entirely. */
           .nav-links {
-            display: none;
+            display: flex;
+            font-size: 13px;
+            gap: 14px;
           }
           .nav-toggle {
-            display: flex;
+            display: none;
           }
-          /* Mobile-only: render the menu panel so it can fade in when
-             toggled. Display stays flex; opacity + pointer-events do
-             the actual showing/hiding. */
           .nav-menu {
-            display: flex;
+            display: none;
           }
           /* Tagline visible on mobile under the brand. */
           .nav-tagline {
@@ -2252,14 +2614,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .hero-h1 {
             font-size: clamp(30px, 7vw, 56px);
           }
-          .alpha-mark,
-          .folio {
+          .alpha-mark {
             position: absolute;
-            bottom: 24px;
+            bottom: 64px;
+            left: 20px;
             font-size: 10.5px;
           }
-          .alpha-mark { left: 20px; }
-          .folio { right: 20px; font-size: 9.5px; letter-spacing: 0.14em; }
 
           /* Mobile spacing — the two-slide peel format is gone here;
              everything flows naturally. Give every block more
@@ -2347,6 +2707,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             font-size: clamp(16px, 1.9vw, 19px);
             line-height: 1.5;
           }
+          .statement-close .close-strong {
+            font-size: clamp(22px, 3.2vw, 28px);
+            margin-top: 6px;
+          }
           .statement-close::before {
             left: 0;
           }
@@ -2396,11 +2760,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           background-position: 50% 30%;
           background-size: cover;
           background-repeat: no-repeat;
-          /* Opacity tracks the peel: 0.18 on front (faint watermark — the
-             fresco frames, doesn't compete with text), fades to 0.04 on
-             back so the bottom-slide content reads cleanly. */
-          opacity: calc(0.18 - var(--peel-progress, 0) * 0.14);
-          filter: sepia(0.7) saturate(0.5) contrast(0.95);
+          /* Centerpiece, not watermark — the fresco IS the visual hero,
+             like Fleet's world cluster. Opacity tracks the peel: 0.48 on
+             front (visible enough to read as the focal gesture), fades to
+             0.05 on back so the bottom-slide content reads cleanly. */
+          opacity: calc(0.48 - var(--peel-progress, 0) * 0.43);
+          filter: sepia(0.35) saturate(0.7) contrast(1) brightness(1.02);
           pointer-events: none;
           z-index: 22;
           /* Narrow horizontal band at upper portion. Top fades out so the
@@ -2409,8 +2774,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              Lower fades out so the manifesto + closer sit on clean cream
              (no anatomy behind the conversion line). The vignette is the
              editorial decision: the iconic moment, nothing else. */
-          -webkit-mask-image: radial-gradient(ellipse 70% 28% at 50% 32%, #000 0%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0) 100%);
-          mask-image: radial-gradient(ellipse 70% 28% at 50% 32%, #000 0%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0) 100%);
+          -webkit-mask-image: radial-gradient(ellipse 72% 30% at 50% 32%, #000 0%, rgba(0,0,0,0.95) 42%, rgba(0,0,0,0) 100%);
+          mask-image: radial-gradient(ellipse 72% 30% at 50% 32%, #000 0%, rgba(0,0,0,0.95) 42%, rgba(0,0,0,0) 100%);
         }
         @media (max-width: 899px) {
           /* Mobile: shift the slice to favour Adam — his body fills the
