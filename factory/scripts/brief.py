@@ -31,8 +31,14 @@ LOG = ALEX / ".brief_log"
 LAST_RUN = ALEX / ".autoloop" / "last_run.md"
 
 DEFAULT_BODY = "no material change overnight."
-# Daily routine + buffer for sync lag and timezone offset between brief and routine.
-STALE_HOURS = 30
+# Outbox content from before this threshold is treated as stale (yesterday's
+# run, not today's). The autoloop fires at 14:00 UTC, the brief at 15:00 UTC
+# — today's outbox is ~50 min old when read. 20h rejects anything older than
+# this morning while leaving slack for autoloop running late.
+OUTBOX_STALE_HOURS = 20
+# Last_run.md older than this triggers the "routine never ran" alarm. Daily
+# routine + buffer for sync lag and DST drift.
+LAST_RUN_STALE_HOURS = 30
 # A claude/* branch counts as a "live strand" only if its tip is this fresh.
 # Older branches are leftover artefacts from successful runs that are now on master.
 STRAND_FRESH_HOURS = 26
@@ -91,7 +97,7 @@ def read_fresh_outbox() -> Optional[str]:
             return text  # git inspection failed — fail open, use the content
         commit_time = int(proc.stdout.strip())
         age_h = (datetime.now(timezone.utc).timestamp() - commit_time) / 3600
-        if age_h > STALE_HOURS:
+        if age_h > OUTBOX_STALE_HOURS:
             return None
         return text
     except Exception as e:
@@ -197,7 +203,7 @@ def main() -> int:
             body = "alarm: machine routine has never run — no last_run.md found."
         else:
             age_h = (datetime.now(timezone.utc).timestamp() - LAST_RUN.stat().st_mtime) / 3600
-            if age_h > STALE_HOURS:
+            if age_h > LAST_RUN_STALE_HOURS:
                 body = f"alarm: machine routine stale — last_run.md is {age_h:.0f}h old."
 
     msg = EmailMessage()
