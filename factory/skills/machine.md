@@ -77,20 +77,24 @@ If rebase has conflicts you can't auto-resolve, abort the rebase, leave the work
 
 Write a report to `~/alexandria/system/.autoloop/last_run.md` — include entries processed, entries remaining, and any signal you noticed but couldn't act on yet.
 
-## Brief delivery is NOT this loop's job
+## Brief outbox
 
-The autoloop produces vault-processing artefacts (constitution writes, notepad fragments, shadow drafts, last_run.md). It does NOT send email or deliver the morning brief.
+When the run produces something the Author should see in the morning email — constitutional surgery, library drafts ready for review, restructure signals, errors that need their attention — write one short line to `~/alexandria/system/.brief_outbox` and commit it with the rest of the run.
 
-Email delivery is a separate, fully sovereign loop on the Author's own machine: `factory/skills/brief-setup.md` installs `~/alexandria/system/brief.py` + a launchd schedule + the Author's own SMTP credentials. The brief sender runs locally on its own clock and reads from `~/alexandria/system/.brief_outbox` (one line) when present, falling back to a default line when absent.
+The brief sender runs locally on the Author's mac (separate sovereign loop, see `factory/skills/brief-setup.md`). It pulls master before sending, reads `.brief_outbox`, and uses that as the email body. **Git is the transport** — the outbox file is committed and pushed like any other artefact, so it works regardless of where the autoloop runs (claude.ai, github actions, local cron, anywhere). The outbox file is NOT gitignored.
 
-If you want today's autoloop work to surface in the Author's brief, write one line to `~/alexandria/system/.brief_outbox` BUT only when the autoloop is running on the same machine as `brief.py` (e.g. local cron / local launchd-driven autoloop). For remote runtimes (claude.ai trigger, github actions, anywhere off the Author's mac) the file write does not reach the local sender — skip the outbox and let the default fire.
+If nothing this run is worth surfacing, do not write the outbox. Brief defaults to silent. Brief delivery itself is not this loop's job — only producing the content is.
+
+You do not need to write a separate marker for stranded work. The brief sender independently detects strands by checking `claude/*` branches against master, reads the outbox from the strand branch, and surfaces the rescue command. Just write the outbox normally and let the strand detector do its job if your push doesn't land.
 
 ## Verification (run last)
 
 Before exiting, verify your own work:
 1. Did last_run.md get written? Read it back.
-2. Did the git commit and push succeed? Check `git -C ~/alexandria log -1 --oneline`.
+2. **Did the master push actually land?** Run `git ls-remote origin master | cut -f1` and compare to `git rev-parse HEAD`. If they differ, the push didn't land — your work is stranded on the `claude/*` branch. This is the most important check; without it `## Status: complete` is a lie.
 3. Did the protocol call succeed? If not, log it.
 4. Did the audit find anything worth clearing from `.alexandria_errors`? If items were acted on, remove the corresponding lines. If items remain unactionable, leave them — the next run sees them.
 
-Append a `## Status` section to last_run.md: `complete` or `partial` with what failed.
+Append a `## Status` section to last_run.md:
+- `complete` only if local HEAD matches `origin/master` after the push.
+- `partial: master push did not land — stranded on <branch>` when (2) failed. The brief sender will surface the strand to the Author automatically — no manual escalation needed.
