@@ -264,7 +264,23 @@ export default function MarkdownDoc({ src, header, homeHref = '/', numbered = fa
   const [content, setContent] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(src).then(r => r.text()).then(setContent);
+    fetch(src)
+      .then((r) => {
+        if (!r.ok) throw new Error(`${src} → HTTP ${r.status}`);
+        return r.text();
+      })
+      .then(setContent)
+      .catch(() => {
+        // Source missing — surface loudly rather than render the Next.js
+        // 404 HTML body as garbled markdown. A deleted .md should fail
+        // visibly so the route gets removed too (the only reason this
+        // ever 404s is a stale route after a docs cleanup).
+        setContent(
+          '# this document is being prepared\n\n' +
+            "the page you're looking for is on the shelf but hasn't been put back yet. " +
+            '[return to alexandria.](/)',
+        );
+      });
   }, [src]);
 
   const parsed = useMemo(() => {

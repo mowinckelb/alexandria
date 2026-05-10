@@ -154,13 +154,29 @@ async function auditOne(browser, vp, route) {
         h: Math.round(r.height),
       };
     });
-    // Touch target audit — buttons/links < 32px tall on mobile-ish viewports
+    // Touch target audit — buttons/links < 32px tall on mobile-ish
+    // viewports. Excludes inline-in-paragraph links: WCAG 2.5.5 explicitly
+    // exempts inline targets ("the target is in a sentence or block of
+    // text") because adjacent context resolves mis-taps. Walk up to <p>;
+    // if found, the link is inline copy — not a standalone control —
+    // and is acceptable at body-text height.
     if (window.innerWidth < 1024) {
       const small = [];
+      const isInlineInParagraph = (el) => {
+        let cur = el.parentElement;
+        for (let depth = 0; cur && depth < 6; depth++, cur = cur.parentElement) {
+          const tag = cur.tagName.toLowerCase();
+          if (tag === 'p' || tag === 'li' || tag === 'blockquote') return true;
+          // Hard stops — interactive containers reset the "is body copy" claim.
+          if (tag === 'nav' || tag === 'header' || tag === 'footer' || tag === 'main') return false;
+        }
+        return false;
+      };
       for (const el of document.querySelectorAll('a, button')) {
         const r = el.getBoundingClientRect();
         if (r.width === 0 || r.height === 0) continue;
         if (r.height < 32 && r.width > 4) {
+          if (isInlineInParagraph(el)) continue;
           small.push({
             tag: el.tagName.toLowerCase(),
             text: (el.textContent || '').trim().slice(0, 30),
