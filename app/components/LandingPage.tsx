@@ -175,20 +175,28 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
     if (v === 'arch' || v === 'frame') setCenterpieceVariant(v);
   }, []);
 
-  // Breeze video — flip .is-ready when the video can play. React's
-  // onCanPlay sometimes misses the firing if 'canplay' fires before
-  // hydration, so we check readyState on mount and bind a listener
-  // for the case where it isn't ready yet.
+  // Breeze video — Safari blocks autoplay on the muted attribute alone
+  // because React doesn't reflect `muted` as an HTML attribute, so the
+  // initial DOM parse reads as unmuted and Safari shows its click-to-
+  // play overlay. Forcing v.muted=true via ref then calling .play()
+  // satisfies the autoplay policy. Also flip .is-ready on canplay.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    const reveal = () => v.classList.add('is-ready');
+    v.muted = true;
+    v.defaultMuted = true;
+    const tryPlay = () => v.play().catch(() => {});
+    const reveal = () => {
+      v.classList.add('is-ready');
+      tryPlay();
+    };
     if (v.readyState >= 3) {
       reveal();
     } else {
       v.addEventListener('canplay', reveal, { once: true });
       v.addEventListener('loadeddata', reveal, { once: true });
     }
+    tryPlay();
     return () => {
       v.removeEventListener('canplay', reveal);
       v.removeEventListener('loadeddata', reveal);
