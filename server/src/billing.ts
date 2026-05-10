@@ -11,12 +11,11 @@ import Stripe from 'stripe';
 import type { Hono } from 'hono';
 import { logEvent } from './analytics.js';
 import { callbackPageHtml } from './templates.js';
-import { hashApiKey } from './crypto.js';
 import { requireAuth } from './auth.js';
 import { loadAccounts, getKV } from './kv.js';
 import { getAccountByLogin } from './accounts.js';
 import { getDB } from './db.js';
-import { sendPatronAck } from './email.js';
+import { sendEmail } from './email.js';
 
 // ---------------------------------------------------------------------------
 // Stripe client — lazy init (needs env to be populated)
@@ -857,15 +856,13 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
         }
 
         case 'invoice.paid': {
-          // Send kin nudge receipt after each billing cycle
+          // State upsert only — Stripe sends the receipt itself.
           const invoice = event.data.object as Stripe.Invoice;
-          // Skip Library purchases and non-subscription invoices
           if (invoice.metadata?.kind === 'library' || invoice.metadata?.library_purchase === 'true') break;
           const subId = extractSubscriptionId(invoice);
           if (subId) {
             try {
               const sub = await stripe.subscriptions.retrieve(subId);
-
               if (sub.metadata?.kind === 'patron') {
                 const email = (sub.metadata?.follow_email || invoice.customer_email || '').toLowerCase();
                 const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id || '';
@@ -876,42 +873,10 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
                     email,
                     status: sub.status,
                   });
-                  // Acknowledgment only on first invoice — Stripe handles renewal receipts.
-                  if (invoice.billing_reason === 'subscription_create') {
-                    const amountDollars = (invoice.amount_paid || 0) / 100;
-                    try {
-                      const portalUrl = await createPortalSession(customerId);
-                      await sendPatronAck(email, amountDollars, portalUrl);
-                      logEvent('follow_subscription_ack_sent', { amount: String(amountDollars) });
-                    } catch (e) {
-                      console.error('[billing] Patron ack email failed:', e);
-                    }
-                  }
-                }
-                break;
-              }
-
-              const subLogin = sub.metadata?.github_login || sub.metadata?.api_key;
-              if (subLogin) {
-                // Find account by login (primary) or api_key hash (legacy)
-                type BillingAccount = { github_login?: string; api_key_hash?: string; email?: string };
-                const accounts = await loadAccounts<Record<string, BillingAccount>>();
-                const legacyKeyHash = subLogin.startsWith('alex_') ? hashApiKey(subLogin) : null;
-                const user = Object.values(accounts).find((account) => {
-                  if (account.github_login === subLogin) return true;
-                  if (legacyKeyHash) return account.api_key_hash === legacyKeyHash;
-                  return false;
-                });
-                if (user?.email && user.github_login) {
-                  const kinData = await countActiveKin(user.github_login);
-                  const amountPaid = (invoice.amount_paid || 0) / 100;
-                  const kinNeeded = Math.max(0, KIN_THRESHOLD - kinData.compliant);
-                  await sendKinReceiptEmail(user.email, user.github_login, amountPaid, kinData.compliant, kinNeeded);
-                  logEvent('kin_receipt_sent', { github_login: user.github_login, compliant_kin: String(kinData.compliant), amount: String(amountPaid) });
                 }
               }
             } catch (e) {
-              console.error('[billing] Kin receipt email failed:', e);
+              console.error('[billing] invoice.paid handler failed:', e);
             }
           }
           break;
@@ -960,11 +925,12 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
           break;
         }
 
-        // SetupIntent / PaymentIntent failure visibility. Stripe-hosted
-        // Checkout surfaces errors to the user, but without these cases we
-        // have no server-side trace of declines, SCA failures, or wallet
-        // aborts. Added 2026-05-10 after an Apple Pay drop-off left no event
-        // trail to diagnose.
+        // SetupIntent failures — author signup (BETA setup mode + non-BETA trial
+        // mode both run a SetupIntent before any charge). Stripe-hosted Checkout
+        // surfaces these to the user via the UI; we log them so failure modes
+        // (issuer declines, SCA timeouts, wallet quirks) are visible server-side
+        // instead of silent. Triggered by ayo@kaizenlab.co Apple Pay abandonment
+        // 2026-05-10 — Stripe never received an Intent so nothing was logged.
         case 'setup_intent.setup_failed': {
           const intent = event.data.object as Stripe.SetupIntent;
           const err = intent.last_setup_error;
@@ -979,6 +945,7 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
           break;
         }
 
+        // PaymentIntent failures — library one-time purchases. Same rationale.
         case 'payment_intent.payment_failed': {
           const intent = event.data.object as Stripe.PaymentIntent;
           const err = intent.last_payment_error;
@@ -993,10 +960,11 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
           break;
         }
 
+        // Session expired — user opened Checkout but never completed. Useful
+        // conversion-loss signal; emits ~24h after creation if no completion.
         case 'checkout.session.expired': {
           const session = event.data.object as Stripe.Checkout.Session;
           logEvent('billing_checkout_expired', {
-            session_id: session.id,
             kind: session.metadata?.kind || 'unknown',
             mode: session.mode || 'unknown',
             email: session.customer_email || '',
@@ -1071,57 +1039,6 @@ export async function settleMonthlyTabs(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Kin receipt email — sent after each billing cycle
-// ---------------------------------------------------------------------------
-
-async function sendKinReceiptEmail(
-  email: string,
-  githubLogin: string,
-  amountPaid: number,
-  activeKin: number,
-  kinNeeded: number,
-): Promise<void> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
-  const kinLink = `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}`;
-
-  const kinLine = kinNeeded === 0
-    ? `<p style="font-size: 1rem; color: #3d3630; margin: 0;">you have ${activeKin} active kin. alexandria is free.</p>`
-    : `<p style="font-size: 1rem; color: #3d3630; margin: 0;">you have ${activeKin} active kin. ${kinNeeded} more and it&rsquo;s free.</p>`;
-
-  const amountLine = amountPaid === 0
-    ? `<p style="font-size: 1.15rem; color: #3d3630; margin: 0 0 1.5rem;">$0 this month.</p>`
-    : `<p style="font-size: 1.15rem; color: #3d3630; margin: 0 0 1.5rem;">$${amountPaid.toFixed(0)} this month.</p>`;
-
-  const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 420px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
-  ${amountLine}
-  ${kinLine}
-  <p style="font-size: 0.85rem; color: #8a8078; margin: 1.5rem 0 0;"><a href="${kinLink}" style="color: #8a8078;">your kin link</a></p>
-  <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 2rem;">the examined life.</p>
-</div>`;
-
-  try {
-    const resp = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'Alexandria <a@mowinckel.ai>',
-        to: email,
-        subject: amountPaid === 0 ? 'alexandria. — free this month' : `alexandria. — $${amountPaid.toFixed(0)} this month`,
-        html,
-      }),
-    });
-    if (!resp.ok) {
-      console.error('[billing] Receipt email Resend error:', resp.status, await resp.text());
-    }
-  } catch (err) {
-    console.error('[billing] Receipt email send failed:', err);
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Pre-bill warning — fired from invoice.upcoming when the user is about to be
 // charged. Lead time lets them recover the discount instead of being surprised.
 // ---------------------------------------------------------------------------
@@ -1173,26 +1090,8 @@ async function sendPreBillWarningEmail(
   <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 2rem;">the examined life.</p>
 </div>`;
 
-  try {
-    const resp = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'Alexandria <a@mowinckel.ai>',
-        to: email,
-        subject: 'alexandria. — heads up',
-        html,
-      }),
-    });
-    if (!resp.ok) {
-      logEvent('kin_prebill_warning_failed', { status: String(resp.status) });
-      console.error('[billing] Pre-bill warning Resend error:', resp.status, await resp.text());
-    }
-  } catch (err) {
-    logEvent('kin_prebill_warning_failed', { reason: 'send_threw' });
-    console.error('[billing] Pre-bill warning send failed:', err);
+  const result = await sendEmail(email, 'alexandria. — heads up', html);
+  if (!result.ok) {
+    logEvent('kin_prebill_warning_failed', { reason: result.error || 'unknown' });
   }
 }
