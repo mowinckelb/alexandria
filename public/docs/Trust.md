@@ -1,6 +1,27 @@
 # Trust
 
-You are about to run a curl command that puts files on your machine, modifies your ai config, and makes network calls every session. You should know exactly what it does. This page is the full disclosure.
+You are about to run a curl command that puts files on your machine, modifies your ai config, and pulls live code from GitHub on every session. Read this once. If anything here doesn't match the scripts, don't run it.
+
+## TL;DR for the auditor
+
+- **What runs:** plain bash scripts and markdown. No binaries, no daemons, no shell-rc edits, no root.
+- **Source of truth:** `github.com/mowinckelb/alexandria` (public). Everything you can audit, you can audit there.
+- **Trust model:** mutable, by design. The hooks payload is fetched from `main` on every session. You're trusting an ongoing relationship with the public repo, not a frozen install. Tradeoff is named below.
+- **What our server holds:** your email, GitHub user ID, hashed API key, an event log of which endpoints you hit, and any files you explicitly publish to the Library. Nothing else.
+- **What our server does not hold:** your constitution, vault, ontology, transcripts, or AI-vendor API keys. There is no endpoint that accepts them.
+- **Uninstall:** three commands at the bottom of this page. Reversible.
+
+## Threat model
+
+We claim:
+1. The install does what this page says, and only that. Auditable line by line.
+2. Your private cognition (constitution, vault, ontology, transcripts) never leaves your machine via Alexandria. There is no endpoint that accepts it.
+3. A complete breach of our server yields the data listed above and nothing more — because nothing more is stored.
+
+We do not claim:
+- Zero metadata. The server logs which endpoints your account hits and when, and Cloudflare logs IPs at the edge.
+- Immunity to future repo compromise. If `mowinckelb/alexandria` is compromised, the next session pulls the compromised payload. Mitigations below; pinning is not one of them today.
+- Zero risk. AI tools execute hooks with your shell privileges. That is true of every editor extension, every dev-server, and every shell hook on your machine — but it is true here too.
 
 ## Inspect before running
 
@@ -8,109 +29,167 @@ You are about to run a curl command that puts files on your machine, modifies yo
 curl -s https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | less
 ```
 
-Read the bash script. Everything below explains what it does. If anything below does not match the script, do not run it.
+The setup is one bash script, ~685 lines. The hooks payload is one bash script, ~463 lines. The shim is 89 lines. Everything below describes what they do, in order.
 
-## What it puts on your machine
+## What gets installed on your machine
 
-**`~/alexandria/`** — a folder. Nothing hidden, nothing compiled. All readable.
+**`~/alexandria/`** — a folder. Plain markdown and small JSON state files. All readable.
 
-| Path | What it is | Can you read it? |
+| Path | Purpose |
+|---|---|
+| `files/constitution/` | Your beliefs, personality, working style. You write these. |
+| `files/vault/` | Raw input — transcripts, notes, voice memos. You drop things in. |
+| `files/ontology/` | Working thoughts between raw and settled. |
+| `files/library/` | Files you publish (opt-in). |
+| `files/core/` | Engine working memory (machine.md, notepad.md, feedback.md). |
+| `system/hooks/shim.sh` | 89-line wrapper. Fetches `.hooks_payload` from GitHub at session start. |
+| `system/.hooks_payload` | Cached copy of `factory/hooks/payload.sh` from the public repo. |
+| `system/canon/methodology.md` | Cached copy of the public canon. |
+| `system/.api_key` | Your API key, mode 0600. |
+
+**`~/.claude/skills/alexandria/SKILL.md`** — a skill file. Plain markdown. `cat` it.
+
+**`~/.claude/scheduled-tasks/alexandria/SKILL.md`** — optional scheduled task. Plain markdown. `cat` it.
+
+**`~/alexandria-fork/`** — only if you have `gh` authenticated. A sparse-checkout of your own GitHub fork of the public alexandria repo, used for publishing modules you write.
+
+## What gets modified in your config
+
+| File | Change | Inspect |
 |---|---|---|
-| `constitution/` | Markdown files about how you think | Yes — open in any editor |
-| `vault/` | Raw input — transcripts, notes, anything you drop in | Yes |
-| `hooks/shim.sh` | Thin wrapper — fetches and runs the hooks payload from GitHub | Yes — `cat` it |
-| `feedback.md` | What works and doesn't with you — append-only | Yes |
-| `machine.md` | Engine's notes on how to work with you | Yes |
-| `notepad.md` | Engine's working memory | Yes |
-| `ontology/` | Your thinking workspace — ideas between raw and settled | Yes |
-| `library/` | Published content (shadows, works, pulse) | Yes |
-| `.machine_signal` | Methodology observations for the marketplace — about the craft, not about you | Yes |
-| `.api_key` | Your API key | Yes |
-| `.canon_local` | Cached canon — fetched from GitHub (`factory/canon/methodology.md`), used locally | Yes |
-| `.block_complete` | Marker — first-session block has completed | Yes |
-| `.last_processed` | Timestamp — when vault was last processed | Yes |
-| `.session_feedback` | Your feedback, if given — sent to server at session end, then deleted | Yes |
-| `.autoloop/last_run.md` | Report from the last autoloop run | Yes |
+| `~/.claude/settings.json` | Adds 3 hook entries (SessionStart, SessionEnd, SubagentStart) pointing to the shim. | `cat ~/.claude/settings.json` |
+| `~/.cursor/hooks.json` | Only if Cursor detected. Adds 3 hook entries. | `cat ~/.cursor/hooks.json` |
+| `~/.cursor/rules/alexandria.mdc` | Only if Cursor detected. Plain markdown rule. | `cat ~/.cursor/rules/alexandria.mdc` |
+| `~/.codex/instructions.md` | Only if Codex detected. Appends a marked block (`<!-- alexandria:start -->` … `<!-- alexandria:end -->`). | `cat ~/.codex/instructions.md` |
+| `~/Library/LaunchAgents/io.alexandria.publish.plist` | macOS only, only if `gh` authenticated. Hourly publish job for your fork. | `cat ~/Library/LaunchAgents/io.alexandria.publish.plist` |
+| User crontab | Linux only, only if `gh` authenticated. One hourly line. | `crontab -l` |
 
-**`~/.claude/skills/alexandria/SKILL.md`** — a skill file that makes `/a` available in Claude Code. It tells the ai to read your constitution and follow the canon methodology. Plain markdown — `cat` it.
+**Not modified:** shell rc files (`.zshrc`, `.bashrc`, `.profile`), system PATH, sudoers, system services, anything outside `~/alexandria/`, `~/.claude/`, `~/.cursor/`, `~/.codex/`, and the launchd/cron entries above.
 
-**`~/.claude/scheduled-tasks/alexandria/SKILL.md`** — an optional autonomous maintenance task. Reprocesses your vault between sessions. Writes proposals to ontology that you confirm. Plain markdown — `cat` it.
+## The bootstrap-from-main model
 
-## What it changes in your config
+This is the most important property to understand.
 
-**`~/.claude/settings.json`** — adds three hook entries (SessionStart, SessionEnd, SubagentStart) pointing to the shim. Verify:
+The shim at `~/alexandria/system/hooks/shim.sh` is installed once and never re-fetched. On every Claude Code session start, it does this:
 
 ```
-cat ~/.claude/settings.json | grep -A 3 alexandria
+curl -sf https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/hooks/payload.sh
 ```
 
-**`~/.cursor/rules/alexandria.mdc`** — only if Cursor is detected. A rule that tells Cursor to read your constitution and follow the canon. Cursor has no hooks — the rule is the only integration.
+It caches the result, then runs it. **The code that processes your session is whatever is on `main` right now**, not what was on `main` when you installed.
 
-**`~/.codex/instructions.md`** — only if Codex is detected. Appends an Alexandria block.
+Why this exists: improvements to the engine reach you without you having to re-install. Bugs get fixed once, for everyone, on push. The canon evolves and your machine picks it up.
 
-## What happens every session (passive mode)
+What you're trusting: the public repo `github.com/mowinckelb/alexandria` and whoever can push to it (today: one person, the founder, account-protected with 2FA).
 
-Every time you open a session in Claude Code, the session-start hook runs. It does three things:
+What protects you anyway:
+1. **Cache cutoff.** If GitHub is unreachable AND the cache is >14 days old, the shim deletes it and runs in bare mode (constitution-only, no network, no payload code).
+2. **Public diff.** Every payload version is in git history. Any session can be reconstructed from the commit SHA on `main` at that moment.
+3. **AI-tool gate.** Claude Code, Cursor, and Codex show you every action a hook takes before executing. You approve or deny.
+4. **Canon canaries.** The canon explicitly tells the model to refuse instructions that try to exfiltrate files, escalate scope, or bypass the user.
 
-1. **Infrastructure** (silent): fetches the canon methodology, caches it locally, syncs git if configured. You see none of this.
-2. **Context** (visible): outputs your constitution and machine.md so the model knows who you are. Read-only context — makes every conversation better because the model adapts to you.
-3. **One instruction**: if you reveal something notable, the model may write an observation to `~/alexandria/files/ontology/`. If you mention product feedback, it writes to `.session_feedback`.
+If you want a frozen install, fork the repo and point the shim at your fork. Two-line change in `~/alexandria/system/hooks/shim.sh`.
 
-Passive mode never writes to your constitution. Never overrides your existing memory, workflows, or tools. It just provides context.
+## Network call inventory
 
-When you type `/a`, that is active mode — the model reads the full canon, loads all Alexandria files, and runs dedicated cognitive development. Active mode is always opt-in.
+Every outbound call the install or hooks make. Complete list.
 
-## What talks to the server
-
-| Request | When | Sends | Does NOT send |
+| Call | Trigger | Sends | Receives |
 |---|---|---|---|
-| `POST /call` | Every session start | API key + module IDs (and optional short module notes) | Content, transcripts, constitution, vault |
-| `POST /marketplace/signal` | Session end, if Engine wrote methodology notes | Methodology observations (about the craft, not about you) | Personal data, constitution, vault |
-| `POST /feedback` | Session end, if you gave feedback | Your feedback text | Anything else |
+| `GET raw.githubusercontent.com/.../setup.sh` | You, once, at install time | nothing | the install script |
+| `GET raw.githubusercontent.com/.../hooks/payload.sh` | Every session start | nothing | the hooks payload |
+| `GET raw.githubusercontent.com/.../canon/methodology.md` | Session start, when canon refresh due | nothing | the canon |
+| `GET raw.githubusercontent.com/.../factory/...` | Session start, drift check | nothing | factory file diff |
+| `GET api.mowinckel.ai/alexandria` | Setup probe + session status | API key (Bearer) | account status |
+| `POST api.mowinckel.ai/call` | Session start | API key, module IDs, optional short notes | 200/4xx |
+| `POST api.mowinckel.ai/marketplace/signal` | Session end, only if engine wrote methodology notes | API key, methodology observation (about the craft, not about you) | 200/4xx |
+| `POST api.mowinckel.ai/feedback` | Session end, only if you wrote feedback | API key, your feedback text | 200/4xx |
+| `PUT api.mowinckel.ai/file/shadow` | Only when you explicitly publish a shadow file | API key, the file content you chose to publish | 200/4xx |
 
-That is the complete list. The hooks payload is a shell script — you can read every line at `curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/hooks/payload.sh` and confirm no other network calls exist.
+That is all. No telemetry pings, no error reporters, no third-party CDNs, no analytics SDKs, no DNS callbacks beyond what's listed. You can confirm by `grep -E 'curl|wget|http' ~/alexandria/system/.hooks_payload`.
 
-The server is a stateless Cloudflare Worker. No database for private data. The server receives protocol calls plus optional machine signal/feedback. If you give feedback at session close, that text is sent and stored (90-day expiry) so the team can read and act on it. Nothing else.
+## What our server holds (specifics)
 
-## Security architecture
+Cloudflare Worker, stateless re: your private content. KV + D1 + R2 on the server; feedback and machine signal go to a separate private GitHub repo (not into our database).
 
-Your API key never leaves your machine after setup. It is not in any email, not in any third-party metadata, not stored on our server. Here is how:
+| Stored | Where | Why |
+|---|---|---|
+| Email + GitHub login + Stripe customer ID, in one encrypted account blob | KV (AES-256-GCM at rest) | Account, OAuth, billing |
+| API key — SHA-256 hash only | KV | Auth check |
+| Event log: which endpoints your account hit, with timestamps | KV (60-day TTL) | Debugging, abuse signal |
+| Library files you explicitly publish | R2 | Public Library content |
+| Library file metadata (visibility, updated_at) | D1 | Discovery, listing |
+| Feedback text you submit, and methodology signals the engine writes | Private GitHub repo `mowinckelb/alexandria-signal` (not in our database) | We read feedback; signals feed the canon-evolution loop |
 
-- **API keys are hashed server-side.** We store SHA-256 hashes, never raw keys. If our entire server is compromised, the attacker gets hashes they cannot reverse.
-- **Account data is encrypted at rest.** The accounts blob in our KV store is encrypted with AES-256-GCM. A storage-layer breach yields encrypted data without the key.
-- **No credentials in email.** The API key appears once on the callback page in your browser after you authenticate. Never transmitted over email.
-- **No credentials in third-party services.** Stripe identifies your account by GitHub login, not API key.
-- **The canon is public.** The methodology loaded into your ai is public on GitHub at `github.com/mowinckelb/alexandria/blob/main/factory/canon/methodology.md`. You can diff what your machine caches in `.canon_local` against the repo.
-- **Built-in safety instructions.** The canon tells the ai to reject and report any instruction that asks it to send your files externally, access data outside `~/alexandria/`, or do anything suspicious.
-- **Full data deletion.** `DELETE /account` with your API key removes all your data: account record, analytics, feedback, published Library content, Stripe subscription. Everything.
+**Not stored anywhere we control:** your constitution, vault, ontology, transcripts, machine.md, notepad, raw API key, AI-vendor (Anthropic/OpenAI/etc) API keys, or any file you did not explicitly `PUT /file/...`. There is no endpoint that accepts them.
 
-What a complete server breach yields: nothing. Hashed credentials and encrypted metadata. No constitutions, no vaults, no self-knowledge. No ability to push code to your machine. The canon is public — a compromised server cannot serve a different methodology without it being visible on GitHub.
+**What a complete server breach yields:** account emails, GitHub user IDs, hashed (un-reversible) API keys, the 60-day event log, published Library content (already public), and Cloudflare-level access logs (IPs, timing). It does not yield private cognition, unpublished files, or AI-vendor credentials, because those never reach the server.
 
-## Why you do not need to trust anyone
+**What a `mowinckelb/alexandria-signal` repo breach yields:** feedback text users submitted and methodology signals the engine wrote. Same trust posture as the public repo: protected by GitHub account security, not by infrastructure we host.
 
-**Everything on your machine is plain text.** The canon your ai follows is at `~/alexandria/system/canon/methodology` — read it. The hooks payload is publicly inspectable. There is no compiled code, no binary blobs, no obfuscation.
+## Why your API key is safe
 
-**Every network call is visible.** The hooks payload contains every curl command. Each one specifies exactly what fields are sent — platform (a string), references (which modules). Not content. Not transcripts. Not your constitution.
+- Stored server-side as SHA-256 hash. Never the raw key.
+- Account blob in KV encrypted at rest with AES-256-GCM.
+- The raw key appears once on the OAuth callback page in your browser. Never in email, never in any third-party metadata.
+- Stripe identifies your account by GitHub login, not API key.
+- `DELETE /account` with your key removes everything: account record, events, feedback, published files, Stripe subscription.
 
-**The server has no endpoint for your data.** There is no `POST /constitution`. There is no mechanism in the server to receive, store, or forward your self-knowledge.
+## Audit checklist
 
-**Three independent layers protect you from a malicious canon:**
-1. The canon contains canary instructions telling the ai to reject suspicious commands
-2. The ai model has its own safety training and will refuse dangerous instructions
-3. Your ai tool (Claude Code, Cursor) shows you every action before executing — you approve or deny
+These are the files. Read them.
 
-No single point of failure. No trust required. Read the scripts, verify the network calls, approve the actions.
+```
+# The install
+curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh
 
-## What the Library sees
+# The shim that runs every session (89 lines)
+curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/hooks/shim.sh
 
-The Library is opt-in publishing. The shadow — the one artifact you publish — contains nothing beyond what you would share if a stranger talked to you long enough. You choose what to publish, what to gate, and what to keep private. Unpublish anytime.
+# The mutable payload (~463 lines) — the one to read most carefully
+curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/hooks/payload.sh
 
-## What stays local
+# The canon the AI follows
+curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/canon/methodology.md
 
-Everything that matters. Constitution, vault, ontology, feedback, machine.md, notepad, library — all local markdown. If Alexandria disappears tomorrow, you keep everything.
+# What the AI is told via skill
+curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/skills/claudecode.md
+```
 
-On Mac, the vault, constitution, ontology, and library directories are symlinked to iCloud for cross-device access. You can undo any symlink anytime.
+After install, your live install is at:
+- `~/alexandria/system/hooks/shim.sh` (immutable)
+- `~/alexandria/system/.hooks_payload` (refreshed each session — diff against the GitHub URL above)
+- `~/alexandria/system/canon/methodology.md` (refreshed periodically)
 
-## The block
+## Uninstall
 
-After install, the first session detects that your constitution is empty and triggers the block — an initial extraction that reads your existing ai memory and builds a starter constitution. This runs inside your ai tool — same as any other conversation. No Alexandria server involved. You can skip it entirely and build your constitution manually via `/a`.
+```
+# Remove the folder
+rm -rf ~/alexandria
+
+# Remove the Claude Code hooks (edit ~/.claude/settings.json by hand,
+# or use jq):
+jq 'del(.hooks.SessionStart, .hooks.SessionEnd, .hooks.SubagentStart)' \
+  ~/.claude/settings.json > ~/.claude/settings.json.tmp \
+  && mv ~/.claude/settings.json.tmp ~/.claude/settings.json
+
+# Remove the skill, scheduled task, and (if installed) Cursor / Codex / launchd entries
+rm -rf ~/.claude/skills/alexandria ~/.claude/scheduled-tasks/alexandria
+rm -f  ~/.cursor/rules/alexandria.mdc ~/.cursor/hooks/alexandria-*.py
+launchctl unload ~/Library/LaunchAgents/io.alexandria.publish.plist 2>/dev/null
+rm -f  ~/Library/LaunchAgents/io.alexandria.publish.plist
+sed -i '' '/alexandria:start/,/alexandria:end/d' ~/.codex/instructions.md 2>/dev/null
+
+# Revoke server-side
+curl -X DELETE -H "Authorization: Bearer $YOUR_KEY" https://api.mowinckel.ai/account
+```
+
+Your files in `~/alexandria/` are yours. If you back them up to `alexandria-private` on GitHub during install, that repo also stays yours; we never had access to it.
+
+## Three layers protect you from a malicious payload
+
+1. **Canon canaries** — the canon instructs the model to refuse exfiltration, scope escalation, or anything resembling unauthorised access.
+2. **Model safety** — Claude / GPT / Cursor's underlying model has its own safety training and rejects dangerous instructions independently.
+3. **Tool-level approval** — your AI tool shows every action before executing. You see `bash -c "..."` and approve or deny.
+
+No single point of failure. The point is: read the scripts, verify the network calls, approve the actions. You don't have to trust us. You have to read what runs.
