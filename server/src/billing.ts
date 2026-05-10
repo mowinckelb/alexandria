@@ -120,15 +120,22 @@ async function ensurePrice(): Promise<string> {
   if (_priceId) return _priceId;
 
   const stripe = getStripe();
+  const productCopy = {
+    name: 'The Examined Life',
+    description: 'a tribe of humans who put their minds into writing, so ai thinks with them, not for them. free with five friends who join through you and stay active. otherwise $10 a month.',
+  };
+
   const products = await stripe.products.list({ limit: 10 });
   let product = products.data.find(p => p.metadata.alexandria === 'examined_life');
 
   if (!product) {
     product = await stripe.products.create({
-      name: 'The Examined Life',
-      description: 'Alexandria — Greek philosophy infrastructure. One tier, everything included.',
+      ...productCopy,
       metadata: { alexandria: 'examined_life' },
     });
+  } else if (product.name !== productCopy.name || product.description !== productCopy.description) {
+    // Description drifts when edited in Stripe dashboard; this code is the source of truth.
+    product = await stripe.products.update(product.id, productCopy);
   }
 
   const prices = await stripe.prices.list({ product: product.id, limit: 10 });
