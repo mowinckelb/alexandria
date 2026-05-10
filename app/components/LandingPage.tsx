@@ -164,10 +164,24 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
   // Default (no param) keeps the existing CSS-built window. Read on
   // mount so the data-attribute picks up the correct CSS branch.
   const [centerpieceVariant, setCenterpieceVariant] = useState<string | null>(null);
+  // Breeze video — null during SSR (PNG poster carries the scene). On
+  // mount the page reads the OS reduced-motion preference and decides:
+  // mount the <video> only for users who want motion. Reduced-motion
+  // users never download the 923KB MP4 — they get the still PNG and
+  // nothing else. Tracks live changes to the OS preference.
+  const [showBreeze, setShowBreeze] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
   const middleRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setShowBreeze(!rm.matches);
+    sync();
+    rm.addEventListener('change', sync);
+    return () => rm.removeEventListener('change', sync);
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -175,11 +189,13 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
     if (v === 'arch' || v === 'frame') setCenterpieceVariant(v);
   }, []);
 
-  // Breeze video — Safari blocks autoplay on the muted attribute alone
-  // because React doesn't reflect `muted` as an HTML attribute, so the
-  // initial DOM parse reads as unmuted and Safari shows its click-to-
-  // play overlay. Forcing v.muted=true via ref then calling .play()
-  // satisfies the autoplay policy. Also flip .is-ready on canplay.
+  // Breeze video — only mounted when motion is allowed (see showBreeze
+  // state above), so this effect just handles Safari's autoplay quirk:
+  // React doesn't reflect `muted` as an HTML attribute on initial parse,
+  // so Safari treats the video as unmuted and shows its click-to-play
+  // overlay. Forcing v.muted=true via the ref + explicit .play()
+  // satisfies the policy. .is-ready flips on canplay to fade the video
+  // in over the PNG poster (hides Veo's softening artifact).
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -201,7 +217,7 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
       v.removeEventListener('canplay', reveal);
       v.removeEventListener('loadeddata', reveal);
     };
-  }, []);
+  }, [showBreeze]);
 
   // Peel mechanic — top slide translates up as user scrolls; revealing bottom.
   // Disabled on mobile: slides flow naturally, no peel, no fixed positioning.
@@ -448,18 +464,20 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
             once it can play. Ping-pong loop (forward+reverse), so it's
             seamless with no visible cut. Reduced-motion users keep the
             still PNG (video is hidden via media query). */}
-        <video
-          ref={videoRef}
-          className="adam-video"
-          src="/adam-scene.mp4"
-          poster="/adam-arch-wide.png"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          aria-hidden
-        />
+        {showBreeze && (
+          <video
+            ref={videoRef}
+            className="adam-video"
+            src="/adam-scene.mp4"
+            poster="/adam-arch-wide.png"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden
+          />
+        )}
         {/* Veo watermark mask — Fast-plan output stamps "Veo" in the
             bottom-right. Soft cream radial gradient over the corner
             blends it into the wall. Cream matches #d8ccb6. */}
@@ -470,7 +488,7 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
             reflow with viewport changes. Mobile (<899px) sets this to
             display:contents so the existing flow layout takes over. */}
         <div className="stage-top">
-        <span className="alpha-mark" aria-hidden>
+        <span className="alpha-mark">
           <a href="tel:+14155038178" className="alpha-cta">
             investor?{' '}<span className="alpha-cta-underline">call me</span>
           </a>
@@ -747,6 +765,13 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
           display: inline-flex;
           align-items: baseline;
           transition: opacity 200ms ease;
+          /* Tap target — Apple HIG ≥ 44pt. Extend the hit-rect via
+             vertical padding + negative margin so visual placement
+             stays exactly where the design wants it (nav-brand-block
+             centers on the wordmark's text height, subtitle is abs
+             below). */
+          padding: 12px 0;
+          margin: -12px 0;
         }
         .nav-brand .nav-dot {
           font-style: normal;
@@ -909,6 +934,13 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
           text-underline-offset: 5px;
           text-decoration-thickness: 1px;
           transition: color 180ms ease, text-decoration-color 180ms ease;
+          /* Tap target — extend without shifting visual baseline. Apple
+             HIG asks 44pt; this pushes the hit-rect to ~36px which works
+             for nav marginalia and avoids layout shift on the same row. */
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 4px;
+          margin: -8px -4px;
         }
         .nav-group a:hover {
           color: #1a1318;
@@ -1466,6 +1498,11 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
           color: rgba(58, 15, 61, 0.75);
           text-decoration: none;
           transition: color 180ms ease;
+          /* Extend tap target without changing visual — the marginalia
+             stays where it is, but iPhone fingers can land it. */
+          display: inline-block;
+          padding: 10px 6px;
+          margin: -10px -6px;
         }
         .alpha-mark a.alpha-cta .alpha-cta-underline {
           text-decoration: underline;
@@ -2072,6 +2109,12 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
           line-height: 1.5;
           letter-spacing: 0.005em;
           transition: color 180ms ease, opacity 180ms ease;
+          /* Tap target extension — visual unchanged (display:inline-block
+             keeps text flow inside flex column), padding+negative margin
+             pushes hit-rect to ~32px without shifting the column rhythm. */
+          display: inline-block;
+          padding: 6px 4px;
+          margin: -6px -4px;
         }
         .footer-col-link:hover {
           opacity: 0.62;
@@ -2084,8 +2127,10 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
         button.footer-col-mechanics {
           background: none;
           border: none;
-          padding: 0;
-          margin: 0;
+          /* Inherit tap padding from .footer-col-link instead of zeroing
+             it — same hit-rect as the surrounding links. */
+          padding: 6px 4px;
+          margin: -6px -4px;
           cursor: pointer;
           text-align: left;
           display: inline-flex;
@@ -2334,11 +2379,15 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
              back-slide). Without this, the body's theme bg leaks above the
              top-slide content (status bar / safe area) and below it. */
           body {
+            /* svh, not dvh — dvh tracks the iOS address bar, so the
+               cream→theme stop snaps every time the bar collapses or
+               expands. svh holds the smallest stable height (chrome
+               visible) so the seam is invariant during scroll. */
             background: linear-gradient(
               to bottom,
               #f7f2ec 0,
-              #f7f2ec 100dvh,
-              var(--theme-bg) 100dvh,
+              #f7f2ec 100svh,
+              var(--theme-bg) 100svh,
               var(--theme-bg) 100%
             ) !important;
           }
@@ -2925,7 +2974,7 @@ function Ornament({ src, id }: { src: string; id: string }) {
             opacity: 1;
           }
         }
-        @media (max-width: 900px) {
+        @media (max-width: 899px) {
           .orn {
             width: 320px;
             height: 320px;

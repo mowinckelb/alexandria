@@ -375,8 +375,8 @@ html.app-shell input:focus {
    visible target. Theme control sits opposite on the right. */
 .mdoc-shelf-link {
   position: fixed;
-  top: 1.6rem;
-  left: 1.8rem;
+  top: calc(1.6rem - 10px);
+  left: calc(1.8rem - 10px);
   z-index: 199;
   font-family: var(--font-eb-garamond);
   font-style: italic;
@@ -386,6 +386,10 @@ html.app-shell input:focus {
   color: var(--text-primary);
   text-decoration: none;
   transition: opacity 0.25s ease;
+  /* Tap target ≥ 44pt — pad and back the position out so the visual
+     baseline stays at top:1.6rem / left:1.8rem. */
+  display: inline-block;
+  padding: 10px;
 }
 .mdoc-shelf-link:hover {
   opacity: 0.65;
@@ -417,6 +421,13 @@ html.app-shell input:focus {
   text-decoration: none;
   font-size: 0.85rem;
   transition: opacity 300ms ease;
+  /* Tap target — visual baseline preserved via inline-flex; padded so
+     the "a." link in the footnav doesn't read as a 9×18px hairline. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
 }
 .mdoc-home:hover { opacity: 0.6; }
 
@@ -911,4 +922,35 @@ html.app-shell input:focus {
   40% { transform: translateX(3px); }
   60% { transform: translateX(-2px); }
   80% { transform: translateX(2px); }
+}
+
+/* Reduced-motion compliance — respects user OS preference. Collapses
+   every keyframe animation to a single instantaneous frame and every
+   transition to ~no duration, so decorative motion (orbital seal,
+   breathing dots, pulsing chevrons, hero/manifesto fade-ins, slider
+   nudges, ornament fades, etc.) goes silent. Critical UI feedback
+   (focus rings, hover colour shifts under 0.1s) still reads as a
+   discrete state change rather than animating.
+
+   The breeze video is paused via JS (LandingPage.tsx); CSS already
+   hides it via @media (prefers-reduced-motion: reduce) on .adam-video. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Keyboard-navigation focus — the default Safari focus ring on iOS is
+   suppressed by `:focus { outline: none }` patterns elsewhere, so we
+   explicitly re-establish a visible ring for `:focus-visible` (only
+   when the focus came from keyboard). Keeps mouse/touch clean and
+   keyboard usable on every Apple device. */
+:focus-visible {
+  outline: 2px solid var(--accent, #5B1F47);
+  outline-offset: 2px;
+  border-radius: 2px;
 }

@@ -176,8 +176,8 @@ const styles = `
 
   .nav-brand {
     position: fixed;
-    top: 22px;
-    left: clamp(24px, 6vw, 120px);
+    top: calc(22px - 10px);
+    left: calc(clamp(24px, 6vw, 120px) - 8px);
     z-index: 10;
     font-style: italic;
     font-weight: 500;
@@ -189,6 +189,7 @@ const styles = `
     display: inline-flex;
     align-items: baseline;
     transition: opacity 200ms ease;
+    padding: 10px 8px;
   }
   .nav-brand:hover { opacity: 0.7; }
   .nav-brand :global(em) { font-style: italic; }
@@ -398,7 +399,11 @@ const styles = `
   .cta {
     background: transparent;
     border: none;
-    padding: 0;
+    /* Tap target — Apple HIG ≥ 44pt. Pad and back the inline rhythm
+       out so the button reads as a 22px word but registers as a 44px
+       hit-rect. */
+    padding: 11px 16px;
+    margin: -11px -16px;
     cursor: pointer;
     font-family: inherit;
     font-size: 22px;
@@ -442,7 +447,7 @@ const styles = `
   .done-mark :global(em) { font-style: italic; }
 
   @media (max-width: 600px) {
-    .nav-brand { font-size: 24px; top: 18px; left: 22px; }
+    .nav-brand { font-size: 24px; top: calc(18px - 10px); left: calc(22px - 8px); }
     .watermark { font-size: 20px; bottom: 18px; right: 22px; }
     .form { gap: 48px; }
     .field input { font-size: 20px; }

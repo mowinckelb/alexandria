@@ -148,6 +148,9 @@ export default async function SignupPage({
           text-decoration: none;
           letter-spacing: 0.005em;
           transition: opacity 220ms ease;
+          display: inline-block;
+          padding: 10px 8px;
+          margin: -10px -8px;
         }
         .primer-brand:hover {
           opacity: 0.6;

@@ -28,7 +28,10 @@ const tagStyle: CSSProperties = {
   color: 'var(--text-ghost)',
   fontSize: '0.88rem',
   lineHeight: 1,
-  padding: '0.32rem 0.58rem',
+  // Tap target — was 0.32rem×0.58rem ≈ 26px tall, below HIG floor.
+  // 0.6rem×0.85rem brings the chip to ~33px without breaking the
+  // dense filter-bar rhythm.
+  padding: '0.6rem 0.85rem',
   textDecoration: 'none',
 };
 
@@ -151,7 +154,19 @@ export function LibraryDirectory({
             <article key={author.id} style={{ padding: '1.1rem 0', borderTop: '1px solid var(--border-light)' }}>
               <Link
                 href={author.files_url}
-                style={{ textDecoration: 'none', color: 'inherit', display: 'block', transition: 'opacity 0.15s' }}
+                style={{
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  display: 'block',
+                  transition: 'opacity 0.15s',
+                  // Tap target — the author row was a 26px-tall Link
+                  // inside a padded article. Adding 10px vertical padding
+                  // makes the row hit-rect ≥ 44pt without changing the
+                  // card's outer spacing (the article's 1.1rem padding
+                  // continues to separate cards).
+                  padding: '10px 0',
+                  margin: '-10px 0',
+                }}
                 className="hover:opacity-60"
               >
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
