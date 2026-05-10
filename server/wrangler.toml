@@ -45,7 +45,7 @@ globs = ["**/*.md"]
 fallthrough = false
 
 [vars]
-BETA_MODE = "true"
+BETA_MODE = "false"
 SERVER_URL = "https://api.mowinckel.ai"
 FOUNDER_EMAIL = "benjamin@mowinckel.com"
 ADMIN_GITHUB_LOGIN = "mowinckelb"
