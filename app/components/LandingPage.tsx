@@ -2452,6 +2452,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                in the visual middle. The desktop 62% offset pulled the
                niche off-frame to the left here. */
             background-position: center center;
+            /* Portrait crop fills the viewport with the dark niche +
+               painting (less cream wall visible than at desktop), so
+               the scene reads as a yellow-heavy dark cream. Subtle
+               lift + desaturation pulls it back toward the desktop
+               read. Affects PNG poster and breeze video together. */
+            filter: brightness(1.06) saturate(0.92);
+          }
+          /* Breeze video sits on top of the PNG; same mobile recentre
+             so the niche stays in the visual middle. Without this the
+             desktop 75% crop pushes the painting halfway off the left. */
+          .adam-video {
+            object-position: center center;
           }
           /* Mobile bypasses the desktop scaled canvases — display:contents
              makes the wrappers invisible to layout so children flow as if
