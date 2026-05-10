@@ -166,11 +166,32 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   const topRef = useRef<HTMLDivElement>(null);
   const middleRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const v = params.get('v');
     if (v === 'arch' || v === 'frame') setCenterpieceVariant(v);
+  }, []);
+
+  // Breeze video — flip .is-ready when the video can play. React's
+  // onCanPlay sometimes misses the firing if 'canplay' fires before
+  // hydration, so we check readyState on mount and bind a listener
+  // for the case where it isn't ready yet.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const reveal = () => v.classList.add('is-ready');
+    if (v.readyState >= 3) {
+      reveal();
+    } else {
+      v.addEventListener('canplay', reveal, { once: true });
+      v.addEventListener('loadeddata', reveal, { once: true });
+    }
+    return () => {
+      v.removeEventListener('canplay', reveal);
+      v.removeEventListener('loadeddata', reveal);
+    };
   }, []);
 
   // Mobile menu — close on outside click + ESC. Listeners only mount
@@ -461,6 +482,28 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            carries the "voice inside your head" register. Whitespace
            is the only ornament. */}
       <div className="top-slide" ref={topRef}>
+        {/* Breeze video — the same scene as the PNG background, with
+            tree-leaf shadows swaying. PNG stays as the .top-slide
+            background so first paint is instant; video fades in on top
+            once it can play. Ping-pong loop (forward+reverse), so it's
+            seamless with no visible cut. Reduced-motion users keep the
+            still PNG (video is hidden via media query). */}
+        <video
+          ref={videoRef}
+          className="adam-video"
+          src="/adam-scene.mp4"
+          poster="/adam-arch-wide.png"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden
+        />
+        {/* Veo watermark mask — Fast-plan output stamps "Veo" in the
+            bottom-right. Soft cream radial gradient over the corner
+            blends it into the wall. Cream matches #d8ccb6. */}
+        <div className="veo-mask" aria-hidden />
         {/* Stage canvas — pixel-locked 1440×900 frame uniformly scaled to
             the viewport via --stage-scale-top. Inside this wrapper everything
             is absolute pixels, so type, drop-caps, and corner marks never
@@ -1105,6 +1148,49 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           will-change: transform;
           box-shadow: var(--peel-shadow, 0 0 0 rgba(0, 0, 0, 0));
           color: #1a1318;
+        }
+        /* Breeze video — sits on top of the PNG background, below the
+           stage. Same crop logic (object-position 75% center) so it
+           registers exactly with the still PNG underneath; the eye
+           sees no jump when the video begins playing. Fades in on
+           canplay (.is-ready) to hide Veo's slight bloom/softening
+           vs the source PNG. */
+        .adam-video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: 75% center;
+          opacity: 0;
+          transition: opacity 800ms ease-in;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .adam-video.is-ready {
+          opacity: 1;
+        }
+        /* Reduced-motion: keep the still frontispiece. */
+        @media (prefers-reduced-motion: reduce) {
+          .adam-video { display: none; }
+        }
+        /* Veo watermark mask — soft cream radial blob in the bottom-
+           right covering the ~120×40px stamp on Fast-plan output. */
+        .veo-mask {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          width: 220px;
+          height: 110px;
+          background: radial-gradient(
+            ellipse at 78% 70%,
+            #d8ccb6 0%,
+            rgba(216, 204, 182, 0.96) 32%,
+            rgba(216, 204, 182, 0.65) 60%,
+            rgba(216, 204, 182, 0) 100%
+          );
+          pointer-events: none;
+          z-index: 1;
         }
         /* Stage — pixel-locked 1440×900 canvas, centred, uniformly scaled.
            Everything inside is absolute pixels at this design size, so
