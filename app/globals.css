@@ -480,22 +480,8 @@ html.app-shell input:focus {
   text-transform: none;
   font-variant-caps: normal;
 }
-/* The abstract block carries an underlay tint and a hairline below to
-   separate "the punch" from "the proof." Form is the content's
-   intermission — the reader who stops here has the whole thing. */
-.pdoc-longform .pdoc-h1-abstract {
-  position: relative;
-}
-.pdoc-longform .pdoc-h1-abstract::before {
-  content: '';
-  position: absolute;
-  left: -0.6rem;
-  top: 0.65em;
-  width: 1.4em;
-  height: 1px;
-  background: var(--accent);
-  opacity: 0.45;
-}
+/* The abstract H1 stands on its own — italic display, generous space
+   above and below. No leading rule (it would crash through "the"). */
 
 /* Abstract body — first paragraph after the Abstract heading gets an
    illuminated initial like a manuscript chapter opening. The drop cap

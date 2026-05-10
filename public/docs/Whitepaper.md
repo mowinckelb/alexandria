@@ -8,15 +8,15 @@
 
 # *the abstract.*
 
-*ai is about to do most of the thinking. The question is no longer **what to do for a living**. It is **what to do with a life**.*
+**Soon, ai will do most of the thinking.** *The question is no longer what to do for a **living**. It is what to do with a **life**.*
 
-A human contributes four capabilities — *intelligence, strength, dexterity, empathy* — and a fifth dimension: **the fact that a human is involved.** *The four are commoditising. The fifth survives, because no machine can have it.*
+Humans bring four capabilities — *intelligence, strength, dexterity, empathy* — and one property: **the fact that a human is involved.** The four are commoditising in turn. **The fifth is what survives, because no machine can have it.**
 
-But the fifth does not maintain itself. **Cognition only develops to the level of demand placed on it, and ai removes the demand.** *The body has gravity to keep it honest. The mind has nothing.* The muscle whose loss removes the ability to realise it has been lost.
+The fifth does not maintain itself. **Cognition only develops to the level of demand placed on it, and ai removes the demand.** *The body has gravity to keep it honest. The mind has nothing.* The faculty that would notice the loss is the faculty that has weakened.
 
-**Alexandria is the practice that prevents this.** Files on your own computer where you write what you actually think. *Every ai you use reads them.* **The more you write, the more your ai thinks *with* you, not *for* you.** You own everything. *Switching cost is zero by design.*
+**Alexandria is the practice that prevents this.** Files on your own computer where you write what you actually think. *Every ai you use reads them.* **The more you write, the more your ai thinks *with* you, not *for* you.** *You own everything. Switching cost is zero by design.*
 
-The original library burned, and centuries of human thought were lost. **We are building it again — this time of minds.** *Athens had the agora. Rome the forum. America the constitution. Alexandria is the next.*
+The original library burned, and centuries of human thought were lost. **We are building it again** — this time of minds, *sovereign per Author, impossible to burn.*
 
 The architecture rides every model release. **Each Author is a finite source no model can synthesise; better models extract more from the same living frame.** *The moat is social and cultural — the kind intelligence cannot manufacture, the kind that compounds as intelligence becomes a commodity.*
 
