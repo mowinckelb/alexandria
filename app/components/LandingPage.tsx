@@ -331,28 +331,25 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Decode every ornament into the image cache before first scroll so a peel
-  // never waits on network (first ornament was already priority via next/image;
-  // the rest were only fire-and-forget loaded before).
+  // Theme rotation pre-decode — pull only the NEXT ornament into cache
+  // on idle, not all 10. The previous "preload everything" loaded 15MB+
+  // of raw PNGs (bypassing Next/Image's WebP optimization) on every
+  // first paint, dominating page weight and starving everything else on
+  // cellular. The first ornament is already `priority` via next/image;
+  // the next one prefetched in the idle window covers the typical first
+  // peel; the remaining 8 load on-demand when the user rotates that far.
   useEffect(() => {
-    void Promise.all(
-      THEMES.map(
-        (t) =>
-          new Promise<void>((resolve) => {
-            const img = new window.Image();
-            img.onload = () => {
-              if (img.decode) {
-                img.decode().then(resolve, resolve);
-              } else {
-                resolve();
-              }
-            };
-            img.onerror = () => resolve();
-            img.src = t.image;
-          }),
-      ),
-    );
-  }, []);
+    const next = THEMES[(themeIdx + 1) % THEMES.length];
+    const schedule = (cb: () => void) => {
+      const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
+      if (w.requestIdleCallback) w.requestIdleCallback(cb);
+      else setTimeout(cb, 800);
+    };
+    schedule(() => {
+      const img = new window.Image();
+      img.src = next.image;
+    });
+  }, [themeIdx]);
 
   const theme = THEMES[themeIdx];
 
@@ -1999,7 +1996,11 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
           font-style: italic;
           font-weight: 400;
           letter-spacing: 0.18em;
-          color: var(--theme-fg-faint);
+          /* fg-muted (was fg-faint) — readable salutation; the heavy
+             tracking + lowercase already softens the visual weight, so
+             muted reads as the right plate-credit register without
+             dropping below AA contrast. */
+          color: var(--theme-fg-muted);
           text-transform: lowercase;
           user-select: none;
         }
@@ -2108,7 +2109,10 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
           font-size: 11px;
           letter-spacing: 0.18em;
           text-transform: lowercase;
-          color: rgba(var(--theme-fg-rgb, 26, 19, 24), 0.5);
+          /* Was rgba(...,0.5) which fell to 3.34:1 contrast on cream.
+             fg-muted is the canonical mid-tone with WCAG-passing
+             contrast across every theme. */
+          color: var(--theme-fg-muted);
           margin-bottom: 4px;
           user-select: none;
         }
@@ -2201,7 +2205,11 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 13px;
           font-style: italic;
-          color: var(--theme-fg-faint);
+          /* fg-muted (was fg-faint) — explanatory caption next to the
+             primary CTA must hit AA. The italic register already reads
+             as quieter than the button label; muted vs faint is the
+             contrast difference. */
+          color: var(--theme-fg-muted);
           letter-spacing: 0.012em;
           line-height: 1.35;
           padding-left: 0;
@@ -2268,7 +2276,10 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
         }
         .dict-line em {
           font-style: italic;
-          color: var(--theme-fg-faint);
+          /* fg-muted (was fg-faint) — same WCAG AA reasoning as .phon:
+             the "I. n." / "II. n." labels are 13.5px body text and
+             need ≥ 4.5:1 contrast. */
+          color: var(--theme-fg-muted);
           margin-right: 4px;
         }
         .dict-line a {
