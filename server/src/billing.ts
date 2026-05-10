@@ -359,6 +359,9 @@ export async function createCheckoutSession(opts: {
         trial_period_days: 30,
       },
       metadata: { kind: 'author', github_login: opts.githubLogin },
+      custom_text: {
+        submit: { message: 'free if five friends join through you and stay active. otherwise $10/month after the 30-day trial.' },
+      },
       success_url: `${SERVER_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${WEBSITE_URL}/signup?billing=cancel`,
     };
