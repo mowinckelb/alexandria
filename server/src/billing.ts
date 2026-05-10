@@ -193,11 +193,13 @@ export async function countActiveKin(githubLogin: string): Promise<{ count: numb
   const kinLogins = results.map(r => r.referred_github_login).filter(Boolean);
   if (kinLogins.length === 0) return { count: 0, compliant: 0 };
 
-  // Compliant kin = meets all three obligations this month:
-  // 1. Account exists (they have an account)
-  // 2. File edited this month (protocol_files updated in current month)
-  // 3. Call made this month (protocol_calls table)
-  const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  // Compliant kin = meets all three obligations within the rolling 30-day window:
+  // 1. Account exists
+  // 2. File edited (protocol_files.updated_at within window)
+  // 3. Call made (protocol_calls.time within window)
+  // Rolling, not calendar-month — no cliff at midnight on the 1st where every
+  // kin must reactivate before the next invoice fires a few days later.
+  const cutoff = new Date(Date.now() - 30 * 86400 * 1000).toISOString();
 
   // Resolve each kin's account in parallel via the login index (O(1) per lookup, no full-account scan)
   const kinResults = await Promise.all(kinLogins.map(login => getAccountByLogin(login)));
@@ -212,7 +214,6 @@ export async function countActiveKin(githubLogin: string): Promise<{ count: numb
 
   const githubIds = kinWithAccounts.map(k => k.githubId);
   const idPlaceholders = githubIds.map(() => '?').join(',');
-  const monthStart = currentMonth + '-01';
 
   // Batch D1 query for file freshness — protocol_files keyed by github_id
   const { results: files } = await db.prepare(
@@ -223,14 +224,14 @@ export async function countActiveKin(githubLogin: string): Promise<{ count: numb
   // Batch D1 query for protocol calls — one query for all kin
   const { results: callResults } = await db.prepare(
     `SELECT DISTINCT account_id FROM protocol_calls WHERE account_id IN (${idPlaceholders}) AND time > ?`
-  ).bind(...githubIds, monthStart).all<{ account_id: string }>();
+  ).bind(...githubIds, cutoff).all<{ account_id: string }>();
   const hasCallSet = new Set((callResults || []).map(r => r.account_id));
 
   let compliant = 0;
   for (const { githubId } of kinWithAccounts) {
     const hasCall = hasCallSet.has(githubId);
     const lastEdit = fileEdits.get(githubId);
-    const hasFile = lastEdit?.startsWith(currentMonth);
+    const hasFile = !!lastEdit && lastEdit > cutoff;
 
     if (hasCall && hasFile) compliant++;
   }
@@ -238,26 +239,39 @@ export async function countActiveKin(githubLogin: string): Promise<{ count: numb
   return { count: kinLogins.length, compliant };
 }
 
-export async function recalculateKinPricing(githubLogin: string): Promise<void> {
+export interface KinPricingState {
+  email: string | undefined;
+  authorCompliant: boolean;
+  authorHasCall: boolean;
+  authorHasFile: boolean;
+  kinCount: number;
+  kinCompliant: number;
+  kinNeeded: number;
+  shouldBeFree: boolean;
+  hadDiscount: boolean;
+  nowHasDiscount: boolean;
+}
+
+export async function recalculateKinPricing(githubLogin: string): Promise<KinPricingState | null> {
   // Find account by github_login (O(1) via index)
   const result = await getAccountByLogin(githubLogin);
   const user = result?.account as any;
-  if (!user?.subscription_id) return;
+  if (!user?.subscription_id) return null;
 
-  // Author must be compliant themselves (file + call this month) to get kin discount
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  // Author must be compliant themselves (file + call within last 30 days) to get kin discount
+  const cutoff = new Date(Date.now() - 30 * 86400 * 1000).toISOString();
   let authorHasCall = false;
   let authorHasFile = false;
   try {
     const db = getDB();
     const callCheck = await db.prepare(
       `SELECT 1 FROM protocol_calls WHERE account_id = ? AND time > ? LIMIT 1`
-    ).bind(String(user.github_id), currentMonth + '-01').first();
+    ).bind(String(user.github_id), cutoff).first();
     authorHasCall = !!callCheck;
     const file = await db.prepare(
       `SELECT MAX(updated_at) as last_edit FROM protocol_files WHERE account_id = ?`
     ).bind(String(user.github_id)).first<{ last_edit: string | null }>();
-    authorHasFile = !!file?.last_edit?.startsWith(currentMonth);
+    authorHasFile = !!file?.last_edit && file.last_edit > cutoff;
   } catch { /* D1 unavailable — treat as non-compliant */ }
   const authorCompliant = authorHasCall && authorHasFile;
 
@@ -267,20 +281,37 @@ export async function recalculateKinPricing(githubLogin: string): Promise<void> 
   const stripe = getStripe();
   const sub = await stripe.subscriptions.retrieve(user.subscription_id);
 
-  const hasKinDiscount = sub.discounts?.some(d => {
+  const hadDiscount = sub.discounts?.some(d => {
     if (typeof d === 'string') return false;
     const coupon = d.source?.coupon;
     return typeof coupon !== 'string' && coupon?.metadata?.alexandria === 'kin_free';
-  });
+  }) ?? false;
 
-  if (shouldBeFree && !hasKinDiscount) {
+  let nowHasDiscount = hadDiscount;
+
+  if (shouldBeFree && !hadDiscount) {
     const couponId = await ensureKinCoupon();
     await stripe.subscriptions.update(user.subscription_id, { discounts: [{ coupon: couponId }] });
+    nowHasDiscount = true;
     logEvent('kin_pricing_free', { github_login: user.github_login, compliant_kin: String(kinData.compliant) });
-  } else if (!shouldBeFree && hasKinDiscount) {
+  } else if (!shouldBeFree && hadDiscount) {
     await stripe.subscriptions.deleteDiscount(user.subscription_id);
+    nowHasDiscount = false;
     logEvent('kin_pricing_paid', { github_login: user.github_login, compliant_kin: String(kinData.compliant) });
   }
+
+  return {
+    email: user.email,
+    authorCompliant,
+    authorHasCall,
+    authorHasFile,
+    kinCount: kinData.count,
+    kinCompliant: kinData.compliant,
+    kinNeeded: Math.max(0, KIN_THRESHOLD - kinData.compliant),
+    shouldBeFree,
+    hadDiscount,
+    nowHasDiscount,
+  };
 }
 
 /** Recalculate kin pricing for all subscribed users. Called monthly by cron. */
@@ -765,7 +796,9 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
         }
 
         case 'invoice.upcoming': {
-          // Recalculate kin pricing ~3 days before billing
+          // Recalculate kin pricing ~3 days before billing, then warn the user
+          // if they're about to be charged. Lead time lets them edit a file,
+          // make a call, or nudge a kin to reactivate before the invoice closes.
           const invoice = event.data.object as Stripe.Invoice;
           const subId = extractSubscriptionId(invoice);
           if (subId) {
@@ -773,7 +806,19 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
               const sub = await stripe.subscriptions.retrieve(subId);
               const subLogin = sub.metadata?.github_login || sub.metadata?.api_key;
               if (subLogin) {
-                await recalculateKinPricing(subLogin);
+                const state = await recalculateKinPricing(subLogin);
+                if (state && !state.nowHasDiscount && state.email && (invoice.amount_due || 0) > 0) {
+                  try {
+                    const amountDollars = (invoice.amount_due || 0) / 100;
+                    const dueAt = invoice.next_payment_attempt
+                      ? new Date(invoice.next_payment_attempt * 1000)
+                      : null;
+                    await sendPreBillWarningEmail(state.email, subLogin, state, amountDollars, dueAt);
+                    logEvent('kin_prebill_warning_sent', { github_login: subLogin, amount: String(amountDollars) });
+                  } catch (e) {
+                    console.error('[billing] Pre-bill warning email failed:', e);
+                  }
+                }
               }
             } catch (e) {
               console.error('[billing] Kin recalculation failed:', e);
@@ -1000,5 +1045,63 @@ async function sendKinReceiptEmail(
     }
   } catch (err) {
     console.error('[billing] Receipt email send failed:', err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pre-bill warning — fired from invoice.upcoming when the user is about to be
+// charged. Lead time lets them recover the discount instead of being surprised.
+// ---------------------------------------------------------------------------
+
+async function sendPreBillWarningEmail(
+  email: string,
+  githubLogin: string,
+  state: KinPricingState,
+  amountDollars: number,
+  dueAt: Date | null,
+): Promise<void> {
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const kinLink = `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}`;
+
+  const todos: string[] = [];
+  if (!state.authorHasFile) todos.push('publish a file');
+  if (!state.authorHasCall) todos.push('make a protocol call');
+  if (state.kinNeeded > 0) {
+    todos.push(`have ${state.kinNeeded} more active kin (you currently have ${state.kinCompliant}/5)`);
+  }
+  const todoLine = todos.length === 0
+    ? 'stay active in the next 30 days to keep it free.'
+    : 'to stay free: ' + todos.join('; ') + '.';
+
+  const dueLine = dueAt
+    ? `your next bill is $${amountDollars.toFixed(0)}, due ${dueAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}.`
+    : `your next bill is $${amountDollars.toFixed(0)}.`;
+
+  const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #3d3630; text-align: center;">
+  <p style="font-size: 1.15rem; color: #3d3630; margin: 0 0 1.5rem;">${dueLine}</p>
+  <p style="font-size: 1rem; color: #3d3630; margin: 0 0 1.5rem;">${todoLine}</p>
+  <p style="font-size: 0.85rem; color: #8a8078; margin: 1.5rem 0 0;"><a href="${kinLink}" style="color: #8a8078;">your kin link</a></p>
+  <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 2rem;">the examined life.</p>
+</div>`;
+
+  try {
+    const resp = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: 'Alexandria <a@mowinckel.ai>',
+        to: email,
+        subject: `alexandria. — $${amountDollars.toFixed(0)} coming up`,
+        html,
+      }),
+    });
+    if (!resp.ok) {
+      console.error('[billing] Pre-bill warning Resend error:', resp.status, await resp.text());
+    }
+  } catch (err) {
+    console.error('[billing] Pre-bill warning send failed:', err);
   }
 }

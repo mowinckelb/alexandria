@@ -205,7 +205,7 @@ export function registerRoutes(app: Hono) {
       ? new Date(new Date(callLast).getTime() + thirtyDays).toISOString()
       : new Date(new Date(account.created_at).getTime() + thirtyDays).toISOString();
 
-    // Kin compliance — all three obligations met (account + file + call) this month
+    // Kin compliance — all three obligations met (account + file + call) in the last 30 days
     let kinData = { count: 0, compliant: 0 };
     try {
       kinData = await countActiveKin(account.github_login);
