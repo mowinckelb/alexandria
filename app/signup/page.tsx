@@ -49,10 +49,11 @@ export default async function SignupPage({
             </p>
             <p>
               the one thing we ask: participate in the collective.
-              publish a single living file &mdash; your evolving
-              thoughts, gated however you choose &mdash; and share
-              the modules you build for yourself. the library
-              compounds when minds reach across.
+              publish a single living file &mdash; what you&rsquo;d
+              say to a stranger, plus a table of contents to the
+              rest (gated however you choose). and share the
+              modules you build for yourself. the library compounds
+              when minds reach across.
             </p>
           </section>
 

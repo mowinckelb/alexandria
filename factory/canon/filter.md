@@ -36,6 +36,16 @@ The things the Author wouldn't tell a stranger even given infinite time. These f
 - Their aesthetic, taste, craft. The things they'd happily spend hours on with anyone who asked.
 - Anything they'd read aloud from a journal at a dinner party without hesitation.
 
+## The minimum compliance template — two integrated floors
+
+Every Author publishes one file at minimum: the floor of protocol participation. Two parts, fused into a single artifact (router on top, content below).
+
+**Floor 1 — stranger-parity content.** The frame above, applied. Anything the Author would say to a stranger in real life, they should be able to say to a stranger in digital life.
+
+**Floor 2 — the router.** A table of contents that signals *the Author has thoughts on X* without exposing the thoughts. Each entry resolves to a deeper file or contact gate — paid (`library/paid/`), invite-only (`library/invite/`), an external link (email, Calendly, the Author's site), or to nothing further if covered in the content below. The router is the entry point for machines (another Author's Engine, a frontier model, a stranger's tool) to navigate the Author's full surface.
+
+Both floors are mandatory for every Author regardless of openness: the router is what lets machines navigate, the content is what makes the file readable rather than a bare index.
+
 ## The trust boundary
 
 `~/alexandria/files/library/` is the opt-in. The folder has three tier sub-folders; placement selects both consent and visibility:
