@@ -421,58 +421,108 @@ html.app-shell input:focus {
 .mdoc-home:hover { opacity: 0.6; }
 
 /* H1 — the title "alexandria." Italic hero with a presence that holds
-   the page together. Generous space below; this is a destination. */
+   the page together. Sits high on the page like a frontispiece title
+   plate; generous space below before the subtitle drops in. */
 .pdoc-longform .pdoc-h1 {
   font-family: var(--font-eb-garamond);
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(3.2rem, 6vw, 4.6rem);
-  line-height: 1;
-  letter-spacing: -0.025em;
+  font-size: clamp(3.6rem, 7vw, 5.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.028em;
   color: var(--text-primary);
-  margin: 4rem 0 3rem;
+  margin: 5.5rem 0 0.6rem;
   text-wrap: balance;
 }
 
-/* Abstract H1 — distinct register from the title. Italic small-caps
-   "Abstract." reads as a section label, not a duplicate title. The
-   contrast between hero italic title above and small-caps abstract
-   header below tells the reader these are different things. */
+/* H2 immediately after the title H1 — the frontispiece subtitle.
+   Italic, small, muted; reads as a literary epigraph beneath the title
+   plate, not a chapter heading. */
+.pdoc-longform .pdoc-h1 + .pdoc-h2 {
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+  line-height: 1.4;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  margin: 0 0 0.35rem;
+  text-align: left;
+}
+/* Soft preamble paragraph beneath the subtitle — the italic note that
+   tells the cold reader what this document is. Small, faint, set to
+   read as colophon text rather than body prose. */
+.pdoc-longform .pdoc-h1 + .pdoc-h2 + .pdoc-p {
+  font-style: italic;
+  font-size: 0.96rem;
+  line-height: 1.55;
+  color: var(--text-faint);
+  letter-spacing: 0.012em;
+  margin: 0 0 4.5rem;
+  max-width: 36em;
+  text-wrap: pretty;
+}
+
+/* Abstract H1 — italic display, set quietly so the abstract prose
+   does the work. Not a section label, not a duplicate title — a
+   threshold mark. The actual punch is in the body that follows. */
 .pdoc-longform .pdoc-h1.pdoc-h1-abstract {
   font-family: var(--font-eb-garamond);
   font-style: italic;
-  font-weight: 500;
-  font-size: clamp(1rem, 1.4vw, 1.15rem);
-  letter-spacing: 0.32em;
-  text-transform: lowercase;
-  font-variant-caps: all-small-caps;
-  color: var(--accent);
-  margin: 5rem 0 2rem;
-  text-align: left;
-}
-
-/* First paragraph after H1 — the dek (subtitle). In markdown, *italic*
-   wraps entire line. Slightly larger body for the opening sentence. */
-.pdoc-longform .pdoc-h1 + .pdoc-p {
-  font-size: 1.2rem;
-  line-height: 1.55;
-  color: var(--text-muted);
+  font-weight: 400;
+  font-size: clamp(1.85rem, 3vw, 2.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  color: var(--text-primary);
   margin: 0 0 2rem;
-  text-wrap: pretty;
+  text-align: left;
+  text-transform: none;
+  font-variant-caps: normal;
+}
+/* The abstract block carries an underlay tint and a hairline below to
+   separate "the punch" from "the proof." Form is the content's
+   intermission — the reader who stops here has the whole thing. */
+.pdoc-longform .pdoc-h1-abstract {
+  position: relative;
+}
+.pdoc-longform .pdoc-h1-abstract::before {
+  content: '';
+  position: absolute;
+  left: -0.6rem;
+  top: 0.65em;
+  width: 1.4em;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.45;
 }
 
 /* Abstract body — first paragraph after the Abstract heading gets an
    illuminated initial like a manuscript chapter opening. The drop cap
    tells the reader THIS IS WHERE TO START in a way no signpost can. */
+.pdoc-longform .pdoc-h1-abstract + .pdoc-p {
+  font-size: 1.18rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  font-style: italic;
+  margin: 0 0 1.4rem;
+  text-wrap: pretty;
+  /* The lede paragraph is italic across — it's the raised lead that
+     tells the reader this is the abstract's opening note, not body. */
+}
 .pdoc-longform .pdoc-h1-abstract + .pdoc-p::first-letter {
   font-family: var(--font-eb-garamond);
   font-style: italic;
   font-weight: 600;
-  font-size: 4em;
+  font-size: 4.4em;
   line-height: 0.82;
-  letter-spacing: -0.04em;
+  /* Italic Garamond's lowercase "a" has a curl on the right that
+     crashes into the next character if pulled too tight. Generous
+     positive margin (~0.18em) clears the next letter; no negative
+     letter-spacing on a single glyph. */
+  letter-spacing: 0;
   vertical-align: -0.36em;
-  margin-right: 0.04em;
+  margin-right: 0.18em;
   color: var(--accent);
   text-shadow:
     0 1px 0 rgba(255, 250, 240, 0.6),
@@ -569,6 +619,20 @@ html.app-shell input:focus {
   hanging-punctuation: first last;
   font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "calt" 1, "onum" 1;
   font-variant-ligatures: common-ligatures discretionary-ligatures;
+}
+
+/* Suppress the drop cap on the title/subtitle/preamble chain — that
+   leading paragraph reads as colophon text, not a chapter opening. */
+.pdoc-longform .pdoc-h1 + .pdoc-h2 + .pdoc-p::first-letter {
+  font-size: inherit;
+  color: inherit;
+  font-weight: inherit;
+  vertical-align: baseline;
+  margin-right: 0;
+  text-shadow: none;
+  line-height: inherit;
+  letter-spacing: inherit;
+  font-style: inherit;
 }
 
 /* First paragraph after a chapter heading — illuminated initial. The
@@ -714,6 +778,137 @@ html.app-shell input:focus {
 @media (max-width: 640px) {
   .mdoc-toc-item a { grid-template-columns: 2.6rem 1fr; gap: 0.7rem; font-size: 0.98rem; }
   .mdoc-toc-item.lvl-1 a { font-size: 1.05rem; }
+}
+
+/* ============================================
+   Reading-progress hairline — fixed top edge.
+   Fills as the reader descends. Faint enough
+   to be felt, not seen. URL-medium pacing cue.
+   ============================================ */
+.mdoc-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 200;
+  pointer-events: none;
+  background: transparent;
+}
+.mdoc-progress > div {
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  opacity: 0.55;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 80ms linear;
+}
+
+/* ============================================
+   Chapter rail — fixed right edge, desktop only.
+   One faint dot per chapter; the active one
+   widens. Hover reveals the chapter number and
+   title as a small italic label. Fades in once
+   the reader is past the abstract.
+   ============================================ */
+.mdoc-rail {
+  position: fixed;
+  top: 50%;
+  right: 1.4rem;
+  transform: translateY(-50%);
+  z-index: 150;
+  opacity: 0;
+  transition: opacity 600ms ease;
+  pointer-events: none;
+}
+.mdoc-rail.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mdoc-rail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.mdoc-rail-item a {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  text-decoration: none;
+  color: var(--text-faint);
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-size: 0.78rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: color 200ms ease;
+}
+.mdoc-rail-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  opacity: 0.55;
+  transition: width 200ms ease, height 200ms ease, background 200ms ease, opacity 200ms ease;
+  flex-shrink: 0;
+}
+.mdoc-rail-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.mdoc-rail-num {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-ghost);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+.mdoc-rail-text {
+  color: var(--text-muted);
+}
+.mdoc-rail:hover .mdoc-rail-label,
+.mdoc-rail-item:focus-within .mdoc-rail-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+.mdoc-rail-item:hover .mdoc-rail-dot,
+.mdoc-rail-item:focus-within .mdoc-rail-dot {
+  background: var(--accent);
+  opacity: 0.85;
+}
+.mdoc-rail-item.is-active .mdoc-rail-dot {
+  background: var(--accent);
+  opacity: 1;
+  width: 6px;
+  height: 6px;
+}
+.mdoc-rail-item.is-active a {
+  color: var(--accent);
+}
+.mdoc-rail-item.is-active .mdoc-rail-num,
+.mdoc-rail-item.is-active .mdoc-rail-text {
+  color: var(--accent);
+  opacity: 0.95;
+}
+.mdoc-rail-item.is-active .mdoc-rail-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+/* Hide the rail below the desktop breakpoint — vertical real estate
+   is precious on mobile, and the auto-TOC inside the article serves
+   the same skim purpose with one tap. */
+@media (max-width: 1100px) {
+  .mdoc-rail { display: none; }
 }
 
 /* ============================================

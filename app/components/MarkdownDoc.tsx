@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -59,7 +59,7 @@ function processNumbered(md: string): { pre: string; post: string; toc: TocEntry
 
     if (!inFence) {
       // Strip the manual `## contents.` block — runs until the next H1.
-      if (/^##\s+contents\.?\s*$/i.test(line)) {
+      if (/^##\s+\*?contents\.?\*?\s*$/i.test(line)) {
         inContents = true;
         if (!tocInserted) {
           out.push(TOC_MARKER);
@@ -90,7 +90,7 @@ function processNumbered(md: string): { pre: string; post: string; toc: TocEntry
         // Abstract is a preamble, not a numbered part. Pass through
         // unchanged so the abstract-class detection in MD_COMPONENTS
         // recognises it (text === 'abstract' after strip).
-        if (/^abstract\.?\s*$/i.test(text.trim())) {
+        if (/^\*?the\s+abstract\.?\*?\s*$/i.test(text.trim()) || /^\*?abstract\.?\*?\s*$/i.test(text.trim())) {
           out.push(line);
           continue;
         }
@@ -138,6 +138,107 @@ function TocBlock({ entries }: { entries: TocEntry[] }) {
   );
 }
 
+// Right-edge chapter rail. Faint dots, one per chapter (h2). Numbers appear on
+// hover. Active chapter highlighted by IntersectionObserver on the rendered
+// h2 elements. Fades in once the reader has scrolled past the abstract.
+function ChapterRail({ entries }: { entries: TocEntry[] }) {
+  // Only chapters (level 2) get rail dots; parts are too coarse and would
+  // crowd the rail. The rail is the chapter-level skim navigator.
+  const chapters = entries.filter((e) => e.level === 2);
+  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (chapters.length === 0) return;
+    const headings = chapters
+      .map((c) => document.getElementById(c.slug))
+      .filter((el): el is HTMLElement => !!el);
+    if (headings.length === 0) return;
+
+    // Use rootMargin to define an "active band" — a heading is current
+    // when it sits in the upper third of the viewport. Topmost heading
+    // in the band wins.
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const inBand = entries.filter((e) => e.isIntersecting);
+        if (inBand.length > 0) {
+          // Pick the top-most heading currently in the band.
+          inBand.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          setActiveSlug(inBand[0].target.id);
+        }
+      },
+      { rootMargin: '-10% 0px -70% 0px', threshold: 0 }
+    );
+    headings.forEach((h) => obs.observe(h));
+    return () => obs.disconnect();
+  }, [chapters]);
+
+  useEffect(() => {
+    // Fade the rail in once the reader has crossed roughly one viewport —
+    // i.e., past the abstract. Before that, the rail would distract from
+    // the hero composition.
+    const onScroll = () => {
+      setVisible(window.scrollY > window.innerHeight * 0.6);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  if (chapters.length === 0) return null;
+
+  return (
+    <nav
+      className={`mdoc-rail ${visible ? 'is-visible' : ''}`}
+      aria-label="Chapter navigation"
+    >
+      <ol className="mdoc-rail-list">
+        {chapters.map((c) => (
+          <li
+            key={c.slug}
+            className={`mdoc-rail-item ${activeSlug === c.slug ? 'is-active' : ''}`}
+          >
+            <a href={`#${c.slug}`} aria-label={`Chapter ${c.num} — ${c.text.replace(/\*/g, '')}`}>
+              <span className="mdoc-rail-dot" aria-hidden />
+              <span className="mdoc-rail-label">
+                <span className="mdoc-rail-num">{c.num}</span>
+                <span className="mdoc-rail-text">{c.text.replace(/\*/g, '')}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
+// Reading-progress hairline at the very top of the viewport. Fills as the
+// reader descends. Faint enough to be felt, not seen.
+function ReadingProgress() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const doc = document.documentElement;
+        const max = doc.scrollHeight - window.innerHeight;
+        const pct = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+        if (ref.current) ref.current.style.transform = `scaleX(${pct})`;
+      });
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+  return <div className="mdoc-progress" aria-hidden><div ref={ref} /></div>;
+}
+
 // Cycle through manuscript-style ornament glyphs for section breaks so
 // the page reads as a typeset book (different ornaments at different
 // rhythms) rather than a wall of identical horizontal rules.
@@ -147,7 +248,7 @@ let fleuronIdx = 0;
 const MD_COMPONENTS = {
   h1: ({ children }: { children?: React.ReactNode }) => {
     const text = flattenText(children).trim().toLowerCase().replace(/\.$/, '');
-    const isAbstract = text === 'abstract';
+    const isAbstract = /^(the\s+)?abstract$/.test(text);
     return (
       <h1
         id={slugify(children)}
@@ -193,10 +294,14 @@ export default function MarkdownDoc({ src, header, homeHref = '/', numbered = fa
 
   return (
     <>
+      {numbered && <ReadingProgress />}
       <ThemeToggle />
       <Link href={homeHref} className="mdoc-shelf-link">
         alexandria<span className="mdoc-shelf-dot">.</span>
       </Link>
+      {numbered && parsed && parsed.toc.length > 0 && (
+        <ChapterRail entries={parsed.toc} />
+      )}
       <main className="mdoc">
         {header && <div className="mdoc-frame mdoc-header">{header}</div>}
 
