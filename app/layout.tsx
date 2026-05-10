@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { EB_Garamond } from "next/font/google";
+import { EB_Garamond, Spectral } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -7,6 +7,17 @@ import { ThemeProvider } from "./components/ThemeProvider";
 const ebGaramond = EB_Garamond({
   variable: "--font-eb-garamond",
   subsets: ["latin"],
+});
+
+// Spectral is the website + primer face — modern literary serif. Bound
+// globally so any route can use `var(--font-serif)`. Previously bound
+// only on app/page.tsx, which silently fell through to ui-serif on
+// /signup; promoting it here fixes that and keeps the website unchanged.
+const spectral = Spectral({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://mowinckel.ai";
@@ -135,7 +146,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${ebGaramond.variable} antialiased`}
+        className={`${ebGaramond.variable} ${spectral.variable} antialiased`}
       >
         <ThemeProvider>
           {children}

@@ -105,13 +105,34 @@ export default async function SignupPage({
       </main>
 
       <style>{`
+        /* PAGE — covenant register. Cream substrate, classical
+           literary serif, gentle paper grain, soft fade-in on first
+           paint. The page is the deal made visible; the typography
+           does the work of "this is serious." */
         .primer-page {
           background: var(--bg-primary);
           color: var(--text-primary);
           min-height: 100vh;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
+          /* Two faint radial gradients give the page a barely-there
+             paper warmth — uneven, unpressed, alive. Not visible as
+             texture; felt as substrate. Same recipe as .mdoc on the
+             whitepaper so the brand reads as one printed object
+             across surfaces. */
+          background-image:
+            radial-gradient(ellipse 120% 80% at 30% 20%, rgba(91, 31, 71, 0.025) 0%, transparent 60%),
+            radial-gradient(ellipse 100% 70% at 70% 80%, rgba(74, 50, 30, 0.020) 0%, transparent 60%);
+          /* Wake up gently. The reader has just crossed a threshold;
+             snapping in would feel transactional. */
+          animation: primerFadeIn 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        }
+        @keyframes primerFadeIn {
+          0% { opacity: 0; transform: translateY(6px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
 
+        /* BRAND — top-left, italic wordmark, quiet hover. The
+           reader's anchor home. */
         .primer-header {
           padding: 28px 32px 0;
         }
@@ -119,10 +140,14 @@ export default async function SignupPage({
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-weight: 400;
-          font-size: 22px;
+          font-size: 21px;
           color: var(--text-primary);
           text-decoration: none;
           letter-spacing: 0.005em;
+          transition: opacity 220ms ease;
+        }
+        .primer-brand:hover {
+          opacity: 0.6;
         }
         .primer-brand-dot {
           font-style: normal;
@@ -134,39 +159,43 @@ export default async function SignupPage({
           padding: 5rem 24px 6rem;
         }
 
-        /* SALUTATION — small italic letter-spaced museum-plate
-           opener, matching the landing slide's "to the reader."
-           pattern. Keeps the same Renaissance epistle register. */
+        /* SALUTATION — museum-plate opener, lowercase letter-spaced
+           italic. The Renaissance epistolary register: "to the new
+           alexandrian." reads as "to the reader" did on the front
+           slide. Sits above the threshold sentence as a small chip. */
         .primer-salutation {
           margin: 0 0 28px;
           font-style: italic;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 400;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.22em;
           color: var(--text-muted, rgba(26, 19, 24, 0.55));
           text-transform: lowercase;
         }
 
-        /* H1 — the threshold sentence. Larger italic serif body
-           weight; reads as a primed paragraph rather than a chunk
-           heading. The covenant's actual headline. */
+        /* H1 — the threshold sentence. The covenant's headline
+           sentence has to *feel* like a threshold, not a paragraph
+           with extra weight. Bumped up; given more line height; sits
+           with proper presence. */
         .primer-h1 {
-          margin: 0 0 56px;
+          margin: 0 0 64px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-weight: 400;
-          font-size: 22px;
-          line-height: 1.5;
-          letter-spacing: 0.005em;
+          font-size: 27px;
+          line-height: 1.42;
+          letter-spacing: -0.005em;
           color: var(--text-primary);
+          text-wrap: pretty;
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1;
         }
 
-        /* SECTIONS — five short articles of the covenant. Each
-           opens with an italic letter-spaced lowercase label
-           (matching the salutation register), then 1-2 short
-           paragraphs of body prose. */
+        /* SECTIONS — five short articles of the covenant. Each opens
+           with an italic letter-spaced lowercase label (matching the
+           salutation register), then 1-2 short paragraphs. Spacing
+           is the divider; the rhythm IS the structure. */
         .primer-section {
-          margin: 0 0 44px;
+          margin: 0 0 48px;
         }
         .primer-section:last-of-type {
           margin-bottom: 56px;
@@ -175,9 +204,9 @@ export default async function SignupPage({
         .primer-label {
           margin: 0 0 14px;
           font-style: italic;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 400;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.22em;
           text-transform: lowercase;
           color: var(--text-muted, rgba(26, 19, 24, 0.55));
         }
@@ -189,7 +218,10 @@ export default async function SignupPage({
           line-height: 1.7;
           color: var(--text-secondary, rgba(26, 19, 24, 0.85));
           letter-spacing: 0.005em;
+          /* Old-style figures + common ligatures + kerning. Body type
+             that reads as printed, not transmitted. */
           font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
+          text-wrap: pretty;
         }
         .primer p:last-child {
           margin-bottom: 0;
@@ -197,12 +229,6 @@ export default async function SignupPage({
 
         .primer em {
           font-style: italic;
-          color: var(--text-primary);
-        }
-
-        .primer strong {
-          font-weight: 600;
-          font-style: normal;
           color: var(--text-primary);
         }
 
@@ -215,8 +241,9 @@ export default async function SignupPage({
           color: var(--text-primary);
         }
 
-        /* TRUST LINK — inherits .primer button styling but matches
-           the inline link register so it reads as part of the prose. */
+        /* TRUST LINK — inline trust.md link with copy icon. Reads as
+           part of the prose, with a quiet underline that strengthens
+           on hover. */
         .primer button.trust-copy {
           display: inline-flex;
           align-items: baseline;
@@ -234,10 +261,11 @@ export default async function SignupPage({
           text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.45));
           text-underline-offset: 3px;
           text-decoration-thickness: 1px;
-          transition: opacity 200ms;
+          transition: opacity 200ms, text-decoration-color 200ms;
         }
         .primer button.trust-copy:hover {
-          opacity: 0.6;
+          text-decoration-color: var(--text-primary);
+          opacity: 0.85;
         }
         .primer .trust-copy-icon {
           display: inline-flex;
@@ -245,25 +273,43 @@ export default async function SignupPage({
           opacity: 0.55;
         }
 
-        /* CTA SECTION — kept dignified. Sign-up link as italic
-           serif text-button, kin code as a minimal underlined
-           field. No filled buttons; the literary register stays
-           through the action moment. */
+        /* CTA — fleuron divider + italic text-button. No filled
+           buttons; the literary register holds through the action.
+           The fleuron replaces the hairline rule because the rule
+           read as "thin grey line on cream"; the fleuron reads as
+           "rhetorical pause before the close." Same ornament as the
+           whitepaper's section breaks — the brand cohering. */
         .cta-section {
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 28px;
-          padding: 48px 0 0;
+          padding: 56px 0 0;
           margin-top: 24px;
-          border-top: 1px solid var(--bg-tertiary, rgba(26, 19, 24, 0.12));
+          position: relative;
+        }
+        .cta-section::before {
+          content: '❦';
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-size: 18px;
+          color: var(--accent);
+          opacity: 0.45;
+          line-height: 1;
+          padding: 0 14px;
+          background: var(--bg-primary);
+          letter-spacing: 0.3em;
         }
 
         .primary-cta {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-weight: 500;
-          font-size: 22px;
+          font-size: 23px;
           letter-spacing: 0;
           color: var(--text-primary);
           text-decoration: underline;
@@ -288,7 +334,7 @@ export default async function SignupPage({
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-size: 12px;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.22em;
           text-align: center;
           text-transform: lowercase;
           color: var(--text-ghost, rgba(26, 19, 24, 0.45));
@@ -310,7 +356,7 @@ export default async function SignupPage({
           padding: 4px 0;
           color: var(--text-ghost, rgba(26, 19, 24, 0.55));
           caret-color: var(--text-ghost, rgba(26, 19, 24, 0.55));
-          transition: border-bottom-color 200ms;
+          transition: border-bottom-color 200ms, color 200ms;
         }
         .kin-input:focus {
           border-bottom-color: var(--text-primary);
@@ -357,17 +403,19 @@ export default async function SignupPage({
           color: var(--text-muted, rgba(26, 19, 24, 0.5));
         }
 
-        /* CODA — small italic "welcome." beneath the action.
-           The covenant ends with the same word the landing slide
-           ends with; closes the loop between the two pages. */
+        /* CODA — destination beat. "welcome to alexandria." closes
+           the covenant the way the front slide closes the pitch.
+           Larger than the body's small text; sits with weight as the
+           last word; centred italic, gentle accent. */
         .primer-coda {
-          margin: 56px 0 0;
+          margin: 64px 0 0;
           text-align: center;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 16px;
+          font-size: 21px;
           font-style: italic;
-          color: var(--text-muted, rgba(26, 19, 24, 0.5));
-          letter-spacing: 0.02em;
+          color: var(--text-primary);
+          letter-spacing: 0.005em;
+          opacity: 0.78;
         }
 
         @media (max-width: 640px) {
@@ -375,21 +423,26 @@ export default async function SignupPage({
             padding: 3rem 20px 4rem;
           }
           .primer-h1 {
-            font-size: 19px;
-            margin-bottom: 44px;
+            font-size: 22px;
+            line-height: 1.42;
+            margin-bottom: 48px;
           }
           .primer p:not(.primer-label):not(.primer-salutation):not(.primer-coda) {
             font-size: 16px;
             line-height: 1.7;
           }
           .primer-section {
-            margin-bottom: 36px;
+            margin-bottom: 40px;
           }
           .cta-section {
-            padding-top: 40px;
+            padding-top: 48px;
           }
           .primary-cta {
             font-size: 20px;
+          }
+          .primer-coda {
+            font-size: 19px;
+            margin-top: 56px;
           }
         }
       `}</style>
