@@ -506,7 +506,7 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
             reflow with viewport changes. Mobile (<899px) sets this to
             display:contents so the existing flow layout takes over. */}
         <div className="stage-top">
-        <span className="alpha-mark">San Francisco · mmxxvi</span>
+        <span className="alpha-mark">san francisco · mmxxvi</span>
         {/* Frontispiece composition. The wall + niche + fresco + tree
             shadow ARE the slide (background on .top-slide). The title
             block sits in the top-left nav (wordmark + small-caps
