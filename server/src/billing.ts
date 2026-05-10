@@ -959,6 +959,49 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
           });
           break;
         }
+
+        // SetupIntent / PaymentIntent failure visibility. Stripe-hosted
+        // Checkout surfaces errors to the user, but without these cases we
+        // have no server-side trace of declines, SCA failures, or wallet
+        // aborts. Added 2026-05-10 after an Apple Pay drop-off left no event
+        // trail to diagnose.
+        case 'setup_intent.setup_failed': {
+          const intent = event.data.object as Stripe.SetupIntent;
+          const err = intent.last_setup_error;
+          logEvent('billing_setup_failed', {
+            intent_id: intent.id,
+            code: err?.code || 'unknown',
+            decline_code: err?.decline_code || '',
+            type: err?.type || '',
+            payment_method_type: err?.payment_method?.type || '',
+            customer: typeof intent.customer === 'string' ? intent.customer : intent.customer?.id || '',
+          });
+          break;
+        }
+
+        case 'payment_intent.payment_failed': {
+          const intent = event.data.object as Stripe.PaymentIntent;
+          const err = intent.last_payment_error;
+          logEvent('billing_payment_intent_failed', {
+            intent_id: intent.id,
+            code: err?.code || 'unknown',
+            decline_code: err?.decline_code || '',
+            type: err?.type || '',
+            payment_method_type: err?.payment_method?.type || '',
+            amount_cents: String(intent.amount || 0),
+          });
+          break;
+        }
+
+        case 'checkout.session.expired': {
+          const session = event.data.object as Stripe.Checkout.Session;
+          logEvent('billing_checkout_expired', {
+            kind: session.metadata?.kind || 'unknown',
+            mode: session.mode || 'unknown',
+            email: session.customer_email || '',
+          });
+          break;
+        }
       }
     } catch (err) {
       console.error('Webhook handler error:', err);
