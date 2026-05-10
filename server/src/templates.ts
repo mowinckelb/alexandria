@@ -50,7 +50,7 @@ export function authErrorHtml(message: string): string {
 // ---------------------------------------------------------------------------
 
 const BLOCK_URL = 'https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/block.md';
-const TRUST_URL = 'https://raw.githubusercontent.com/mowinckelb/alexandria/main/public/docs/Trust.md';
+const MECHANICS_URL = 'https://raw.githubusercontent.com/mowinckelb/alexandria/main/public/docs/Mechanics.md';
 
 async function fetchRawText(url: string): Promise<string> {
   try {
@@ -68,11 +68,11 @@ export async function callbackPageHtml(apiKey: string, githubLogin = ''): Promis
   const curlCmd = isReturning ? '' : `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}`;
   const kinCode = githubLogin ? escapeHtml(githubLogin) : '';
   const kinLink = githubLogin ? `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}` : '';
-  // Inline block.md + Trust.md so copy buttons can run synchronously inside the click handler.
+  // Inline block.md + Mechanics.md so copy buttons can run synchronously inside the click handler.
   // Async fetch + clipboard.writeText loses user activation and falls back to opening the raw URL.
-  const [blockContent, trustContent] = isReturning
+  const [blockContent, mechanicsContent] = isReturning
     ? ['', '']
-    : await Promise.all([fetchRawText(BLOCK_URL), fetchRawText(TRUST_URL)]);
+    : await Promise.all([fetchRawText(BLOCK_URL), fetchRawText(MECHANICS_URL)]);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,10 +98,10 @@ export async function callbackPageHtml(apiKey: string, githubLogin = ''): Promis
   .container { max-width: 420px; text-align: center; }
   .welcome { font-size: 1.5rem; font-weight: 400; line-height: 1.4; }
   .line { font-size: 1.1rem; line-height: 1.9; }
-  .trust { font-size: 0.85rem; line-height: 1.9; color: #bbb4aa; margin-top: 2.5rem; }
-  .trust-row { display: block; }
-  .trust-hint { color: #bbb4aa; }
-  .trust .action { color: #8a8078; }
+  .mechanics { font-size: 0.85rem; line-height: 1.9; color: #bbb4aa; margin-top: 2.5rem; }
+  .mechanics-row { display: block; }
+  .mechanics-hint { color: #bbb4aa; }
+  .mechanics .action { color: #8a8078; }
   .kin { font-size: 0.9rem; line-height: 1.9; color: #8a8078; margin-top: 2rem; }
   .kin-row { display: block; }
   .kin code { color: #3d3630; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.85em; padding: 1px 6px; background: rgba(61,54,48,0.05); border-radius: 3px; }
@@ -198,9 +198,9 @@ ${isReturning ? `<a class="brand-corner" href="${WEBSITE_URL}/">alexandria.</a>`
     <span class="kin-row">your kin code: <button type="button" class="action" onclick="copyKinCode(this)" aria-label="copy kin code"><code>${kinCode}</code> <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></span>
     <span class="kin-row"><button type="button" class="action" onclick="copyKinLink(this)" aria-label="copy invite link">copy invite link <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> <button type="button" class="info" onclick="toggleTip(this)" aria-label="how kin works">${ICON_INFO}<span class="tooltip">share the link or just the code. when five kin become active, alexandria is free.</span></button></span>
   </div>` : ''}
-  ${isReturning ? '' : `<div class="trust">
-    <span class="trust-row">we never see your data &mdash; <button type="button" class="action" onclick="copyTrust(this)" aria-label="copy Trust.md">Trust.md <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></span>
-    <span class="trust-row trust-hint">paste in your ai chat to verify.</span>
+  ${isReturning ? '' : `<div class="mechanics">
+    <span class="mechanics-row">we never see your data &mdash; <button type="button" class="action" onclick="copyMechanics(this)" aria-label="copy Mechanics.md">Mechanics.md <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></span>
+    <span class="mechanics-row mechanics-hint">paste in your ai chat to verify.</span>
   </div>`}
   <p class="signout">wrong account? <a href="https://github.com/logout" target="_blank" rel="noopener noreferrer">sign out of github</a></p>
 </div>
@@ -241,9 +241,9 @@ function copyBlock(el) {
   var t = ${JSON.stringify(blockContent)};
   if (t) copyText(t, el); else copyRemote(${JSON.stringify(BLOCK_URL)}, el);
 }
-function copyTrust(el) {
-  var t = ${JSON.stringify(trustContent)};
-  if (t) copyText(t, el); else copyRemote(${JSON.stringify(TRUST_URL)}, el);
+function copyMechanics(el) {
+  var t = ${JSON.stringify(mechanicsContent)};
+  if (t) copyText(t, el); else copyRemote(${JSON.stringify(MECHANICS_URL)}, el);
 }
 function copyKinCode(el) { copyText(${JSON.stringify(githubLogin)}, el); }
 function copyKinLink(el) { copyText(${JSON.stringify(kinLink)}, el); }

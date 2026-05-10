@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import TrustCopy from './TrustCopy';
+import MechanicsCopy from './MechanicsCopy';
 
 interface Props {
   brandClassName?: string;
-  trustContent?: string;
+  mechanicsContent?: string;
 }
 
 /*
@@ -158,7 +158,7 @@ const THEMES: Theme[] = [
   },
 ];
 
-export default function LandingPage({ brandClassName = '', trustContent = '' }: Props) {
+export default function LandingPage({ brandClassName = '', mechanicsContent = '' }: Props) {
   const [themeIdx, setThemeIdx] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
@@ -671,7 +671,7 @@ export default function LandingPage({ brandClassName = '', trustContent = '' }: 
                   <div className="footer-col">
                     <span className="footer-col-head">about</span>
                     <Link href="/whitepaper" className="footer-col-link">whitepaper</Link>
-                    <TrustCopy content={trustContent} className="footer-col-link footer-col-trust" />
+                    <MechanicsCopy content={mechanicsContent} className="footer-col-link footer-col-mechanics" />
                   </div>
                 </div>
               </div>
@@ -2192,12 +2192,12 @@ export default function LandingPage({ brandClassName = '', trustContent = '' }: 
         .footer-col-link:hover {
           opacity: 0.62;
         }
-        /* Trust.md copy button — same surface as footer-col-link, but
+        /* Mechanics.md copy button — same surface as footer-col-link, but
            a button (clipboard write) with the icon next to the label.
            Font properties come from .footer-col-link (also on this
            element); we only reset button-shell defaults here, never
            override font-* since that would lose the link styling. */
-        button.footer-col-trust {
+        button.footer-col-mechanics {
           background: none;
           border: none;
           padding: 0;
@@ -2208,7 +2208,7 @@ export default function LandingPage({ brandClassName = '', trustContent = '' }: 
           align-items: baseline;
           gap: 0.4em;
         }
-        .footer-col-trust .trust-copy-icon {
+        .footer-col-mechanics .mechanics-copy-icon {
           display: inline-flex;
           align-items: center;
           opacity: 0.55;

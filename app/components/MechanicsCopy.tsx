@@ -15,9 +15,9 @@ const ICON_CHECK = (
   </svg>
 );
 
-export default function TrustCopy({
+export default function MechanicsCopy({
   content,
-  className = 'trust-copy',
+  className = 'mechanics-copy',
 }: {
   content: string;
   className?: string;
@@ -39,10 +39,10 @@ export default function TrustCopy({
       type="button"
       onClick={handleCopy}
       className={className}
-      aria-label={copied ? 'copied' : 'copy trust.md contents'}
+      aria-label={copied ? 'copied' : 'copy mechanics.md contents'}
     >
-      <span>trust.md</span>
-      <span className="trust-copy-icon">{copied ? ICON_CHECK : ICON_COPY}</span>
+      <span>mechanics.md</span>
+      <span className="mechanics-copy-icon">{copied ? ICON_CHECK : ICON_COPY}</span>
     </button>
   );
 }

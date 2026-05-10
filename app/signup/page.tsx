@@ -3,7 +3,7 @@ import path from 'node:path';
 import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
 import SignupCTA from './SignupCTA';
-import TrustCopy from '../components/TrustCopy';
+import MechanicsCopy from '../components/MechanicsCopy';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +16,8 @@ export default async function SignupPage({
   const urlRef = sp.ref;
   const refSource = sp.ref_source;
 
-  const trustContent = await readFile(
-    path.join(process.cwd(), 'public', 'docs', 'Trust.md'),
+  const mechanicsContent = await readFile(
+    path.join(process.cwd(), 'public', 'docs', 'Mechanics.md'),
     'utf8',
   );
 
@@ -85,7 +85,7 @@ export default async function SignupPage({
               your files live on your own machine and your
               github. we never see what you do not publish. if
               alexandria disappears tomorrow, you keep everything.{' '}
-              <TrustCopy content={trustContent} /> lists every byte that touches our server.
+              <MechanicsCopy content={mechanicsContent} /> lists every byte that touches our server.
             </p>
           </section>
 
@@ -242,10 +242,10 @@ export default async function SignupPage({
           color: var(--text-primary);
         }
 
-        /* TRUST LINK — inline trust.md link with copy icon. Reads as
+        /* MECHANICS LINK — inline mechanics.md link with copy icon. Reads as
            part of the prose, with a quiet underline that strengthens
            on hover. */
-        .primer button.trust-copy {
+        .primer button.mechanics-copy {
           display: inline-flex;
           align-items: baseline;
           gap: 0.3em;
@@ -264,11 +264,11 @@ export default async function SignupPage({
           text-decoration-thickness: 1px;
           transition: opacity 200ms, text-decoration-color 200ms;
         }
-        .primer button.trust-copy:hover {
+        .primer button.mechanics-copy:hover {
           text-decoration-color: var(--text-primary);
           opacity: 0.85;
         }
-        .primer .trust-copy-icon {
+        .primer .mechanics-copy-icon {
           display: inline-flex;
           align-items: center;
           opacity: 0.55;

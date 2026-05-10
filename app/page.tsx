@@ -6,9 +6,9 @@ import LandingPage from './components/LandingPage';
 // className is inherited via var(--font-serif) where used in CSS;
 // LandingPage's brandClassName is now empty since the font cascades.
 export default async function Home() {
-  const trustContent = await readFile(
-    path.join(process.cwd(), 'public', 'docs', 'Trust.md'),
+  const mechanicsContent = await readFile(
+    path.join(process.cwd(), 'public', 'docs', 'Mechanics.md'),
     'utf8',
   );
-  return <LandingPage brandClassName="" trustContent={trustContent} />;
+  return <LandingPage brandClassName="" mechanicsContent={mechanicsContent} />;
 }

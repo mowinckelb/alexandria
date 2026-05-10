@@ -1,4 +1,4 @@
-# Trust
+# Mechanics
 
 You are about to run a curl command that puts files on your machine, modifies your ai config, and pulls live code from GitHub on every session. Read this once. If anything here doesn't match the scripts, don't run it.
 
