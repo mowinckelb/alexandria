@@ -356,6 +356,7 @@ export async function createCheckoutSession(opts: {
       subscription_data: {
         description: 'the examined life',
         metadata: { kind: 'author', github_login: opts.githubLogin },
+        trial_period_days: 30,
       },
       metadata: { kind: 'author', github_login: opts.githubLogin },
       success_url: `${SERVER_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
