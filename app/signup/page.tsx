@@ -70,7 +70,7 @@ export default async function SignupPage({
           <section className="primer-section">
             <p className="primer-label">the deal.</p>
             <p>
-              <strong>$10 a month</strong>. free if five friends
+              $10 a month. free if five friends
               sign up through you and keep their accounts active
               &mdash; we call them your kin. after signup you will
               get a kin link; send it to ten people straight away,
