@@ -3,7 +3,7 @@ import path from 'node:path';
 import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
 import SignupCTA from './SignupCTA';
-import TrustCopy from './TrustCopy';
+import TrustCopy from '../components/TrustCopy';
 
 export const dynamic = 'force-dynamic';
 

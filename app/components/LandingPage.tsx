@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import TrustCopy from './TrustCopy';
 
 interface Props {
   brandClassName?: string;
+  trustContent?: string;
 }
 
 /*
@@ -156,7 +158,7 @@ const THEMES: Theme[] = [
   },
 ];
 
-export default function LandingPage({ brandClassName = '' }: Props) {
+export default function LandingPage({ brandClassName = '', trustContent = '' }: Props) {
   const [themeIdx, setThemeIdx] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
@@ -665,6 +667,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     >
                       x
                     </a>
+                  </div>
+                  <div className="footer-col">
+                    <span className="footer-col-head">about</span>
+                    <Link href="/whitepaper" className="footer-col-link">whitepaper</Link>
+                    <TrustCopy content={trustContent} className="footer-col-link footer-col-trust" />
                   </div>
                 </div>
               </div>
@@ -2184,6 +2191,26 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .footer-col-link:hover {
           opacity: 0.62;
+        }
+        /* Trust.md copy button — same surface as footer-col-link, but
+           a button (clipboard write) with the icon next to the label. */
+        button.footer-col-trust {
+          background: none;
+          border: none;
+          padding: 0;
+          margin: 0;
+          font: inherit;
+          cursor: pointer;
+          text-align: left;
+          display: inline-flex;
+          align-items: baseline;
+          gap: 0.4em;
+        }
+        .footer-col-trust .trust-copy-icon {
+          display: inline-flex;
+          align-items: center;
+          opacity: 0.55;
+          transform: translateY(2px);
         }
         .cta-pair a.lr-cta {
           font-family: var(--font-serif), ui-serif, Georgia, serif;

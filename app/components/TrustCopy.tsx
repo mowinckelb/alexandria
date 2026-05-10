@@ -15,7 +15,13 @@ const ICON_CHECK = (
   </svg>
 );
 
-export default function TrustCopy({ content }: { content: string }) {
+export default function TrustCopy({
+  content,
+  className = 'trust-copy',
+}: {
+  content: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -32,7 +38,7 @@ export default function TrustCopy({ content }: { content: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="trust-copy"
+      className={className}
       aria-label={copied ? 'copied' : 'copy trust.md contents'}
     >
       <span>trust.md</span>
