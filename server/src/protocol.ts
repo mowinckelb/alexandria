@@ -8,7 +8,8 @@ import { saveAccount, getKV } from './kv.js';
 import { resolveModule, authorFromModuleId, deriveKind } from './marketplace-catalog.js';
 import {
   DEFAULT_CONTENT_TYPE,
-  isAcceptedContentType,
+  isPutWritableContentType,
+  PUT_WRITABLE_CONTENT_TYPES,
   r2ExtensionForContentType,
   readProtocolFile,
 } from './file-access.js';
@@ -34,10 +35,22 @@ export function registerProtocol(app: Hono) {
     const now = new Date().toISOString();
     const text = typeof body.text === 'string' ? body.text : null;
     const visibility = ['authors', 'public', 'invite', 'paid'].includes(body.visibility) ? body.visibility : 'authors';
-    // Default markdown when the field is absent; allow only the types we
-    // know how to serve. Future types (e.g. application/json for structured
-    // files) get added in one place: file-access.ts EXTENSION_BY_CONTENT_TYPE.
-    const contentType = isAcceptedContentType(body.content_type) ? body.content_type : DEFAULT_CONTENT_TYPE;
+
+    // content_type: absent → markdown default; present → must be one of the
+    // types JSON PUT can faithfully carry. Rejecting unsupported types here
+    // (rather than silently storing markdown bytes under a .pdf key) means
+    // a confused caller sees the error instead of a corrupt file.
+    let contentType: string;
+    if (body.content_type === undefined || body.content_type === null) {
+      contentType = DEFAULT_CONTENT_TYPE;
+    } else if (isPutWritableContentType(body.content_type)) {
+      contentType = body.content_type;
+    } else {
+      return c.json({
+        error: `content_type ${JSON.stringify(body.content_type)} is not writable via JSON PUT (binary uploads not supported yet)`,
+        writable: [...PUT_WRITABLE_CONTENT_TYPES],
+      }, 400);
+    }
     const ext = r2ExtensionForContentType(contentType);
 
     await getR2().put(`protocol/${id}/${name}.${ext}`, body.content);

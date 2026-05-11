@@ -150,17 +150,25 @@ const EXTENSION_BY_CONTENT_TYPE: Record<string, string> = {
   'application/pdf': 'pdf',
 };
 
+// Subset of the above that the JSON PUT endpoint can faithfully write —
+// `body.content` is a UTF-8 string, so binary formats (application/pdf,
+// image/*, …) are read-only via this server today and must be uploaded
+// out-of-band. A future multipart PUT will extend this set.
+const PUT_WRITABLE_CONTENT_TYPES = new Set<string>([
+  'text/markdown; charset=utf-8',
+]);
+
 const DEFAULT_CONTENT_TYPE = 'text/markdown; charset=utf-8';
 
 export function r2ExtensionForContentType(contentType: string): string {
   return EXTENSION_BY_CONTENT_TYPE[contentType] ?? 'md';
 }
 
-export function isAcceptedContentType(value: unknown): value is string {
-  return typeof value === 'string' && value in EXTENSION_BY_CONTENT_TYPE;
+export function isPutWritableContentType(value: unknown): value is string {
+  return typeof value === 'string' && PUT_WRITABLE_CONTENT_TYPES.has(value);
 }
 
-export { DEFAULT_CONTENT_TYPE };
+export { DEFAULT_CONTENT_TYPE, PUT_WRITABLE_CONTENT_TYPES };
 
 export type ReadDenialStatus = 401 | 402 | 403 | 404;
 export type ReadProtocolFileResult =

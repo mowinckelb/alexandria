@@ -9,7 +9,12 @@
  */
 
 import assert from 'node:assert';
-import { authorizeFileRead, isInternalProtocolFileName } from '../src/file-access.js';
+import {
+  authorizeFileRead,
+  isInternalProtocolFileName,
+  isPutWritableContentType,
+  r2ExtensionForContentType,
+} from '../src/file-access.js';
 
 const OWNER = '233047998';
 const STRANGER = '999999999';
@@ -219,6 +224,38 @@ test('real Author file names are not internal', () => {
   for (const name of ['shadow', 'on-power', 'on-love', 'design', 'droplets-of-grace', 'lifecycle']) {
     assert.strictEqual(isInternalProtocolFileName(name), false, `${name} should not be internal`);
   }
+});
+
+// ---------------------------------------------------------------------------
+// Content-type extension + write-eligibility
+// ---------------------------------------------------------------------------
+
+test('extension map: markdown → md, pdf → pdf', () => {
+  assert.strictEqual(r2ExtensionForContentType('text/markdown; charset=utf-8'), 'md');
+  assert.strictEqual(r2ExtensionForContentType('application/pdf'), 'pdf');
+});
+
+test('extension map: unknown type defaults to md', () => {
+  // Soft default — readProtocolFile uses the stored content_type, so an
+  // unknown value would only land here if the DB got corrupted; failing to
+  // markdown is the least-surprising recovery.
+  assert.strictEqual(r2ExtensionForContentType('application/octet-stream'), 'md');
+  assert.strictEqual(r2ExtensionForContentType(''), 'md');
+});
+
+test('PUT-writable: markdown yes, pdf no', () => {
+  assert.strictEqual(isPutWritableContentType('text/markdown; charset=utf-8'), true);
+  // PDF is readable (the helper serves it) but not writable via JSON PUT —
+  // a `content: string` body cannot carry binary faithfully.
+  assert.strictEqual(isPutWritableContentType('application/pdf'), false);
+});
+
+test('PUT-writable: rejects non-strings and unknown strings', () => {
+  assert.strictEqual(isPutWritableContentType(null), false);
+  assert.strictEqual(isPutWritableContentType(undefined), false);
+  assert.strictEqual(isPutWritableContentType(42), false);
+  assert.strictEqual(isPutWritableContentType('text/plain'), false);
+  assert.strictEqual(isPutWritableContentType('TEXT/MARKDOWN'), false); // case-sensitive on purpose
 });
 
 console.log(`\n  ${passed} tests passed`);
