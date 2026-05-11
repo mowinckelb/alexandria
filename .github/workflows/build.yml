@@ -19,6 +19,17 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Protocol R2 key gate (only file-access.ts may read protocol/* bytes)
+        run: |
+          OFFENDERS=$(grep -lE 'protocol/\$\{' server/src/*.ts 2>/dev/null \
+            | grep -vE 'server/src/(file-access|protocol)\.ts$' || true)
+          if [ -n "$OFFENDERS" ]; then
+            echo "::error::protocol_files R2 keys built outside the allowed paths:"
+            echo "$OFFENDERS"
+            echo "Route the access through readProtocolFile() in server/src/file-access.ts."
+            exit 1
+          fi
+
       - name: Server type check
         run: cd server && npm ci && npx tsc --noEmit
 

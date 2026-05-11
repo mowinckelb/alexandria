@@ -31,6 +31,26 @@ if git diff --cached --name-only | grep -qE '^server/src/.*\.ts$'; then
   fi
 fi
 
+# Structural rule: protocol_files R2 keys may only be constructed in
+#   - server/src/protocol.ts   (writes via the auth-gated PUT handler)
+#   - server/src/file-access.ts (reads via readProtocolFile, which runs the
+#                                 visibility gate before fetching from R2)
+# Any other file that builds a `protocol/${...}` key is reaching the bytes
+# around the gate. This is the mirror loop for the visibility enforcement:
+# no convention to remember — the build fails if drift starts.
+if git diff --cached --name-only | grep -qE '^server/src/.*\.ts$'; then
+  OFFENDERS=$(grep -lE 'protocol/\$\{' server/src/*.ts 2>/dev/null \
+    | grep -vE 'server/src/(file-access|protocol)\.ts$' || true)
+  if [ -n "$OFFENDERS" ]; then
+    echo "BLOCKED: protocol_files R2 keys may only be built in file-access.ts (reads) or protocol.ts (writes)."
+    echo "Violations:"
+    echo "$OFFENDERS" | sed 's/^/  /'
+    echo ""
+    echo "Fix: route the new code through readProtocolFile() in file-access.ts."
+    exit 1
+  fi
+fi
+
 # Server type check (matches CI: "cd server && npm ci && npx tsc --noEmit")
 if git diff --cached --name-only | grep -q '^server/src/'; then
   echo "server/src/ changed — type checking..."
