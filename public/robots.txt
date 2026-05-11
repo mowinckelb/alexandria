@@ -3,6 +3,9 @@ User-agent: Googlebot
 User-agent: Bingbot
 User-agent: Yandex
 Disallow: /confidential
+Disallow: /memo
+Disallow: /pitch
+Disallow: /docs/Memo.md
 Disallow: /docs/confidential.concrete.md
 Disallow: /docs/confidential.alexandria.md
 Disallow: /docs/confidential_alexandria.md
@@ -21,6 +24,9 @@ User-agent: *
 Allow: /
 Allow: /docs/
 Disallow: /confidential
+Disallow: /memo
+Disallow: /pitch
+Disallow: /docs/Memo.md
 Disallow: /signup
 
 Sitemap: https://mowinckel.ai/sitemap.xml
