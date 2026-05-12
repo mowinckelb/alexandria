@@ -1,8 +1,8 @@
 # Alexandria — Brief
 
-> **Most AI investments cannot defend their terminal value. Alexandria's compounds when a new model ships.**
+> *Alexandria is a tribe of people who put their minds into writing so AI thinks with them, not for them.*
 
-> *The cognitive layer of AI — where human minds remain machine-readable across the transition.*
+> **Most AI investments cannot defend their terminal value. Alexandria's compounds when a new model ships.**
 
 ---
 
