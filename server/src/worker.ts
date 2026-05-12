@@ -15,6 +15,7 @@ import { registerBillingRoutes, settleMonthlyTabs, recalculateAllKinPricing, cre
 import { registerLibraryRoutes } from './library.js';
 import { getAnalytics, getEventLog, getDashboard, getUserEvents, logEvent, flushEvents } from './analytics.js';
 import { setKV, getKV } from './kv.js';
+import { getDB } from './db.js';
 import { sendFollowerWelcome } from './email.js';
 import { getAllowedOrigins } from './cors.js';
 import { formatPT } from './time.js';
@@ -257,6 +258,90 @@ app.get('/', (c) => {
 });
 
 // ---------------------------------------------------------------------------
+// Public endpoint rate limiting (D1-backed, atomic)
+// ---------------------------------------------------------------------------
+
+const PUBLIC_RATE_LIMIT_MAX = 5;
+const PUBLIC_RATE_LIMIT_WINDOW_SECONDS = 60;
+
+let rateLimitSchemaReady = false;
+let rateLimitSchemaInit: Promise<void> | null = null;
+
+async function ensureRateLimitSchema(db: D1Database): Promise<void> {
+  if (rateLimitSchemaReady) return;
+  if (!rateLimitSchemaInit) {
+    rateLimitSchemaInit = (async () => {
+      await db.prepare(
+        `CREATE TABLE IF NOT EXISTS request_rate_limits (
+          scope TEXT NOT NULL,
+          ip TEXT NOT NULL,
+          window_bucket INTEGER NOT NULL,
+          hits INTEGER NOT NULL DEFAULT 1,
+          updated_at TEXT NOT NULL,
+          PRIMARY KEY (scope, ip, window_bucket)
+        )`
+      ).run();
+      await db.prepare(
+        `CREATE INDEX IF NOT EXISTS idx_request_rate_limits_window
+         ON request_rate_limits(scope, window_bucket)`
+      ).run();
+      rateLimitSchemaReady = true;
+    })().catch((err) => {
+      rateLimitSchemaInit = null;
+      throw err;
+    });
+  }
+  await rateLimitSchemaInit;
+}
+
+async function enforcePublicRateLimit(scope: 'waitlist' | 'follow', ip: string): Promise<boolean> {
+  const windowSeconds = PUBLIC_RATE_LIMIT_WINDOW_SECONDS;
+  const limit = PUBLIC_RATE_LIMIT_MAX;
+
+  // Primary path — D1 upsert + increment (atomic).
+  try {
+    const db = getDB();
+    await ensureRateLimitSchema(db);
+
+    const windowBucket = Math.floor(Date.now() / (windowSeconds * 1000));
+    const now = new Date().toISOString();
+    const row = await db.prepare(
+      `INSERT INTO request_rate_limits (scope, ip, window_bucket, hits, updated_at)
+       VALUES (?, ?, ?, 1, ?)
+       ON CONFLICT(scope, ip, window_bucket) DO UPDATE SET
+         hits = request_rate_limits.hits + 1,
+         updated_at = excluded.updated_at
+       RETURNING hits`
+    ).bind(scope, ip, windowBucket, now).first<{ hits: number }>();
+
+    // Keep table bounded (best-effort, same keyspace only).
+    await db.prepare(
+      `DELETE FROM request_rate_limits
+       WHERE scope = ? AND window_bucket < ?`
+    ).bind(scope, windowBucket - 2).run();
+
+    return (row?.hits || 1) <= limit;
+  } catch (e) {
+    console.error('[rate-limit] D1 failure, falling back to KV:', e);
+  }
+
+  // Fallback path — KV (non-atomic but preserves availability if D1 is down).
+  try {
+    const kv = getKV();
+    const rateKey = `rate:${scope}:${ip}`;
+    const raw = await kv.get(rateKey);
+    const count = raw ? parseInt(raw, 10) : 0;
+    if (count >= limit) return false;
+    await kv.put(rateKey, String(count + 1), { expirationTtl: windowSeconds });
+  } catch (e) {
+    // Last-resort availability: do not block signups if both D1 and KV fail.
+    console.error('[rate-limit] KV fallback failure, allowing request:', e);
+  }
+
+  return true;
+}
+
+// ---------------------------------------------------------------------------
 // Waitlist
 // ---------------------------------------------------------------------------
 
@@ -268,20 +353,10 @@ app.post('/waitlist', async (c) => {
     c.header('Access-Control-Allow-Origin', reqOrigin);
   }
 
-  // KV-backed rate limiting (persists across isolate restarts)
+  // IP rate limiting
   const ip = c.req.header('cf-connecting-ip') || 'unknown';
-  try {
-    const kv = getKV();
-    const rateKey = `rate:waitlist:${ip}`;
-    const raw = await kv.get(rateKey);
-    const count = raw ? parseInt(raw, 10) : 0;
-    if (count >= 5) {
-      return c.json({ error: 'Too many requests.' }, 429);
-    }
-    await kv.put(rateKey, String(count + 1), { expirationTtl: 60 });
-  } catch (e) {
-    // KV failure — allow request through rather than blocking, but log
-    console.error('[rate-limit] KV failure, allowing request:', e);
+  if (!await enforcePublicRateLimit('waitlist', ip)) {
+    return c.json({ error: 'Too many requests.' }, 429);
   }
 
   const body = await c.req.json().catch(() => null);
@@ -336,17 +411,8 @@ app.post('/follow', async (c) => {
   }
 
   const ip = c.req.header('cf-connecting-ip') || 'unknown';
-  try {
-    const kv = getKV();
-    const rateKey = `rate:follow:${ip}`;
-    const raw = await kv.get(rateKey);
-    const count = raw ? parseInt(raw, 10) : 0;
-    if (count >= 5) {
-      return c.json({ error: 'Too many requests.' }, 429);
-    }
-    await kv.put(rateKey, String(count + 1), { expirationTtl: 60 });
-  } catch (e) {
-    console.error('[rate-limit] KV failure, allowing request:', e);
+  if (!await enforcePublicRateLimit('follow', ip)) {
+    return c.json({ error: 'Too many requests.' }, 429);
   }
 
   const body = await c.req.json().catch(() => null);
