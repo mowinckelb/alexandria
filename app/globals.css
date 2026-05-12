@@ -334,9 +334,13 @@ html.app-shell input:focus {
 }
 .pdoc-table td:nth-child(2) {
   text-align: right;
-  white-space: nowrap;
   font-variant-numeric: tabular-nums;
   padding-left: 1rem;
+  /* Allow descriptive right-column content to wrap on narrow viewports
+     instead of overflowing the table. Numeric values still render on one
+     line because they're shorter than the available column width. */
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 .pdoc-table td:nth-child(3) {
   color: var(--text-faint);
