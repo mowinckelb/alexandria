@@ -568,9 +568,12 @@ html.app-shell input:focus {
   font-weight: 600;
   font-size: 3.2em;
   line-height: 0.82;
-  letter-spacing: -0.03em;
+  /* No negative letter-spacing — at 3.2em scale it pulls the next
+     character into the drop cap's body. The italic slant on letters
+     like F, T, V, W, Y already extends rightward visually beyond the
+     glyph box, so we need a generous, deliberate gap. */
   vertical-align: -0.28em;
-  margin-right: 0.04em;
+  padding-right: 0.18em;
   color: var(--accent);
   text-shadow:
     0 1px 0 rgba(255, 250, 240, 0.55),
