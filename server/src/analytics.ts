@@ -4,7 +4,7 @@
  * Every tool call produces one JSONL line. No user data. No content.
  * No tokens. Just event type, timestamp, and open-ended metadata.
  *
- * Storage: KV namespace with daily keys (events:YYYY-MM-DD).
+ * Storage: KV namespace, one key per request batch (events:YYYY-MM-DD:HH-mm-ss-SSS-{rand}).
  * In-memory summary for fast /analytics reads (warm between requests).
  */
 

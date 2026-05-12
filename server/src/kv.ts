@@ -6,7 +6,7 @@
  *   "auth:{api_key_hash}"  → github_id (lookup index for O(1) auth)
  *   "login:{github_login}" → github_id (lookup index for O(1) login → key, lowercased)
  *   "emailtoken:{token}"   → github_id (lookup index for O(1) email-token auth)
- *   "events:YYYY-MM-DD"    → JSONL string of events for that day
+ *   "events:YYYY-MM-DD:HH-mm-ss-SSS-{rand}" → JSONL batch from one request
  *   "cron:*"                → cron liveness markers (health digest reads these)
  * (marketplace signals + feedback live in the alexandria-signal github repo
  * now, not in KV — see marketplace.ts for the relay.)
@@ -145,52 +145,55 @@ export async function saveAccounts<T>(accounts: T): Promise<void> {
 // Events (JSONL log)
 // ---------------------------------------------------------------------------
 
-function todayKey(): string {
-  return `events:${new Date().toISOString().split('T')[0]}`;
-}
-
-/**
- * Append event line to daily key. Called by flushEvents() which batches
- * all events from a single request into one write. The race condition
- * (two concurrent requests appending to the same key) is acceptable at
- * low volume — flushEvents batching means each request writes once, so
- * races require two requests completing at the exact same millisecond.
- * At 1000+ concurrent users, migrate to per-event keys.
- */
+// Append event batch from one request to its own KV key. The earlier
+// daily-key model did read-modify-write on `events:YYYY-MM-DD`, which lost
+// concurrent writes under bursts (CI smoke probe step, scraper sweeps).
+// Each request gets a unique key; reads list+concat by prefix.
 export async function appendEvent(line: string): Promise<void> {
   const kv = getKV();
-  const key = todayKey();
-  const existing = await kv.get(key) || '';
-  await kv.put(key, existing + line, { expirationTtl: 60 * 24 * 60 * 60 }); // 60-day TTL
+  const now = new Date().toISOString();
+  const day = now.slice(0, 10);
+  const stamp = now.slice(11, 23).replace(/[:.]/g, '-');
+  const rand = crypto.randomUUID().slice(0, 8);
+  await kv.put(`events:${day}:${stamp}-${rand}`, line, { expirationTtl: 60 * 24 * 60 * 60 });
 }
 
-/**
- * Get events for the last N days (default 30).
- * Each day = 1 KV read. 30 days = 30 reads.
- */
-export async function getRecentDaysEvents(days: number = 30): Promise<string> {
+// Walk days from most-recent backward, accumulating event keys until we have
+// `cap` of them or hit `maxDays`. Cap bounds the subsequent get fan-out so we
+// stay under the Worker subrequest ceiling (1000). Returns lex-sorted keys
+// (chronological, since names are date-prefixed).
+async function recentEventKeys(cap: number, maxDays: number = 60): Promise<string[]> {
   const kv = getKV();
-  const keys: string[] = [];
-  for (let i = days - 1; i >= 0; i--) {
+  const collected: string[] = [];
+  for (let i = 0; i < maxDays; i++) {
     const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-    keys.push(`events:${d.toISOString().split('T')[0]}`);
+    const day = d.toISOString().slice(0, 10);
+    // `events:YYYY-MM-DD` = legacy daily-key (pre-2026-05-12 migration; expires
+    // naturally over 60d). `events:YYYY-MM-DD:...` = current per-request keys.
+    const dayKeys: string[] = [`events:${day}`];
+    let cursor: string | undefined;
+    do {
+      const page = await kv.list({ prefix: `events:${day}:`, cursor });
+      for (const k of page.keys) dayKeys.push(k.name);
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+    collected.unshift(...dayKeys.sort());
+    if (collected.length >= cap) break;
   }
-  const results = await Promise.all(keys.map(k => kv.get(k)));
-  return results.filter(Boolean).join('');
+  return collected.slice(-cap);
 }
 
-/**
- * Get ALL events across all time. Only use for explicit data export.
- */
-export async function getAllEvents(): Promise<string> {
+async function readEventKeys(names: string[]): Promise<string> {
+  if (names.length === 0) return '';
   const kv = getKV();
-  const keys = await kv.list({ prefix: 'events:' });
-  if (keys.keys.length === 0) return '';
-  const sorted = keys.keys.sort((a, b) => a.name.localeCompare(b.name));
-  const chunks: string[] = [];
-  for (const key of sorted) {
-    const data = await kv.get(key.name);
-    if (data) chunks.push(data);
-  }
-  return chunks.join('');
+  const values = await Promise.all(names.map(n => kv.get(n)));
+  return values.filter(Boolean).join('');
+}
+
+export async function getRecentDaysEvents(days: number = 30): Promise<string> {
+  return readEventKeys(await recentEventKeys(800, days));
+}
+
+export async function getAllEvents(): Promise<string> {
+  return readEventKeys(await recentEventKeys(500));
 }
