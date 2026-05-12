@@ -73,8 +73,8 @@ app.use('*', async (c, next) => {
   c.header('X-Frame-Options', 'DENY');
   c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-  const serverUrl = process.env.SERVER_URL || 'https://api.mowinckel.ai';
-  const websiteUrl = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const serverUrl = process.env.SERVER_URL || 'https://api.alexandria-library.com';
+  const websiteUrl = process.env.WEBSITE_URL || 'https://alexandria-library.com';
   c.header('Content-Security-Policy', `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' ${serverUrl} ${websiteUrl}; img-src 'self' ${websiteUrl}`);
 });
 
@@ -245,7 +245,7 @@ app.get('/', (c) => {
 <head>
 <meta charset="utf-8">
 <title>Alexandria</title>
-<link rel="icon" type="image/png" href="https://mowinckel.ai/favicon.png">
+<link rel="icon" type="image/png" href="https://alexandria-library.com/favicon.png">
 </head>
 <body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0a0a0a;color:#fff">
 <div style="text-align:center">
@@ -484,8 +484,8 @@ app.options('/follow', (c) => {
 // Favicon
 // ---------------------------------------------------------------------------
 
-app.get('/favicon.ico', (c) => c.redirect('https://mowinckel.ai/favicon.png', 301));
-app.get('/favicon.png', (c) => c.redirect('https://mowinckel.ai/favicon.png', 301));
+app.get('/favicon.ico', (c) => c.redirect('https://alexandria-library.com/favicon.png', 301));
+app.get('/favicon.png', (c) => c.redirect('https://alexandria-library.com/favicon.png', 301));
 
 // ---------------------------------------------------------------------------
 // Analytics endpoints

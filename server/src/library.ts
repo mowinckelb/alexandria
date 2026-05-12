@@ -299,7 +299,7 @@ export function registerLibraryRoutes(app: Hono): void {
 
     const accessorKey = extractApiKey(c);
     const accessor = accessorKey ? await findByApiKey(accessorKey) : null;
-    const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+    const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
     const requestedOrigin = typeof body.return_origin === 'string' ? body.return_origin.trim() : '';
     const allowedOrigins = new Set(getAllowedOrigins());
     const returnOrigin = requestedOrigin && allowedOrigins.has(requestedOrigin) ? requestedOrigin : WEBSITE_URL;
@@ -386,7 +386,7 @@ export function registerLibraryRoutes(app: Hono): void {
       if (result.status === 402) {
         return c.json({
           ...result.body,
-          checkout_url: `${process.env.WEBSITE_URL || 'https://mowinckel.ai'}/library/${encodeURIComponent(authorId)}/checkout/file/${encodeURIComponent(name)}`,
+          checkout_url: `${process.env.WEBSITE_URL || 'https://alexandria-library.com'}/library/${encodeURIComponent(authorId)}/checkout/file/${encodeURIComponent(name)}`,
         }, 402);
       }
       return c.json(result.body, result.status);

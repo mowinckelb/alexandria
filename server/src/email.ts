@@ -31,7 +31,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
         'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Alexandria <a@mowinckel.ai>',
+        from: 'Alexandria <a@alexandria-library.com>',
         to,
         subject,
         html,
@@ -51,7 +51,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
 }
 
 export async function sendFollowerWelcome(email: string): Promise<{ ok: boolean; error?: string }> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">welcome to alexandria. :)</p>
   <p style="margin: 0 0 1.4rem;">
@@ -71,7 +71,7 @@ export async function sendFollowerWelcome(email: string): Promise<{ ok: boolean;
 }
 
 export async function sendWelcomeEmail(email: string): Promise<void> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
   await sendEmail(email, 'welcome to alexandria.',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; text-align: left; line-height: 1.7;">
   <p style="font-size: 1.1rem; margin: 0 0 1.75rem;">welcome to alexandria.</p>
@@ -84,8 +84,8 @@ export async function sendWeekOneCheckIn(
   email: string,
   emailToken: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
-  const SERVER_URL = process.env.SERVER_URL || 'https://api.mowinckel.ai';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
+  const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">hey :)</p>
   <p style="margin: 0 0 1.4rem;">you signed up to alexandria a week ago &mdash; just dropping in.</p>

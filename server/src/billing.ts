@@ -456,8 +456,8 @@ export async function createCheckoutSession(opts: {
   stripeCustomerId?: string;
 }): Promise<string> {
   const stripe = getStripe();
-  const SERVER_URL = process.env.SERVER_URL || 'https://api.mowinckel.ai';
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
 
   // First attempt uses the stored customer if any; if Stripe rejects it as
   // missing (test→live transition leaves stale IDs behind), retry once with
@@ -514,7 +514,7 @@ export async function createPatronCheckoutSession(opts: {
   amountCents: number;
 }): Promise<string> {
   const stripe = getStripe();
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     customer_email: opts.email,
@@ -617,7 +617,7 @@ export async function reconcilePatronSubscriptions(): Promise<{ drift: number; c
 
 export async function createPortalSession(stripeCustomerId: string): Promise<string> {
   const stripe = getStripe();
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
   const session = await stripe.billingPortal.sessions.create({
     customer: stripeCustomerId,
     return_url: `${WEBSITE_URL}/signup`,
@@ -632,7 +632,7 @@ export async function createPortalSession(stripeCustomerId: string): Promise<str
 export type AccountUpdater = (identifier: string, billing: Partial<BillingInfo>) => Promise<void>;
 
 export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater) {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
 
   // Success page
   app.get('/billing/success', async (c) => {
@@ -1098,7 +1098,7 @@ async function sendPreBillWarningEmail(
   amountDollars: number,
   dueAt: Date | null,
 ): Promise<void> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
   const kinLink = `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}`;
 
   // Warning fires only when not-free, so at least one of (kinShort, authorQuiet) is true.

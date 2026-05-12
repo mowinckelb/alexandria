@@ -3,7 +3,7 @@
  * Callback page HTML for OAuth signup flow.
  */
 
-function getWebsiteUrl() { return process.env.WEBSITE_URL || 'https://mowinckel.ai'; }
+function getWebsiteUrl() { return process.env.WEBSITE_URL || 'https://alexandria-library.com'; }
 
 function escapeHtml(value: string): string {
   return value

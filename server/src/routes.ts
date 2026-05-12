@@ -112,8 +112,8 @@ function deriveCookieDomain(reqUrl: string): string {
 }
 
 export function registerRoutes(app: Hono) {
-  const SERVER_URL = process.env.SERVER_URL || 'https://api.mowinckel.ai';
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+  const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
+  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
 
   const sanitizeNextPath = (raw: string | undefined): string => {
     if (!raw) return '';
@@ -526,7 +526,7 @@ export function registerRoutes(app: Hono) {
     if (!auth) return c.text('Unauthorized', 401);
     const { account, key } = auth;
     if (!account.stripe_customer_id) {
-      return c.text('No billing account found. Complete signup at https://mowinckel.ai/signup', 400);
+      return c.text('No billing account found. Complete signup at https://alexandria-library.com/signup', 400);
     }
     try {
       const url = await createPortalSession(account.stripe_customer_id);
@@ -539,7 +539,7 @@ export function registerRoutes(app: Hono) {
       // creates a fresh live customer on next /signup.
       const e = err as { type?: string; code?: string };
       if (e?.type === 'StripeInvalidRequestError' && e?.code === 'resource_missing') {
-        const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
+        const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
         console.warn(`[account] stale stripe_customer_id ${account.stripe_customer_id} — clearing and redirecting`);
         try {
           const storeKey = await getAuthIndex(hashApiKey(key));
@@ -762,8 +762,8 @@ export function registerRoutes(app: Hono) {
     if (!auth) return c.text('Unauthorized', 403);
     if (await checkAdminRateLimit('nudge', 3, 300)) return c.json({ error: 'Rate limited (sends emails, capped 3/5min)' }, 429);
 
-    const WEBSITE_URL = process.env.WEBSITE_URL || 'https://mowinckel.ai';
-    const SERVER_URL = process.env.SERVER_URL || 'https://api.mowinckel.ai';
+    const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
+    const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
     const accounts = await loadAccounts<AccountStore>();
     const recipients = Object.values(accounts).filter(acct =>
       !acct.installed_at && acct.email && !acct.engagement_opt_out && acct.github_login !== auth.account.github_login
