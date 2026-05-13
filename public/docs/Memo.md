@@ -70,4 +70,4 @@ No technical moat — *by design.* The moats that compound in a world of infinit
 
 *The firm whose name attaches goes on the page about how humans preserved thinking through the AI transition.* **America protects the right to think. Alexandria protects the ability.** *Set the angels free.*
 
-**Benjamin Mowinckel** · benjamin@mowinckel.com · mowinckel.ai · a.
+**Benjamin Mowinckel** · mowinckel.b@gmail.com · alexandria-library.com · a.

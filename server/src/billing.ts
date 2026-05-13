@@ -713,8 +713,15 @@ async function healAccount(account: Account, sub: Stripe.Subscription): Promise<
   }
 }
 
+// Subscription statuses we'll surface for cancel/reactivate. Excludes
+// terminal states only — past_due / unpaid / paused users still need a
+// way to cancel (their card may have failed; they shouldn't be trapped).
+const MANAGEABLE_STATUSES: Stripe.Subscription.Status[] = [
+  'active', 'trialing', 'past_due', 'unpaid', 'paused', 'incomplete',
+];
+
 function subMatchesAccount(sub: Stripe.Subscription, account: Account): boolean {
-  if (sub.status !== 'active' && sub.status !== 'trialing') return false;
+  if (!MANAGEABLE_STATUSES.includes(sub.status)) return false;
   const md = sub.metadata || {};
   if (md.github_login && md.github_login === account.github_login) return true;
   if (md.api_key && account.api_key && md.api_key === account.api_key) return true;
@@ -777,7 +784,7 @@ export async function resolveActiveSubscription(account: Account): Promise<Resol
         status: 'all',
         limit: 10,
       });
-      const active = subs.data.find((s) => s.status === 'active' || s.status === 'trialing');
+      const active = subs.data.find((s) => MANAGEABLE_STATUSES.includes(s.status));
       if (active) {
         await healAccount(account, active);
         return shapeResolvedSubscription(active, true);

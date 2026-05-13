@@ -1095,6 +1095,97 @@ html.app-shell input:focus {
   opacity: 0.92;
 }
 
+/* Feedback form — replaces the mailto CTA. Closes the mirror loop:
+   user types (or pastes AI output), submit hits /account/feedback,
+   founder gets email + I read D1. Textarea is shaped to feel like
+   writing a note, not filling a form. Send button matches the
+   contact-cta register (italic underline, no chrome). */
+.cancel-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  margin: 24px 0 20px;
+  width: 100%;
+}
+.cancel-feedback-input {
+  width: 100%;
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  background: var(--bg-secondary, transparent);
+  border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.25));
+  border-radius: 2px;
+  padding: 16px 18px;
+  resize: vertical;
+  min-height: 180px;
+  transition: border-color 200ms;
+  box-sizing: border-box;
+}
+.cancel-feedback-input:focus {
+  outline: none;
+  border-color: var(--text-primary);
+}
+.cancel-feedback-input::placeholder {
+  font-style: italic;
+  color: var(--text-muted);
+}
+.cancel-feedback-input:disabled {
+  opacity: 0.6;
+}
+.cancel-feedback-send {
+  align-self: center;
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 20px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  padding: 6px 4px;
+  cursor: pointer;
+  transition: text-decoration-color 200ms, opacity 200ms;
+}
+.cancel-feedback-send:hover:not(:disabled) {
+  text-decoration-color: var(--text-primary);
+  opacity: 0.92;
+}
+.cancel-feedback-send:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.cancel-feedback-thanks {
+  align-self: center;
+  margin: 0 !important;
+  font-size: 17px !important;
+  color: var(--text-muted) !important;
+}
+
+/* Secondary call CTA — small line below the form. */
+.cancel-or-call {
+  margin: 8px 0 24px !important;
+  font-size: 16px !important;
+  color: var(--text-muted) !important;
+  text-align: center;
+}
+.cancel-inline-cta {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  font-style: italic;
+  transition: text-decoration-color 200ms;
+}
+.cancel-inline-cta:hover {
+  text-decoration-color: var(--text-primary);
+}
+
 /* Sign-off + aside — "— b" + "no hard feelings if neither." */
 .cancel-sign {
   margin: 28px 0 8px !important;

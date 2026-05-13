@@ -697,6 +697,58 @@ export function registerRoutes(app: Hono) {
     }
   });
 
+  // --- Cancel-screen feedback (the mirror loop) ---
+  //
+  // The /cancel save-screen has a free-text field for "what's missing /
+  // what would make you stay." Submissions land here, get persisted in
+  // access_log so the founder can query the structured feedback stream
+  // (`SELECT meta FROM access_log WHERE event = 'cancel_feedback' ...`),
+  // and trigger a notification email to FOUNDER_EMAIL. Mailto on the
+  // page was retired in favour of this so the loop closes — Gmail keeps
+  // a copy, D1 keeps a structured copy.
+  app.post('/account/feedback', async (c) => {
+    const account = await authorFromRequest(c);
+    if (!account) return c.json({ error: 'Unauthorized' }, 401);
+
+    let body: { message?: string } = {};
+    try { body = await c.req.json() as { message?: string }; } catch {}
+    const message = String(body.message || '').trim();
+    if (!message) return c.json({ ok: false, error: 'empty message' }, 400);
+    if (message.length > 10000) return c.json({ ok: false, error: 'message too long' }, 400);
+
+    try {
+      const db = getDB();
+      await db.prepare(
+        `INSERT INTO access_log (event, author_id, accessor_id, artifact_id, tier, meta, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        'cancel_feedback',
+        account.github_login,
+        account.github_login,
+        null,
+        null,
+        JSON.stringify({ message }),
+        new Date().toISOString(),
+      ).run();
+    } catch (e) {
+      console.error('[account/feedback] D1 insert failed:', e);
+    }
+
+    try {
+      const fromName = account.github_name?.trim() || account.github_login;
+      await sendEmail(
+        FOUNDER_EMAIL,
+        `cancel feedback from ${fromName}`,
+        `${message}\n\n---\nfrom: ${fromName} (${account.email})\nsubscription: ${account.subscription_id || 'unknown'}`,
+      );
+    } catch (e) {
+      console.error('[account/feedback] notification email failed:', e);
+    }
+
+    logEvent('cancel_feedback', { github_login: account.github_login });
+
+    return c.json({ ok: true });
+  });
+
   // --- Admin: remove another account (KV + D1 + R2; same footprint as DELETE /account) ---
 
   app.post('/admin/account/remove', async (c) => {

@@ -1,31 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { FOUNDER_EMAIL, FOUNDER_PHONE } from '../lib/config';
+import { FOUNDER_PHONE } from '../lib/config';
 
-// The AI-assist prompt is offered as a hand-off the user can paste into
-// their own assistant — half the message field is intimidating without it.
-// Match the prompt exactly to the one embedded in the prefilled mailto body
-// so the two copies don't drift.
+// The AI-assist prompt — offered as a hand-off the user can paste into
+// their own assistant. The page now captures the reply directly in a
+// textarea (mailto retired) so the loop closes: founder sees it in
+// Gmail (via Resend), I see it in D1 access_log.
 const AI_PROMPT = `write a short, honest note to benjamin at alexandria. answer three things in 3-5 sentences: what made me try alexandria, what didn't land for me, what would actually make me stay. my voice, no fluff.`;
-
-const MAILTO_BODY = [
-  'hi benjamin,',
-  '',
-  "(if writing's a chore — paste this prompt into your AI assistant and let it draft:",
-  `"${AI_PROMPT}"`,
-  'then replace this section with the result.)',
-  '',
-  'what made me try alexandria:',
-  '',
-  "what didn't land:",
-  '',
-  'what would make me stay:',
-  '',
-  '— [your name]',
-].join('\n');
 
 // Formats an ISO date as "Month D, YYYY" — Intl.DateTimeFormat respects
 // the visitor's locale by default. Lowercased to match the literary
@@ -45,6 +30,7 @@ function formatCancelDate(iso: string): string {
 }
 
 type Mode = 'save' | 'cancelling' | 'cancelled' | 'reactivating' | 'reactivated';
+type FeedbackState = 'idle' | 'sending' | 'sent';
 
 export default function CancelClient({
   githubLogin: _githubLogin,
@@ -63,13 +49,37 @@ export default function CancelClient({
   const [cancelAt, setCancelAt] = useState<string | null>(initialCancelAt);
   const [error, setError] = useState<string>('');
 
-  const mailtoUrl = useMemo(() => {
-    const subject = encodeURIComponent("what i'd need to stay");
-    const body = encodeURIComponent(MAILTO_BODY);
-    return `mailto:${FOUNDER_EMAIL}?subject=${subject}&body=${body}`;
-  }, []);
+  const [feedbackBody, setFeedbackBody] = useState('');
+  const [feedbackState, setFeedbackState] = useState<FeedbackState>('idle');
+  const [feedbackError, setFeedbackError] = useState('');
 
   const telUrl = `tel:${FOUNDER_PHONE}`;
+
+  const onSendFeedback = async (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = feedbackBody.trim();
+    if (!trimmed || feedbackState !== 'idle') return;
+    setFeedbackState('sending');
+    setFeedbackError('');
+    try {
+      const res = await fetch('/api/library/account/feedback', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: trimmed }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) {
+        setFeedbackError(data.error || 'something broke. try again?');
+        setFeedbackState('idle');
+        return;
+      }
+      setFeedbackState('sent');
+    } catch {
+      setFeedbackError('network hiccup. try again?');
+      setFeedbackState('idle');
+    }
+  };
 
   const onCancel = async () => {
     setMode('cancelling');
@@ -160,16 +170,37 @@ export default function CancelClient({
               <em>{AI_PROMPT}</em>
             </blockquote>
 
-            <p>then send the result.</p>
+            <p>then paste it here:</p>
 
-            <div className="cancel-contact">
-              <a href={mailtoUrl} className="cancel-contact-cta">
-                email benjamin
-              </a>
-              <a href={telUrl} className="cancel-contact-cta">
-                call benjamin
-              </a>
-            </div>
+            <form className="cancel-feedback" onSubmit={onSendFeedback}>
+              <textarea
+                className="cancel-feedback-input"
+                value={feedbackBody}
+                onChange={(e) => setFeedbackBody(e.target.value)}
+                disabled={feedbackState !== 'idle'}
+                rows={8}
+                placeholder="your words, your AI&rsquo;s words — either lands with me."
+                aria-label="message to benjamin"
+              />
+              {feedbackState === 'sent' ? (
+                <p className="cancel-feedback-thanks">
+                  <em>thanks &mdash; i read every word.</em>
+                </p>
+              ) : (
+                <button
+                  type="submit"
+                  className="cancel-feedback-send"
+                  disabled={!feedbackBody.trim() || feedbackState === 'sending'}
+                >
+                  {feedbackState === 'sending' ? 'sending&hellip;' : 'send'}
+                </button>
+              )}
+              {feedbackError && <p className="cancel-error">{feedbackError}</p>}
+            </form>
+
+            <p className="cancel-or-call">
+              or <a href={telUrl} className="cancel-inline-cta">call benjamin</a>.
+            </p>
 
             <p className="cancel-sign">&mdash; b</p>
 
