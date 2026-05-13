@@ -694,36 +694,80 @@ function shapeResolvedSubscription(sub: Stripe.Subscription, healed: boolean): R
   };
 }
 
+async function healAccount(account: Account, sub: Stripe.Subscription): Promise<void> {
+  const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
+  const periodEndUnix = sub.items?.data?.[0]?.current_period_end ?? null;
+  try {
+    await updateAccountBilling(account.github_login, {
+      stripe_customer_id: customerId,
+      subscription_id: sub.id,
+      subscription_status: sub.status,
+      ...(periodEndUnix ? { current_period_end: new Date(periodEndUnix * 1000).toISOString() } : {}),
+    });
+    logEvent('subscription_account_healed', {
+      github_login: account.github_login,
+      subscription_id: sub.id,
+    });
+  } catch (e) {
+    console.warn(`[billing] auto-heal failed for ${account.github_login}:`, e);
+  }
+}
+
+function subMatchesAccount(sub: Stripe.Subscription, account: Account): boolean {
+  if (sub.status !== 'active' && sub.status !== 'trialing') return false;
+  const md = sub.metadata || {};
+  if (md.github_login && md.github_login === account.github_login) return true;
+  if (md.api_key && account.api_key && md.api_key === account.api_key) return true;
+  if (md.follow_email && account.email && md.follow_email.toLowerCase() === account.email.toLowerCase()) return true;
+  return false;
+}
+
 /**
  * Resolve an account's active subscription from Stripe.
  *
  * Source of truth is Stripe; KV `subscription_id` is the derivative cache.
- * Fast path: cached subscription_id present → retrieve directly.
- * Fallback path: cached id missing or stale (e.g. legacy accounts whose
- * original checkout predated the `github_login` metadata convention) →
- * look up active/trialing subscription by `account.email` and auto-heal
- * the KV record so the next call takes the fast path. As legacy accounts
- * are touched they self-heal; the scaffolding falls away on its own.
+ * Multi-path resolution — first match wins, then KV auto-heals so the next
+ * call takes the fast path. As legacy/drifted accounts are touched they
+ * self-heal; the scaffolding falls away on its own.
  *
- * Returns null when no active/trialing subscription exists in Stripe.
+ *   1. Cached `account.subscription_id` (fast path)
+ *   2. Stripe sweep — recent subs filtered by metadata:
+ *        - sub.metadata.github_login === account.github_login (current author convention)
+ *        - sub.metadata.api_key === account.api_key (legacy author convention)
+ *        - sub.metadata.follow_email === account.email (patron / Door 2)
+ *   3. Customer.list by email → first active/trialing sub on those customers
+ *
+ * Returns null when no active/trialing subscription exists.
  */
 export async function resolveActiveSubscription(account: Account): Promise<ResolvedSubscription | null> {
   const stripe = getStripe();
 
-  // Fast path — cached subscription_id is valid.
+  // 1. Fast path — cached subscription_id is valid.
   if (account.subscription_id) {
     try {
       const sub = await stripe.subscriptions.retrieve(account.subscription_id);
       return shapeResolvedSubscription(sub, false);
     } catch (e) {
       console.warn(
-        `[billing] cached subscription_id ${account.subscription_id} not in Stripe — falling back to email lookup:`,
+        `[billing] cached subscription_id ${account.subscription_id} not in Stripe — falling back to metadata sweep:`,
         e,
       );
     }
   }
 
-  // Fallback — find active sub by customer email, auto-heal KV.
+  // 2. Metadata sweep — robust to email mismatch + legacy + patron variants.
+  try {
+    const recent = await stripe.subscriptions.list({ status: 'all', limit: 100 });
+    const matched = recent.data.find((s) => subMatchesAccount(s, account));
+    if (matched) {
+      await healAccount(account, matched);
+      return shapeResolvedSubscription(matched, true);
+    }
+  } catch (e) {
+    console.error(`[billing] metadata sweep failed for ${account.github_login}:`, e);
+  }
+
+  // 3. Email-based customer lookup — fallback when no metadata identifier hit.
   if (!account.email) return null;
   try {
     const customers = await stripe.customers.list({ email: account.email, limit: 5 });
@@ -735,28 +779,12 @@ export async function resolveActiveSubscription(account: Account): Promise<Resol
       });
       const active = subs.data.find((s) => s.status === 'active' || s.status === 'trialing');
       if (active) {
-        const periodEndUnix = active.items?.data?.[0]?.current_period_end ?? null;
-        try {
-          await updateAccountBilling(account.github_login, {
-            stripe_customer_id: customer.id,
-            subscription_id: active.id,
-            subscription_status: active.status,
-            ...(periodEndUnix
-              ? { current_period_end: new Date(periodEndUnix * 1000).toISOString() }
-              : {}),
-          });
-          logEvent('subscription_account_healed', {
-            github_login: account.github_login,
-            subscription_id: active.id,
-          });
-        } catch (e) {
-          console.warn(`[billing] auto-heal failed for ${account.github_login}:`, e);
-        }
+        await healAccount(account, active);
         return shapeResolvedSubscription(active, true);
       }
     }
   } catch (e) {
-    console.error(`[billing] subscription lookup for ${account.email} failed:`, e);
+    console.error(`[billing] customer email lookup for ${account.email} failed:`, e);
   }
   return null;
 }
