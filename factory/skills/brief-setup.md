@@ -7,7 +7,14 @@ You are setting up the Author's daily morning brief delivery. ONE-TIME interacti
 
 ## What the brief does
 
-The brief fires once a day, reads `~/alexandria/system/.brief_outbox` (one line — written by the autoloop or any other producer), and SMTP-sends it through the Author's own credentials, against the Author's own email provider. Empty/stale outbox → default `"no material change overnight."`
+The brief fires once a day and SMTP-sends through the Author's own credentials, against the Author's own email provider. The body is assembled in priority order:
+
+1. **Stranded autoloop alarm** — `claude/*` branch ahead of master, surfaces a rescue command.
+2. **Fresh `~/alexandria/system/.brief_outbox`** — autoloop-written content (decisions parked / alarm-worthy state). Optional `SUBJECT:` first line overrides the default subject; everything after a blank line is the body.
+3. **Stale-routine alarm** — `last_run.md` hasn't been committed within ~24h.
+4. **Droplet floor** — one stanza from `~/alexandria/files/core/shelf.md`, deterministic per ISO week (weekday indexes into a per-week shuffle, so 7 unique stanzas a week when N ≥ 7). Missing/empty shelf → built-in `*keep thinking.*` fallback.
+
+The brief always sends — silence would train the inbox to filter. The droplet floor is the daily heartbeat; outbox/alarms promote over it when something actually warrants the Author's attention.
 
 ## Two paths, one outcome
 

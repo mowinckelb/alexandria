@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Daily brief sender — syncs ~/alexandria with origin, then reads
-~/alexandria/system/.brief_outbox (one line, written by the autoloop or any
-other producer) and SMTP-sends it. Falls back to a default line when the
-outbox is empty.
+"""Daily brief sender — syncs ~/alexandria with origin, then assembles a
+subject + body and SMTP-sends it.
 
-Verification loop: also detects autoloop work that didn't reach master
-(stranded on a claude/* branch from a failed master push) and surfaces a
-rescue command in the brief body. Without this, silent strands look identical
-to silent days.
+Priority of body sources:
+  1. Stranded autoloop work (alarm).
+  2. Fresh `system/.brief_outbox` (autoloop wrote something to surface).
+  3. Stale-routine alarm if the autoloop hasn't committed in ~24h.
+  4. Default — one droplet picked from `files/core/shelf.md`, deterministic per
+     day. The brief always lands; silence trains the inbox to filter.
+
+Subject taxonomy:
+  - `alexandria. — alarm` for stranded / alarm bodies.
+  - Whatever `SUBJECT:` line the outbox supplies (e.g. `alexandria. — 2 to decide`).
+  - `alexandria.` for the daily droplet.
 
 Sovereign by construction: no network calls except git (the Author's own
 remote) and SMTP (the Author's own provider).
@@ -15,6 +20,8 @@ remote) and SMTP (the Author's own provider).
 
 import json
 import os
+import random
+import re
 import smtplib
 import ssl
 import subprocess
@@ -32,22 +39,20 @@ LOG = ALEX / ".brief_log"
 # (git -C $REPO log -- $REL); the absolutes are what Python opens. One source.
 OUTBOX_REL = "system/.brief_outbox"
 LAST_RUN_REL = "system/.autoloop/last_run.md"
+SHELF_REL = "files/core/shelf.md"
 OUTBOX = REPO / OUTBOX_REL
 LAST_RUN = REPO / LAST_RUN_REL
+SHELF = REPO / SHELF_REL
 
-DEFAULT_BODY = "no material change overnight."
+FALLBACK_DROPLET = "*keep thinking.*"
 # Outbox content from before this threshold is treated as stale (yesterday's
 # run, not today's). The autoloop fires at 14:00 UTC, the brief at 15:00 UTC
 # — today's outbox is ~50 min old when read. 20h rejects anything older than
 # this morning while leaving slack for autoloop running late.
 OUTBOX_STALE_HOURS = 20
 # Last_run.md commit older than this triggers the "routine missed today" alarm.
-# With autoloop daily at 14:00 UTC, yesterday's commit is ~24h 50m old when
-# brief reads at 15:00 UTC the next day. 24h catches the miss; tighter would
-# false-positive on slow autoloops, looser would silently skip a missed day.
 LAST_RUN_STALE_HOURS = 24
 # A claude/* branch counts as a "live strand" only if its tip is this fresh.
-# Older branches are leftover artefacts from successful runs that are now on master.
 STRAND_FRESH_HOURS = 26
 
 
@@ -66,13 +71,8 @@ def git(*args: str, timeout: int = 30, check: bool = False) -> subprocess.Comple
 
 
 def file_commit_age_h(rel_path: str) -> Optional[float]:
-    """Hours since `rel_path` was last committed on the current ref. None on
-    failure (git missing, file never committed, repo absent).
-
-    Use this instead of file mtime — `git pull` resets mtime to clock time,
-    breaking mtime as a freshness signal. Commit time is the direct ground
-    truth.
-    """
+    """Hours since `rel_path` was last committed. `git pull` resets mtime, so
+    commit time is the only direct freshness signal."""
     try:
         proc = git("log", "-1", "--format=%ct", "--", rel_path)
         if proc.returncode != 0 or not proc.stdout.strip():
@@ -85,18 +85,13 @@ def file_commit_age_h(rel_path: str) -> Optional[float]:
 
 
 def sync_repo() -> None:
-    """Fetch all refs and fast-forward master so we see the latest autoloop output.
-
-    Failures are logged but non-fatal — the brief should still send something
-    rather than block on git issues.
-    """
+    """Fetch + FF master so OUTBOX/LAST_RUN reflect the latest autoloop push.
+    Failures logged but non-fatal — the brief still sends a droplet."""
     try:
         git("fetch", "--all", "--quiet", timeout=45)
     except Exception as e:
         log(f"sync_repo fetch failed: {type(e).__name__}: {e}")
         return
-    # FF master only when the working tree is clean enough; if not, skip the pull
-    # rather than risk a merge conflict during a non-interactive job.
     status = git("status", "--porcelain")
     if status.returncode == 0 and not status.stdout.strip():
         git("pull", "--ff-only", "origin", "master", "--quiet")
@@ -105,12 +100,9 @@ def sync_repo() -> None:
 def read_fresh_outbox() -> Optional[str]:
     """Return outbox content if it was committed within STALE_HOURS, else None.
 
-    The outbox file is git-transported: the autoloop commits it, brief pulls
-    master to read it. The natural lifecycle is "autoloop overwrites every
-    run" — but if a run has nothing to surface and skips the write, origin
-    keeps yesterday's content. Without a freshness check the brief would
-    re-send the same line every silent day. Commit time on the blob is the
-    direct signal, not file existence.
+    The outbox is git-transported: the autoloop commits, brief pulls master to
+    read. Natural lifecycle is "autoloop overwrites every run" — but silent days
+    leave yesterday's content. Commit-time check prevents re-sending stale text.
     """
     if not OUTBOX.exists():
         return None
@@ -125,12 +117,26 @@ def read_fresh_outbox() -> Optional[str]:
     return text
 
 
-def detect_stranded() -> Optional[str]:
-    """Return a brief body describing stranded autoloop work, or None.
+def parse_outbox(raw: str) -> Tuple[Optional[str], str]:
+    """Extract an optional `SUBJECT: ...` first line. Returns (subject, body).
 
-    A strand = a claude/* branch on origin whose tip is newer than master AND
-    fresh enough to be from this run cycle. Old claude/* branches that were
-    later cherry-picked onto master have older tips than master and are ignored.
+    Format is intentionally minimal — autoloops write plain text. A leading
+    `SUBJECT:` line overrides the default subject (e.g. `alexandria. — 2 to
+    decide`). Everything after blank-line separator is the body.
+    """
+    first_line, _, rest = raw.partition("\n")
+    if first_line.upper().startswith("SUBJECT:"):
+        subject = first_line.split(":", 1)[1].strip()
+        return subject, rest.lstrip("\n")
+    return None, raw
+
+
+def detect_stranded() -> Optional[str]:
+    """Return alarm body describing stranded autoloop work, or None.
+
+    A strand = a claude/* branch on origin newer than master AND fresh enough
+    to be this cycle's. Old claude/* branches cherry-picked onto master have
+    older tips and are ignored.
     """
     try:
         refs = git(
@@ -167,10 +173,9 @@ def detect_stranded() -> Optional[str]:
     if not candidates:
         return None
 
-    branch_ref, _ = max(candidates, key=lambda x: x[1])  # most recent strand
+    branch_ref, _ = max(candidates, key=lambda x: x[1])
     short_branch = branch_ref[len("origin/"):] if branch_ref.startswith("origin/") else branch_ref
 
-    # Try to surface what was on the strand — read its outbox if it has one.
     payload = ""
     try:
         show = git("show", f"{branch_ref}:{OUTBOX_REL}", timeout=10)
@@ -179,9 +184,6 @@ def detect_stranded() -> Optional[str]:
     except Exception:
         pass
 
-    # Refspec push — branch-agnostic (works regardless of user's current
-    # branch), FF-only by default (rejects if not a fast-forward), updates
-    # remote master directly. Local master syncs naturally on next pull.
     rescue = (
         f"cd ~/alexandria && git fetch origin && "
         f"git push origin {branch_ref}:master"
@@ -192,9 +194,36 @@ def detect_stranded() -> Optional[str]:
     return f"{header}\n\nRescue: {rescue}"
 
 
+def pick_droplet() -> str:
+    """Pick one droplet from the shelf, deterministic for today's UTC date.
+
+    Stanzas in `files/core/shelf.md` are separated by lines of three+ dashes.
+    Anything before the first separator is treated as header/meta and ignored.
+    Empty/missing shelf → built-in fallback.
+
+    Rotation: reshuffles the stanza order each ISO week (seed = year+week);
+    weekday indexes into the shuffled list. Same day-of-week within a week =
+    same droplet (idempotent reruns). 7 unique droplets per week when N ≥ 7.
+    """
+    if not SHELF.exists():
+        return FALLBACK_DROPLET
+    raw = SHELF.read_text()
+    parts = re.split(r"\n-{3,}\n", raw)
+    # parts[0] is the header above the first `---`. Stanzas start at parts[1:].
+    stanzas = [p.strip() for p in parts[1:] if p.strip()]
+    if not stanzas:
+        return FALLBACK_DROPLET
+    today = datetime.now(timezone.utc).date()
+    iso_year, iso_week, iso_weekday = today.isocalendar()
+    rng = random.Random(f"{iso_year}-W{iso_week:02d}")
+    order = list(range(len(stanzas)))
+    rng.shuffle(order)
+    # iso_weekday is 1..7; index modulo N so weeks where N<7 still cycle cleanly.
+    return stanzas[order[(iso_weekday - 1) % len(stanzas)]]
+
+
 def load_creds() -> dict:
-    """Env vars (CI) win over the local .brief_email file. SMTP_HOST presence
-    is the env-mode trigger — all SMTP_* must be set together."""
+    """Env vars (CI) win over the local .brief_email file."""
     if os.environ.get("SMTP_HOST"):
         return {
             "host": os.environ["SMTP_HOST"],
@@ -208,6 +237,41 @@ def load_creds() -> dict:
     return json.loads(CREDS.read_text())
 
 
+def assemble(creds: dict) -> Tuple[str, str]:
+    """Return (subject, body) for today's brief. Priority:
+      stranded > fresh outbox > stale-routine alarm > droplet.
+    """
+    body: Optional[str] = None
+    subject: Optional[str] = None
+
+    stranded = detect_stranded() if (REPO / ".git").exists() else None
+    if stranded:
+        return "alexandria. — alarm", stranded
+
+    fresh = read_fresh_outbox()
+    if fresh:
+        parsed_subject, parsed_body = parse_outbox(fresh)
+        body = parsed_body
+        subject = parsed_subject
+
+    if body is None:
+        # No outbox content: check routine health before falling through to droplet.
+        if not LAST_RUN.exists():
+            return "alexandria. — alarm", "alarm: machine routine has never run — no last_run.md found."
+        age_h = file_commit_age_h(LAST_RUN_REL)
+        if age_h is not None and age_h > LAST_RUN_STALE_HOURS:
+            return "alexandria. — alarm", f"alarm: machine routine stale — last_run.md last committed {age_h:.0f}h ago."
+        body = pick_droplet()
+
+    if subject is None:
+        if body.startswith("STRANDED") or body.startswith("alarm:"):
+            subject = "alexandria. — alarm"
+        else:
+            subject = creds.get("subject", "alexandria.")
+
+    return subject, body
+
+
 def main() -> int:
     try:
         creds = load_creds()
@@ -215,34 +279,13 @@ def main() -> int:
         log(f"abort: creds unavailable ({type(e).__name__}: {e})")
         return 1
 
-    # Sync first so OUTBOX and LAST_RUN reflect the latest autoloop push.
     if REPO.exists() and (REPO / ".git").exists():
         sync_repo()
 
-    body = DEFAULT_BODY
-
-    # Stranded work takes priority — it's the alarm condition.
-    stranded = detect_stranded() if (REPO / ".git").exists() else None
-    if stranded:
-        body = stranded
-    else:
-        fresh = read_fresh_outbox()
-        if fresh:
-            body = fresh
-
-    # If still defaulting, verify the upstream routine is alive. The default
-    # body is meaningful only when the machine routine ran and chose silence —
-    # otherwise it silently masks a stalled loop.
-    if body == DEFAULT_BODY:
-        if not LAST_RUN.exists():
-            body = "alarm: machine routine has never run — no last_run.md found."
-        else:
-            age_h = file_commit_age_h(LAST_RUN_REL)
-            if age_h is not None and age_h > LAST_RUN_STALE_HOURS:
-                body = f"alarm: machine routine stale — last_run.md last committed {age_h:.0f}h ago."
+    subject, body = assemble(creds)
 
     msg = EmailMessage()
-    msg["Subject"] = creds.get("subject", "alexandria.")
+    msg["Subject"] = subject
     msg["From"] = creds["from"]
     msg["To"] = creds["to"]
     msg.set_content(body)
@@ -259,7 +302,7 @@ def main() -> int:
                 srv.starttls(context=ctx)
                 srv.login(creds["user"], creds["password"])
                 srv.send_message(msg)
-        log(f"sent: {body[:80]}")
+        log(f"sent [{subject}]: {body[:80]}")
         return 0
     except Exception as e:
         log(f"fail: {type(e).__name__}: {e}")

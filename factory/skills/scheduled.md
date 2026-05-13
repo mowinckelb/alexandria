@@ -68,11 +68,53 @@ If ~/alexandria/ is a git repo, commit changes and push. Write a report to ~/ale
 
 ## Brief delivery is NOT this loop's job
 
-The autoloop produces vault-processing artefacts (constitution writes, notepad fragments, shadow drafts, last_run.md). It does NOT send email or deliver the morning brief.
+The autoloop produces vault-processing artefacts (constitution writes, notepad fragments, shadow drafts, last_run.md). It does NOT send email. Email delivery is a separate sovereign loop on the Author's own infrastructure — `factory/skills/brief-setup.md` installs `brief.py` + a schedule + the Author's own SMTP credentials.
 
-Email delivery is a separate, fully sovereign loop on the Author's own machine: `factory/skills/brief-setup.md` installs `~/alexandria/system/brief.py` + a launchd schedule + the Author's own SMTP credentials. The brief sender runs locally on its own clock and reads from `~/alexandria/system/.brief_outbox` (one line) when present, falling back to a default line when absent.
+### What you can write to the outbox
 
-If you want today's autoloop work to surface in the Author's brief, write one line to `~/alexandria/system/.brief_outbox` BUT only when the autoloop is running on the same machine as `brief.py` (e.g. local cron / local launchd-driven autoloop). For remote runtimes (claude.ai trigger, github actions, anywhere off the Author's mac) the file write does not reach the local sender — skip the outbox and let the default fire.
+`~/alexandria/system/.brief_outbox` is the autoloop → brief channel. `brief.py` reads it on the next morning fire and ships what's there. The brief always sends — quiet days default to a hand-curated droplet from `files/core/shelf.md`. So the outbox is for **promotions over the daily floor**, not for daily reports.
+
+Write to the outbox ONLY when one of these is true:
+
+1. **Decisions are parked for the Author.** Taste calls the autoloop couldn't make alone (publish-or-hold, fire-or-drop, promote-to-constitution, etc.). Apply the ≤3 rule — if it would take more than three bullets, you're reporting, not asking.
+2. **Alarm-worthy machine state** the brief.py probes don't already cover. (`brief.py` already detects stranded autoloop branches and stale `last_run.md` — don't duplicate those.)
+
+**Do NOT write to the outbox for:**
+- Daily work summaries ("46 sessions processed, 5 _constitution deltas…"). The Author already knows what they wrote in /a; the autoloop summarising it back is noise. `last_run.md` holds the full report — the brief is not the same surface.
+- Loaded fragments / observations / fragment counts. These belong in `notepad.md`.
+- "No action required" lines. Silence is the signal — the droplet floor takes over.
+
+If nothing meets the bar, leave the outbox alone. The droplet picker handles the rest.
+
+### Outbox format
+
+Plain text, optional `SUBJECT:` first line. `brief.py` parses the subject line if present; everything after a blank-line separator is the body.
+
+Decision-day example:
+```
+SUBJECT: alexandria. — 2 to decide
+
+— shadow draft updated. publish or hold?
+— democracy error-correction loaded for next /a. fire or drop?
+
+work: 46 sessions, 5 _constitution deltas, 2 youtube fragments.
+
+— a.
+```
+
+Alarm-day example (only for alarms `brief.py` doesn't already detect — be specific about what broke and the rescue):
+```
+SUBJECT: alexandria. — alarm
+
+<one-line description of the failure>
+rescue: <exact command or step>
+```
+
+Register: lowercase, italic openers when it earns them, sign with `— a.` for multi-line bodies. Match `~/alexandria/files/core/shelf.md`'s voice. Compress.
+
+### Runtime constraint
+
+The outbox is git-transported. Commit + push it the same way you commit `last_run.md`; `brief.py` pulls master on the next fire. For autoloops running off the Author's machine (claude.ai, GH Actions, remote), the commit IS the delivery mechanism — no local file write required.
 
 ## Verification (run last)
 
