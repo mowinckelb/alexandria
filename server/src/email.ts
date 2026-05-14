@@ -36,11 +36,11 @@ function htmlToText(html: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/&rsquo;/g, '’')
     .replace(/&lsquo;/g, '‘')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
     .replace(/ +/g, ' ')
     .replace(/\n /g, '\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -54,21 +54,20 @@ export async function sendEmail(
   opts?: { unsubscribeUrl?: string },
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const text = htmlToText(html);
-    const headers: Record<string, string> = {};
-    if (opts?.unsubscribeUrl) {
-      headers['List-Unsubscribe'] = `<${opts.unsubscribeUrl}>`;
-      headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
-    }
-    const body: Record<string, unknown> = {
+    const body = {
       from: 'Alexandria <a@alexandria-library.com>',
       reply_to: 'a@alexandria-library.com',
       to,
       subject,
       html,
-      text,
+      text: htmlToText(html),
+      ...(opts?.unsubscribeUrl ? {
+        headers: {
+          'List-Unsubscribe': `<${opts.unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
+      } : {}),
     };
-    if (Object.keys(headers).length) body.headers = headers;
     const resp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
