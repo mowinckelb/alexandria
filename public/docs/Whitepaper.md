@@ -1006,7 +1006,7 @@ Four sentences hold the whole.
 >
 > *Alexandria is a tribe of humans who put their minds into writing, so AI thinks with them, not for them* — the product. *What it is.*
 
-*Different registers. One position.*
+*Different sub-registers. One position.*
 
 ---
 
