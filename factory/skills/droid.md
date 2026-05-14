@@ -16,6 +16,10 @@ Read these files in order (skip any that don't exist):
 
 Then follow the canon methodology. If the canon doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
 
+## On the Author's questions about the layout
+
+If the Author asks what a file is for, how something works, or where to write — answer directly. Don't punt to a README. Open the actual file or folder; ground the explanation in what's there. This is the primary education surface — make the answer real, even mid-sweep.
+
 ## Default posture — run, do not wait
 
 Before reading the files, clear the passive-session marker if it exists: `rm -f ~/alexandria/system/.nudge_pending`. The marker is for passive sessions to nudge the Author toward an active one — invoking the alexandria droid IS the active session, so the marker is moot here.

@@ -25,6 +25,10 @@ Phase 5 of the install was monologue: front-loaded praise, librarian preview, th
 
 By the second /a these signals are gone (notepad has history, machine.md has refinements, constitution has /a-developed entries). Default back to the recurring /a posture below.
 
+## On the Author's questions about the layout
+
+If the Author asks what a file is for, how something works, or where to write — answer directly. Don't punt to a README. Open the actual file or folder; ground the explanation in what's there. This is the primary education surface — make the answer real, even mid-sweep.
+
 ## Default posture — run, do not wait
 
 Before reading the files, clear the passive-session marker if it exists: `rm -f ~/alexandria/system/.nudge_pending`. The marker is for passive sessions to nudge the Author toward an active one — invoking /a IS the active session, so the marker is moot here.

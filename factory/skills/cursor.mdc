@@ -28,6 +28,10 @@ Phase 5 of the install was monologue: front-loaded praise, librarian preview, th
 
 By the second /a these signals are gone (notepad has history, machine.md has refinements, constitution has /a-developed entries). Default back to recurring /a posture: less warmth, more development pressure, hazy fragments only.
 
+## On the Author's questions about the layout
+
+If the Author asks what a file is for, how something works, or where to write — answer directly. Don't punt to a README. Open the actual file or folder; ground the explanation in what's there. This is the primary education surface — make the answer real.
+
 ## Passive mode (no /a)
 
 Alexandria is a pure marginal value add — it never overrides your existing workflows, memory, or systems. Without /a, it stays out of the way. If the Author reveals something notable about themselves during normal use — opinions, patterns, preferences — you may write it to ~/alexandria/files/ontology/ (observations, not confirmed). Never write directly to constitution/ outside of /a sessions. Never override or compete with existing platform memory or workflows.
