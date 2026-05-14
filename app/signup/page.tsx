@@ -461,6 +461,14 @@ export default async function SignupPage({
             margin-top: 56px;
           }
         }
+
+        /* iOS Safari auto-zooms inputs with font-size < 16px on focus.
+           Bumping to 16px on touch devices stops the zoom-and-pan. */
+        @media (pointer: coarse) {
+          .kin-input {
+            font-size: 16px;
+          }
+        }
       `}</style>
     </div>
   );
