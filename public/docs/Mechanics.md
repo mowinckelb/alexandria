@@ -9,7 +9,7 @@ You are about to run a curl command that puts files on your machine, modifies yo
 - **Trust model:** mutable, by design. The hooks payload is fetched from `main` on every session. You're trusting an ongoing relationship with the public repo, not a frozen install. Tradeoff is named below.
 - **What our server holds:** your email, GitHub user ID, hashed API key, an event log of which endpoints you hit, and any files you explicitly publish to the Library. Nothing else.
 - **What our server does not hold:** your constitution, vault, ontology, transcripts, or AI-vendor API keys. There is no endpoint that accepts them.
-- **Side channel:** feedback you submit and methodology signals the engine writes go to a separate private GitHub repo (`mowinckelb/alexandria-signal`), not our database. Same trust posture as the public repo.
+- **Side channel:** feedback you submit and methodology signals the engine writes are stored in Cloudflare KV alongside the rest of our operational data — private by default, accessible only via our Cloudflare account. Methodology signals are anonymized at the boundary (author stripped before write); feedback retains attribution because the canon-evolution loop needs context. Signals auto-expire after 90 days; feedback persists.
 - **Uninstall:** three commands at the bottom of this page. Reversible.
 
 ## Threat model
@@ -138,13 +138,14 @@ Cloudflare Worker, stateless re: your private content. KV + D1 + R2 on the serve
 | Event log: which endpoints your account hit, with timestamps | KV (60-day TTL) | Debugging, abuse signal |
 | Library files you explicitly publish | R2 | Public Library content |
 | Library file metadata (visibility, updated_at) | D1 | Discovery, listing |
-| Feedback text you submit, and methodology signals the engine writes | Private GitHub repo `mowinckelb/alexandria-signal` (not in our database) | We read feedback; signals feed the canon-evolution loop |
+| Feedback text you submit | KV under `feedback:` prefix (no TTL) | We read feedback; informs product evolution |
+| Methodology signals the engine writes | KV under `signal:` prefix (90-day TTL, anonymized at boundary) | Feeds the canon-evolution loop |
 
 **Not stored anywhere we control:** your constitution, vault, ontology, transcripts, machine.md, notepad, raw API key, AI-vendor (Anthropic/OpenAI/etc) API keys, or any file you did not explicitly `PUT /file/...`. There is no endpoint that accepts them.
 
 **What a complete server breach yields:** account emails, GitHub user IDs, hashed (un-reversible) API keys, the 60-day event log, published Library content (already public), and Cloudflare-level access logs (IPs, timing). It does not yield private cognition, unpublished files, or AI-vendor credentials, because those never reach the server.
 
-**What a `mowinckelb/alexandria-signal` repo breach yields:** feedback text users submitted and methodology signals the engine wrote. Same trust posture as the public repo: protected by GitHub account security, not by infrastructure we host.
+**What feedback/signal KV breach yields:** feedback text users submitted (attributed) and methodology signals the engine wrote (anonymized at the relay boundary — author stripped before write). Protected by the same Cloudflare auth model as the rest of our infrastructure.
 
 ## Why your API key is safe
 
