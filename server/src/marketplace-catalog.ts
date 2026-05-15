@@ -240,10 +240,12 @@ export function deriveKind(id: string): string {
   if (p.path.startsWith('factory/scripts/')) return 'script';
   if (p.path.startsWith('factory/templates/')) return 'template';
   if (p.path.startsWith('factory/systems/')) return 'system';
-  // `<user>/alexandria-systems` is the publish.sh convention: a flat repo
+  // `<user>/alexandria-modules` is the publish.sh convention: a flat repo
   // with one .md per skill at the root. Treat its modules as skills so the
   // marketplace shows them with the right badge instead of falling through
-  // to the generic "module".
-  if (p.repo === 'alexandria-systems') return 'skill';
+  // to the generic "module". `alexandria-systems` accepted as legacy name
+  // (repo was renamed 2026-05-15; old call_manifest IDs still resolve via
+  // GitHub redirect but carry the stale repo name in the parsed ID).
+  if (p.repo === 'alexandria-modules' || p.repo === 'alexandria-systems') return 'skill';
   return 'module';
 }

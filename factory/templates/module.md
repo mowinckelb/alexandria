@@ -28,4 +28,4 @@ description: <one sentence — what this module does, in plain terms>
 
 ---
 
-*Module ID once published: `github:<user>/<repo>#<path-without-extension>` — e.g. `github:<user>/alexandria-systems/<slug>`. Append to `~/alexandria/.call_manifest` to start counting usage. See `factory/canon/library.md` for the full lifecycle.*
+*Module ID once published: `github:<user>/<repo>#<path-without-extension>` — e.g. `github:<user>/alexandria-modules/<slug>`. Append to `~/alexandria/.call_manifest` to start counting usage. See `factory/canon/library.md` for the full lifecycle.*

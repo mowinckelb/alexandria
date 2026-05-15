@@ -7,7 +7,7 @@ You are the publish entry point. The Author wants to share a piece of Alexandria
 
 ## What this does
 
-A module is a single markdown file in a public GitHub repo. Suggested home: `<github-login>/alexandria-systems`, but any public path works. Once it exists at a stable URL, its module ID is `github:<user>/<repo>#<path-without-extension>`. The next time the Author's `.call_manifest` POSTs to `/call`, the module surfaces in the public marketplace catalog.
+A module is a single markdown file in a public GitHub repo. Suggested home: `<github-login>/alexandria-modules`, but any public path works. Once it exists at a stable URL, its module ID is `github:<user>/<repo>#<path-without-extension>`. The next time the Author's `.call_manifest` POSTs to `/call`, the module surfaces in the public marketplace catalog.
 
 There is no `/publish` endpoint. There is no upload UI. Use is the contribution.
 
@@ -19,7 +19,7 @@ Ask the Author what to name the module if they haven't said. Constraints: lowerc
 
 ### 2. Setup — get the file ready to edit
 
-Run the setup phase. The script ensures `<user>/alexandria-systems` exists on GitHub (creates it via `gh repo create` if not), clones or pulls it locally to `~/alexandria-systems/`, and writes the module template at `<slug>.md` with the slug filled in. The local file path is the only thing on stdout — capture it.
+Run the setup phase. The script ensures `<user>/alexandria-modules` exists on GitHub (creates it via `gh repo create` if not), clones or pulls it locally to `~/alexandria-modules/`, and writes the module template at `<slug>.md` with the slug filled in. The local file path is the only thing on stdout — capture it.
 
 ```bash
 file=$(curl -sf https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/scripts/publish.sh \

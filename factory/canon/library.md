@@ -95,12 +95,12 @@ Before a module is contributed, use a provisional local ID in `.call_manifest`:
 
 When the local module is published to GitHub, replace the local ID with the GitHub ID. The marketplace counts only GitHub IDs (provisional locals are private signal).
 
-## Suggested home — `<user>/alexandria-systems`
+## Suggested home — `<user>/alexandria-modules`
 
-The recommended convention is to keep all your published modules in a single repo named `<user>/alexandria-systems`, one markdown file per module:
+The recommended convention is to keep all your published modules in a single repo named `<user>/alexandria-modules`, one markdown file per module:
 
 ```
-<user>/alexandria-systems/
+<user>/alexandria-modules/
   optimise.md
   verify-edit.md
   brief-setup.md
@@ -138,7 +138,7 @@ Five stages from local invention to canonical signal:
 
 2. **Decide whether it generalises.** Most local systems stay local — they're calibrated to this Author's specific quirks and don't transfer. The Engine should not push every system upstream. The bar: *could another Author benefit without context they don't have?* If yes, candidate for publishing. If no, keep local.
 
-3. **Publish.** Run `factory/scripts/publish.sh <slug>` (or the equivalent skill). The script ensures `<user>/alexandria-systems` exists, copies the template with the slug filled in, lets the Author edit the body, commits and pushes. Module is now reachable at `github:<user>/alexandria-systems#<slug>`. The Author replaces the `local:` ID with the GitHub ID in their `.call_manifest`.
+3. **Publish.** Run `factory/scripts/publish.sh <slug>` (or the equivalent skill). The script ensures `<user>/alexandria-modules` exists, copies the template with the slug filled in, lets the Author edit the body, commits and pushes. Module is now reachable at `github:<user>/alexandria-modules#<slug>`. The Author replaces the `local:` ID with the GitHub ID in their `.call_manifest`.
 
 4. **Use propagates discovery.** The Author's next `/call` POST surfaces the new module ID. The server lazy-fetches, parses front-matter, caches, and adds it to the public Marketplace listing. Other Authors can now browse and install it.
 
@@ -178,7 +178,7 @@ Browsable at `mowinckel.ai/marketplace/mowinckelb/alexandria/factory/skills/brie
 
 ## When to suggest contributing
 
-When the Author invents a system element that another Author could benefit from — a prompt pattern, filter, extraction move, publishing format, ritual, workflow, or local override that generalises beyond this Author's specific frame. Capture as a candidate in `~/alexandria/files/works/systems/<slug>.md`. Strip private details. Preserve the reusable mechanism. Then run `factory/scripts/publish.sh` to push it to `<user>/alexandria-systems` (or whichever public repo the Author prefers).
+When the Author invents a system element that another Author could benefit from — a prompt pattern, filter, extraction move, publishing format, ritual, workflow, or local override that generalises beyond this Author's specific frame. Capture as a candidate in `~/alexandria/files/works/systems/<slug>.md`. Strip private details. Preserve the reusable mechanism. Then run `factory/scripts/publish.sh` to push it to `<user>/alexandria-modules` (or whichever public repo the Author prefers).
 
 If the system is only useful for this Author, keep it local. The bar for publishing is generalisability, not ambition.
 

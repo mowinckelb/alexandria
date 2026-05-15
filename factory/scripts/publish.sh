@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish a marketplace module to <user>/alexandria-systems on GitHub.
+# Publish a marketplace module to <user>/alexandria-modules on GitHub.
 #
 # Two phases — the orchestrating skill (factory/skills/publish.md) runs:
 #   bash publish.sh setup <slug>     ensure repo, clone/pull, write template,
@@ -8,8 +8,8 @@
 #   bash publish.sh finalize <slug>  commit + push, print canonical module ID.
 #
 # Env overrides (rarely needed):
-#   ALEXANDRIA_SYSTEMS_REPO   default: <gh-login>/alexandria-systems
-#   ALEXANDRIA_SYSTEMS_DIR    default: $HOME/alexandria-systems
+#   ALEXANDRIA_MODULES_REPO   default: <gh-login>/alexandria-modules
+#   ALEXANDRIA_MODULES_DIR    default: $HOME/alexandria-modules
 set -euo pipefail
 
 cmd="${1:-}"
@@ -33,8 +33,8 @@ user=$(gh api user --jq .login 2>/dev/null) || {
   exit 1
 }
 
-repo="${ALEXANDRIA_SYSTEMS_REPO:-$user/alexandria-systems}"
-clone_dir="${ALEXANDRIA_SYSTEMS_DIR:-$HOME/alexandria-systems}"
+repo="${ALEXANDRIA_MODULES_REPO:-$user/alexandria-modules}"
+clone_dir="${ALEXANDRIA_MODULES_DIR:-$HOME/alexandria-modules}"
 file="$clone_dir/$slug.md"
 
 setup() {
@@ -80,7 +80,7 @@ finalize() {
     git push >&2
   fi
   # Module ID on stdout — the only stdout line.
-  echo "github:$user/alexandria-systems#$slug"
+  echo "github:$user/alexandria-modules#$slug"
 }
 
 case "$cmd" in
