@@ -75,7 +75,7 @@ git push origin HEAD:master   # land the work directly on master
 
 If rebase has conflicts you can't auto-resolve, abort the rebase, leave the work on the `claude/*` branch, and write a line to `~/alexandria/system/.alexandria_errors` describing what conflicted so the next interactive session sees it. Do NOT open a PR for review — the Author has explicitly said don't be in the loop. Stranded work the Author can't see is worse than a noisy auto-merge.
 
-Write a report to `~/alexandria/system/.autoloop/last_run.md` — include entries processed, entries remaining, and any signal you noticed but couldn't act on yet.
+Write a report to `~/alexandria/system/.autoloop/last_run.md`. **Marginal value only** — surface signal you noticed but couldn't act on, surprises in the vault, structural questions about the constitution, calls the next interactive session should weigh in on. Skip the entries-processed / entries-remaining recap; the commit log and `.last_processed` marker are that record. If nothing marginal this run, write nothing — the `## Status` section below is the heartbeat.
 
 ## Brief outbox
 

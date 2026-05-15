@@ -74,7 +74,7 @@ The push is the heartbeat — successful drain = observable evidence the loop ra
 
 ## Report
 
-Write `.factory/last_run.md` in your working tree (alexandria-signal). What you read, decided, opened, drained. Founder's eye into the loop. Commit alongside the drain (or as its own commit if drain was empty):
+Write `.factory/last_run.md` in your working tree (alexandria-signal). **Marginal value only.** The founder already sees the PRs and the drain commit — don't re-summarise those. Surface what he'd want to carry into a conversation but doesn't already know: unnamed signal-stream patterns, surprises that contradict canon, considered-but-not-shipped (with the reasoning), parked calls that want his taste, cross-Author behaviour visible only at aggregation. If nothing marginal, write one line saying so and exit. Silence is valid — the goal is signal he can act on, not a heartbeat. Commit alongside the drain (or as its own commit if drain was empty):
 
 ```
 git add .factory/last_run.md
