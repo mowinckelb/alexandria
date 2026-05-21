@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useLayoutEffect, useRef } from 'react';
 import Link from 'next/link';
 import { SERVER_URL } from '../lib/config';
 
@@ -21,6 +21,26 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
   const [error, setError] = useState('');
   const [shakeKey, setShakeKey] = useState(0);
   const [done, setDone] = useState(initialDone);
+  const sliderRef = useRef<HTMLInputElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [hintLeft, setHintLeft] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const slider = sliderRef.current;
+    const wrap = wrapRef.current;
+    if (!slider || !wrap) return;
+    const update = () => {
+      const sr = slider.getBoundingClientRect();
+      const wr = wrap.getBoundingClientRect();
+      const ratio = (amount - AMOUNT_MIN) / (AMOUNT_MAX - AMOUNT_MIN);
+      const THUMB = 16;
+      const thumbCenterInSlider = THUMB / 2 + ratio * (sr.width - THUMB);
+      setHintLeft(sr.left - wr.left + thumbCenterInSlider);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [amount]);
 
   const handleSubmit = async () => {
     const trimmed = email.trim();
@@ -97,11 +117,18 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
 
           <div className="amount-block">
             <div className="amount-line">
-              <span className="amount-value">${amount}</span>
-              <span className="amount-unit">{amount === 0 ? '' : '/ month'}</span>
+              {amount === 0 ? (
+                <span className="amount-value amount-free"><em>free.</em></span>
+              ) : (
+                <>
+                  <span className="amount-value">${amount}</span>
+                  <span className="amount-unit">/ month</span>
+                </>
+              )}
             </div>
-            <div className="slider-wrap">
+            <div className="slider-wrap" ref={wrapRef}>
               <input
+                ref={sliderRef}
                 type="range"
                 min={AMOUNT_MIN}
                 max={AMOUNT_MAX}
@@ -110,17 +137,22 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
                 onChange={(e) => setAmount(parseInt(e.target.value, 10))}
                 className="slider"
                 aria-label="monthly amount"
+                style={{ ['--fill' as string]: `${(amount / AMOUNT_MAX) * 100}%` }}
               />
-              <div className="slider-marks" aria-hidden>
-                <span className="mark" style={{ left: '0%' }}>
-                  <i className="mark-tick" />
-                  <em>free</em>
-                </span>
-                <span className="mark" style={{ left: '22.5%' }}>
-                  <i className="mark-tick" />
-                  <em>avg. $45</em>
-                </span>
-              </div>
+              <p
+                className="slider-hint"
+                aria-hidden
+                style={{
+                  left: hintLeft == null ? '50%' : `${hintLeft}px`,
+                  visibility: hintLeft == null ? 'hidden' : 'visible',
+                  ['--lfade' as string]: amount <= AMOUNT_MIN ? '0' : '1',
+                  ['--rfade' as string]: amount >= AMOUNT_MAX ? '0' : '1',
+                }}
+              >
+                <span className="hint-arrow hint-l">←</span>
+                <em>drag</em>
+                <span className="hint-arrow hint-r">→</span>
+              </p>
             </div>
             <div className="tier-row" aria-live="polite">
               <span className={`tier ${isHonourary ? 'is-dim' : 'is-on'}`}>
@@ -273,16 +305,27 @@ const styles = `
     letter-spacing: 0.02em;
   }
 
+  .amount-free :global(em) {
+    font-style: italic;
+    letter-spacing: -0.005em;
+  }
+
   .slider-wrap {
     position: relative;
-    padding-bottom: 28px;
+    padding-bottom: 44px;
   }
   .slider {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
     height: 1px;
-    background: ${RULE};
+    background: linear-gradient(
+      to right,
+      ${INK} 0%,
+      ${INK} var(--fill, 0%),
+      ${RULE} var(--fill, 0%),
+      ${RULE} 100%
+    );
     outline: none;
     cursor: pointer;
     margin: 4px 0 2px;
@@ -291,8 +334,8 @@ const styles = `
   }
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background: ${INK};
     cursor: grab;
@@ -307,8 +350,8 @@ const styles = `
     animation: none;
   }
   .slider::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background: ${INK};
     border: none;
@@ -327,37 +370,39 @@ const styles = `
     100% { box-shadow: 0 0 0 0   rgba(26, 19, 24, 0);    }
   }
 
-  .slider-marks {
+  .slider-hint {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 100%;
-    pointer-events: none;
-  }
-  .mark {
-    position: absolute;
-    top: 0;
+    top: 38px;
     transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
+    display: inline-flex;
     align-items: center;
+    margin: 0;
     font-size: 11px;
     letter-spacing: 0.04em;
     color: ${INK_MUTED};
-    opacity: 0.6;
+    opacity: 0.7;
     white-space: nowrap;
+    pointer-events: none;
+    transition: left 80ms ease-out;
   }
-  .mark-tick {
-    display: block;
-    width: 1px;
-    height: 6px;
-    background: ${INK_MUTED};
-    margin-top: 5px;
-  }
-  .mark em {
+  .slider-hint :global(em) {
     font-style: italic;
-    margin-top: 6px;
+  }
+  .slider-hint .hint-arrow {
+    display: inline-block;
+    width: 12px;
+    text-align: center;
+    font-style: normal;
+    font-size: 11px;
+    transition: opacity 200ms ease;
+  }
+  .slider-hint .hint-l {
+    margin-right: 8px;
+    opacity: var(--lfade, 1);
+  }
+  .slider-hint .hint-r {
+    margin-left: 8px;
+    opacity: var(--rfade, 1);
   }
 
   .tier-row {
