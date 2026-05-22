@@ -1026,19 +1026,25 @@ export function registerRoutes(app: Hono) {
       { expirationTtl: 600 },
     );
     const result = await sendInstallNudge(auth.account.email, auth.account.email_token, testToken, auth.account.github_login);
-    return c.json({ ok: result.ok, error: result.error, to: auth.account.email });
+    return c.json({ ok: result.ok, error: result.error, to: auth.account.email, install_url: `${getServerUrl()}/install/${testToken}` });
   });
 
   // Magic-link install — email nudges link here so the user gets the actual
   // onboarding page (copy buttons + shortcut link), no OAuth needed. Token
   // is generated per-nudge with a 14d TTL; expired tokens fall back to
-  // /signup (clean OAuth flow).
+  // /signup (clean OAuth flow). Redemption is logged so we know whether the
+  // email actually drove a click (mirror loop between "nudge sent" and
+  // "installed_after_nudge").
   app.get('/install/:token', async (c) => {
     const token = c.req.param('token');
     if (!token) return c.text('missing token', 400);
     const stored = await getKV().get(`install:${token}`);
-    if (!stored) return c.redirect(`${getWebsiteUrl()}/signup`, 302);
+    if (!stored) {
+      logEvent('install_token_expired', { token_prefix: token.slice(0, 8) });
+      return c.redirect(`${getWebsiteUrl()}/signup`, 302);
+    }
     const { api_key, github_login } = JSON.parse(stored) as { api_key: string; github_login: string };
+    logEvent('install_token_redeemed', { author: github_login });
     const html = await callbackPageHtml(api_key, github_login);
     return c.html(html);
   });
