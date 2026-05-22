@@ -1012,13 +1012,12 @@ export function registerRoutes(app: Hono) {
   // (founder doesn't qualify). Doesn't update any nudge state. For email
   // template visual verification.
   app.post('/admin/test/install-nudge', async (c) => {
-    if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
+    const auth = await requireAdmin(c);
+    if (!auth) return c.text('Unauthorized', 403);
     if (await checkAdminRateLimit('test-nudge', 5, 60)) return c.json({ error: 'Rate limited (5/min)' }, 429);
-    const accounts = await loadAccounts<AccountStore>();
-    const founder = Object.values(accounts).find(a => a.email === FOUNDER_EMAIL);
-    if (!founder) return c.text('founder account not found', 404);
-    const result = await sendInstallNudge(founder.email, founder.email_token);
-    return c.json({ ok: result.ok, error: result.error, to: founder.email });
+    if (!auth.account.email) return c.text('admin account has no email', 404);
+    const result = await sendInstallNudge(auth.account.email, auth.account.email_token);
+    return c.json({ ok: result.ok, error: result.error, to: auth.account.email });
   });
 
   // Test render — returns the onboarding callback HTML with dummy values so
