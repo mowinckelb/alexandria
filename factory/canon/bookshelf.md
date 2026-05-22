@@ -7,8 +7,8 @@
 ## Discipline
 
 - **Section A (loaded substrate):** capped at 5–7 items. Processed in depth, so cost matters. Adding an 8th means removing one.
-- **Section B (bookshelf catalog):** ~50–60 items. Each earns its slot by deploying across multiple thinking threads, not by canon-by-default — works the model already heavily weights from training earn slots only when naming them changes which reference the Engine reaches for first.
-- **Cost:** scan cheap (titles + framings), deep-extract per item on demand. Never eager-process the full corpus.
+- **Section B (bookshelf catalog):** ~20–25 items, hard target. Each slot must clear one bar: *would the Engine fail to reach this work when relevant if it weren't listed?* If the model deploys adequately from training alone, the slot isn't earned. Pure-optimal beats canon-by-default.
+- **Cost:** scan cheap (titles only), deep-extract per item on demand. Never eager-process the full corpus.
 - **Curator:** the founder. Same as the rest of canon. Marketplace input may inform; doesn't override.
 
 ## How the Engine uses this
@@ -49,79 +49,38 @@
 
 ## Section B — Bookshelf catalog
 
-*Curated canonical works the Engine should know exist and deploy when threads activate. Not eagerly deep-extracted; reference-and-retrieve on demand. Each item earns its slot through cross-thread deployment value — not canon-by-default. Heterogeneous by design: some are deep texts (Brothers Karamazov, Critique of Pure Reason), some are short anchors (Gettysburg Address, Communist Manifesto). When the model already heavily weights a work from training, naming it here only earns a slot if it changes which reference the Engine reaches for first.*
+*Pure-optimal canon. ~22 items. Each one defended as either the Engine wouldn't reach for it adequately from training alone, or load-bearing in the founder's constitution. Items the model heavily weights from training and would deploy without prompting are excluded — the bookshelf is not a "list of great works," it is a deploy-on-thread reference catalog. The Iliad, Kant, Darwin, Marx, the Federalist Papers, and most of the standard Western canon are deployed by the Engine when threads activate, with or without a slot here.*
 
-### Literature & fiction
-- Pride and Prejudice — Jane Austen
-- Middlemarch — George Eliot
-- Jane Eyre — Charlotte Brontë
-- Anna Karenina — Leo Tolstoy
-- The Brothers Karamazov — Fyodor Dostoevsky
-- Eugene Onegin — Alexander Pushkin
-- The Picture of Dorian Gray — Oscar Wilde
-- The Stranger — Albert Camus
-- 1984 — George Orwell
-- Brave New World — Aldous Huxley
-- Things Fall Apart — Chinua Achebe
-- Ficciones — Jorge Luis Borges
-
-### Classical
-- The Iliad — Homer
-- The Odyssey — Homer
-- Julius Caesar — William Shakespeare
+### Foundational anchors
+- Meditations — Marcus Aurelius
+- Letters from a Stoic — Seneca
+- The Republic — Plato
+- Nicomachean Ethics — Aristotle
+- The Bible
 
 ### Eastern foundational
 - Tao Te Ching — Laozi
-- The Analects — Confucius
 - Zhuangzi
 - The Art of War — Sun Tzu
-- Bhagavad Gita
-- Dhammapada
 
-### Religion & scripture
-- The Bible
-- The Qur'an
-
-### Philosophy
-- Meditations — Marcus Aurelius
-- Letter to Menoeceus — Epicurus
-- The Republic — Plato
-- Nicomachean Ethics — Aristotle
-- Letters from a Stoic — Seneca
+### Modern philosophy
 - Essays — Michel de Montaigne
-- Discourse on Method — René Descartes
-- Enquiry Concerning Human Understanding — David Hume
-- Critique of Pure Reason — Immanuel Kant
-- Phenomenology of Spirit — Georg Wilhelm Friedrich Hegel
-- Fear and Trembling — Søren Kierkegaard
 - Thus Spoke Zarathustra — Friedrich Nietzsche
+- Fear and Trembling — Søren Kierkegaard
 - Modern Man in Search of a Soul — Carl Jung
-- Against Interpretation — Susan Sontag
 - The Tacit Dimension — Michael Polanyi
+- Against Interpretation — Susan Sontag
 - Discipline and Punish — Michel Foucault
 
-### Political philosophy & governance
+### Political philosophy
 - The Prince — Niccolò Machiavelli
 - Leviathan — Thomas Hobbes
-- The Social Contract — Jean-Jacques Rousseau
-- Two Treatises of Government — John Locke
-- The Wealth of Nations — Adam Smith
-- On Liberty — John Stuart Mill
 - Democracy in America — Alexis de Tocqueville
-- The Federalist Papers — Alexander Hamilton, James Madison, John Jay
-- The Declaration of Independence — Thomas Jefferson
-- The Communist Manifesto — Karl Marx and Friedrich Engels
-- Capitalism and Freedom — Milton Friedman
-- The Road to Serfdom — Friedrich Hayek
-- The Tragedy of Great Power Politics — John Mearsheimer
 
-### History & political memoir
-- Pericles' Funeral Oration — Thucydides
-- The Decline and Fall of the Roman Empire — Edward Gibbon
+### History
 - Muqaddimah — Ibn Khaldun
-- The Gettysburg Address — Abraham Lincoln
-- Homo Deus — Yuval Noah Harari
 
-### Science & mathematics
-- The Elements — Euclid
-- On the Origin of Species — Charles Darwin
+### Literature
+- The Brothers Karamazov — Fyodor Dostoevsky
+- Middlemarch — George Eliot
+- Anna Karenina — Leo Tolstoy
