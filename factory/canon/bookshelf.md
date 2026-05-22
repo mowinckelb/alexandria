@@ -7,7 +7,8 @@
 ## Substrate (dense source material for deep extraction)
 
 - Founder's YouTube playlist — [https://youtube.com/playlist?list=PLOP9v1FPBYePbN3BduyTI_mw7s6HGJqXV](https://youtube.com/playlist?list=PLOP9v1FPBYePbN3BduyTI_mw7s6HGJqXV)
-- Princeton ENG 203 — *The Essay* (Jeff Nunokawa, Fall 2019). Source at `~/alexandria/files/vault/english/eng203_nunokawa_coursepack.md` on the founder's machine. For other Authors, fork to your own dense corpus (coursepack, archived class, deep technical book).
+
+*Each Author adds their own dense corpora here — coursepacks, archived classes, deep technical books, hand-curated essay collections.*
 
 ---
 
