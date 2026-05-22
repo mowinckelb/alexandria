@@ -1,29 +1,49 @@
 # Bookshelf — Factory Baseline
 
-*Cross-Author substrate intent. Not a hard-coded list. The Engine maintains a working sense of which canonical works to deploy when each kind of thread activates in each Author's constitution. As models improve, the selection sharpens automatically — no scaffolding to maintain.*
+*Cross-Author substrate. The founder's suggestions for what the Engine can pull from on cold-start and deploy as reference. Not authoritative — the Engine selects per-Author based on constitution, and reaches beyond these picks when threads warrant. As models improve, the Engine leans less on the suggested set and more on its own judgment.*
 
 ---
 
-## Intent
-
-The practice values fluency with foundational works across traditions: Western philosophy (ancient to modern), Eastern wisdom (Daoist, Confucian, Buddhist), Abrahamic religious and ethical texts, foundational political philosophy, modern depth psychology, the strongest modern thinkers on technology and civilization. No work is privileged by being listed. The Engine deploys what fits the thread, weighted by the Author's constitution.
-
-## Two modes
-
-**Eager cold-start extraction.** On a new Author's first session (thin vault), the Engine selects a small number of high-density canonical works likely to surface candidates against the just-loaded constitution and deep-extracts each. Compact public-domain texts (Stoic, Daoist registers) tend to land widely — but the Engine picks per-Author, not from a fixed list. Fragments land in the Author's loaded magazine.
-
-Authors can add personal deep-load sources to their own vault — coursepacks, archived classes, video playlists, dense corpora. These get included in eager extraction.
-
-**Deploy on thread activation.** During recurring sessions, when a thread surfaces in the Author's conversation that maps to a canonical reference, the Engine reaches for it from training. No specific list; the model decides per-Author-per-thread.
-
-## Cost discipline
-
-Eager cold-start extraction is bounded — Engine keeps cold-start cost reasonable, intelligence call per Author. Reference deployment is free (no eager processing; on-demand). The Author's vault remains the highest-priority signal source — the Bookshelf never overrides.
-
 ## How the Engine uses this
 
-**Cold start:** Engine selects universal canonical works to deep-extract, weighted by marginal-delta against the just-loaded constitution. Fragments land as candidates in the loaded magazine.
+**Eager cold-start extraction.** On a new Author's first session (thin vault), the Engine deep-extracts from a small number of substrate sources, surfacing candidate fragments in the loaded magazine. Defaults to compact high-density texts likely to land widely; weights by the just-loaded constitution. The Author can add their own deep-load sources to their vault.
 
-**Recurring sessions:** Engine deploys canonical references when threads activate.
+**Deploy on thread activation.** When a thread surfaces in conversation that maps to a canonical reference, the Engine deploys from training. The picks below are starting points; the Engine reaches beyond as fit demands.
 
-**Outputs are candidates, not deposits.** Items produce candidate fragments in the loaded magazine — the Author fires or kills as they would any accretion grenade.
+**Outputs are candidates, not deposits.** Fragments land in the loaded magazine — the Author fires or kills as they would any accretion grenade. The Author's vault remains the highest-priority signal source; Bookshelf never overrides.
+
+---
+
+## Founder's suggestions
+
+### Cold-start eager-extract sources
+
+- Marcus Aurelius — *Meditations* (compact public-domain Stoic operating manual; deploys broadly)
+- Lao Tzu — *Tao Te Ching* (~5k words; maximum density)
+- Founder's YouTube playlist — [https://youtube.com/playlist?list=PLOP9v1FPBYePbN3BduyTI_mw7s6HGJqXV](https://youtube.com/playlist?list=PLOP9v1FPBYePbN3BduyTI_mw7s6HGJqXV)
+- Princeton ENG 203 — *The Essay* (Jeff Nunokawa, Fall 2019). Source `~/alexandria/files/vault/english/eng203_nunokawa_coursepack.md` lives in the founder's vault; on other Authors' machines this slot is an invitation to fork to your own dense corpus (coursepack, archived class, deep technical book).
+
+### Anchor reference picks (deploy when threads activate)
+
+- *Meditations* — Marcus Aurelius
+- *Letters from a Stoic* — Seneca
+- *The Republic* — Plato
+- *Nicomachean Ethics* — Aristotle
+- The Bible
+- *Tao Te Ching* — Lao Tzu
+- *Zhuangzi*
+- *The Art of War* — Sun Tzu
+- *Essays* — Michel de Montaigne
+- *Thus Spoke Zarathustra* — Friedrich Nietzsche
+- *Fear and Trembling* — Søren Kierkegaard
+- *Modern Man in Search of a Soul* — Carl Jung
+- *The Tacit Dimension* — Michael Polanyi
+- *Against Interpretation* — Susan Sontag
+- *Discipline and Punish* — Michel Foucault
+- *The Prince* — Niccolò Machiavelli
+- *Leviathan* — Thomas Hobbes
+- *Democracy in America* — Alexis de Tocqueville
+- *Muqaddimah* — Ibn Khaldun
+- *The Brothers Karamazov* — Fyodor Dostoevsky
+- *Middlemarch* — George Eliot
+- *Anna Karenina* — Leo Tolstoy
