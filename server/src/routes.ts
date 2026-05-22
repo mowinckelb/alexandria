@@ -10,7 +10,7 @@ import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, ge
 import { hashApiKey, generateToken } from './crypto.js';
 import { Account, AccountStore, extractApiKey, extractLibrarySessionToken, findByApiKey, findByLibrarySessionToken, requireAuth } from './auth.js';
 import { generateApiKey, getAccounts, getAccountByLogin, requireAdmin } from './accounts.js';
-import { sendEmail, sendEmailsBatched, sendWelcomeEmail, FOUNDER_EMAIL } from './email.js';
+import { sendEmail, sendEmailsBatched, sendWelcomeEmail, sendInstallNudge, FOUNDER_EMAIL } from './email.js';
 import { runHealthDigest, runWeekOneCheckIns, runInstallNudges } from './cron.js';
 import { publishFeedback } from './marketplace.js';
 import { handleGithubPushWebhook } from './marketplace-catalog.js';
@@ -1005,6 +1005,31 @@ export function registerRoutes(app: Hono) {
     const dry = c.req.query('dry') === 'true';
     const result = await runInstallNudges({ dry });
     return c.json({ ok: true, ...result });
+  });
+
+  // Test send — fires one install nudge to the founder, using real template +
+  // real email_token (so the unsubscribe link works). Bypasses the cron filter
+  // (founder doesn't qualify). Doesn't update any nudge state. For email
+  // template visual verification.
+  app.post('/admin/test/install-nudge', async (c) => {
+    if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
+    if (await checkAdminRateLimit('test-nudge', 5, 60)) return c.json({ error: 'Rate limited (5/min)' }, 429);
+    const accounts = await loadAccounts<AccountStore>();
+    const founder = Object.values(accounts).find(a => a.email === FOUNDER_EMAIL);
+    if (!founder) return c.text('founder account not found', 404);
+    const result = await sendInstallNudge(founder.email, founder.email_token);
+    return c.json({ ok: result.ok, error: result.error, to: founder.email });
+  });
+
+  // Test render — returns the onboarding callback HTML with dummy values so
+  // the page can be screenshotted without going through OAuth. ?returning=true
+  // for the welcome-back variant.
+  app.get('/admin/test/onboarding', async (c) => {
+    if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
+    const returning = c.req.query('returning') === 'true';
+    const apiKey = returning ? '' : 'sk_test_dummy_for_visual_verification';
+    const html = await callbackPageHtml(apiKey, 'mowinckelb');
+    return c.html(html);
   });
 
   // Mirror loop for install nudges — how many of the last 30d signups got a
