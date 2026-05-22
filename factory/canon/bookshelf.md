@@ -7,7 +7,7 @@
 ## Discipline
 
 - **Section A (loaded substrate):** capped at 5–7 items. Processed in depth, so cost matters. Adding an 8th means removing one.
-- **Section B (bookshelf catalog):** ~100 items, soft target. Canonical works — not deep-extracted by default; deployed on thread activation.
+- **Section B (bookshelf catalog):** ~50–60 items. Each earns its slot by deploying across multiple thinking threads, not by canon-by-default — works the model already heavily weights from training earn slots only when naming them changes which reference the Engine reaches for first.
 - **Cost:** scan cheap (titles + framings), deep-extract per item on demand. Never eager-process the full corpus.
 - **Curator:** the founder. Same as the rest of canon. Marketplace input may inform; doesn't override.
 
@@ -49,60 +49,34 @@
 
 ## Section B — Bookshelf catalog
 
-*The Ideal Bookshelf — ~100 canonical works the Engine should know exist and deploy when threads activate. Not eagerly deep-extracted; reference-and-retrieve on demand. Heterogeneous by design — some items are deep texts (Brothers Karamazov, Critique of Pure Reason), some are short anchors (Gettysburg Address, Communist Manifesto). For figures where no single "best" work exists, an anchor work stands in (e.g., Napoleon's Memorial of Saint Helena — not the best book about Napoleon, but the entry-point that places Napoleon on the bookshelf).*
+*Curated canonical works the Engine should know exist and deploy when threads activate. Not eagerly deep-extracted; reference-and-retrieve on demand. Each item earns its slot through cross-thread deployment value — not canon-by-default. Heterogeneous by design: some are deep texts (Brothers Karamazov, Critique of Pure Reason), some are short anchors (Gettysburg Address, Communist Manifesto). When the model already heavily weights a work from training, naming it here only earns a slot if it changes which reference the Engine reaches for first.*
 
 ### Literature & fiction
-- The Godfather — Mario Puzo
-- Hitchhiker's Guide to the Galaxy — Douglas Adams
-- The Old Man and the Sea — Ernest Hemingway
-- Romeo and Juliet — William Shakespeare
 - Pride and Prejudice — Jane Austen
-- The Stranger — Albert Camus
-- Things Fall Apart — Chinua Achebe
+- Middlemarch — George Eliot
 - Jane Eyre — Charlotte Brontë
-- Great Expectations — Charles Dickens
-- The Picture of Dorian Gray — Oscar Wilde
-- Fahrenheit 451 — Ray Bradbury
-- 1984 — George Orwell
-- Brave New World — Aldous Huxley
-- Candide — Voltaire
-- Don Quixote — Miguel de Cervantes
-- War and Peace — Leo Tolstoy
 - Anna Karenina — Leo Tolstoy
 - The Brothers Karamazov — Fyodor Dostoevsky
-- Middlemarch — George Eliot
 - Eugene Onegin — Alexander Pushkin
-- Ulysses — James Joyce
-- Lolita — Vladimir Nabokov
-- One Hundred Years of Solitude — Gabriel García Márquez
+- The Picture of Dorian Gray — Oscar Wilde
+- The Stranger — Albert Camus
+- 1984 — George Orwell
+- Brave New World — Aldous Huxley
+- Things Fall Apart — Chinua Achebe
 - Ficciones — Jorge Luis Borges
-- A Room of One's Own — Virginia Woolf
-- Notes from Underground — Fyodor Dostoevsky
 
-### Epic & classical
-- Paradise Lost — John Milton
-- The Aeneid — Virgil
-- The Divine Comedy — Dante Alighieri
+### Classical
 - The Iliad — Homer
 - The Odyssey — Homer
-- The Epic of Gilgamesh
 - Julius Caesar — William Shakespeare
-- Hamlet — William Shakespeare
-- Macbeth — William Shakespeare
 
-### Asian classics
+### Eastern foundational
 - Tao Te Ching — Laozi
 - The Analects — Confucius
+- Zhuangzi
 - The Art of War — Sun Tzu
-- The Book of Changes (Yi Jing)
-- Romance of the Three Kingdoms — Luo Guanzhong
-- Water Margin — Shi Naian
-- Journey to the West — Wu Cheng'en
-- Dream of the Red Chamber — Cao Xueqin
-- The Tale of Genji — Murasaki Shikibu
 - Bhagavad Gita
 - Dhammapada
-- Muqaddimah — Ibn Khaldun
 
 ### Religion & scripture
 - The Bible
@@ -113,38 +87,29 @@
 - Letter to Menoeceus — Epicurus
 - The Republic — Plato
 - Nicomachean Ethics — Aristotle
-- Politics — Aristotle
-- On Duties — Cicero
 - Letters from a Stoic — Seneca
-- Summa Theologica — Thomas Aquinas
+- Essays — Michel de Montaigne
 - Discourse on Method — René Descartes
-- Meditations on First Philosophy — René Descartes
 - Enquiry Concerning Human Understanding — David Hume
 - Critique of Pure Reason — Immanuel Kant
 - Phenomenology of Spirit — Georg Wilhelm Friedrich Hegel
-- On Human Nature — Arthur Schopenhauer
 - Fear and Trembling — Søren Kierkegaard
 - Thus Spoke Zarathustra — Friedrich Nietzsche
-- Civilization and Its Discontents — Sigmund Freud
 - Modern Man in Search of a Soul — Carl Jung
-- Being and Nothingness — Jean-Paul Sartre
+- Against Interpretation — Susan Sontag
+- The Tacit Dimension — Michael Polanyi
 - Discipline and Punish — Michel Foucault
-- A Theory of Justice — John Rawls
 
 ### Political philosophy & governance
 - The Prince — Niccolò Machiavelli
 - Leviathan — Thomas Hobbes
 - The Social Contract — Jean-Jacques Rousseau
 - Two Treatises of Government — John Locke
-- Common Sense — Thomas Paine
-- The Rights of Man — Thomas Paine
 - The Wealth of Nations — Adam Smith
 - On Liberty — John Stuart Mill
 - Democracy in America — Alexis de Tocqueville
 - The Federalist Papers — Alexander Hamilton, James Madison, John Jay
 - The Declaration of Independence — Thomas Jefferson
-- The Constitution of the United States — James Madison
-- The Bill of Rights — James Madison
 - The Communist Manifesto — Karl Marx and Friedrich Engels
 - Capitalism and Freedom — Milton Friedman
 - The Road to Serfdom — Friedrich Hayek
@@ -152,23 +117,11 @@
 
 ### History & political memoir
 - Pericles' Funeral Oration — Thucydides
-- Commentarii de Bello Gallico — Julius Caesar
-- Annals — Tacitus
 - The Decline and Fall of the Roman Empire — Edward Gibbon
+- Muqaddimah — Ibn Khaldun
 - The Gettysburg Address — Abraham Lincoln
-- The Memorial of Saint Helena — Napoleon Bonaparte
-- What is to be Done? — Vladimir Lenin
-- Quotations from Chairman Mao Tse-Tung — Mao Zedong
-- Mein Kampf — Adolf Hitler
-- History of the Communist Party of the Soviet Union (Bolsheviks): Short Course — Joseph Stalin
-- The Second World War — Winston Churchill
-- The Governance of China — Xi Jinping
-- The Art of the Deal — Donald Trump
 - Homo Deus — Yuval Noah Harari
 
 ### Science & mathematics
 - The Elements — Euclid
-- Philosophiæ Naturalis Principia Mathematica — Isaac Newton
 - On the Origin of Species — Charles Darwin
-- Cosmos — Carl Sagan
-- Guns, Germs, and Steel — Jared Diamond
