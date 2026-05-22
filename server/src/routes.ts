@@ -1016,7 +1016,10 @@ export function registerRoutes(app: Hono) {
     if (!auth) return c.text('Unauthorized', 403);
     if (await checkAdminRateLimit('test-nudge', 5, 60)) return c.json({ error: 'Rate limited (5/min)' }, 429);
     if (!auth.account.email) return c.text('admin account has no email', 404);
-    const result = await sendInstallNudge(auth.account.email, auth.account.email_token);
+    // Test path uses a placeholder key — don't regen the admin's real key
+    // (would invalidate their working install). Email shows the template;
+    // the curl in it is not runnable.
+    const result = await sendInstallNudge(auth.account.email, auth.account.email_token, 'TEST_KEY_NOT_RUNNABLE');
     return c.json({ ok: result.ok, error: result.error, to: auth.account.email });
   });
 

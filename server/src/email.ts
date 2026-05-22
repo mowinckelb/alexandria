@@ -149,14 +149,15 @@ export async function sendWeekOneCheckIn(
 export async function sendInstallNudge(
   email: string,
   emailToken: string,
+  apiKey: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
   const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
-  const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
+  const curl = `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}`;
+  const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 520px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">hey :)</p>
-  <p style="margin: 0 0 1.4rem;">you signed up to alexandria but haven't installed on your computer yet &mdash; the part that processes what you've been saving.</p>
-  <p style="margin: 0 0 1.4rem;">when you're at your computer, <a href="${WEBSITE_URL}/signup" style="color: #3d3630;">sign in</a> to grab the setup command and finish.</p>
-  <p style="margin: 0 0 2.2rem;">keep adding via the shortcut in the meantime &mdash; the more you save, the richer your first session will be.</p>
+  <p style="margin: 0 0 1rem;">paste into your coding agent to finish setup:</p>
+  <pre style="margin: 0 0 1.4rem; padding: 14px 16px; background: #f5f0e8; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.78rem; line-height: 1.5; white-space: pre-wrap; word-break: break-all; color: #3d3630;">${curl}</pre>
+  <p style="margin: 0 0 2.2rem;">keep adding via the shortcut meanwhile &mdash; what you save becomes your first session.</p>
   <p style="margin: 0 0 0.4rem;">Benjamin a. Mowinckel</p>
   <p style="margin: 0; font-style: italic; color: #8a8078;">a.</p>
   <p style="margin: 1.5rem 0 0; font-size: 0.72rem; color: #bbb4aa;"><a href="${SERVER_URL}/email/stop?t=${emailToken}" style="color: #8a8078;">stop these emails</a></p>

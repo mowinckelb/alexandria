@@ -1,7 +1,9 @@
 /** Cron jobs — health digest. Called by worker scheduled handler. */
 
-import { getKV, getRecentDaysEvents, loadAccounts, saveAccount } from './kv.js';
+import { getKV, getRecentDaysEvents, loadAccounts, saveAccount, setAuthIndex } from './kv.js';
 import { sendEmail, sendEmailsBatched, sendWeekOneCheckIn, sendInstallNudge, FOUNDER_EMAIL } from './email.js';
+import { generateApiKey } from './accounts.js';
+import { hashApiKey } from './crypto.js';
 import { formatPT } from './time.js';
 import { publishLibrarySignalSnapshot } from './marketplace.js';
 import { computeLibrarySignalText } from './library-signal.js';
@@ -344,8 +346,18 @@ export async function runInstallNudges(
     if (recipients.length === 0) return { candidates: 0, sent: 0, failed: 0, dry: false };
 
     const { sent, failed } = await sendEmailsBatched(recipients, async ({ key, account }) => {
-      const result = await sendInstallNudge(account.email, account.email_token);
+      // Regenerate api_key per nudge so the email's curl command is immediately
+      // runnable (we don't store plaintext keys, so we can't surface the
+      // original). The new hash gets indexed; the old hash stays in the index
+      // (auth_index has no delete path), so any previously-saved key still
+      // works alongside the new one. Acceptable at solo-founder threshold —
+      // the user's email IS their auth surface for everything else anyway.
+      const apiKey = generateApiKey();
+      const apiKeyHash = hashApiKey(apiKey);
+      account.api_key_hash = apiKeyHash;
+      const result = await sendInstallNudge(account.email, account.email_token, apiKey);
       if (result.ok) {
+        await setAuthIndex(apiKeyHash, key);
         account.install_nudge_last_sent_at = new Date().toISOString();
         account.install_nudge_count = (account.install_nudge_count || 0) + 1;
         await saveAccount(key, account as unknown as Record<string, unknown>);
