@@ -53,7 +53,7 @@ echo "Setting up Alexandria..."
 
 # ── 1. Directory structure ────────────────────────────────────────
 
-mkdir -p "$ALEX_DIR/files/vault" "$ALEX_DIR/system/hooks" "$ALEX_DIR/files/constitution" "$ALEX_DIR/files/ontology" "$ALEX_DIR/files/library/public" "$ALEX_DIR/files/library/paid" "$ALEX_DIR/files/library/invite" "$ALEX_DIR/files/works/systems" "$ALEX_DIR/files/core" "$ALEX_DIR/files/vault/input" "$ALEX_DIR/system/.autoloop"
+mkdir -p "$ALEX_DIR/files/vault" "$ALEX_DIR/system/hooks" "$ALEX_DIR/files/constitution" "$ALEX_DIR/files/ontology" "$ALEX_DIR/files/library/public" "$ALEX_DIR/files/library/paid" "$ALEX_DIR/files/library/invite" "$ALEX_DIR/files/works/systems" "$ALEX_DIR/files/core" "$ALEX_DIR/files/vault/input" "$ALEX_DIR/files/vault/_input" "$ALEX_DIR/system/.autoloop"
 echo "$API_KEY" > "$ALEX_DIR/system/.api_key"
 chmod 600 "$ALEX_DIR/system/.api_key"
 touch "$ALEX_DIR/system/.last_processed"
