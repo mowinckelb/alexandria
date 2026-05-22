@@ -408,7 +408,9 @@ Both tasks follow the same principle: the Engine generates drafts, the Author cu
 
 **Morning brief.** The autoloop writes `system/.brief_outbox` at end-of-run; `system/scripts/brief.py` ships it at ~09:00 UTC. The brief is the Author's forward-looking daily lens — invitational, not a reminders list, never an activity recap. The Author was in yesterday's sessions; restating decisions or constitutional updates is signal he already has.
 
-**Shape: five dimensions × 1 entry per dimension**, named by the five operation crafts (Genesis / Accretion / Entropy / Development / Creation). The shortcut sub-section under Accretion (iCloud captures pending engagement) is a separate footer-style list, not counted as a menu entry. **Default is one entry per dimension; a sixth entry is permitted only if (a) one dimension genuinely holds two top-tier signals AND (b) the total brief still skims in ≤30s.** Six is the ceiling, not a target. The autoloop's instinct is to stack — fight it.
+**Above the brief: shortcut waitlist.** When `~/alexandria/files/vault/input/` holds items captured via iOS Shortcut and not yet engaged, surface them as a short section above the dim menu — either a list of items (if few enough to scan in two lines) or a count ("15 items waiting from the shortcut"). Highest-affinity content; the visible weight pulls the Author to engage. Omit entirely if empty; never render an empty waitlist.
+
+**Shape: five dimensions × 1 entry per dimension**, named by the five operation crafts (Genesis / Accretion / Entropy / Development / Creation). **Default is one entry per dimension; a sixth entry is permitted only if (a) one dimension genuinely holds two top-tier signals AND (b) the total brief still skims in ≤30s.** Six is the ceiling, not a target. The autoloop's instinct is to stack — fight it.
 
 **Per-entry render — two lines, no body:**
 
@@ -420,12 +422,12 @@ Both tasks follow the same principle: the Engine generates drafts, the Author cu
 The Engine speaks in its own voice. Specific topic + the tension + the invitation. The Author reads each entry and feels pulled to engage, not directed to act. Per-dimension register — each dim has a characteristic tension shape:
 
 - **Genesis.** Contradictions and partial articulations the Author half-holds — positions implied in session that haven't crossed into the constitution; concepts applied once that haven't been generalised; recent news the Author would have a take on but hasn't articulated.
-- **Accretion.** A loaded fragment that CHALLENGES the Author's position, not confirms it (confirmatory fragments produce zero delta). External argument against a documented thesis; missing-mechanism fragment that would reshape a coalescing thread. Shortcut sub-section = iCloud-pending items as a separate footer.
+- **Accretion.** A loaded fragment that CHALLENGES the Author's position, not confirms it (confirmatory fragments produce zero delta). External argument against a documented thesis; missing-mechanism fragment that would reshape a coalescing thread. (Shortcut captures live in the waitlist above, not under Accretion.)
 - **Entropy.** Drift between documented canon and recent behavior — positions the Author has been operating off that the constitution doesn't say, or a documented position long undefended that adjacent files have outgrown.
 - **Development.** An underdeveloped position the Constitution overclaims on, or a recent extension that breaks an earlier calibration. Quantitative tensions where the math has shifted but the number hasn't.
 - **Creation.** A coalesced thread ready for a specific NAMED artifact, OR a recent development unreflected on a live surface the Author owns. Always name the WHAT — the artifact the Author would actually make, not the meta-thesis behind it. Concrete artifact titles or surface names land; meta-labels fail.
 
-**Total-budget rule (hard):** The full brief — five entries plus the shortcut footer — must skim end-to-end in ≤20s. That's roughly 100 words, with ~13-word hooks the natural mean. If a draft exceeds that, tighten the hooks before adding more entries. If after tightening a sixth entry would push it over, drop it. Skim budget is the structural constraint; entry count bends to it. ≤30s is the absolute ceiling — anything closer is over-budget.
+**Total-budget rule (hard):** The full brief — five entries plus the shortcut waitlist — must skim end-to-end in ≤20s. That's roughly 100 words, with ~13-word hooks the natural mean. If a draft exceeds that, tighten the hooks before adding more entries. If after tightening a sixth entry would push it over, drop it. Skim budget is the structural constraint; entry count bends to it. ≤30s is the absolute ceiling — anything closer is over-budget.
 
 **Render:** `brief.py` ships multipart text/plain + text/html. `**foo**` → `<strong>foo</strong>`, `*foo*` → `<em>foo</em>`, blank lines split paragraphs. Modern clients render bold/italic; plain-text clients see the markers but still get the hierarchy from line structure.
 
