@@ -1045,7 +1045,7 @@ export function registerRoutes(app: Hono) {
     }
     const { api_key, github_login } = JSON.parse(stored) as { api_key: string; github_login: string };
     logEvent('install_token_redeemed', { author: github_login });
-    const html = await callbackPageHtml(api_key, github_login);
+    const html = await callbackPageHtml(api_key, github_login, true);
     return c.html(html);
   });
 
