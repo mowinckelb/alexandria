@@ -123,6 +123,56 @@ if [ "$MODE" = "session-start" ]; then
     [ -n "$latest_autoloop" ] && echo "$latest_autoloop" > "$ALEX_DIR/system/.autoloop_relayed"
   fi
 
+  # ── Network sync: fetch connected Authors' shadows (1/day, backgrounded) ──
+  # Reads ~/alexandria/files/network.md, fetches each connected Author's shadow
+  # to ~/alexandria/files/network/<slug>/shadow.md. Engine reads these as
+  # relational context per § VI The Network Multiplier (methodology.md).
+  # No file = single-Author mode, surface dark, nothing fetched.
+  if [ -f "$ALEX_DIR/files/network.md" ]; then
+    network_cache="$ALEX_DIR/files/network"
+    mkdir -p "$network_cache" 2>/dev/null
+    network_needs_sync="yes"
+    if [ -f "$network_cache/.last_synced" ]; then
+      last_sync=$(cat "$network_cache/.last_synced" 2>/dev/null || echo 0)
+      [ -n "$last_sync" ] && [ "$(($(date +%s) - last_sync))" -lt 86400 ] && network_needs_sync="no"
+    fi
+    if [ "$network_needs_sync" = "yes" ]; then
+      (
+        net_key=""
+        [ -f "$ALEX_DIR/system/.api_key" ] && net_key=$(tr -d '[:space:]' < "$ALEX_DIR/system/.api_key" 2>/dev/null)
+        net_api="https://api.alexandria-library.com"
+        while IFS= read -r line; do
+          trimmed=$(echo "$line" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+          [[ "$trimmed" =~ ^# ]] && continue
+          [ -z "$trimmed" ] && continue
+          url=$(echo "$trimmed" | grep -oE 'https?://[^[:space:]]+' | head -1)
+          [ -z "$url" ] && url="$trimmed"
+          slug=$(echo "$url" | sed -E 's#https?://[^/]+/library/##; s#/.*$##' | tr -cd 'a-zA-Z0-9_-')
+          [ -z "$slug" ] && continue
+          author_dir="$network_cache/$slug"
+          mkdir -p "$author_dir" 2>/dev/null
+          # Try authors tier first (richer for connected peers), fall back to free.
+          fetched=""
+          if [ -n "$net_key" ] && curl -fsS --max-time 5 -H "Authorization: Bearer $net_key" \
+               "$net_api/library/$slug/shadow/authors" -o "$author_dir/shadow.md.tmp" 2>/dev/null \
+               && [ -s "$author_dir/shadow.md.tmp" ]; then
+            mv "$author_dir/shadow.md.tmp" "$author_dir/shadow.md"
+            fetched=1
+          fi
+          if [ -z "$fetched" ] && curl -fsS --max-time 5 \
+               "$net_api/library/$slug/shadow/free" -o "$author_dir/shadow.md.tmp" 2>/dev/null \
+               && [ -s "$author_dir/shadow.md.tmp" ]; then
+            mv "$author_dir/shadow.md.tmp" "$author_dir/shadow.md"
+            fetched=1
+          fi
+          rm -f "$author_dir/shadow.md.tmp"
+          [ -n "$fetched" ] && echo "$trimmed" > "$author_dir/_annotation.md"
+        done < "$ALEX_DIR/files/network.md"
+        date -u +%s > "$network_cache/.last_synced"
+      ) 2>/dev/null &
+    fi
+  fi
+
   # ── Nudges ──
   # Markers only — Engine composes any user-facing text per canon.
   # .nudge_pending: written at prior session-end if the session wasn't active.

@@ -667,9 +667,11 @@ The network surface fires ONLY when other-Author conditions hold. Day one for a 
 
 ### Designating Connections (Author-Side)
 
-The Engine needs to know which other Authors this Author has chosen to engage with. Minimum viable mechanism: an Author-maintained file at `~/alexandria/files/network.md` listing Library URLs of connected Authors with one-line annotations (who they are, what kind of engagement — close collaborator, friend, partner, peer). The Engine reads this when network surface is relevant and fetches the listed Authors' L3 shadows as relational context.
+The Engine needs to know which other Authors this Author has chosen to engage with. Minimum viable mechanism: an Author-maintained file at `~/alexandria/files/network.md` listing Library URLs of connected Authors with one-line annotations (who they are, what kind of engagement — close collaborator, friend, partner, peer).
 
 Format is intentionally minimal — bare list of URLs with free-text notes, Author maintains, no schema. Empty or missing file = single-Author mode, network surface dark. The Engine may propose additions when it notices the Author repeatedly references someone whose shadow is on Alexandria; the Author accepts or ignores. Never auto-add.
+
+**Fetch mechanism.** The hook payload backgrounds a fetch at session start (rate-limited to once per 24h): for each URL in `network.md`, it pulls the connected Author's shadow into `~/alexandria/files/network/<slug>/shadow.md`, with `<slug>/_annotation.md` preserving the source-line note. Tries the authors-tier shadow first (richer content for connected peers, requires this Author's API key), falls back to the public/free shadow. The Engine reads these cached files as relational context when network surface is relevant — no per-session fetching, no extra latency.
 
 ### What the Engine Can Do Across Canons
 
