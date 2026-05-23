@@ -56,6 +56,14 @@ The setup is one bash script, ~685 lines. The hooks payload is one bash script, 
 
 **`~/alexandria-fork/`** — only if you have `gh` authenticated. A sparse-checkout of your own GitHub fork of the public alexandria repo, used for publishing modules you write.
 
+### The Git substrate and commit signing
+
+`~/alexandria/` is initialised as a local Git repository. Your worldline IS a commit history — every Constitution edit, marginalia drain, and vault drop you preserve becomes a commit. The repo is yours; you can push to any Git remote (GitHub is the default if you have `gh` authenticated; any host works).
+
+**Currently:** commits are unsigned by default (the genesis commit uses `--no-gpg-sign`). The trust model for *your worldline* is the Git history itself — local, portable, in your hands.
+
+**On the immediate roadmap:** setup.sh will configure commit signing using your own SSH key (no key generation, just registering an existing key as a GitHub signing key via `gh ssh-key add --type signing`, and configuring the Alexandria repo only — not your global Git config). Every commit becomes signed; Alexandria's API surfaces GitHub's `commit.verification.verified` status. The result: a cryptographically anchored cognitive ledger that is tamper-evident, portable, and verifiable by anyone with your public key. Plan and execution detail in `.tasks/git-protocol-mandate.md` in this repo. Once shipped, this section will describe the live mechanism, not a roadmap.
+
 ## What gets modified in your config
 
 | File | Change | Inspect |
