@@ -19,7 +19,7 @@ Read in this order, stop when you have enough:
 3. `~/alexandria/files/core/machine.md` — operating notes. Includes any standing nudge preferences ("don't nudge weekends," "don't nudge during X sprint").
 4. Last 7 days of git log on `~/alexandria/` — what the autoloop has been writing recently, in case there's a fresh fragment notepad hasn't surfaced yet.
 
-Do NOT read constitution, ontology, or vault directly. Those are too raw — surfacing happens via notepad.
+Do NOT read constitution, marginalia, or vault directly. Those are too raw — surfacing happens via notepad.
 
 ## Output
 
@@ -45,7 +45,7 @@ echo "<one to three lines>" > ~/alexandria/system/.nudge_outbox
 
 ## Privacy
 
-Never include constitution content, ontology entries, vault excerpts, or interpretation of the Author's inner state. The nudge is a pointer ("approve the shadow proposal"), not a window into the cognition. If you're tempted to quote vault material in the nudge, the answer is silence instead.
+Never include constitution content, marginalia entries, vault excerpts, or interpretation of the Author's inner state. The nudge is a pointer ("approve the shadow proposal"), not a window into the cognition. If you're tempted to quote vault material in the nudge, the answer is silence instead.
 
 ## Verification (run last)
 

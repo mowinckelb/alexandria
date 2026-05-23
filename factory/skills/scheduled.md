@@ -1,6 +1,6 @@
 ---
 name: alexandria
-description: Autonomous cognitive maintenance — vault reprocessing, ontology/constitution/notepad development
+description: Autonomous cognitive maintenance — vault reprocessing, marginalia/constitution/notepad development
 schedule: daily 15:00 UTC
 ---
 
@@ -35,7 +35,7 @@ If the run discovers a reusable system element, keep the marketplace loop curren
 
 ## Canon update review (when `.canon_update_notice` exists)
 
-Upstream canon is auto-pulled on every session-start. When it changes, the hook writes `.canon_update_notice` with the diff. Your job during the audit: read the notice, consider each change against what you know about this Author (constitution, ontology, feedback, machine.md, canon_overrides). For each change:
+Upstream canon is auto-pulled on every session-start. When it changes, the hook writes `.canon_update_notice` with the diff. Your job during the audit: read the notice, consider each change against what you know about this Author (constitution, marginalia, feedback, machine.md, canon_overrides). For each change:
 
 - Fits this Author → no action. Upstream applies.
 - Conflicts with this Author's practice → add or refine an entry in `~/alexandria/canon_overrides.md` that supersedes the change. Cite the upstream line you're overriding and why.
@@ -43,17 +43,17 @@ Upstream canon is auto-pulled on every session-start. When it changes, the hook 
 
 Clear `.canon_update_notice` after review. The Author's consent layer lives in `canon_overrides.md`; upstream auto-pulls but overrides win.
 
-Read ~/alexandria/files/constitution/, ~/alexandria/files/ontology/, ~/alexandria/files/core/notepad.md, ~/alexandria/files/core/machine.md, and ~/alexandria/files/core/feedback.md.
+Read ~/alexandria/files/constitution/, ~/alexandria/files/marginalia/, ~/alexandria/files/core/notepad.md, ~/alexandria/files/core/machine.md, and ~/alexandria/files/core/feedback.md.
 
 Process vault entries (newest first) against the current constitution. For each entry: what signal exists that isn't captured yet?
 
 Chunk intelligently. You have finite context — do not attempt to process every unprocessed entry in a single run. Process entries until you feel signal quality dropping or context getting heavy, then stop. Quality over quantity. Unprocessed entries persist — the next run picks them up. After processing a batch, touch ~/alexandria/system/.last_processed only if zero unprocessed entries remain. If entries remain, leave the marker so the next run finds them.
 
-Write to the appropriate pool — ontology (Author's thoughts), constitution (Author's beliefs), notepad (your observations). You decide what goes where.
+Write to the appropriate pool — marginalia (shared working layer, content awaiting status), constitution (Author's positions with status assigned), notepad (your operational observations). You decide what goes where.
 
 Every change to constitution must cite the Author's exact words from vault.
 
-After processing vault, check if derivatives need regenerating. If the source files (constitution/, ontology/, notepad.md, feedback.md) changed meaningfully since the derivative was last written, regenerate the derivative. Write `_constitution.md`, `_ontology.md`, `_notepad.md`, `_feedback.md` as compressed, max-signal versions. (agent.md is bounded and hand-curated — no derivative; loaded directly.) See methodology.md § Source/Derivative Separation for the full pattern.
+After processing vault, check if derivatives need regenerating. If the source files (constitution/, notepad.md, feedback.md) changed meaningfully since the derivative was last written, regenerate the derivative. Write `_constitution.md`, `_notepad.md`, `_feedback.md` as compressed, max-signal versions. (agent.md is bounded and hand-curated — no derivative; loaded directly. marginalia/ doesn't follow source/derivative either — it's a single working file `marginalia.md` that drains over time.) See methodology.md § Source/Derivative Separation for the full pattern.
 
 Then check constitution structural fit. Not every run — only when you notice signals: one file growing disproportionately, signal landing between domains, a domain gone dark, cross-references clustering between the same two files. If restructure signals are present, note them in last_run.md under "## Restructure signals" — the Author or the interactive Engine decides whether to act. You do not restructure autonomously. See methodology.md for the full signal list.
 

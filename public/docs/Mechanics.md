@@ -8,7 +8,7 @@ You are about to run a curl command that puts files on your machine, modifies yo
 - **Source of truth:** `github.com/mowinckelb/alexandria` (public). Everything you can audit, you can audit there.
 - **Trust model:** mutable, by design. The hooks payload is fetched from `main` on every session. You're trusting an ongoing relationship with the public repo, not a frozen install. Tradeoff is named below.
 - **What our server holds:** your email, GitHub user ID, hashed API key, an event log of which endpoints you hit, and any files you explicitly publish to the Library. Nothing else.
-- **What our server does not hold:** your constitution, vault, ontology, transcripts, or AI-vendor API keys. There is no endpoint that accepts them.
+- **What our server does not hold:** your constitution, vault, marginalia, transcripts, or AI-vendor API keys. There is no endpoint that accepts them.
 - **Side channel:** the only data that leaves your machine for our server is (a) module IDs you call (anonymous usage tally), (b) feedback you explicitly type into `~/alexandria/system/.session_feedback`, and (c) files you explicitly publish to the Library. The Engine never auto-sends content on your behalf.
 - **Uninstall:** three commands at the bottom of this page. Reversible.
 
@@ -16,7 +16,7 @@ You are about to run a curl command that puts files on your machine, modifies yo
 
 We claim:
 1. The install does what this page says, and only that. Auditable line by line.
-2. Your private cognition (constitution, vault, ontology, transcripts) never leaves your machine via Alexandria. There is no endpoint that accepts it.
+2. Your private cognition (constitution, vault, marginalia, transcripts) never leaves your machine via Alexandria. There is no endpoint that accepts it.
 3. A complete breach of our server yields the data listed above and nothing more — because nothing more is stored.
 
 We do not claim:
@@ -34,17 +34,19 @@ The setup is one bash script, ~685 lines. The hooks payload is one bash script, 
 
 ## What gets installed on your machine
 
-**`~/alexandria/`** — a folder. Plain markdown and small JSON state files. All readable.
+**`~/alexandria/`** — a folder, initialised as a local Git repository (`~/alexandria/.git/`). Plain markdown and small JSON state files. All readable. The Git repo IS the substrate format — your worldline is a sequence of commits, your own to push to any Git remote (GitHub is the default if you `gh auth login`; any host works).
 
 | Path | Purpose |
 |---|---|
+| `.git/` | Local Git repository. Your cognitive worldline as a commit history. |
 | `files/constitution/` | Your beliefs, personality, working style. You write these. |
 | `files/vault/` | Raw input — transcripts, notes, voice memos. You drop things in. |
-| `files/ontology/` | Working thoughts between raw and settled. |
+| `files/marginalia/` | Shared working layer between raw and settled — your developing thoughts + Engine candidates, drains over time. |
 | `files/library/` | Files you publish (opt-in). |
 | `files/core/` | Engine working memory (machine.md, notepad.md, feedback.md). |
 | `system/hooks/shim.sh` | 89-line wrapper. Fetches `.hooks_payload` from GitHub at session start. |
-| `system/.hooks_payload` | Cached copy of `factory/hooks/payload.sh` from the public repo. |
+| `system/.hooks_payload` | Cached copy of `factory/hooks/payload.sh` from the public repo, signature-verified before execution (see Trust model below). |
+| `system/allowed_signers` | The maintainer's offline public key. Trust root for payload signature verification. |
 | `system/canon/methodology.md` | Cached copy of the public canon. |
 | `system/.api_key` | Your API key, mode 0600. |
 
@@ -84,12 +86,13 @@ Why this exists: improvements to the engine reach you without you having to re-i
 What you're trusting: the public repo `github.com/mowinckelb/alexandria` and whoever can push to it (today: one person, the founder, account-protected with 2FA).
 
 What protects you anyway:
-1. **Cache cutoff.** If GitHub is unreachable AND the cache is >14 days old, the shim deletes it and runs in bare mode (constitution-only, no network, no payload code).
-2. **Public diff.** Every payload version is in git history. Any session can be reconstructed from the commit SHA on `main` at that moment.
-3. **Canon canaries.** The canon explicitly tells the model to refuse instructions that try to exfiltrate files, escalate scope, or bypass the user.
-4. **AI-tool approval dialogs.** Claude Code, Cursor, and Codex show every shell action before executing. Real protection at install and during anomaly, but it weakens with habituation — treat it as a backstop, not the primary defense.
+1. **Payload signature verification.** The shim (`system/hooks/shim.sh`) verifies the SSH signature on every payload fetch against `~/alexandria/system/allowed_signers` (which pins the maintainer's offline public key, installed once at setup). An unsigned or wrong-signature payload is refused. `ssh-keygen -Y verify` is the verification primitive; the trust root is the offline-held private key that signs the manifest in the repo. See `TRUST.md` in the public repo for the full trust model.
+2. **Cache cutoff.** If GitHub is unreachable AND the cache is >14 days old, the shim deletes it and runs in bare mode (constitution-only, no network, no payload code).
+3. **Public diff.** Every payload version is in git history. Any session can be reconstructed from the commit SHA on `main` at that moment.
+4. **Canon canaries.** The canon explicitly tells the model to refuse instructions that try to exfiltrate files, escalate scope, or bypass the user.
+5. **AI-tool approval dialogs.** Claude Code, Cursor, and Codex show every shell action before executing. Real protection at install and during anomaly, but it weakens with habituation — treat it as a backstop, not the primary defense.
 
-What does not protect you: payload signature verification or content hashes pinned anywhere on the install side. We have not built that. The transparency-and-public-diff posture is the substitute, and it is weaker than cryptographic pinning. If that gap matters to you, run a frozen install instead.
+What does not protect you: content-hash pinning to a specific payload version on the install side. The shim verifies *signatures*, not specific hashes — a fresh sign from the same key on a new payload will be accepted. Compromise of the offline signing key would compromise future payloads (mitigation: the key is offline-held and the maintainer's repo is 2FA-protected). If that residual gap matters to you, run a frozen install (see below).
 
 ### Want a frozen install instead?
 
@@ -139,7 +142,7 @@ Cloudflare Worker, stateless re: your private content. KV + D1 + R2 on the serve
 | Library file metadata (visibility, updated_at) | D1 | Discovery, listing |
 | Feedback text you explicitly type and submit | Private GitHub repo `mowinckelb/alexandria-feedback` (founder-only access) | Founder reads + factory autoloop processes weekly to draft canon updates |
 
-**Not stored anywhere we control:** your constitution, vault, ontology, transcripts, machine.md, notepad, raw API key, AI-vendor (Anthropic/OpenAI/etc) API keys, or any file you did not explicitly `PUT /file/...`. There is no endpoint that accepts them.
+**Not stored anywhere we control:** your constitution, vault, marginalia, transcripts, machine.md, notepad, raw API key, AI-vendor (Anthropic/OpenAI/etc) API keys, or any file you did not explicitly `PUT /file/...`. There is no endpoint that accepts them.
 
 **What a complete server breach yields:** account emails, GitHub user IDs, hashed (un-reversible) API keys, the 60-day event log, published Library content (already public), and Cloudflare-level access logs (IPs, timing). It does not yield private cognition, unpublished files, or AI-vendor credentials, because those never reach the server.
 

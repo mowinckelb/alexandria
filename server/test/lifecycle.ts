@@ -216,15 +216,15 @@ async function main() {
     const res = await fetch(`${FACTORY_RAW}/hooks/payload.sh`);
     const body = await res.text();
     const hasConstitution = body.includes('constitution');
-    const hasOntology = body.includes('ontology');
+    const hasMarginalia = body.includes('marginalia');
     const hasMachine = body.includes('machine.md');
     const hasNotepad = body.includes('notepad.md');
     const hasFeedback = body.includes('feedback.md');
 
     return {
       test: 'Factory payload context layers',
-      passed: res.ok && hasConstitution && hasOntology && hasMachine && hasNotepad && hasFeedback,
-      details: `constitution=${hasConstitution}, ontology=${hasOntology}, machine=${hasMachine}, notepad=${hasNotepad}, feedback=${hasFeedback}`,
+      passed: res.ok && hasConstitution && hasMarginalia && hasMachine && hasNotepad && hasFeedback,
+      details: `constitution=${hasConstitution}, marginalia=${hasMarginalia}, machine=${hasMachine}, notepad=${hasNotepad}, feedback=${hasFeedback}`,
     };
   });
 

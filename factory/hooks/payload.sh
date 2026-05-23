@@ -207,7 +207,7 @@ if [ "$MODE" = "session-start" ]; then
   fi
 
   # ── Author context — pointer, not inline injection ──
-  # Inlining the full constitution+ontology+machine+notepad+feedback was ~70KB,
+  # Inlining the full constitution+marginalia+machine+notepad+feedback was ~70KB,
   # which blows past harness output-truncation thresholds (Claude Code shows
   # only the first ~2KB inline before saving the rest to a side file the AI
   # has to discover). Net signal delivered ≈ 0 for the cost of a 70KB GitHub
@@ -247,10 +247,10 @@ if [ "$MODE" = "session-start" ]; then
   if [ -f "$ALEX_DIR/system/.block_complete" ] && [ "$has_constitution" = "true" ]; then
     echo ""
     echo "--- AUTHOR CONTEXT (read-only — do not override existing workflows or memory) ---"
-    echo "Author files live at ~/alexandria/files/. Read what's relevant for the moment, not everything every time. Prefer derivatives (underscore-prefixed: _constitution.md, _ontology.md, _notepad.md, _feedback.md) when they exist — they are the compressed working copy. Fall back to sources when the derivative is missing."
+    echo "Author files live at ~/alexandria/files/. Read what's relevant for the moment, not everything every time. Prefer derivatives (underscore-prefixed: _constitution.md, _notepad.md, _feedback.md) when they exist — they are the compressed working copy. Fall back to sources when the derivative is missing."
     echo ""
-    echo "  constitution/  — beliefs (Core.md first); _constitution.md is the derivative"
-    echo "  ontology/      — Author's working thoughts (not yet confirmed beliefs); _ontology.md derivative"
+    echo "  constitution/  — positions with epistemic status assigned (Core.md first); _constitution.md is the derivative"
+    echo "  marginalia/    — shared working layer (your developing thoughts + Engine candidates, awaiting status); drains over time"
     echo "  core/machine.md — how to work with this Author"
     echo "  core/notepad.md (or _notepad.md) — Engine working memory, parked questions, loaded magazine"
     echo "  core/feedback.md (or _feedback.md) — corrections + confirmed approaches"
@@ -416,7 +416,7 @@ fi
 
 if [ "$MODE" = "subagent" ]; then
   # Pointer, not inline injection. Same reasoning as session-start: dumping
-  # the full constitution+ontology+notepad+feedback every subagent invocation
+  # the full constitution+marginalia+notepad+feedback every subagent invocation
   # is ~70KB the harness mostly truncates and the subagent could Read on demand
   # anyway. Bitter-lesson move: tell the subagent where the files are, let it
   # decide what's relevant for its task.
@@ -434,8 +434,8 @@ if [ "$MODE" = "subagent" ]; then
     echo "--- AUTHOR CONTEXT (from Alexandria) ---"
     echo "Author files live at ~/alexandria/files/. Prefer derivatives (underscore-prefixed) when they exist; fall back to sources."
     echo ""
-    echo "  constitution/  — beliefs (Core.md first); _constitution.md derivative"
-    echo "  ontology/      — Author's working thoughts; _ontology.md derivative"
+    echo "  constitution/  — positions with epistemic status assigned (Core.md first); _constitution.md derivative"
+    echo "  marginalia/    — shared working layer (your developing thoughts + Engine candidates, awaiting status); drains over time"
     echo "  core/machine.md — how to work with this Author"
     echo "  core/notepad.md (or _notepad.md) — Engine working memory, parked threads"
     echo "  core/feedback.md (or _feedback.md) — corrections + confirmed approaches"

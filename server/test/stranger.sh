@@ -139,7 +139,7 @@ check "alexandria dir exists"      [ -d "$HOME/alexandria" ]
 check "vault dir exists"           [ -d "$HOME/alexandria/files/vault" ]
 check "hooks dir exists"           [ -d "$HOME/alexandria/system/hooks" ]
 check "constitution dir exists"    [ -d "$HOME/alexandria/files/constitution" ]
-check "ontology dir exists"        [ -d "$HOME/alexandria/files/ontology" ]
+check "marginalia dir exists"      [ -d "$HOME/alexandria/files/marginalia" ]
 check "library dir exists"         [ -d "$HOME/alexandria/files/library" ]
 
 # Verify files
@@ -199,11 +199,11 @@ They want concrete execution and short feedback loops.
 They dislike process theater and default to deletion before addition.
 CONSTITUTION_TEST
 
-# Seed ontology so the pointer block sees a non-empty directory
-mkdir -p "$HOME/alexandria/files/ontology"
-cat > "$HOME/alexandria/files/ontology/test.md" << 'ONTOLOGY_TEST'
+# Seed marginalia so the pointer block sees a non-empty directory
+mkdir -p "$HOME/alexandria/files/marginalia"
+cat > "$HOME/alexandria/files/marginalia/test.md" << 'MARGINALIA_TEST'
 Early signal: this Author sees software architecture as compressed philosophy.
-ONTOLOGY_TEST
+MARGINALIA_TEST
 
 touch "$HOME/alexandria/system/.block_complete"
 
@@ -212,12 +212,12 @@ SESSION_START_OUTPUT=$(bash "$HOME/alexandria/system/hooks/shim.sh" session-star
 SESSION_START_EXIT=$?
 
 check "session-start ran"                [ "$SESSION_START_EXIT" -eq 0 ]
-# Author context is a pointer block now (constitution/ontology/machine/notepad/feedback
+# Author context is a pointer block now (constitution/marginalia/machine/notepad/feedback
 # live at ~/alexandria/files/, AI Reads on demand). Inline injection was dropped in
 # 09fe5fa — was 70KB, mostly truncated by harnesses, near-zero net signal.
 check_output "author context block"      "AUTHOR CONTEXT"        "$SESSION_START_OUTPUT"
 check_output "constitution pointer"      "constitution/"         "$SESSION_START_OUTPUT"
-check_output "ontology pointer"          "ontology/"             "$SESSION_START_OUTPUT"
+check_output "marginalia pointer"        "marginalia/"           "$SESSION_START_OUTPUT"
 check_output "machine pointer"           "core/machine.md"       "$SESSION_START_OUTPUT"
 check_output "notepad pointer"           "core/notepad.md"       "$SESSION_START_OUTPUT"
 check_output "feedback pointer"          "core/feedback.md"      "$SESSION_START_OUTPUT"

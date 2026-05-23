@@ -7,8 +7,7 @@
 ## Substrate (dense source material for deep extraction)
 
 - Founder's YouTube playlist — [https://youtube.com/playlist?list=PLOP9v1FPBYePbN3BduyTI_mw7s6HGJqXV](https://youtube.com/playlist?list=PLOP9v1FPBYePbN3BduyTI_mw7s6HGJqXV)
-
-*Each Author adds their own dense corpora here — coursepacks, archived classes, deep technical books, hand-curated essay collections.*
+- Each Author adds their own dense source corpora here — archived courses, deep technical books, coursepacks, anything the Engine should eagerly extract from on cold-start.
 
 ---
 

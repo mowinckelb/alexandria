@@ -42,7 +42,7 @@ plan_move "$ALEX_DIR/files/filter.md"     "$ALEX_DIR/files/library/filter.md"
 plan_move "$ALEX_DIR/files/core/filter.md" "$ALEX_DIR/files/library/filter.md"
 # Derivatives at files/ root → into source folder
 plan_move "$ALEX_DIR/files/_constitution.md" "$ALEX_DIR/files/constitution/_constitution.md"
-plan_move "$ALEX_DIR/files/_ontology.md"     "$ALEX_DIR/files/ontology/_ontology.md"
+plan_move "$ALEX_DIR/files/_ontology.md"     "$ALEX_DIR/files/marginalia/marginalia.md"
 # Single-file derivatives → files/core/ (alongside source)
 plan_move "$ALEX_DIR/files/_notepad.md"      "$ALEX_DIR/files/core/_notepad.md"
 plan_move "$ALEX_DIR/files/_feedback.md"     "$ALEX_DIR/files/core/_feedback.md"
@@ -56,12 +56,30 @@ plan_move "$ALEX_DIR/.api_key"           "$ALEX_DIR/system/.api_key"
 plan_move "$ALEX_DIR/.hooks_payload"     "$ALEX_DIR/system/.hooks_payload"
 plan_move "$ALEX_DIR/.canon_local"       "$ALEX_DIR/system/canon/methodology.md"
 
+# 2026-05-23 — ontology → marginalia (folder rename + single working file)
+# Old: files/ontology/ folder with _ontology.md derivative + domain source files
+# New: files/marginalia/ folder with single marginalia.md (no source/derivative split — layer drains)
+PLANNED_DIRS=()
+if [ -d "$ALEX_DIR/files/ontology" ] && [ ! -d "$ALEX_DIR/files/marginalia" ]; then
+  PLANNED_DIRS+=("$ALEX_DIR/files/ontology → $ALEX_DIR/files/marginalia (folder rename)")
+fi
+# After folder rename, inside marginalia/: _ontology.md or _marginalia.md → marginalia.md
+# (plan_move runs in apply phase; both possible intermediate names captured)
+plan_move "$ALEX_DIR/files/marginalia/_ontology.md"    "$ALEX_DIR/files/marginalia/marginalia.md"
+plan_move "$ALEX_DIR/files/marginalia/_marginalia.md"  "$ALEX_DIR/files/marginalia/marginalia.md"
+
 # Report
 echo "═══ Alexandria migration plan ═══"
 echo ""
-if [ ${#PLANNED[@]} -eq 0 ] && [ ${#CONFLICTS[@]} -eq 0 ]; then
+if [ ${#PLANNED[@]} -eq 0 ] && [ ${#CONFLICTS[@]} -eq 0 ] && [ ${#PLANNED_DIRS[@]} -eq 0 ]; then
   echo "Nothing to migrate. Already on current structure."
   exit 0
+fi
+
+if [ ${#PLANNED_DIRS[@]} -gt 0 ]; then
+  echo "Will rename folders (${#PLANNED_DIRS[@]}):"
+  for p in "${PLANNED_DIRS[@]}"; do echo "  $p"; done
+  echo ""
 fi
 
 if [ ${#PLANNED[@]} -gt 0 ]; then
@@ -83,6 +101,17 @@ if [ "$APPLY" != "true" ]; then
 fi
 
 # Execute
+# Folder renames first — file moves below depend on the new folder paths
+if [ ${#PLANNED_DIRS[@]} -gt 0 ]; then
+  echo "Renaming ${#PLANNED_DIRS[@]} folder(s)..."
+  for p in "${PLANNED_DIRS[@]}"; do
+    old="${p%% → *}"
+    new_full="${p#* → }"
+    new="${new_full% (*}"
+    mv "$old" "$new" && echo "  ✓ $old → $new"
+  done
+fi
+
 echo "Applying ${#PLANNED[@]} moves..."
 for p in "${PLANNED[@]}"; do
   old="${p% → *}"

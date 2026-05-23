@@ -2,7 +2,7 @@ You are setting up Alexandria for a new Author. One shot at a first impression. 
 
 Before you start, narrate what's about to happen — and why it's safe — in your own words:
 
-1. **What's about to happen.** You'll read what they already have — AI memory across tools, personal writing, voice memos, journal entries — and build a starter version of who they are: a constitution (their beliefs and patterns), an ontology (things you notice but they haven't confirmed), and a notepad (threads to talk about). They'll read your first impression at the end and decide if it lands.
+1. **What's about to happen.** You'll read what they already have — AI memory across tools, personal writing, voice memos, journal entries — and build a starter version of who they are: a constitution (their positions with epistemic status assigned), marginalia (the shared working layer — your synthesis candidates and their developing thoughts, awaiting status), and a notepad (threads to talk about). They'll read your first impression at the end and decide if it lands.
 2. **Why it's safe.** Everything stays on their machine. The files you build live in ~/alexandria/ on their computer. They own them, can read them, edit them, delete them. Nothing is sent anywhere.
 3. **What this is.** Still their normal coding agent. Alexandria is a skill on top. Tone, depth, approach — flexible. Only architecture is fixed (local files, their data on their machine).
 
@@ -10,7 +10,7 @@ Casual and honest. They're about to watch you open every file on their computer 
 
 Write to ~/alexandria/ as you go. Files on disk survive if this conversation compacts.
 
-**Spot the DIY Author early.** Before Phase 1, scan for signs they already have their own thinking system — a long CLAUDE.md, a personal vault, a notes folder with structure (constitution / ontology / ideas / journal in any naming), AI rules across multiple tools. If yes, flag it and adjust: their system is the floor, ours is a starter we'd otherwise impose. Don't duplicate their structure into ours just because the canonical scaffold expects certain filenames. Point at theirs, fork ours toward theirs, or skip the parts that conflict. Alexandria is the protocol, not the system — every step from here treats the Author's existing setup as load-bearing.
+**Spot the DIY Author early.** Before Phase 1, scan for signs they already have their own thinking system — a long CLAUDE.md, a personal vault, a notes folder with structure (constitution / marginalia / ideas / journal in any naming), AI rules across multiple tools. If yes, flag it and adjust: their system is the floor, ours is a starter we'd otherwise impose. Don't duplicate their structure into ours just because the canonical scaffold expects certain filenames. Point at theirs, fork ours toward theirs, or skip the parts that conflict. Alexandria is the protocol, not the system — every step from here treats the Author's existing setup as load-bearing.
 
 ## Phase 1 — Sync (reach parity with what already exists)
 
@@ -29,9 +29,9 @@ Copy valuable personal finds to ~/alexandria/files/vault/. Preserve original fil
 
 ## Phase 2 — Extract (build the starter mind)
 
-~/alexandria/ already has the structure: constitution/, ontology/, notepad.md, machine.md, feedback.md.
+~/alexandria/ already has the structure: constitution/, marginalia/, notepad.md, machine.md, feedback.md.
 
-The most important phase. The constitution captures who this person IS — cite their own words, with source. Ontology is what you NOTICE but they haven't confirmed. Notepad is working memory for the first /a (and Phase 3 fills it). Machine.md is how to work with them. Write only what's actually there. No inference, no guessing.
+The most important phase. The constitution captures who this person IS — cite their own words, with source, and tag epistemic status (committed, exploring, examined-not-adopted, etc.). Marginalia is the shared working layer — what you NOTICE (Engine synthesis candidates) plus their developing thoughts awaiting status. Notepad is working memory for the first /a (and Phase 3 fills it). Machine.md is how to work with them. Write only what's actually there. No inference, no guessing.
 
 Two layers to capture:
 
@@ -44,7 +44,7 @@ Accuracy is the bar. Verify every claim against the source. Revise until the con
 
 When the Author starts their first /a, the conversation must convert them. They walk away thinking "I need to do more of this." The notepad is the ammunition. Without it, Phase 5 fires blanks and the first /a echoes.
 
-Use the constitution and ontology you just built. Core tensions, deep cares, fields they work in, adjacent domains that would extend their thinking. Then load aggressively — the most common Phase 3 failure mode is underloading. Push past your default.
+Use the constitution and marginalia you just built. Core tensions, deep cares, fields they work in, adjacent domains that would extend their thinking. Then load aggressively — the most common Phase 3 failure mode is underloading. Push past your default.
 
 **Coverage that gives Phase 5 something to draw from:**
 

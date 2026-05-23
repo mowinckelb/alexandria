@@ -1,6 +1,6 @@
 ---
 name: alexandria
-description: Autonomous cognitive maintenance — vault reprocessing, ontology/constitution/notepad development
+description: Autonomous cognitive maintenance — vault reprocessing, marginalia/constitution/notepad development
 schedule: daily 03:00
 ---
 

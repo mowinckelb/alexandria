@@ -153,7 +153,7 @@ def _run() -> None:
     root = _derive_root(agent_path, root_hint)
     overlay = home / ".alexandria" / "inject" / "session-start.md"
     constitution_derivative = root / "files" / "constitution" / "_constitution.md"
-    ontology_derivative = root / "files" / "ontology" / "_ontology.md"
+    marginalia_file = root / "files" / "marginalia" / "marginalia.md"
 
     include_overlay = _env_bool("ALEXANDRIA_INCLUDE_OVERLAY", True)
     include_derivatives = _env_bool("ALEXANDRIA_INCLUDE_DERIVATIVES", True)
@@ -167,7 +167,7 @@ def _run() -> None:
     constitution_status = _derivative_status(
         root / "files" / "constitution", constitution_derivative
     )
-    ontology_status = _derivative_status(root / "files" / "ontology", ontology_derivative)
+    marginalia_status = _derivative_status(root / "files" / "marginalia", marginalia_file)
 
     header = (
         "## Alexandria (Cursor sessionStart)\n\n"
@@ -176,7 +176,7 @@ def _run() -> None:
         f"- is_background_agent: {is_bg}\n"
         f"- composer_mode: {composer_mode}\n"
         f"- agent_source: {agent_path}\n"
-        f"- derivative_status: constitution={constitution_status}, ontology={ontology_status}\n"
+        f"- derivative_status: constitution={constitution_status}, marginalia={marginalia_status}\n"
         f"- context_budget_chars: {max_chars}\n"
         f"- include_derivatives: {include_derivatives}\n\n"
         "Canon for values and principles. Repo-local CLAUDE.md / AGENTS.md wins on project facts; "
@@ -218,11 +218,11 @@ def _run() -> None:
                     False,
                 )
             )
-        if ontology_derivative.is_file():
+        if marginalia_file.is_file():
             sections.append(
                 (
-                    "Ontology derivative (`files/ontology/_ontology.md`)",
-                    _read_or_note(ontology_derivative, "ontology derivative"),
+                    "Marginalia (`files/marginalia/marginalia.md`)",
+                    _read_or_note(marginalia_file, "marginalia"),
                     False,
                 )
             )
@@ -317,7 +317,7 @@ def _run() -> None:
                 "ALEXANDRIA_ROOT": str(root),
                 "ALEXANDRIA_AGENT_MD": str(agent_path),
                 "ALEXANDRIA_CONSTITUTION_DERIVATIVE": str(constitution_derivative),
-                "ALEXANDRIA_ONTOLOGY_DERIVATIVE": str(ontology_derivative),
+                "ALEXANDRIA_MARGINALIA_FILE": str(marginalia_file),
                 "ALEXANDRIA_SESSION_ID": session_id,
                 "ALEXANDRIA_BACKGROUND": "1" if is_bg else "0",
                 "ALEXANDRIA_COMPOSER_MODE": composer_mode,

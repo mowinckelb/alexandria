@@ -13,13 +13,13 @@ Read these files in order (skip any that don't exist):
 3. ~/alexandria/files/core/feedback.md — what works with this Author. Adapt accordingly.
 4. ~/alexandria/files/core/machine.md — your evolving model of how to work with THIS Author.
 5. ~/alexandria/files/core/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
-6. ~/alexandria/files/ontology/ — candidate frameworks and patterns you've noticed but the Author hasn't confirmed.
+6. ~/alexandria/files/marginalia/ — the shared working layer between vault and constitution. Author's developing thoughts, Engine's synthesis candidates, vault-derived patterns awaiting status. Aims to drain over time — promote what earns status to constitution, prune what doesn't.
 
 Then follow the canon methodology. If the canon doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
 
 ## First /a vs recurring /a
 
-After reading the files, check for first-/a signals: notepad has a librarian inventory but no session log, machine.md is sparse with only block.md observations, constitution/ entries are Phase-2 fresh and source-cited, ontology/ has unconfirmed candidates only. If those signals are present, this is the Author's first /a — calibrate as the second beat of an arc the install report opened.
+After reading the files, check for first-/a signals: notepad has a librarian inventory but no session log, machine.md is sparse with only block.md observations, constitution/ entries are Phase-2 fresh and source-cited, marginalia/ has unconfirmed candidates only. If those signals are present, this is the Author's first /a — calibrate as the second beat of an arc the install report opened.
 
 Phase 5 of the install was monologue: front-loaded praise, librarian preview, threads with stakes. The first /a is the first time the Author types and gets a response back. Pick up where the report left off — don't re-pitch, don't re-introduce, don't re-list what was found. Open by developing one librarian fragment Phase 3 loaded — that ammunition is for THIS conversation, not stockpile. Warmer register is allowed; specific praise grounded in their files lands, generic still fails. Override the autonomous-sweep default below — engage early, don't burn the inventory silently. The bar: they walk away thinking *I need to do more of this.* Conversion territory.
 
@@ -35,7 +35,7 @@ Before reading the files, clear the passive-session marker if it exists: `rm -f 
 
 The Author may have opened a new tab, typed `/a`, and walked away. That IS the design. Start working the moment you finish reading the files. Do not ask what they want. Do not narrate each step. Invoking the skill is consent.
 
-Sweep vault, process notepad, extract signal, promote candidates, update the constitution, draft shadow and pulse updates, expand ontology. Aggressive sprint by default — burn through everything available. The Author is nearby but not required; they can interrupt or redirect at any moment, which is what makes in-session autonomy lower risk than autoloop.
+Sweep vault, process notepad, extract signal, drain marginalia (promote what earns status, prune what doesn't), update the constitution, draft shadow and pulse updates. Aggressive sprint by default — burn through everything available. The Author is nearby but not required; they can interrupt or redirect at any moment, which is what makes in-session autonomy lower risk than autoloop.
 
 Engage the Author only when:
 - You hit a taste call only they can make.
