@@ -90,6 +90,27 @@ if [ "$MODE" = "session-start" ]; then
 
   # ── Git sync: push local, pull overnight changes ──
   if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/null; then
+    # Recover from stuck state left by a previous run.
+    # Stale index.lock (>5 min) = previous git op crashed; safe to remove.
+    # If stat fails we can't determine age — leave the lock alone (better safe).
+    if [ -f "$ALEX_DIR/.git/index.lock" ]; then
+      lock_mtime=$(stat -f %m "$ALEX_DIR/.git/index.lock" 2>/dev/null || stat -c %Y "$ALEX_DIR/.git/index.lock" 2>/dev/null)
+      if [ -n "$lock_mtime" ]; then
+        lock_age=$(($(date +%s) - lock_mtime))
+        [ "$lock_age" -gt 300 ] && rm -f "$ALEX_DIR/.git/index.lock"
+      fi
+    fi
+    # Abandoned rebase (>1 hr) = a previous pull --rebase got stuck; abort so this run can proceed.
+    # A real user mid-rebase resolves within an hour or knows it's broken if left longer.
+    for rebase_dir in "$ALEX_DIR/.git/rebase-merge" "$ALEX_DIR/.git/rebase-apply"; do
+      if [ -d "$rebase_dir" ]; then
+        rebase_mtime=$(stat -f %m "$rebase_dir" 2>/dev/null || stat -c %Y "$rebase_dir" 2>/dev/null)
+        if [ -n "$rebase_mtime" ]; then
+          rebase_age=$(($(date +%s) - rebase_mtime))
+          [ "$rebase_age" -gt 3600 ] && git -C "$ALEX_DIR" rebase --abort 2>/dev/null
+        fi
+      fi
+    done
     (cd "$ALEX_DIR" && git add -A && { git diff --cached --quiet || git commit -q -m "sync: $(date +%Y-%m-%d_%H-%M)"; }) 2>/dev/null
     git -C "$ALEX_DIR" push -q 2>/dev/null || true
     git -C "$ALEX_DIR" pull --rebase -q 2>/dev/null || true
