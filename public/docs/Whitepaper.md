@@ -323,7 +323,7 @@ The grandmother wins her game by being her.
 
 ## what humans are for.
 
-*Most situations are not single games but many games stacked. Three loop types govern them. Maximisation goes to ai. Humanity loops mandate human-only by rule. Threshold loops are most of life. The human only needs to sit at the outermost loop — three irreducibly human acts: curiosity, critique, close. And underneath the loops, four modes describe what a human still does for being human's sake.*
+*Most situations are not single games but many games stacked. Three loop types govern them. Maximisation goes to ai. Property loops mandate a specific entity-property by rule — typically human (sport), but the structural slot is the same regardless (robot Olympics is a property loop for robots). Threshold loops are most of life. The human only needs to sit at the outermost loop — three irreducibly human acts: curiosity, critique, close. And underneath the loops, four modes describe what a human still does for being human's sake.*
 
 ---
 
@@ -335,7 +335,7 @@ Some games are won by the best output, and the best output wins by margin. Faste
 
 Some games are won by clearing a bar. Pass the threshold and you have won. **These are threshold loops.** *A meal that is good enough to enjoy. A piece of writing that is good enough to land. A relationship that is good enough to nourish. Most of life is threshold loops.*
 
-Some games are won only by humans, because the rules say so. **Humanity loops.** *Sport is canonical* — the value is precisely that a human body is doing it, and a robot would dissolve the loop entirely.
+Some games are won only by a specific kind of entity, because the rules say so. **Property loops.** *Sport is canonical for humans* — the value is precisely that a human body is doing it, and a robot would dissolve the loop entirely. *Robot Olympics or autonomous drone racing are property loops for robots* — same structural slot, different mandated entity.
 
 Three loop types. *Knowing which loop you are in is the meta-skill.*
 
@@ -343,7 +343,7 @@ Three loop types. *Knowing which loop you are in is the meta-skill.*
 
 Loops nest.
 
-Inside *run a great restaurant* is *design tonight's menu*, inside which is *plate this dish*, inside which is *get the sear right on this onion*. Each loop has its own type. The outermost is humanity (does this restaurant have a soul?). The middle layers are threshold (is the menu cohesive enough?). The innermost is maximisation (what is the optimal sear?).
+Inside *run a great restaurant* is *design tonight's menu*, inside which is *plate this dish*, inside which is *get the sear right on this onion*. Each loop has its own type. The outermost is property (does this restaurant have the soul of the specific human running it?). The middle layers are threshold (is the menu cohesive enough?). The innermost is maximisation (what is the optimal sear?).
 
 **The Author should not be in every loop. Only the outermost one, where humanity matters.** *ai handles the inner loops. The Author absorbs the value by being the human at the top.* The creative director, not the player of the second violin.
 
