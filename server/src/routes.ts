@@ -293,15 +293,12 @@ export function registerRoutes(app: Hono) {
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: `${getServerUrl()}/auth/github/callback`,
-      // admin:ssh_signing_key — soft-default scaffolding for a future
-      // server-side endpoint that would upload Author SSH signing keys to
-      // GitHub using Alexandria's OAuth token. NOT currently active: setup.sh
-      // uses the user's own `gh` CLI (which has its own independent auth
-      // scopes) to register keys. The scope is requested here so the option
-      // is open if/when we build server-side upload (would require persisting
-      // refresh tokens, against the current statelessness principle — flag).
-      // See .tasks/git-protocol-mandate.md for the full execution context.
-      scope: 'read:user user:email admin:ssh_signing_key',
+      // Minimal scopes. Author-level signing verification uses GitHub's
+      // PUBLIC ssh_signing_keys endpoint (no scope required). setup.sh uses
+      // the user's own `gh` CLI to register their signing key (gh CLI has
+      // independent auth scopes — `gh auth refresh -s admin:ssh_signing_key`
+      // if missing). Don't add scopes here speculatively.
+      scope: 'read:user user:email',
       state,
     });
 
