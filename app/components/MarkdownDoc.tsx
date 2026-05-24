@@ -43,8 +43,9 @@ function slugify(node: React.ReactNode): string {
 
 const TOC_MARKER = '\n%%MDOC_TOC%%\n';
 const ABSTRACT_MARKER = '\n%%MDOC_ABSTRACT%%\n';
+const FRONTISPIECE_MARKER = '\n%%MDOC_FRONTISPIECE%%\n';
 
-function processNumbered(md: string): { pre: string; abstract: string; post: string; toc: TocEntry[] } {
+function processNumbered(md: string): { pre: string; frontispiece: string; abstract: string; post: string; toc: TocEntry[] } {
   const lines = md.split('\n');
   const out: string[] = [];
   const toc: TocEntry[] = [];
@@ -54,8 +55,10 @@ function processNumbered(md: string): { pre: string; abstract: string; post: str
   let inFence = false;
   let inContents = false;
   let inAbstract = false;
+  let inFrontispiece = false;
   let tocInserted = false;
   let abstractInserted = false;
+  let frontispieceInserted = false;
 
   for (const line of lines) {
     if (line.startsWith('```')) inFence = !inFence;
@@ -81,6 +84,26 @@ function processNumbered(md: string): { pre: string; abstract: string; post: str
         } else {
           continue;
         }
+      }
+
+      // Frontispiece section — `## *the ninety seconds.*` (the elevator
+      // pitch above the abstract). Capture content until the next H1/H2.
+      // The H2 itself stays in the captured content so it renders inside
+      // the frontispiece section (unlike the abstract, whose label is
+      // reconstructed in JSX). This sits BEFORE the abstract detection
+      // because both are H2 — order matters for the close-on-next-heading
+      // logic. Detected only on entry, not as a closing trigger for itself.
+      if (/^##\s+\*?the ninety seconds\.?\*?\s*$/i.test(line)) {
+        if (!frontispieceInserted) {
+          out.push(FRONTISPIECE_MARKER);
+          frontispieceInserted = true;
+        }
+        inFrontispiece = true;
+        // Fall through so the H2 is pushed inside the marker bounds.
+      } else if (inFrontispiece && /^(# |## )/.test(line)) {
+        inFrontispiece = false;
+        out.push(FRONTISPIECE_MARKER);
+        // Fall through — process this heading (likely `## abstract.`).
       }
 
       // Abstract section — capture content between `## abstract.` and the
@@ -134,23 +157,32 @@ function processNumbered(md: string): { pre: string; abstract: string; post: str
   }
 
   const full = out.join('\n');
-  // Pull the abstract block out of the pre stream, leaving the rest intact.
+  // Pull the abstract block out of the pre stream, then pull the
+  // frontispiece block out of what's left. Both sit before the TOC.
   let pre = '';
+  let frontispiece = '';
   let abstract = '';
   let post = '';
   const [beforeToc, afterToc = ''] = full.split(TOC_MARKER);
   post = afterToc;
   const absParts = beforeToc.split(ABSTRACT_MARKER);
+  let preBefore = '';
   if (absParts.length >= 3) {
-    pre = absParts[0];
+    preBefore = absParts[0];
     abstract = absParts[1].trim();
-    // Anything after the closing marker rejoins pre (rare — currently nothing
-    // sits between abstract end and TOC, but allow it).
-    if (absParts[2].trim()) pre = pre + '\n' + absParts[2];
+    if (absParts[2].trim()) preBefore = preBefore + '\n' + absParts[2];
   } else {
-    pre = beforeToc;
+    preBefore = beforeToc;
   }
-  return { pre, abstract, post, toc };
+  const frontParts = preBefore.split(FRONTISPIECE_MARKER);
+  if (frontParts.length >= 3) {
+    pre = frontParts[0];
+    frontispiece = frontParts[1].trim();
+    if (frontParts[2].trim()) pre = pre + '\n' + frontParts[2];
+  } else {
+    pre = preBefore;
+  }
+  return { pre, frontispiece, abstract, post, toc };
 }
 
 function TocBlock({ entries }: { entries: TocEntry[] }) {
@@ -394,6 +426,13 @@ export default function MarkdownDoc({ src, header, homeHref = '/', numbered = fa
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
                 {parsed.pre}
               </ReactMarkdown>
+              {parsed.frontispiece && (
+                <section className="pdoc-frontispiece" aria-label="In ninety seconds">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
+                    {parsed.frontispiece}
+                  </ReactMarkdown>
+                </section>
+              )}
               {parsed.abstract && (
                 <section className="pdoc-abstract" aria-label="Abstract">
                   <p className="pdoc-abstract-label">abstract.</p>

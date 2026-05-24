@@ -708,6 +708,110 @@ html.app-shell input:focus {
   font-style: italic;
 }
 
+/* ============================================
+   Frontispiece — the ninety-second elevator pitch
+   above the abstract. Custom section that
+   suppresses chapter-opening drop-caps (which
+   would hijack the italic labels) and gives the
+   why/what/how beats a tight, label-led rhythm.
+   Labels left-aligned, accent-coloured, small;
+   bodies in body-text scale, sitting close.
+   ============================================ */
+.pdoc-longform .pdoc-frontispiece {
+  margin: 2.6rem 0 5.5rem;
+}
+/* Tighten the fleuron break that closes the frontispiece — it sits
+   inside the section, so its default 4rem top/bottom is too generous
+   relative to the section's own margins. Just need a clear gap. */
+.pdoc-longform .pdoc-frontispiece .pdoc-hr {
+  margin: 3rem 0 0;
+}
+
+/* Suppress drop-cap on the H2 → first paragraph and H3 → first paragraph
+   transitions inside the frontispiece. The drop-cap belongs to chapter
+   openings, not to the labelled beats of an elevator pitch. */
+.pdoc-longform .pdoc-frontispiece .pdoc-h2 + .pdoc-p::first-letter,
+.pdoc-longform .pdoc-frontispiece .pdoc-h3 + .pdoc-p::first-letter,
+.pdoc-longform .pdoc-frontispiece .pdoc-p::first-letter {
+  font-family: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  padding-right: 0;
+  color: inherit;
+  text-shadow: none;
+}
+
+/* Frontispiece headings — tighter than chapter H2/H3. */
+.pdoc-longform .pdoc-frontispiece .pdoc-h2 {
+  font-size: 1.45rem;
+  margin: 0 0 1.4rem;
+}
+.pdoc-longform .pdoc-frontispiece .pdoc-h3 {
+  font-size: 1.2rem;
+  margin: 2.2rem 0 0.4rem;
+}
+
+/* Beat labels — paragraphs whose only child is an italic phrase, like
+   `*why.*`. Direct-child only so the selector doesn't reach into list
+   items (whose inner paragraphs are also em-only and would otherwise
+   inherit accent colour and small size meant for the labels). Left-
+   aligned, accent, small caps-like rhythm via letter-spacing. Tight
+   to the body below. */
+.pdoc-longform .pdoc-frontispiece > .pdoc-p:has(> em:only-child) {
+  font-size: 0.92rem;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin: 1.1rem 0 0;
+}
+.pdoc-longform .pdoc-frontispiece > .pdoc-p:has(> em:only-child) em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+/* Body paragraph sits tight against its label above. */
+.pdoc-longform .pdoc-frontispiece > .pdoc-p:has(> em:only-child) + .pdoc-p {
+  margin-top: 0.15rem;
+}
+
+/* Numbered list — three things. Body-text size (slightly larger than
+   the label-led beats above), primary text colour, hanging numbers in
+   accent. The value props are the punchline; they should read as
+   confident statements, not whispered footnotes. */
+.pdoc-longform .pdoc-frontispiece ol {
+  list-style: decimal;
+  padding-left: 1.8rem;
+  margin: 0.8rem 0 0;
+}
+.pdoc-longform .pdoc-frontispiece ol li {
+  margin: 0.7rem 0;
+  line-height: 1.7;
+  font-size: 1.08rem;
+  color: var(--text-primary);
+}
+.pdoc-longform .pdoc-frontispiece ol li .pdoc-p {
+  font-size: inherit;
+  color: inherit;
+  margin: 0;
+}
+.pdoc-longform .pdoc-frontispiece ol li .pdoc-p em {
+  color: var(--text-primary);
+  font-style: italic;
+}
+.pdoc-longform .pdoc-frontispiece ol li::marker {
+  color: var(--accent);
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+}
+
+@media (max-width: 720px) {
+  .pdoc-longform .pdoc-frontispiece { margin: 1.8rem 0 2.4rem; }
+  .pdoc-longform .pdoc-frontispiece .pdoc-h2 { font-size: 1.3rem; }
+  .pdoc-longform .pdoc-frontispiece .pdoc-h3 { font-size: 1.1rem; }
+}
+
 @media (max-width: 720px) {
   .pdoc-longform .pdoc-abstract { margin: 2rem 0 3rem; }
   .pdoc-longform .pdoc-abstract-body { padding: 1.3rem 0 1.5rem; }

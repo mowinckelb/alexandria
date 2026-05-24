@@ -2,6 +2,32 @@
 
 ## *the library of human minds.*
 
+## *the ninety seconds.*
+
+*why.*
+
+To get through this new era, humans need to keep thinking — not let ai do it for them.
+
+*what.*
+
+Alexandria gives every ai personal context about you — writes who you are to private files on your own computer, so every ai thinks with you, not for you.
+
+*how.*
+
+A small layer of instructions you give your existing ai, pointing it at private files of who you are — and adding to them as you go.
+
+### *three things.*
+
+*what alexandria gives you, plainly.*
+
+1. *The ai you talk to every day stops treating you like a stranger.*
+
+2. *You stay in control of your personal stuff — who sees it, which parts, which ai gets to use it.*
+
+3. *Turn every ai into a thought partner — to keep, refine, and scale your own thinking.*
+
+---
+
 ## abstract.
 
 **the augmentation.** ai can't read minds, but it can read words. so if we translate our thoughts into words, our minds can be augmented, not replaced — *the symbolic layer of our minds transcribed into private files*, so the exponential intelligence **thinks with us, not for us**.
