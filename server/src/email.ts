@@ -100,7 +100,7 @@ export async function sendFollowerWelcome(email: string, unsubscribeToken?: stri
   </p>
   <p style="margin: 0 0 1.4rem;">
     feel free to reply whenever you want. i'll read all of them!<br>
-    and also if there are others you know who might be interested in following then just send them <a href="${WEBSITE_URL}" style="color: #3d3630;">alexandria-library.com</a>.
+    and if there are others you think might want to follow along, send them to <a href="${WEBSITE_URL}" style="color: #3d3630;">alexandria-library.com</a> and tell them to press stay close.
   </p>
   <p style="margin: 0 0 1.8rem;">ok, that's all. bye for now :)</p>
   <p style="margin: 0 0 0.4rem;">Benjamin a. Mowinckel</p>
@@ -108,7 +108,7 @@ export async function sendFollowerWelcome(email: string, unsubscribeToken?: stri
   <p style="margin: 1.5rem 0 0; font-size: 0.72rem; color: #bbb4aa;"><a href="${SERVER_URL}/email/stop?t=${unsubscribeToken}" style="color: #8a8078;">stop these emails</a></p>` : ''}
 </div>`;
 
-  return await sendEmail(email, 'welcome to alexandria.', html,
+  return await sendEmail(email, 'alexandria.', html,
     unsubscribeToken ? { unsubscribeUrl: `${SERVER_URL}/email/stop?t=${unsubscribeToken}` } : undefined);
 }
 
