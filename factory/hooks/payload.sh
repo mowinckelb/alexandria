@@ -428,13 +428,22 @@ if [ "$MODE" = "session-start" ]; then
             } catch (e) { status.errors.push("put " + name + ":" + e.message); }
           }
 
-          for (const name of serverNames) {
-            if (local.has(name)) continue;
-            try {
-              const r = await deleteOne(name);
-              if (r.ok) status.deleted.push(name);
-              else status.errors.push("delete " + name + " status=" + r.status);
-            } catch (e) { status.errors.push("delete " + name + ":" + e.message); }
+          // Safety guard: empty local almost always means fresh install or
+          // unreadable dir, not a deliberate full wipe. Skip the delete pass
+          // to avoid nuking a populated server. Per-file deletion still works
+          // (rm the local file). Test runners with a temp HOME hit this path
+          // and would otherwise destroy the keyholder prod account.
+          if (local.size === 0 && serverNames.size > 0) {
+            status.errors.push("skip_delete_empty_local: local has 0 files, server has " + serverNames.size + " — refusing to delete everything");
+          } else {
+            for (const name of serverNames) {
+              if (local.has(name)) continue;
+              try {
+                const r = await deleteOne(name);
+                if (r.ok) status.deleted.push(name);
+                else status.errors.push("delete " + name + " status=" + r.status);
+              } catch (e) { status.errors.push("delete " + name + ":" + e.message); }
+            }
           }
 
           // Verification loop: re-fetch server state, diff against local.
