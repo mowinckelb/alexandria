@@ -247,11 +247,11 @@ test('extension map: unknown type defaults to md', () => {
   assert.strictEqual(r2ExtensionForContentType(''), 'md');
 });
 
-test('PUT-writable: markdown yes, pdf no', () => {
+test('PUT-writable: markdown and pdf both writable', () => {
+  // Markdown via `body.content` (UTF-8 string). PDF via `body.content_b64`
+  // (base64-encoded bytes) — both round-trip through the JSON PUT.
   assert.strictEqual(isPutWritableContentType('text/markdown; charset=utf-8'), true);
-  // PDF is readable (the helper serves it) but not writable via JSON PUT —
-  // a `content: string` body cannot carry binary faithfully.
-  assert.strictEqual(isPutWritableContentType('application/pdf'), false);
+  assert.strictEqual(isPutWritableContentType('application/pdf'), true);
 });
 
 test('PUT-writable: rejects non-strings and unknown strings', () => {
