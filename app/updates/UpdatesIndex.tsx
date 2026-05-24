@@ -23,7 +23,7 @@ export default function UpdatesIndex({ updates }: { updates: UpdateMeta[] }) {
         </header>
 
         {updates.length === 0 ? (
-          <p className="empty"><em>the first letter is being written.</em></p>
+          <p className="empty"><em>the first update is being written.</em></p>
         ) : (
           <ol className="list">
             {updates.map((u) => (
