@@ -106,6 +106,9 @@ export default function OpenProtocolFileGatePage({
   const signInUrl = useMemo(() => (
     `${SERVER_URL}/auth/github?intent=library&next=${encodeURIComponent(nextPath)}`
   ), [nextPath]);
+  const signUpUrl = useMemo(() => (
+    `/signup?ref=${encodeURIComponent(authorId)}&ref_source=library`
+  ), [authorId]);
   const purchaseSessionId = (searchParams.get('session_id') || '').trim();
   const canceled = searchParams.get('cancel') === '1';
   const purchased = searchParams.get('purchased') === '1' || !!purchaseSessionId;
@@ -275,7 +278,7 @@ export default function OpenProtocolFileGatePage({
             <a href={signInUrl} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.92rem' }} className="hover:opacity-60">
               sign in
             </a>
-            <a href={signInUrl} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.92rem' }} className="hover:opacity-60">
+            <a href={signUpUrl} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.92rem' }} className="hover:opacity-60">
               sign up
             </a>
             {showGuestOption && (
