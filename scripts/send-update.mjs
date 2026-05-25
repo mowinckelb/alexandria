@@ -45,8 +45,10 @@ const raw = fs.readFileSync(sourceFile, 'utf8');
 const { data, body } = parseFrontmatter(raw);
 const subject = data.subject || slug;
 const date = data.date || '';
+const youtube = extractYouTubeId(data.youtube);
 if (!data.subject) console.warn(`! ${slug}: no subject in frontmatter, falling back to slug`);
 if (!data.date) console.warn(`! ${slug}: no date in frontmatter`);
+if (data.youtube && !youtube) console.warn(`! ${slug}: youtube field could not be parsed: ${data.youtube}`);
 
 // Build the footer nav from the directory — chronological by date,
 // matching the web page's nav order.
@@ -61,9 +63,11 @@ const navHtml = allSlugs
 
 const bodyHtml = markdownToEmailHtml(body.trim());
 const permalink = `${WEBSITE_URL}/updates/${slug}`;
+const videoHtml = youtube ? renderVideoBlock(youtube, permalink) : '';
 
 const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
 ${date ? `<p style="margin: 0 0 1.6rem; font-size: 0.78rem; color: #bbb4aa; letter-spacing: 0.04em; font-style: italic;">${escapeHtml(slug)} &nbsp;·&nbsp; ${escapeHtml(date)}</p>` : ''}
+${videoHtml}
 ${bodyHtml}
 <p style="margin: 2rem 0 0; padding-top: 1.2rem; border-top: 1px solid #e8e2d8; font-size: 0.78rem; color: #8a8078; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; line-height: 2;">${navHtml}</p>
 <p style="margin: 0.6rem 0 0; font-size: 0.72rem; color: #bbb4aa;"><a href="${permalink}" style="color: #bbb4aa; text-decoration: none;">read on the web</a></p>
@@ -133,6 +137,40 @@ function listChronological() {
   return dated
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.slug < b.slug ? -1 : 1))
     .map((d) => d.slug);
+}
+
+function extractYouTubeId(input) {
+  if (!input) return null;
+  const s = String(input).trim();
+  if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+  const patterns = [
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,
+    /[?&]v=([A-Za-z0-9_-]{11})/,
+    /youtube\.com\/(?:shorts|embed|live)\/([A-Za-z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = p.exec(s);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+// Email-friendly video block — clickable thumbnail (hqdefault exists for every
+// video; maxresdefault doesn't for all) with a small play glyph overlay drawn
+// in CSS so it survives image-blocking inboxes. Links direct to YouTube
+// (clicking thumbnail in email opens YouTube; clicking "watch on the site"
+// opens the archive page where the iframe player embeds inline).
+function renderVideoBlock(videoId, archiveUrl) {
+  const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  const thumb = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  return `<a href="${watchUrl}" style="display: block; margin: 0 0 1.6rem; text-decoration: none; position: relative; line-height: 0;">
+  <img src="${thumb}" alt="watch on youtube" width="432" style="display: block; width: 100%; max-width: 432px; height: auto; border-radius: 2px; border: 1px solid #e8e2d8;">
+</a>
+<p style="margin: -0.6rem 0 1.6rem; font-size: 0.82rem; color: #8a8078; text-align: center; line-height: 1.4;">
+  <a href="${watchUrl}" style="color: #3d3630; text-decoration: none; border-bottom: 1px solid #e8e2d8;">▶ watch on youtube</a>
+  &nbsp;·&nbsp;
+  <a href="${archiveUrl}" style="color: #8a8078; text-decoration: none;">or on the site</a>
+</p>`;
 }
 
 function escapeHtml(s) {

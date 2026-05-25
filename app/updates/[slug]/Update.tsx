@@ -41,6 +41,18 @@ export default function UpdatePage({
           <h1 className="update-title">{update.subject}</h1>
         </header>
 
+        {update.youtube ? (
+          <div className="update-video">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${update.youtube}`}
+              title={update.subject}
+              loading="lazy"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        ) : null}
+
         <div className="update-body">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{update.body}</ReactMarkdown>
         </div>
@@ -132,6 +144,23 @@ export default function UpdatePage({
           letter-spacing: -0.015em;
           line-height: 1.2;
           margin: 0;
+        }
+        .update-video {
+          position: relative;
+          padding-bottom: 56.25%;
+          height: 0;
+          margin: 0 0 40px;
+          background: rgba(26, 19, 24, 0.04);
+          border-radius: 2px;
+          overflow: hidden;
+        }
+        .update-video :global(iframe) {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border: 0;
         }
         .update-body {
           font-size: 19px;

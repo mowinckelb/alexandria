@@ -8,6 +8,7 @@ Each update is one markdown file. Filename = slug = footer-nav label (e.g. `u1.m
 ---
 subject: first update.
 date: 2026-05-24
+youtube: dQw4w9WgXcQ
 ---
 
 body in markdown — whatever shape fits the week.
@@ -19,6 +20,7 @@ Benjamin a. Mowinckel
 Frontmatter fields:
 - `subject` — email subject line + page `<title>` + index label
 - `date` — ISO date (`YYYY-MM-DD`), used for ordering (newest first)
+- `youtube` *(optional)* — video ID or full URL (`dQw4w9WgXcQ` / `https://youtu.be/dQw4w9WgXcQ` / `https://www.youtube.com/watch?v=dQw4w9WgXcQ`). When present, the email renders the thumbnail (clickable → YouTube), the archive page embeds the player inline. Body markdown still renders below either way.
 
 Files prefixed with `_` and `README.md` are ignored.
 
