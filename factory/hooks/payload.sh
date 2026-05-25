@@ -68,7 +68,7 @@ if [ "$MODE" = "session-start" ]; then
   canon=""
   canon_ok=false
   notice_body=""
-  for module in axioms methodology editor mercury publisher library filter; do
+  for module in axioms methodology editor mercury publisher library filter bookshelf; do
     fresh=$(curl -s --max-time 5 "$CANON_GITHUB/$module.md" 2>/dev/null)
     local_path="$ALEX_DIR/system/canon/$module.md"
     if [ -n "$fresh" ] && [ ${#fresh} -gt 100 ]; then
