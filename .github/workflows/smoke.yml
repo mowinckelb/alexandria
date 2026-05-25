@@ -18,6 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Health (KV, D1, R2, env vars)
         run: |
           body=$(curl -sf $SERVER/health)
@@ -176,6 +181,18 @@ jobs:
 
       - name: Server paths referenced anywhere resolve (catch dead probes)
         run: bash scripts/check-smoke-paths.sh
+
+      - name: File gate matrix (live route agrees with authorizeFileRead for every cell)
+        env:
+          # Hits the canonical surface (api.alexandria-library.com — the default
+          # in test/gate-matrix.ts), not the deprecated mcp/api.mowinckel.ai
+          # alias the rest of this workflow still uses.
+          OWNER_API_KEY: ${{ secrets.ALEXANDRIA_API_KEY }}
+          ALEXANDRIA_TEST_KEY: ${{ secrets.ALEXANDRIA_TEST_KEY }}
+        run: |
+          cd server
+          npm ci
+          npx tsx test/gate-matrix.ts
 
       - name: Awareness self-check (event log captures deprecated_hit)
         run: |

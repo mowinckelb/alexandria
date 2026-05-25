@@ -245,9 +245,17 @@ export default function OpenProtocolFileGatePage({
       || canOwnerOpen
       || (visibility === 'paid' && (canOwnerOpen || !!purchaseSessionId))
   );
-  const gateMessage = visibility === 'paid' && canOwnerOpen
+  // Message reflects the viewer's actual access, not just the file's policy.
+  // The bare `gateText(visibility)` reads as an imperative ("sign in as an
+  // author") and was being shown even to the owner who was already signed in
+  // — confusing UX that also reads as a security failure when the file then
+  // opens. Owner-aware first, then any signed-in author for `authors` files,
+  // then the policy description as the unsigned fallback.
+  const gateMessage = canOwnerOpen
     ? 'you are signed in as the author. open directly or copy.'
-    : gateText(visibility);
+    : visibility === 'authors' && canAuthorOpen
+      ? 'signed in. open this file.'
+      : gateText(visibility);
 
   if (!ready) {
     return (
