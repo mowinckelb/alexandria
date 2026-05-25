@@ -39,26 +39,26 @@ jobs:
           # bookshelf intentionally missing — tests the lazy-seed path.
 
       - name: Run canon loop logic (mirrors payload.sh behavior)
+        # NOTE: production payload.sh does NOT set pipefail. Keep this test
+        # consistent — diff returns 1 when files differ, which is expected
+        # behavior, not a failure. pipefail would surface that as an error.
         run: |
-          set -euo pipefail
-          canon=""
-          canon_ok=false
+          set -eu
           notice_body=""
           canon_fetch_failures=""
           for module in axioms methodology editor mercury publisher library filter bookshelf; do
-            fresh=$(curl -s --max-time 10 "$CANON_GITHUB/$module.md" 2>/dev/null)
+            fresh=$(curl -s --max-time 10 "$CANON_GITHUB/$module.md" 2>/dev/null) || fresh=""
             local_path="$ALEX_DIR/system/canon/$module.md"
             if [ -n "$fresh" ] && [ ${#fresh} -gt 100 ]; then
               if [ ! -f "$local_path" ]; then
                 printf '%s' "$fresh" > "$local_path"
               elif ! diff -q <(printf '%s' "$fresh") "$local_path" >/dev/null 2>&1; then
+                diff_output=$(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200 || true)
                 notice_body="$notice_body
 
           ## $module.md
 
-          \`\`\`diff
-          $(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200)
-          \`\`\`"
+          $diff_output"
               fi
             else
               canon_fetch_failures="$canon_fetch_failures $module"
@@ -70,6 +70,7 @@ jobs:
           if [ -n "$canon_fetch_failures" ]; then
             echo "::warning::canon fetch failed for:$canon_fetch_failures"
           fi
+          echo "canon loop completed"
 
       - name: ASSERT — personalised content preserved (no overwrite)
         run: |
