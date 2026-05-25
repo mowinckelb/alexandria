@@ -57,34 +57,49 @@ if [ "$MODE" = "session-start" ]; then
   fi
   echo "$session_id" > "$cc_marker"
 
-  # ── Canon fetch ──
-  # Seven modules: axioms, methodology, editor, mercury, publisher, library, filter.
-  # Each cached as .canon_local_<name>. Methodology remains the entry point;
-  # the others are fetched for local availability so the Engine can reference them offline.
-  # On methodology change vs last cached, write a diff notice for the Engine to review —
-  # the Author's consent layer lives in canon_overrides.md (authoritative over canon).
+  # ── Canon ──
+  # Factory ships the starter canon at install. After install, ~/alexandria/system/canon/
+  # is the Author's sovereign system — never overwritten. Each session-start, fetch upstream
+  # and diff against local; if local diverges, write a single notice the Engine surfaces so
+  # the Author can decide per module whether to integrate, partial-integrate, or ignore.
+  # The notice regenerates each session and always reflects current divergence — if the
+  # Author ignores one update and upstream changes again, the next notice shows everything
+  # they haven't taken.
   canon=""
   canon_ok=false
+  notice_body=""
   for module in axioms methodology editor mercury publisher library filter; do
     fresh=$(curl -s --max-time 5 "$CANON_GITHUB/$module.md" 2>/dev/null)
+    local_path="$ALEX_DIR/system/canon/$module.md"
     if [ -n "$fresh" ] && [ ${#fresh} -gt 100 ]; then
-      if [ "$module" = "methodology" ] && [ -f "$ALEX_DIR/system/canon/methodology.md" ] && ! diff -q <(printf '%s' "$fresh") "$ALEX_DIR/system/canon/methodology.md" >/dev/null 2>&1; then
-        {
-          echo "# Canon updated — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          echo ""
-          echo "Upstream canon (factory/canon/methodology.md) changed. Review the diff below and decide per-Author fit. If any change conflicts with this Author's practice, add/refine entries in ~/alexandria/canon_overrides.md — overrides are authoritative over upstream canon. Clear this file when reviewed."
-          echo ""
-          echo "## Diff (first 200 lines)"
-          echo ""
-          diff -u "$ALEX_DIR/system/canon/methodology.md" <(printf '%s' "$fresh") 2>/dev/null | head -n 200
-        } > "$ALEX_DIR/system/.canon_update_notice"
+      if [ ! -f "$local_path" ]; then
+        # First install (or new module): seed from upstream.
+        printf '%s' "$fresh" > "$local_path"
+      elif ! diff -q <(printf '%s' "$fresh") "$local_path" >/dev/null 2>&1; then
+        # Local diverges from upstream — record for notice; never overwrite local.
+        notice_body="$notice_body
+
+## $module.md
+
+\`\`\`diff
+$(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200)
+\`\`\`"
       fi
-      printf '%s' "$fresh" > "$ALEX_DIR/system/canon/$module.md"
-      [ "$module" = "methodology" ] && canon="$fresh" && canon_ok=true
+    fi
+    if [ "$module" = "methodology" ] && [ -f "$local_path" ]; then
+      canon=$(cat "$local_path")
+      canon_ok=true
     fi
   done
-  if [ "$canon_ok" = "false" ] && [ -f "$ALEX_DIR/system/canon/methodology.md" ]; then
-    canon=$(cat "$ALEX_DIR/system/canon/methodology.md")
+  if [ -n "$notice_body" ]; then
+    {
+      echo "# Canon upstream — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      echo ""
+      echo "Your system canon (\`~/alexandria/system/canon/\`) is your ground truth — sovereign, never overwritten. Upstream factory canon has diverged from your local. Decide per module: integrate (edit your local file), partial-integrate, or ignore. This notice regenerates each session and reflects current divergence."
+      echo "$notice_body"
+    } > "$ALEX_DIR/system/.canon_update_notice"
+  else
+    rm -f "$ALEX_DIR/system/.canon_update_notice"
   fi
   [ -n "$CLAUDE_ENV_FILE" ] && [ "$canon_ok" = "true" ] && echo "export ALEXANDRIA_CANON_OK=true" >> "$CLAUDE_ENV_FILE"
 
@@ -316,8 +331,8 @@ if [ "$MODE" = "session-start" ]; then
     echo "  core/notepad.md (or _notepad.md) — Engine working memory, parked questions, loaded magazine"
     echo "  core/feedback.md (or _feedback.md) — corrections + confirmed approaches"
     echo "  core/agent.md  — Author preferences for AI behaviour"
-    [ -f "$ALEX_DIR/canon_overrides.md" ] \
-      && echo "  canon_overrides.md — AUTHORITATIVE over upstream canon when they conflict; read first"
+    echo ""
+    echo "Your system canon is at ~/alexandria/system/canon/ — sovereign, never overwritten. If ~/alexandria/system/.canon_update_notice exists, upstream factory canon has diverged from your local; the notice persists until local matches upstream or upstream changes again. Surface it to the Author with appropriate weight (fresher = louder, ignored-for-many-sessions = quieter) and let them decide per module whether to integrate, partial-integrate, or ignore."
     echo ""
     echo "Alexandria passive mode active. Follow the canon's passive mode instructions. If the Author mentions Alexandria feedback, write to .session_feedback — it reaches the team at session end."
   fi
@@ -643,8 +658,6 @@ if [ "$MODE" = "subagent" ]; then
     echo "  core/notepad.md (or _notepad.md) — Engine working memory, parked threads"
     echo "  core/feedback.md (or _feedback.md) — corrections + confirmed approaches"
     echo "  core/agent.md  — Author preferences for AI behaviour"
-    [ -f "$ALEX_DIR/canon_overrides.md" ] \
-      && echo "  canon_overrides.md — AUTHORITATIVE over upstream canon; read first"
     echo ""
     echo "Read only what's relevant to your task."
   fi
