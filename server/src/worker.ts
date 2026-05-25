@@ -641,19 +641,30 @@ export default {
   async scheduled(event: ScheduledEvent, env: Record<string, unknown>, ctx: ExecutionContext) {
     initEnv(env);
 
+    // Diagnostic — log every scheduled invocation so we can confirm cron is
+    // actually firing and see which pattern triggered it (debugging the
+    // initial deploy where */10 wasn't visibly firing). Cheap; remove later
+    // once cron behaviour is well-understood.
+    logEvent('scheduled_invoked', { cron: String(event.cron || 'undefined') });
+
     // Audit mirror — every 10 minutes. Tight window to keep the tampering
     // surface small. Runs alone (other crons skipped) to keep latency low
     // and avoid burning GitHub API rate limit on no-op scans.
     if (event.cron === '*/10 * * * *') {
+      let auditErr: unknown;
       try {
         await mirrorPendingAuditBatch();
       } catch (err) {
-        // Log and re-throw so Cloudflare records the failure — silent audit
-        // mirror failure is the exact thing the smoke health check catches.
+        // Log the failure for the analytics endpoint, but flush BEFORE
+        // re-throwing — otherwise the diagnostic event lives in `pendingLines`
+        // and never reaches KV, hiding the very failure we wanted to surface.
         logEvent('audit_mirror_failed', { error: String(err).slice(0, 200) });
-        throw err;
+        auditErr = err;
       }
+      // Run the flush regardless of success/failure. ctx.waitUntil keeps the
+      // isolate alive long enough for the KV write to complete.
       ctx.waitUntil(flushEvents());
+      if (auditErr) throw auditErr;
       return;
     }
 
