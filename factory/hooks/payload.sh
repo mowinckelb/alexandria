@@ -93,9 +93,9 @@ $(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200)
   done
   if [ -n "$notice_body" ]; then
     {
-      echo "# Canon upstream — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      echo "# Canon divergence — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
       echo ""
-      echo "Your system canon (\`~/alexandria/system/canon/\`) is your ground truth — sovereign, never overwritten. Upstream factory canon has diverged from your local. Decide per module: integrate (edit your local file), partial-integrate, or ignore. This notice regenerates each session and reflects current divergence."
+      echo "Your system canon (\`~/alexandria/system/canon/\`) is sovereign. It differs from upstream factory canon — diffs per module below. \`+\` lines are upstream-only (factory changes you haven't taken); \`-\` lines are local-only (your personal additions). For each module, edit your local to integrate upstream, or leave as-is. Notice regenerates each session reflecting current state."
       echo "$notice_body"
     } > "$ALEX_DIR/system/.canon_update_notice"
   else
@@ -332,7 +332,7 @@ $(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200)
     echo "  core/feedback.md (or _feedback.md) — corrections + confirmed approaches"
     echo "  core/agent.md  — Author preferences for AI behaviour"
     echo ""
-    echo "Your system canon is at ~/alexandria/system/canon/ — sovereign, never overwritten. If ~/alexandria/system/.canon_update_notice exists, upstream factory canon has diverged from your local; the notice persists until local matches upstream or upstream changes again. Surface it to the Author with appropriate weight (fresher = louder, ignored-for-many-sessions = quieter) and let them decide per module whether to integrate, partial-integrate, or ignore."
+    echo "Your system canon is at ~/alexandria/system/canon/ — sovereign, never overwritten. If ~/alexandria/system/.canon_update_notice exists, your local canon differs from upstream factory canon in some direction (upstream has changes you haven't taken, or your local has personal additions upstream doesn't have, or both). Read the diff to distinguish: upstream-side changes are worth surfacing to the Author for an integrate-or-ignore decision; local-only additions are the Author's own work and don't need to be re-raised. Notice regenerates each session reflecting current state — persists until local and upstream agree."
     echo ""
     echo "Alexandria passive mode active. Follow the canon's passive mode instructions. If the Author mentions Alexandria feedback, write to .session_feedback — it reaches the team at session end."
   fi
