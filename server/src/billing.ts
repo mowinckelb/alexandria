@@ -30,6 +30,23 @@ export function getStripe(): Stripe {
 }
 
 // ---------------------------------------------------------------------------
+// Secret fingerprint — non-reversible identifier for triage logs. SHA-256
+// over the secret, truncated to 8 hex chars. Stable across calls with the
+// same secret (so log readers can tell "same bound secret each time" from
+// "different secret each time" without ever seeing the secret itself).
+// Exported for unit testing the log-leak attack surface.
+// ---------------------------------------------------------------------------
+
+export async function secretFingerprint(secret: string): Promise<string> {
+  const data = new TextEncoder().encode(secret);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  const hex = Array.from(new Uint8Array(digest))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  return `sha256:${hex.slice(0, 8)} (len=${secret.length})`;
+}
+
+// ---------------------------------------------------------------------------
 // Single source of truth for which Stripe events the webhook handler below
 // processes. cron.ts:runHealthDigest calls syncStripeWebhookEvents on every
 // daily tick — drift between this list and the live webhook's enabled_events
@@ -883,11 +900,11 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
       event = await stripe.webhooks.constructEventAsync(rawBody, sig, WEBHOOK_SECRET);
     } catch (err) {
       // Surface enough info to triage signature drift without exposing the
-      // secret. Body & header fingerprints reveal mid-flight modification
-      // (encoding shifts, trailing whitespace) when the secret matches.
-      const fp = WEBHOOK_SECRET
-        ? `${WEBHOOK_SECRET.slice(0, 8)}…${WEBHOOK_SECRET.slice(-4)} (len=${WEBHOOK_SECRET.length})`
-        : '<unset>';
+      // secret. A non-reversible SHA-256 fingerprint distinguishes "wrong
+      // secret bound" from "secret matches but body was modified mid-flight"
+      // — across rotations the hash changes, across the same secret it's
+      // stable. The raw secret (or any slice of it) never touches the log.
+      const fp = WEBHOOK_SECRET ? await secretFingerprint(WEBHOOK_SECRET) : '<unset>';
       const errMsg = err instanceof Error ? err.message : String(err);
       console.error(`[webhook] signature mismatch — bound=${fp}`);
       console.error(`[webhook] sig_header=${sig}`);
