@@ -167,11 +167,22 @@ export default function OpenProtocolFileGatePage({
         return;
       }
       if (visibility === 'invite') {
-        if (!inviteCode.trim()) {
+        // Owner bypass — the server's authorizeFileRead lets the file's
+        // owner through regardless of visibility, so the UI must let the
+        // owner attempt the fetch without typing an invite code. Without
+        // this, the owner is forced through an invite-code prompt for
+        // their own files (the prompt short-circuits with an error before
+        // ever reaching the server).
+        const codeFromInput = inviteCode.trim();
+        if (canOwnerOpen) {
+          await openViaApi(codeFromInput ? `invite=${encodeURIComponent(codeFromInput)}` : undefined);
+          return;
+        }
+        if (!codeFromInput) {
           setError('enter invite code first.');
           return;
         }
-        await openViaApi(`invite=${encodeURIComponent(inviteCode.trim())}`);
+        await openViaApi(`invite=${encodeURIComponent(codeFromInput)}`);
         return;
       }
       // authors visibility
@@ -196,11 +207,18 @@ export default function OpenProtocolFileGatePage({
         }
         query = purchaseSessionId ? `session_id=${encodeURIComponent(purchaseSessionId)}` : undefined;
       } else if (visibility === 'invite') {
-        if (!inviteCode.trim()) {
-          setError('enter invite code first.');
-          return;
+        // Mirror the openNow owner-bypass: the owner can copy their own
+        // invite-gated file via cookie auth alone; no invite code required.
+        const codeFromInput = inviteCode.trim();
+        if (canOwnerOpen) {
+          query = codeFromInput ? `invite=${encodeURIComponent(codeFromInput)}` : undefined;
+        } else {
+          if (!codeFromInput) {
+            setError('enter invite code first.');
+            return;
+          }
+          query = `invite=${encodeURIComponent(codeFromInput)}`;
         }
-        query = `invite=${encodeURIComponent(inviteCode.trim())}`;
       } else if (visibility === 'authors' && !canAuthorOpen && !canOwnerOpen) {
         setError('sign in as an author first.');
         return;
