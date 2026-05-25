@@ -66,6 +66,12 @@ export default function OpenProtocolFileGatePage({
   const [shareLabel, setShareLabel] = useState('');
   const [shareCopying, setShareCopying] = useState(false);
   const [mintingShare, setMintingShare] = useState(false);
+  // Owner's existing active codes — fetched when owner views an invite file
+  // so they can see what's outstanding, re-copy URLs, or revoke.
+  const [codes, setCodes] = useState<Array<{ id: string; code: string; label: string | null; created_at: string; revoked_at: string | null }>>([]);
+  const [codesLoaded, setCodesLoaded] = useState(false);
+  const [revokingId, setRevokingId] = useState('');
+  const [copyingCodeId, setCopyingCodeId] = useState('');
 
   useEffect(() => {
     params.then(async ({ author, name }) => {
@@ -233,8 +239,28 @@ export default function OpenProtocolFileGatePage({
   }, [ready, autoAttempted, visibility, searchParams]);
 
   // ---------------------------------------------------------------------------
-  // Owner share-link — mint a new access code and display the URL.
+  // Owner share-link — mint a new access code, list active codes, revoke.
   // ---------------------------------------------------------------------------
+
+  const fetchCodes = async () => {
+    try {
+      const res = await fetch(`/api/library/${encodeURIComponent(authorId)}/access-codes`, { credentials: 'include' });
+      if (!res.ok) return;
+      const body = await res.json() as { codes: Array<{ id: string; code: string; label: string | null; created_at: string; revoked_at: string | null }> };
+      setCodes(body.codes || []);
+      setCodesLoaded(true);
+    } catch {
+      // Best-effort — list is informational, not load-bearing.
+    }
+  };
+
+  // Load the owner's codes the moment we know they're the owner of an
+  // invite-visibility file. Re-runs after mint/revoke via codesLoaded reset.
+  useEffect(() => {
+    if (!ready || !canOwnerOpen || visibility !== 'invite' || codesLoaded) return;
+    void fetchCodes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, canOwnerOpen, visibility, codesLoaded]);
 
   const createShareLink = async () => {
     if (mintingShare) return;
@@ -258,12 +284,61 @@ export default function OpenProtocolFileGatePage({
       const minted = await res.json() as { code: string; label: string | null };
       const url = `${window.location.origin}${nextPath}?invite=${encodeURIComponent(minted.code)}`;
       setShareUrl(url);
+      setShareLabel('');
+      // Refresh the list so the new code shows immediately.
+      setCodesLoaded(false);
     } catch {
       setError('could not create share link.');
     } finally {
       setMintingShare(false);
     }
   };
+
+  const urlForCode = (code: string): string => (
+    `${window.location.origin}${nextPath}?invite=${encodeURIComponent(code)}`
+  );
+
+  const copyCodeUrl = async (id: string, code: string) => {
+    if (copyingCodeId) return;
+    setCopyingCodeId(id);
+    try {
+      await navigator.clipboard.writeText(urlForCode(code));
+    } catch {
+      setError('clipboard blocked — copy the link manually.');
+    } finally {
+      setCopyingCodeId('');
+    }
+  };
+
+  const revokeCode = async (id: string) => {
+    if (revokingId) return;
+    // Confirm before destructive action — revoke is one-way (the row stays
+    // for audit-chain provenance but the code can never be re-activated).
+    if (typeof window !== 'undefined' && !window.confirm('revoke this link? anyone holding it will lose access.')) {
+      return;
+    }
+    setRevokingId(id);
+    setError('');
+    try {
+      const res = await fetch(
+        `/api/library/${encodeURIComponent(authorId)}/access-code/${encodeURIComponent(id)}`,
+        { method: 'DELETE', credentials: 'include' },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as ApiErrorResponse;
+        setError(body.error || 'could not revoke.');
+        return;
+      }
+      // Optimistically remove from the displayed list.
+      setCodes((prev) => prev.filter((c) => c.id !== id));
+    } catch {
+      setError('could not revoke.');
+    } finally {
+      setRevokingId('');
+    }
+  };
+
+  const activeCodes = codes.filter((c) => !c.revoked_at);
 
   const copyShareUrl = async () => {
     if (!shareUrl || shareCopying) return;
@@ -491,6 +566,70 @@ export default function OpenProtocolFileGatePage({
                   </button>
                 </div>
               </>
+            )}
+
+            {/* Existing active codes — re-copy URL or revoke. Shows below the
+                mint section so the owner can see what's outstanding and act
+                on it without needing a separate page. */}
+            {activeCodes.length > 0 && (
+              <div style={{ margin: '1.4rem 0 0' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-ghost)', margin: '0 0 0.6rem' }}>
+                  active links ({activeCodes.length}):
+                </p>
+                {activeCodes.map((c) => (
+                  <div key={c.id} style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', margin: '0 0 0.45rem' }}>
+                    <code style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                      {c.code.slice(0, 8)}…
+                    </code>
+                    <span style={{
+                      flex: '1 1 auto',
+                      fontSize: '0.78rem',
+                      color: c.label ? 'var(--text-muted)' : 'var(--text-whisper)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {c.label || '(no label)'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => void copyCodeUrl(c.id, c.code)}
+                      disabled={!!copyingCodeId || !!revokingId}
+                      style={{
+                        fontSize: '0.78rem',
+                        color: 'var(--text-muted)',
+                        cursor: copyingCodeId === c.id ? 'default' : 'pointer',
+                        opacity: copyingCodeId === c.id ? 0.45 : 1,
+                        border: 'none',
+                        background: 'none',
+                        padding: 0,
+                        fontFamily: 'inherit',
+                      }}
+                      className="hover:opacity-60"
+                    >
+                      {copyingCodeId === c.id ? '...' : 'copy link'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void revokeCode(c.id)}
+                      disabled={!!revokingId || !!copyingCodeId}
+                      style={{
+                        fontSize: '0.78rem',
+                        color: 'var(--text-whisper)',
+                        cursor: revokingId === c.id ? 'default' : 'pointer',
+                        opacity: revokingId === c.id ? 0.45 : 1,
+                        border: 'none',
+                        background: 'none',
+                        padding: 0,
+                        fontFamily: 'inherit',
+                      }}
+                      className="hover:opacity-60"
+                    >
+                      {revokingId === c.id ? '...' : 'revoke'}
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
