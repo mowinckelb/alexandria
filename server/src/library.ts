@@ -417,11 +417,13 @@ export function registerLibraryRoutes(app: Hono): void {
     const inviteCode = c.req.query('invite')?.trim() || c.req.query('token')?.trim() || null;
 
     let inviteValid = false;
+    let inviteCodeId: string | null = null;
     if (inviteCode) {
       const accessRow = await getDB().prepare(
         'SELECT id FROM access_codes WHERE author_id = ? AND code = ? AND revoked_at IS NULL LIMIT 1'
       ).bind(authorId, inviteCode).first<{ id: string }>();
       inviteValid = !!accessRow?.id;
+      inviteCodeId = accessRow?.id || null;
     }
 
     let purchaseValid = false;
@@ -471,6 +473,10 @@ export function registerLibraryRoutes(app: Hono): void {
       visibility: result.file.visibility,
       accessor: accessor?.github_login || (result.reason === 'paid' ? 'purchase' : result.reason === 'invite' ? 'invite' : 'public'),
       access_reason: result.reason,
+      // When access_reason='invite', capture which access_code row enabled
+      // the read. The auditor can then correlate the file view to the
+      // matching access_code_minted event in the chain.
+      ...(inviteCodeId && result.reason === 'invite' ? { invite_code_id: inviteCodeId } : {}),
     });
 
     const cache = result.file.visibility === 'public' ? 'public, max-age=300' : 'no-store';

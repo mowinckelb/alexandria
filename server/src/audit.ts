@@ -45,10 +45,16 @@ const GITHUB_API = 'https://api.github.com';
 const GENESIS_HASH = '0'.repeat(64);
 
 // Events the audit mirror cares about. Anything else (analytics noise,
-// internal smoke, etc.) is skipped — the audit is a record of *access*
-// decisions on protocol files, not a copy of the whole event log.
+// internal smoke, etc.) is skipped — the audit is a record of *governance*
+// events on protocol files: who accessed, and what credentials existed to
+// grant access. Without the mint/revoke events, a bad actor could mint
+// themselves a code, read every invite file, revoke the code, and only the
+// read events would appear in the chain — making the provisioning that
+// enabled the reads invisible. Cover both.
 const AUDITED_EVENT_TYPES = new Set<string>([
   'library_protocol_file_view',
+  'access_code_minted',
+  'access_code_revoked',
 ]);
 
 export interface AuditState {
