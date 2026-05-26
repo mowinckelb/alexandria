@@ -5,7 +5,7 @@ import { requireAuth } from './auth.js';
 import { getDB, getR2 } from './db.js';
 import { logEvent } from './analytics.js';
 import { saveAccount, getKV } from './kv.js';
-import { resolveModule, authorFromModuleId, deriveKind } from './marketplace-catalog.js';
+import { resolveModule, authorFromModuleId, deriveKind, parseModuleId } from './marketplace-catalog.js';
 import {
   DEFAULT_CONTENT_TYPE,
   isPutWritableContentType,
@@ -272,14 +272,22 @@ export function registerProtocol(app: Hono) {
     const db = getDB();
 
     // Each module: { id: "module_name", text: "why still using / what changed" }
+    // Validate module ID format at ingress — github:user/repo#path or local:user/slug.
+    // Garbage IDs pollute the catalog as "unreachable" entries forever; reject upfront.
     const rows: { mod: string; text: string }[] = [];
     for (const m of body.modules) {
+      let candidateId: string | null = null;
+      let candidateText = '';
       if (typeof m === 'object' && m?.id && typeof m.id === 'string' && typeof m.text === 'string') {
-        rows.push({ mod: m.id.slice(0, 300), text: m.text.slice(0, 2000) });
+        candidateId = m.id;
+        candidateText = m.text;
       } else if (typeof m === 'string') {
         // Backward compat: bare string = module id with empty text
-        rows.push({ mod: m.slice(0, 300), text: '' });
+        candidateId = m;
       }
+      if (!candidateId) continue;
+      if (parseModuleId(candidateId).kind === null) continue;
+      rows.push({ mod: candidateId.slice(0, 300), text: candidateText.slice(0, 2000) });
     }
     if (rows.length === 0) return c.json({ error: 'no valid modules' }, 400);
 
@@ -292,7 +300,27 @@ export function registerProtocol(app: Hono) {
       modules: String(rows.length),
     });
 
-    return c.json({ ok: true });
+    // Bidirectional per a2 — the call IS the closed-loop verification primitive.
+    // Response carries per-module survival signal (status from the catalog cache,
+    // recent distinct-caller count from the 90-day window). One DB query batched
+    // across all modules, KV reads parallel. Forward-compat: agents that ignore
+    // these fields are unaffected.
+    const ids = rows.map((r) => r.mod);
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const placeholders = ids.map(() => '?').join(',');
+    const callerRows = await db.prepare(
+      `SELECT module_id, COUNT(DISTINCT account_id) as n FROM protocol_calls
+       WHERE module_id IN (${placeholders}) AND time > ? GROUP BY module_id`
+    ).bind(...ids, ninetyDaysAgo).all<{ module_id: string; n: number }>();
+    const callerCounts = new Map((callerRows.results || []).map((r) => [r.module_id, r.n]));
+    const metas = await Promise.all(ids.map((mid) => resolveModule(mid)));
+    const responseModules = ids.map((mid, i) => ({
+      id: mid,
+      status: metas[i]?.status || 'unknown',
+      callers_recent: callerCounts.get(mid) ?? 0,
+    }));
+
+    return c.json({ ok: true, modules: responseModules });
   });
 
   // ── Marketplace: browse module usage ───────────────────────────
@@ -313,9 +341,14 @@ export function registerProtocol(app: Hono) {
     // canonical-or-not, kind. Usage telemetry (counts, recency, per-call text)
     // is private Marketplace Signal exposed only via the auth-gated
     // `/marketplace/:module` endpoint.
+    //
+    // 90-day recency window — the catalog must be able to forget. Survival
+    // ranking only works if dormant modules drop out. Soft default; revisit
+    // once the catalog has scale.
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
     const { results } = await getDB().prepare(
-      `SELECT DISTINCT module_id FROM protocol_calls WHERE module_id LIKE 'github:%' LIMIT 1000`
-    ).all<{ module_id: string }>();
+      `SELECT DISTINCT module_id FROM protocol_calls WHERE module_id LIKE 'github:%' AND time > ? LIMIT 1000`
+    ).bind(ninetyDaysAgo).all<{ module_id: string }>();
 
     const rows = results || [];
     let modules = await Promise.all(rows.map(async (r) => {

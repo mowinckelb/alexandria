@@ -239,11 +239,12 @@ async function main() {
   // accumulate. Mirrors the ci-smoke pattern. The internal-name filter in
   // file-access.ts excludes `lifecycle-test` from every public surface.
   const fileName = 'lifecycle-test';
-  // Non-github prefix: the public /marketplace listing filters to github:%, so test
-  // residue never appears there. The auth-gated /marketplace/:module endpoint keys
-  // off raw module_id and works regardless of prefix. Module ID stays unique per
-  // run because the call obligation log is intentionally append-only.
-  const moduleId = `test:lifecycle/mod-${stamp}`;
+  // `local:` prefix: parseModuleId validates the format at /call ingress, and the
+  // public /marketplace listing filters to github:%, so test residue stays off the
+  // public catalog. The auth-gated /marketplace/:module endpoint keys off raw
+  // module_id and works regardless of prefix. Module ID stays unique per run
+  // because the call obligation log is intentionally append-only.
+  const moduleId = `local:lifecycle/mod-${stamp}`;
   const callText = `Lifecycle call verification ${stamp}`;
 
   await test('File obligation write accepted', async () => {

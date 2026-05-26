@@ -57,14 +57,14 @@ async function loadModules(): Promise<MarketplaceModule[]> {
 const CANONICAL_BADGE_STYLE: React.CSSProperties = {
   marginLeft: '0.5rem',
   fontSize: '0.7rem',
-  letterSpacing: '0.06em',
+  letterSpacing: '0.08em',
   textTransform: 'uppercase',
   color: 'var(--text-muted)',
   border: '1px solid var(--border-light)',
   borderRadius: '2px',
   padding: '1px 6px',
   verticalAlign: '2px',
-  fontWeight: 400,
+  fontWeight: 600,
 };
 
 export default async function MarketplacePage() {

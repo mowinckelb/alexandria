@@ -15,7 +15,7 @@ import { getKV } from './kv.js';
 export interface ModuleMeta {
   name: string;
   description: string;
-  status: 'ok' | 'unreachable' | 'parse_error';
+  status: 'ok' | 'unreachable';
   last_fetched: string;
 }
 
@@ -209,10 +209,7 @@ export async function resolveModule(id: string): Promise<ModuleMeta | null> {
   const raw = await getKV().get(cacheKey(id));
   if (raw) {
     try {
-      const cached = JSON.parse(raw) as ModuleMeta;
-      // Refresh entries cached under the old `parse_error` status — the catalog
-      // no longer treats missing front-matter as an error.
-      if (cached.status !== 'parse_error') return cached;
+      return JSON.parse(raw) as ModuleMeta;
     } catch {
       // fall through to refresh on JSON parse error
     }
