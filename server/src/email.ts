@@ -1,6 +1,8 @@
 /** Email primitives — Resend API (hybrid dependency, API-controllable, free 100/day). */
 
 export const FOUNDER_EMAIL = process.env.FOUNDER_EMAIL || 'mowinckel.b@gmail.com';
+const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
+const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
 
 /**
  * Run up to `concurrency` email sends in parallel, draining the task list in
@@ -90,8 +92,6 @@ export async function sendEmail(
 }
 
 export async function sendFollowerWelcome(email: string, unsubscribeToken?: string): Promise<{ ok: boolean; error?: string }> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
-  const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">welcome to alexandria. :)</p>
   <p style="margin: 0 0 1.4rem;">
@@ -113,8 +113,6 @@ export async function sendFollowerWelcome(email: string, unsubscribeToken?: stri
 }
 
 export async function sendWelcomeEmail(email: string, emailToken?: string): Promise<void> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
-  const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
   await sendEmail(email, 'welcome to alexandria.',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; text-align: left; line-height: 1.7;">
   <p style="font-size: 1.1rem; margin: 0 0 1.75rem;">welcome to alexandria.</p>
@@ -128,8 +126,6 @@ export async function sendWeekOneCheckIn(
   email: string,
   emailToken: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
-  const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">hey :)</p>
   <p style="margin: 0 0 1.4rem;">you signed up to alexandria a week ago &mdash; just dropping in.</p>
@@ -152,8 +148,6 @@ export async function sendInstallNudge(
   installToken: string,
   githubLogin: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
-  const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
   const SHORTCUT_URL = 'https://www.icloud.com/shortcuts/0ea1bb7333fd43a9881e9c7b9938a337';
   const MECHANICS_URL = `${WEBSITE_URL}/Mechanics.md`;
   const installUrl = `${SERVER_URL}/install/${installToken}`;
