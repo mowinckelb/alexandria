@@ -911,6 +911,8 @@ The consequences are structural.
 
 **Data is local markdown.** No proprietary encoding. No binary serialisation. No schema. *If Alexandria disappears tomorrow, the Author's vault remains a folder of readable text on their own machine.* Open it in any editor. Point any agent at it. **Switching cost is zero.** *The bet is to stay because the system is useful, not because leaving is expensive.*
 
+**The substrate is filesystem-native.** *Alexandria is markdown on disk by hard-code* — the same substrate every notes-app the Author already uses runs on. Obsidian, Notion-export, Roam, Logseq, plain editors are *viewers* over markdown-on-disk. **Alexandria is what is *written* there.** The two compose mechanically: point any viewer at `~/alexandria/` and the Author's Alexandria *is* their vault — backlinks, graph view, plugins, daily notes, all working on a folder the Engine actively maintains. Alexandria deliberately ships no viewer of its own. *Ride don't build, in a domain the existing editors already serve excellently.* The Author is never asked to switch what they look at. They are given an engine and a network *underneath* the surface they already have.
+
 **The model is not the moat.** Alexandria does not run an ai. *It rides whichever ai the Author already uses* — Claude, Cursor, Codex, GPT, Gemini, anything that loads markdown into a context window.
 
 ---
