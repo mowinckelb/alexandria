@@ -76,17 +76,19 @@ jobs:
           # `local:` prefix: passes parseModuleId validation at /call ingress, stays
           # off the public /marketplace listing (filters to github:%). The auth-gated
           # /marketplace/:module endpoint keys off raw module_id and works regardless.
-          MODULE_ID="local:smoke/methodology"
-          MODULE_ID_ENC="local%3Asmoke%2Fmethodology"
+          # URLs inlined (no shell var) so check-smoke-paths.sh extracts a real path
+          # via its grep — variable substitution would leave a trailing-slash false
+          # positive.
           curl -sf -X POST $SERVER/call \
             -H "Authorization: Bearer $API_KEY" \
             -H "X-Alexandria-Client: ci-smoke" \
             -H "Content-Type: application/json" \
-            -d "{\"modules\":[{\"id\":\"$MODULE_ID\",\"text\":\"ci smoke verification\"}]}" \
+            -d '{"modules":[{"id":"local:smoke/methodology","text":"ci smoke verification"}]}' \
             | grep -q '"ok":true' || { echo "::error::Call failed"; exit 1; }
 
-          # Verify call landed in marketplace
-          MARKET=$(curl -sf $SERVER/marketplace/$MODULE_ID_ENC -H "Authorization: Bearer $API_KEY")
+          # Verify call landed in marketplace. Slash in module id encoded as %2F;
+          # colon stays raw (valid in path segment). Hono decodes :module param.
+          MARKET=$(curl -sf $SERVER/marketplace/local:smoke%2Fmethodology -H "Authorization: Bearer $API_KEY")
           echo "$MARKET" | grep -q '"ci smoke verification"' || { echo "::error::Call not in marketplace"; exit 1; }
 
           # Handshake must reflect the call we just made. Symmetry with the
