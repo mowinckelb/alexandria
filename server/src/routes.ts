@@ -385,6 +385,18 @@ export function registerRoutes(app: Hono) {
         if (legacy) existing = legacy.account;
       }
 
+      // No email path. New accounts can't proceed — Stripe checkout, welcome
+      // email, and every later cron/email touch need a real address. Existing
+      // accounts keep their previously-saved email rather than clobber it with
+      // the empty fetch (otherwise toggling email-private on GitHub silently
+      // wipes the field).
+      if (!email && !existing?.email) {
+        return c.html(authErrorHtml('we need an email to set up your account. enable it in github settings (or grant the user:email scope) and sign in again.'), 400);
+      }
+      if (!email && existing?.email) {
+        email = existing.email;
+      }
+
       // Key is shown once on the callback page, then only the hash is stored.
       // New accounts AND returning uninstalled users get a fresh key.
       const isNewAccount = !existing?.api_key_hash;

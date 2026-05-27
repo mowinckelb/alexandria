@@ -1170,7 +1170,20 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
                     status: sub.status,
                   });
                 }
+                break;
               }
+
+              // Author invoice paid — log it so the daily mirror in cron.ts can
+              // verify a pre-bill warning fired for any charge > $0 in the
+              // prior 14 days. Without this log, "user got charged without
+              // warning" is an open loop and the bug is invisible until they
+              // complain. Patron invoices skip the mirror (they don't get
+              // pre-bill warnings — the slider is opt-in).
+              const subLogin = sub.metadata?.github_login || sub.metadata?.api_key || '';
+              logEvent('billing_invoice_paid', {
+                github_login: subLogin,
+                amount_cents: String(invoice.amount_paid || 0),
+              });
             } catch (e) {
               console.error('[billing] invoice.paid handler failed:', e);
             }

@@ -105,3 +105,36 @@ export async function requireAuth(c: { req: { header: (name: string) => string |
   if (!account) return null;
   return { key, account };
 }
+
+/**
+ * Gate write endpoints (PUT /file, DELETE /file, POST /call) on an active
+ * subscription. The deal is "$10/month or 5 active kin" — no third path. A
+ * cancelled/unpaid sub means neither condition is met, so writes are blocked
+ * at 402 with a reactivate link. Reads remain open (see /library/*) so users
+ * who lapse can still access their own data.
+ *
+ * Allowed statuses:
+ *   - `trialing`  — first 30 days
+ *   - `active`    — paying $10 or free via the kin coupon
+ *   - `past_due`  — Stripe is retrying a failed card; grace period
+ *   - `beta`      — legacy users from before live billing
+ * Anything else (canceled, unpaid, incomplete, undefined) returns 402.
+ */
+export const ACTIVE_AUTHOR_STATUSES = new Set(['trialing', 'active', 'past_due', 'beta']);
+
+export type AuthorAuth =
+  | { ok: true; key: string; account: Account }
+  | { ok: false; status: 401 | 402; message: string };
+
+export async function requireAuthor(c: { req: { header: (name: string) => string | undefined; query: (name: string) => string | undefined } }): Promise<AuthorAuth> {
+  const auth = await requireAuth(c);
+  if (!auth) return { ok: false, status: 401, message: 'Unauthorized' };
+  if (!ACTIVE_AUTHOR_STATUSES.has(auth.account.subscription_status || '')) {
+    return {
+      ok: false,
+      status: 402,
+      message: 'subscription not active. reactivate at https://alexandria-library.com/signup',
+    };
+  }
+  return { ok: true, key: auth.key, account: auth.account };
+}

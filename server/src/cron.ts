@@ -77,6 +77,12 @@ export interface EventScanResult {
   deprecatedByPath: Map<string, number>;
   clientVersions: Map<string, number>;
   setupFailuresByStatus: Map<string, number>;
+  /** Author charges in the last 24h with no matching kin_prebill_warning_sent
+   *  in the prior 14 days. Mirror for the pre-bill warning loop — without it,
+   *  "user got charged without warning" is a silent failure (the user just
+   *  emails support). Cutoff drives "last 24h"; the 14-day lookback is fixed
+   *  because the warning is structurally a 7-day-ahead notice. */
+  paidWithoutWarning: { github_login: string; amount_cents: number }[];
 }
 
 /**
@@ -85,6 +91,10 @@ export interface EventScanResult {
  * isolation — see server/test/cron-scanner.ts. Malformed lines are
  * skipped silently (logs can contain partial writes); events outside
  * [cutoff, now] are ignored.
+ *
+ * The paid-without-warning mirror needs a wider window than `cutoff` (which is
+ * the 24h freshness boundary) — warnings fire 7 days before the charge, so we
+ * accept warnings going back 14 days from each charge regardless of cutoff.
  */
 export function scanEventsForAlarms(rawLog: string, cutoff: number): EventScanResult {
   const r: EventScanResult = {
@@ -96,12 +106,44 @@ export function scanEventsForAlarms(rawLog: string, cutoff: number): EventScanRe
     deprecatedByPath: new Map(),
     clientVersions: new Map(),
     setupFailuresByStatus: new Map(),
+    paidWithoutWarning: [],
   };
+  // Buckets for the paid-without-warning correlation. Collect across the
+  // whole log (no cutoff), then filter at the end.
+  const warningTimes = new Map<string, number[]>(); // github_login → timestamps
+  const recentPaidCharges: { github_login: string; t: number; amount_cents: number }[] = [];
+
   for (const line of rawLog.split('\n')) {
     if (!line) continue;
     try {
       const ev = JSON.parse(line);
-      if (new Date(ev.t).getTime() < cutoff) continue;
+      const tEv = new Date(ev.t).getTime();
+
+      // Charge-without-warning correlation — collect across the full log,
+      // not just the cutoff window, so 7-day-old warnings can cover 1-day-old
+      // charges.
+      if (ev.e === 'kin_prebill_warning_sent') {
+        const login = (ev.github_login as string) || '';
+        if (login) {
+          if (!warningTimes.has(login)) warningTimes.set(login, []);
+          warningTimes.get(login)!.push(tEv);
+        }
+        continue;
+      }
+      if (ev.e === 'billing_invoice_paid' && tEv >= cutoff) {
+        const amount = parseInt((ev.amount_cents as string) || '0', 10);
+        if (amount > 0) {
+          recentPaidCharges.push({
+            github_login: (ev.github_login as string) || '',
+            t: tEv,
+            amount_cents: amount,
+          });
+        }
+        continue;
+      }
+
+      // Existing 24h-bounded counters
+      if (tEv < cutoff) continue;
       if (ev.e === 'server_error') r.serverErrors++;
       else if (ev.e === 'deprecated_hit') {
         // CI smoke fires hits every 6h to verify the alarm path. Skip those —
@@ -127,6 +169,18 @@ export function scanEventsForAlarms(rawLog: string, cutoff: number): EventScanRe
       }
     } catch { continue; }
   }
+
+  // Resolve paid-without-warning: a charge is "warned" if any warning fired
+  // for that github_login within 14 days before the charge.
+  const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+  for (const charge of recentPaidCharges) {
+    const warns = warningTimes.get(charge.github_login) || [];
+    const warned = warns.some(wt => wt < charge.t && wt >= charge.t - fourteenDaysMs);
+    if (!warned) {
+      r.paidWithoutWarning.push({ github_login: charge.github_login, amount_cents: charge.amount_cents });
+    }
+  }
+
   return r;
 }
 
@@ -172,8 +226,11 @@ export async function runHealthDigest(opts: { sendEmailOnAlarm?: boolean } = { s
     // Event log analysis — delegate to the pure scanEventsForAlarms helper
     // (testable in isolation, see server/test/cron-scanner.ts). Test-tag
     // filtering stays here because drift semantics may evolve independently.
+    // 15-day lookback because the paid-without-warning mirror needs to see
+    // warnings up to 14 days before a charge; the other counters apply their
+    // own 24h cutoff inside the scanner.
     try {
-      const raw = await getRecentDaysEvents(2);
+      const raw = await getRecentDaysEvents(15);
       if (raw) {
         const cutoff = Date.now() - 24 * 60 * 60 * 1000;
         const scan = scanEventsForAlarms(raw, cutoff);
@@ -189,6 +246,12 @@ export async function runHealthDigest(opts: { sendEmailOnAlarm?: boolean } = { s
         }
         if (scan.followCheckoutFailed > 0) {
           escalate('stroll', `${scan.followCheckoutFailed} patron checkout failures in 24h — Stripe down or misconfigured`);
+        }
+        if (scan.paidWithoutWarning.length > 0) {
+          const summary = scan.paidWithoutWarning
+            .map(p => `${p.github_login || '<unknown>'}=$${(p.amount_cents / 100).toFixed(2)}`)
+            .join(', ');
+          escalate('sprint', `${scan.paidWithoutWarning.length} author charge(s) in 24h with no prior 7-day warning: ${summary}`);
         }
       }
     } catch { /* non-fatal */ }

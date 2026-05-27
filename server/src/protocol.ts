@@ -1,7 +1,7 @@
 /** The Alexandria protocol — incompressible core. */
 
 import type { Hono } from 'hono';
-import { requireAuth } from './auth.js';
+import { requireAuth, requireAuthor } from './auth.js';
 import { getDB, getR2 } from './db.js';
 import { logEvent } from './analytics.js';
 import { saveAccount, getKV } from './kv.js';
@@ -19,8 +19,8 @@ export function registerProtocol(app: Hono) {
   // ── File obligation ────────────────────────────────────────────
 
   app.put('/file/:name', async (c) => {
-    const auth = await requireAuth(c);
-    if (!auth) return c.text('Unauthorized', 401);
+    const auth = await requireAuthor(c);
+    if (!auth.ok) return c.text(auth.message, auth.status);
     if (!auth.account.github_id) return c.json({ error: 'Account missing github_id' }, 400);
 
     const name = c.req.param('name');
@@ -118,8 +118,8 @@ export function registerProtocol(app: Hono) {
   });
 
   app.delete('/file/:name', async (c) => {
-    const auth = await requireAuth(c);
-    if (!auth) return c.text('Unauthorized', 401);
+    const auth = await requireAuthor(c);
+    if (!auth.ok) return c.text(auth.message, auth.status);
     if (!auth.account.github_id) return c.json({ error: 'Account missing github_id' }, 400);
 
     const name = c.req.param('name');
@@ -218,8 +218,8 @@ export function registerProtocol(app: Hono) {
   // ── Call obligation ────────────────────────────────────────────
 
   app.post('/call', async (c) => {
-    const auth = await requireAuth(c);
-    if (!auth) return c.text('Unauthorized', 401);
+    const auth = await requireAuthor(c);
+    if (!auth.ok) return c.text(auth.message, auth.status);
     if (!auth.account.github_id) return c.json({ error: 'Account missing github_id' }, 400);
 
     // Client version heartbeat — /call is the one authed endpoint every install hits

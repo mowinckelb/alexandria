@@ -134,4 +134,58 @@ test('treats missing setup_report status as unknown failure', () => {
   assert.strictEqual(r.setupFailuresByStatus.get('unknown'), 1);
 });
 
-console.log(`\n${passed}/10 scanner tests passed.`);
+// --- paid-without-warning mirror ---
+
+const sixDaysAgo = new Date(now - 6 * 24 * 60 * 60 * 1000).toISOString();
+const fifteenDaysAgo = new Date(now - 15 * 24 * 60 * 60 * 1000).toISOString();
+
+test('paid charge with prior 7-day warning: not flagged', () => {
+  const log = [
+    JSON.stringify({ t: sixDaysAgo, e: 'kin_prebill_warning_sent', github_login: 'alice', amount: '10' }),
+    JSON.stringify({ t: inWindow, e: 'billing_invoice_paid', github_login: 'alice', amount_cents: '1000' }),
+  ].join('\n');
+  const r = scanEventsForAlarms(log, cutoff);
+  assert.strictEqual(r.paidWithoutWarning.length, 0);
+});
+
+test('paid charge with no prior warning: flagged', () => {
+  const log = JSON.stringify({ t: inWindow, e: 'billing_invoice_paid', github_login: 'bob', amount_cents: '1000' });
+  const r = scanEventsForAlarms(log, cutoff);
+  assert.strictEqual(r.paidWithoutWarning.length, 1);
+  assert.strictEqual(r.paidWithoutWarning[0].github_login, 'bob');
+  assert.strictEqual(r.paidWithoutWarning[0].amount_cents, 1000);
+});
+
+test('paid charge with warning > 14 days prior: flagged (stale warning does not cover)', () => {
+  const log = [
+    JSON.stringify({ t: fifteenDaysAgo, e: 'kin_prebill_warning_sent', github_login: 'carol', amount: '10' }),
+    JSON.stringify({ t: inWindow, e: 'billing_invoice_paid', github_login: 'carol', amount_cents: '1000' }),
+  ].join('\n');
+  const r = scanEventsForAlarms(log, cutoff);
+  assert.strictEqual(r.paidWithoutWarning.length, 1);
+  assert.strictEqual(r.paidWithoutWarning[0].github_login, 'carol');
+});
+
+test('paid charge for different user: warning for other user does not cover', () => {
+  const log = [
+    JSON.stringify({ t: sixDaysAgo, e: 'kin_prebill_warning_sent', github_login: 'alice', amount: '10' }),
+    JSON.stringify({ t: inWindow, e: 'billing_invoice_paid', github_login: 'bob', amount_cents: '1000' }),
+  ].join('\n');
+  const r = scanEventsForAlarms(log, cutoff);
+  assert.strictEqual(r.paidWithoutWarning.length, 1);
+  assert.strictEqual(r.paidWithoutWarning[0].github_login, 'bob');
+});
+
+test('$0 paid charge (kin coupon): not flagged regardless of warning', () => {
+  const log = JSON.stringify({ t: inWindow, e: 'billing_invoice_paid', github_login: 'dave', amount_cents: '0' });
+  const r = scanEventsForAlarms(log, cutoff);
+  assert.strictEqual(r.paidWithoutWarning.length, 0);
+});
+
+test('paid charge outside cutoff window: not flagged', () => {
+  const log = JSON.stringify({ t: outOfWindow, e: 'billing_invoice_paid', github_login: 'eve', amount_cents: '1000' });
+  const r = scanEventsForAlarms(log, cutoff);
+  assert.strictEqual(r.paidWithoutWarning.length, 0);
+});
+
+console.log(`\n${passed}/16 scanner tests passed.`);
