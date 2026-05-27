@@ -7,7 +7,7 @@ MODE="$1"
 ALEX_DIR="$2"
 API_KEY="$3"
 EXTRA="$4"
-SERVER="https://api.mowinckel.ai"
+SERVER="https://api.alexandria-library.com"
 CANON_GITHUB="https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/canon"
 PAYLOAD_FRESH="$5"
 
@@ -301,7 +301,7 @@ $(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200)
     if [ -n "$drift_found" ]; then
       echo ""
       echo "--- INSTALLED ARTEFACT DRIFT ---"
-      echo "Your local files differ from current factory. Not updating automatically — re-run the install block from https://mowinckel.ai/signup when you're ready to sync."
+      echo "Your local files differ from current factory. Not updating automatically — re-run the install block from https://alexandria-library.com/signup when you're ready to sync."
       echo ""
       printf '%s' "$drift_found"
       echo "--- END DRIFT ---"

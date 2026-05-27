@@ -179,7 +179,7 @@ The server keeps one combined KV entry per module: `{frontmatter, body, last_fet
 
 ## URL scheme
 
-On the website: `mowinckel.ai/marketplace/<user>/<repo>/<path>` — friendly, link-shareable, mirrors the Library URL pattern. The module ID `github:<user>/<repo>#<path>` maps trivially. Server-side, the public detail endpoint is `GET /marketplace/<user>/<repo>/*`.
+On the website: `alexandria-library.com/marketplace/<user>/<repo>/<path>` — friendly, link-shareable, mirrors the Library URL pattern. The module ID `github:<user>/<repo>#<path>` maps trivially. Server-side, the public detail endpoint is `GET /marketplace/<user>/<repo>/*`.
 
 ## Worked example — `brief-setup`
 
@@ -197,7 +197,7 @@ Catalog entry it produced:
 }
 ```
 
-Browsable at `mowinckel.ai/marketplace/mowinckelb/alexandria/factory/skills/brief-setup`. Install on any machine with `bash install.sh github:mowinckelb/alexandria#factory/skills/brief-setup`.
+Browsable at `alexandria-library.com/marketplace/mowinckelb/alexandria/factory/skills/brief-setup`. Install on any machine with `bash install.sh github:mowinckelb/alexandria#factory/skills/brief-setup`.
 
 ## When to suggest contributing
 
