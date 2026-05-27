@@ -124,7 +124,11 @@ Five layers govern how signal moves from raw to finished. Each layer has a disti
 
 ### Data and Intent, Not Intelligence
 
-Alexandria ships two things: data (the Author's files — vault, constitution, notepad, library) and intent (axioms, philosophy, the developmental objective). It never ships intelligence. The host LLM IS the intelligence. The conductor provides the score and the direction. The orchestra provides the music.
+The intelligence is the equal-access part of the world. Every Author, every competitor, every stranger has the same model. It is infinite, improving on its own, indifferent to who is asking. There is no edge to be had inside the process. The leverage points are the two surfaces the model cannot supply: the unique input you feed in, and the light intent direction that gives it a shape.
+
+Output quality is a function of (unique input × clear intent × infinite process). The process is fixed and equal. The other two variables are yours alone. So the Author's job is exactly two things: assemble inputs the model could not get from anyone else, and develop the craft of light intent direction. Everything else is the model's job.
+
+Alexandria ships data and intent precisely because those are the only variables the Author can move. Data (the Author's files — vault, constitution, notepad, library) and intent (axioms, philosophy, the developmental objective). It never ships intelligence. The host LLM IS the intelligence. The conductor provides the score and the direction. The orchestra provides the music.
 
 This means: every structure Alexandria touches must be optimizable by the model. Unstructured markdown. Clear intent. No prescribed schemas, no fixed retrieval logic, no hard-coded organization. When context windows double, the same files work better. When memory APIs arrive, the same files plug in. When models improve, the same data yields more. Zero workflow changes. The wave does the work.
 
