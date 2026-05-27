@@ -58,6 +58,7 @@ export async function secretFingerprint(secret: string): Promise<string> {
 
 export const HANDLED_EVENTS = [
   'checkout.session.completed',
+  'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
   'invoice.upcoming',
@@ -331,6 +332,9 @@ export interface KinPricingState {
   kinCompliant: number;
   kinNeeded: number;
   nowHasDiscount: boolean;
+  /** Period end taken straight from the Stripe subscription this call retrieved.
+   *  Ground truth — independent of whatever the KV cache happens to hold. */
+  currentPeriodEnd: Date | null;
 }
 
 export async function recalculateKinPricing(githubLogin: string): Promise<KinPricingState | null> {
@@ -379,6 +383,9 @@ export async function recalculateKinPricing(githubLogin: string): Promise<KinPri
     logEvent('kin_pricing_paid', { github_login: user.github_login, compliant_kin: String(kinData.compliant) });
   }
 
+  const periodEndUnix = sub.items?.data?.[0]?.current_period_end ?? null;
+  const currentPeriodEnd = periodEndUnix ? new Date(periodEndUnix * 1000) : null;
+
   return {
     email: user.email,
     subscriptionId: user.subscription_id,
@@ -387,6 +394,7 @@ export async function recalculateKinPricing(githubLogin: string): Promise<KinPri
     kinCompliant: kinData.compliant,
     kinNeeded: Math.max(0, KIN_THRESHOLD - kinData.compliant),
     nowHasDiscount,
+    currentPeriodEnd,
   };
 }
 
@@ -429,12 +437,15 @@ export async function recalculateAllKinPricing(): Promise<void> {
     const a = account as any;
     if (!a.subscription_id || !a.github_login) continue;
     try {
+      // Period end comes from the Stripe subscription that recalculateKinPricing already
+      // retrieved — not from the KV cache. That cache is empty on the first trial cycle
+      // (until customer.subscription.created/updated lands) and going through Stripe each
+      // pass means the warning fires correctly regardless of cache freshness.
       const state = await recalculateKinPricing(a.github_login);
-      if (state && a.current_period_end) {
-        const dueAt = new Date(a.current_period_end);
-        const dueMs = dueAt.getTime();
+      if (state?.currentPeriodEnd) {
+        const dueMs = state.currentPeriodEnd.getTime();
         if (dueMs > Date.now() && dueMs <= sevenDaysFromNow) {
-          await maybeWarnAboutBill(state, a.github_login, billDollars, dueAt);
+          await maybeWarnAboutBill(state, a.github_login, billDollars, state.currentPeriodEnd);
         }
       }
     } catch (err) {
@@ -853,10 +864,13 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
         } catch { /* proceed without customer ID */ }
       }
 
+      // Don't write subscription_status here — customer.subscription.created/updated
+      // carries the real Stripe state (trialing during the 30-day window, then active).
+      // Hardcoding 'active' here would briefly contradict /alexandria for trial users.
       const billingUpdate: Partial<BillingInfo> = {
         ...(customerId ? { stripe_customer_id: customerId } : {}),
         ...(session.subscription
-          ? { subscription_id: session.subscription as string, subscription_status: 'active' }
+          ? { subscription_id: session.subscription as string }
           : { subscription_status: 'beta' }),
       };
       await onAccountUpdate(login, billingUpdate);
@@ -1022,22 +1036,32 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
             break;
           }
 
-          // Regular subscription checkout — identify by github_login, never api_key
+          // Regular subscription checkout — identify by github_login, never api_key.
+          // Status + current_period_end are authoritative on customer.subscription.created/updated
+          // (those events carry the actual Stripe state); this handler just records the
+          // identifiers so the next sub.* event can match the account.
           const ghLogin = session.metadata?.github_login;
           if (ghLogin && session.customer && session.subscription) {
             await onAccountUpdate(ghLogin, {
               stripe_customer_id: session.customer as string,
               subscription_id: session.subscription as string,
-              subscription_status: 'active',
             });
-            logEvent('billing_subscription_created', { github_login: ghLogin });
+            logEvent('billing_checkout_subscription', { github_login: ghLogin });
           }
           break;
         }
 
+        // Subscription state change — created OR updated. Same write path; whichever
+        // Stripe sends, we mirror its current state into KV. The created path is the
+        // one that gives us current_period_end during the 30-day trial; without it
+        // the daily kin-pricing cron's 7-day pre-bill warning fires only via the
+        // Stripe invoice.upcoming fallback (lead time configurable, opaque).
+        // Note: subLogin uses github_login as primary, api_key as legacy fallback.
+        case 'customer.subscription.created':
         case 'customer.subscription.updated': {
           const sub = event.data.object as Stripe.Subscription;
           const customerId = sub.customer as string;
+          const phase = event.type === 'customer.subscription.created' ? 'created' : 'updated';
 
           if (sub.metadata?.kind === 'patron') {
             const email = (sub.metadata?.follow_email || '').toLowerCase();
@@ -1049,20 +1073,21 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
                 status: sub.status,
               });
             }
-            logEvent('follow_subscription_updated', { status: sub.status });
+            logEvent(`follow_subscription_${phase}`, { status: sub.status });
             break;
           }
 
-          // Use github_login from metadata (primary), fall back to api_key for legacy subscriptions
           const subLogin = sub.metadata?.github_login || sub.metadata?.api_key;
           if (subLogin) {
             const periodEnd = sub.items?.data?.[0]?.current_period_end;
             await onAccountUpdate(subLogin, {
+              stripe_customer_id: customerId,
+              subscription_id: sub.id,
               subscription_status: sub.status,
               ...(periodEnd ? { current_period_end: new Date(periodEnd * 1000).toISOString() } : {}),
             });
           }
-          logEvent('billing_subscription_updated', {
+          logEvent(`billing_subscription_${phase}`, {
             status: sub.status,
             customer: customerId,
           });

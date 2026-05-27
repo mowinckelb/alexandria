@@ -488,9 +488,10 @@ export function registerRoutes(app: Hono) {
         logEvent('library_signup_referral_self', { attempted_ref: ref, referred: user.login });
       }
 
-      // Welcome email — no API key, just links to /signup
+      // Welcome email — carries the deal (30d trial, $10/free with 5 kin) and the
+      // user's kin link so they have a portable reference before any pre-bill prompt.
       if (email && isNewAccount) {
-        await sendWelcomeEmail(email, emailToken);
+        await sendWelcomeEmail(email, user.login, emailToken);
       }
 
       // Skip Stripe if user already has payment info
