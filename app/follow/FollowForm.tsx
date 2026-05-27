@@ -15,7 +15,10 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [shakeKey, setShakeKey] = useState(0);
-  const [done, setDone] = useState(initialDone);
+  const [doneKind, setDoneKind] = useState<null | 'free' | 'paid'>(
+    initialDone ? 'paid' : null,
+  );
+  const done = doneKind !== null;
   const sliderRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hintLeft, setHintLeft] = useState<number | null>(null);
@@ -60,7 +63,7 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
         window.location.href = body.url;
         return;
       }
-      setDone(true);
+      setDoneKind('free');
     } catch {
       setError('could not sign up');
     } finally {
@@ -69,15 +72,26 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
   };
 
   if (done) {
+    const paid = doneKind === 'paid';
     return (
       <main className="follow-root">
         <Link href="/" className="nav-brand" aria-label="alexandria">
           <em>alexandria</em>
           <span className="nav-dot">.</span>
         </Link>
-        <div className="done-mark" aria-hidden>
-          <em>a.</em>
-        </div>
+        <section className="done-wrap">
+          <div className="done-msg">
+            <p className="done-headline">
+              {paid ? 'thank you for supporting alexandria.' : 'welcome.'}
+            </p>
+            <p className="done-sub">
+              {paid
+                ? <>a note&rsquo;s on its way &mdash; reply any time.</>
+                : <>a note&rsquo;s on its way to your inbox.</>}
+            </p>
+          </div>
+        </section>
+        <span className="watermark" aria-hidden><em>a.</em></span>
         <style jsx>{styles}</style>
       </main>
     );
@@ -473,18 +487,39 @@ const styles = `
   }
   .watermark :global(em) { font-style: italic; }
 
-  .done-mark {
+  .done-wrap {
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 64px;
-    font-style: italic;
-    color: ${INK};
-    letter-spacing: -0.02em;
+    padding: 96px clamp(24px, 6vw, 80px);
   }
-  .done-mark :global(em) { font-style: italic; }
+  .done-msg {
+    width: 100%;
+    max-width: 540px;
+    text-align: center;
+    animation: done-fade 720ms ease-out both;
+  }
+  .done-headline {
+    margin: 0 0 14px;
+    font-size: 28px;
+    line-height: 1.3;
+    color: ${INK};
+    letter-spacing: -0.01em;
+  }
+  .done-sub {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: ${INK_MUTED};
+    font-style: italic;
+    letter-spacing: 0.005em;
+  }
+  @keyframes done-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
   @media (max-width: 600px) {
     .nav-brand { font-size: 24px; top: calc(18px - 10px); left: calc(22px - 8px); }
@@ -493,6 +528,7 @@ const styles = `
     .field input { font-size: 20px; }
     .amount-value { font-size: 32px; }
     .cta { font-size: 20px; }
-    .done-mark { font-size: 52px; }
+    .done-headline { font-size: 24px; }
+    .done-sub { font-size: 15px; }
   }
 `;

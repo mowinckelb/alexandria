@@ -91,6 +91,36 @@ export async function sendEmail(
   }
 }
 
+export async function sendPatronWelcome(
+  email: string,
+  amountCents: number,
+  unsubscribeToken?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const dollars = amountCents % 100 === 0
+    ? `$${Math.round(amountCents / 100)}`
+    : `$${(amountCents / 100).toFixed(2)}`;
+  const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
+  <p style="margin: 0 0 1.4rem;">thank you for backing alexandria. :)</p>
+  <p style="margin: 0 0 1.4rem;">
+    ${dollars}/month means real things &mdash; server, dev time, the long road. it matters more than you&rsquo;d think when you&rsquo;re solo.
+  </p>
+  <p style="margin: 0 0 1.4rem;">
+    every week or so i&rsquo;ll send an email with updates on the project; stories, photos, vlogs, etc. keeping you in the loop both ways &mdash; good and bad.
+  </p>
+  <p style="margin: 0 0 1.4rem;">
+    feel free to reply any time, i&rsquo;ll read them all!<br>
+    and if you know anyone else who might want to follow along, send them to <a href="${WEBSITE_URL}" style="color: #3d3630;">alexandria-library.com</a> &mdash; they can stay close, or just follow.
+  </p>
+  <p style="margin: 0 0 1.8rem;">ok, that&rsquo;s all for now :)</p>
+  <p style="margin: 0 0 0.4rem;">Benjamin a. Mowinckel</p>
+  <p style="margin: 0; font-style: italic; color: #8a8078;">a.</p>${unsubscribeToken ? `
+  <p style="margin: 1.5rem 0 0; font-size: 0.72rem; color: #bbb4aa;"><a href="${SERVER_URL}/email/stop?t=${unsubscribeToken}" style="color: #8a8078;">stop these emails</a></p>` : ''}
+</div>`;
+
+  return await sendEmail(email, 'thank you.', html,
+    unsubscribeToken ? { unsubscribeUrl: `${SERVER_URL}/email/stop?t=${unsubscribeToken}` } : undefined);
+}
+
 export async function sendFollowerWelcome(email: string, unsubscribeToken?: string): Promise<{ ok: boolean; error?: string }> {
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">welcome to alexandria. :)</p>

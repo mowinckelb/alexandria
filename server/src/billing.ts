@@ -15,7 +15,8 @@ import { loadAccounts, getKV } from './kv.js';
 import { getAccountByLogin, updateAccountBilling } from './accounts.js';
 import type { Account } from './auth.js';
 import { getDB } from './db.js';
-import { sendEmail } from './email.js';
+import { sendEmail, sendPatronWelcome } from './email.js';
+import { generateToken } from './crypto.js';
 import { safeEqual } from './crypto.js';
 
 // ---------------------------------------------------------------------------
@@ -937,6 +938,41 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
             if (email && customerId && subscriptionId) {
               await upsertPatronSubscription({ subscriptionId, customerId, email, status: 'active' });
               logEvent('follow_subscription_paid', { amount_cents: String(session.amount_total || 0) });
+
+              // Patron welcome — thanks them for the payment. Independent of the
+              // free follower welcome dispatched at /follow, which only fires for
+              // brand-new waitlist rows. Reuse the waitlist unsubscribe_token if
+              // present so the unsubscribe link works; otherwise create one.
+              const amountCents = session.amount_total || 0;
+              c.executionCtx.waitUntil((async () => {
+                try {
+                  const db = getDB();
+                  let unsubscribeToken: string | undefined;
+                  const row = await db
+                    .prepare(`SELECT unsubscribe_token FROM waitlist WHERE email = ? AND type = 'follow'`)
+                    .bind(email)
+                    .first<{ unsubscribe_token: string | null }>();
+                  if (row?.unsubscribe_token) {
+                    unsubscribeToken = row.unsubscribe_token;
+                  } else {
+                    unsubscribeToken = generateToken();
+                    await db
+                      .prepare(
+                        `INSERT INTO waitlist (email, type, source, created_at, unsubscribe_token)
+                         VALUES (?, 'follow', 'stripe', ?, ?)
+                         ON CONFLICT(email) DO UPDATE SET unsubscribe_token = COALESCE(waitlist.unsubscribe_token, excluded.unsubscribe_token)`,
+                      )
+                      .bind(email, new Date().toISOString(), unsubscribeToken)
+                      .run();
+                  }
+                  const result = await sendPatronWelcome(email, amountCents, unsubscribeToken);
+                  if (!result.ok) {
+                    console.error('[billing] Patron welcome email failed:', result.error);
+                  }
+                } catch (err) {
+                  console.error('[billing] Patron welcome dispatch failed:', err);
+                }
+              })());
             } else {
               console.error('[billing] Patron checkout completed with missing fields:', { email, customerId, subscriptionId });
             }
