@@ -19,6 +19,7 @@ import {
 import { getAllowedOrigins } from './cors.js';
 import { getStripe } from './billing.js';
 import { getKV, loadAccounts } from './kv.js';
+import { getAccountByLogin } from './accounts.js';
 import {
   isInternalProtocolFileName,
   readProtocolFile,
@@ -244,8 +245,8 @@ export function registerLibraryRoutes(app: Hono): void {
   app.get('/library/:author', async (c) => {
     const authorId = c.req.param('author');
     const db = getDB();
-    const accounts = await loadAccounts<AccountStore>();
-    const account = Object.values(accounts).find((candidate) => candidate.github_login === authorId) || null;
+    const result = await getAccountByLogin(authorId);
+    const account = result?.account || null;
     const accountId = account?.github_id ? String(account.github_id) : null;
 
     if (!accountId) return c.json({ error: 'Author not found' }, 404);
@@ -261,6 +262,10 @@ export function registerLibraryRoutes(app: Hono): void {
 
     logEvent('library_author_view', { author: authorId });
 
+    // fallback index for directoryAuthor still needs the full account ordering
+    // (alexandria_id assigns by creation order). Single decrypt pass; the lookup
+    // above already cost O(1).
+    const accounts = await loadAccounts<AccountStore>();
     const accountList = Object.values(accounts)
       .filter((candidate) => !!candidate?.github_id && !!candidate.github_login)
       .sort((a, b) => {
@@ -297,8 +302,8 @@ export function registerLibraryRoutes(app: Hono): void {
     if (!isValidFileName(name)) return c.json({ error: 'Invalid file name' }, 400);
     if (isInternalProtocolFileName(name)) return c.json({ error: 'File not found' }, 404);
 
-    const accounts = await loadAccounts<AccountStore>();
-    const authorAccount = Object.values(accounts).find((candidate) => candidate.github_login === authorId);
+    const lookup = await getAccountByLogin(authorId);
+    const authorAccount = lookup?.account;
     if (!authorAccount?.github_id) return c.json({ error: 'Author not found' }, 404);
 
     const db = getDB();
@@ -365,8 +370,8 @@ export function registerLibraryRoutes(app: Hono): void {
     const name = c.req.param('name');
     if (!isValidFileName(name)) return c.json({ error: 'Invalid file name' }, 400);
 
-    const accounts = await loadAccounts<AccountStore>();
-    const authorAccount = Object.values(accounts).find((candidate) => candidate.github_login === authorId);
+    const lookup = await getAccountByLogin(authorId);
+    const authorAccount = lookup?.account;
     if (!authorAccount?.github_id) return c.json({ error: 'Author not found' }, 404);
 
     // Resolve accessor identity from API key or browser session cookie.
@@ -539,8 +544,9 @@ export function registerLibraryRoutes(app: Hono): void {
 
   app.get('/library/:author/quiz/:id', async (c) => {
     const quizId = c.req.param('id');
+    const authorId = c.req.param('author');
 
-    const result = await readQuizDefinition({ quizId });
+    const result = await readQuizDefinition({ quizId, authorId });
     if (!result.ok) return c.json(result.body, result.status);
 
     return c.json({ quiz_id: quizId, author_id: result.quiz.author_id, ...result.data });
@@ -554,7 +560,7 @@ export function registerLibraryRoutes(app: Hono): void {
     const body = await c.req.json().catch(() => null);
     if (!body || !body.answers) return c.json({ error: 'Provide answers' }, 400);
 
-    const quizResult = await readQuizDefinition({ quizId });
+    const quizResult = await readQuizDefinition({ quizId, authorId });
     if (!quizResult.ok) return c.json(quizResult.body, quizResult.status);
     const data = quizResult.data as { questions?: Array<{ id?: string; key?: string; correct?: string; answer?: string }>; result_tiers?: Array<{ min_pct: number; label: string; message: string }> };
     const answers = body.answers as Record<string, string>;
@@ -611,12 +617,16 @@ export function registerLibraryRoutes(app: Hono): void {
     const authorId = c.req.param('author');
     const db = getDB();
 
+    // Scope: the quiz must belong to the URL's author. Without this, a share
+    // link can claim authorship of any quiz it knows the id+slug of.
+    const quiz = await db.prepare('SELECT title, author_id FROM quizzes WHERE id = ?').bind(quizId).first<{ title: string; author_id: string }>();
+    if (!quiz || quiz.author_id !== authorId) return c.json({ error: 'Result not found' }, 404);
+
     const result = await db.prepare(
       'SELECT * FROM quiz_results WHERE result_slug = ? AND quiz_id = ?'
     ).bind(slug, quizId).first();
     if (!result) return c.json({ error: 'Result not found' }, 404);
 
-    const quiz = await db.prepare('SELECT title FROM quizzes WHERE id = ?').bind(quizId).first<{ title: string }>();
     const author = await db.prepare('SELECT display_name FROM authors WHERE id = ?').bind(authorId).first<{ display_name: string }>();
 
     logEvent('library_quiz_share_view', { author: authorId, quiz_id: quizId, slug });

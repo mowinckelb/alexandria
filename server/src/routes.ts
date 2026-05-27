@@ -95,12 +95,14 @@ async function purgeAuthorAccount(account: Account, storeKey: string | null, aut
 // Company routes — registered on Hono app
 // ---------------------------------------------------------------------------
 
-// Cookie scoped to the registrable domain of the request host — strips
-// leading "api." or "www." to land on the apex. Works for any canonical
-// the Worker is bound to without code changes.
-function deriveCookieDomain(reqUrl: string): string {
+// Cookie scoped to the canonical website apex (derived from WEBSITE_URL).
+// Pinning to canonical rather than the request hostname prevents legacy /
+// alias hostnames from issuing session cookies onto unrelated apex domains
+// (e.g., api.mowinckel.ai → .mowinckel.ai, where unrelated subdomains live).
+function deriveCookieDomain(): string {
   try {
-    const apex = new URL(reqUrl).hostname.replace(/^(api|www)\./, '');
+    const websiteUrl = process.env.WEBSITE_URL || 'https://alexandria-library.com';
+    const apex = new URL(websiteUrl).hostname.replace(/^(api|www)\./, '');
     return apex ? `; Domain=.${apex}` : '';
   } catch {
     return '';
@@ -398,11 +400,15 @@ export function registerRoutes(app: Hono) {
       }
 
       // Key is shown once on the callback page, then only the hash is stored.
-      // New accounts AND returning uninstalled users get a fresh key.
+      // New accounts AND returning uninstalled users get a fresh key. Returning
+      // uninstalled users have a `previousHash` we need to rotate out — without
+      // it, the prior key (still in their inbox from the earlier OAuth callback)
+      // stays valid forever in parallel with the new one.
       const isNewAccount = !existing?.api_key_hash;
       const needsKey = isNewAccount || !existing?.installed_at;
       const apiKey = needsKey ? generateApiKey() : '';
       const apiKeyHash = needsKey ? hashApiKey(apiKey) : existing!.api_key_hash;
+      const previousHash = needsKey ? (existing?.api_key_hash || null) : null;
       const emailToken = existing?.email_token || generateToken();
 
       const updatedAccount = {
@@ -421,7 +427,7 @@ export function registerRoutes(app: Hono) {
       };
       delete updatedAccount.api_key;
       await saveAccount(key, updatedAccount as unknown as Record<string, unknown>);
-      if (needsKey) await setAuthIndex(apiKeyHash, key);
+      if (needsKey) await setAuthIndex(apiKeyHash, key, previousHash);
       await setEmailTokenIndex(emailToken, key);
 
       // Browser Library session (for human navigation on /library/*).
@@ -430,7 +436,7 @@ export function registerRoutes(app: Hono) {
         account_key: key,
         github_login: user.login,
       }), { expirationTtl: 30 * 24 * 60 * 60 });
-      c.header('Set-Cookie', `alex_library_session=${librarySessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}${deriveCookieDomain(c.req.url)}`);
+      c.header('Set-Cookie', `alex_library_session=${librarySessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}${deriveCookieDomain()}`);
 
       // Company Library profile. This mirrors GitHub account metadata for
       // discovery; protocol file content still arrives only through /file.
@@ -937,32 +943,6 @@ export function registerRoutes(app: Hono) {
     if (alreadyOut) return c.html(stoppedHtml);
 
     return c.text('not found', 404);
-  });
-
-  // One-shot migration runner — applies a specific migration via the
-  // worker's D1 binding (bypasses the wrangler OAuth D1-scope gap).
-  // Idempotent. Safe to leave in.
-  app.post('/admin/migrate-0022', async (c) => {
-    if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
-    const db = getDB();
-    const steps = [
-      'ALTER TABLE waitlist ADD COLUMN unsubscribe_token TEXT',
-      'ALTER TABLE waitlist ADD COLUMN opted_out_at TEXT',
-      'CREATE INDEX IF NOT EXISTS idx_waitlist_unsubscribe_token ON waitlist(unsubscribe_token)',
-    ];
-    const results: Array<{ sql: string; ok: boolean; error?: string }> = [];
-    for (const sql of steps) {
-      try {
-        await db.exec(sql);
-        results.push({ sql, ok: true });
-      } catch (e) {
-        const msg = String((e as { message?: string })?.message || e);
-        const idempotent = msg.includes('duplicate column');
-        results.push({ sql, ok: idempotent, error: idempotent ? undefined : msg });
-        if (!idempotent) return c.json({ ok: false, results }, 500);
-      }
-    }
-    return c.json({ ok: true, results });
   });
 
   // Admin: send a one-time email to all uninstalled users

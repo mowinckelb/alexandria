@@ -66,10 +66,19 @@ export async function saveAccount(githubKey: string, account: Record<string, unk
   if (login) await setLoginIndex(login, githubKey);
 }
 
-/** Set auth lookup index: api_key_hash → github_id key. */
-export async function setAuthIndex(apiKeyHash: string, githubKey: string): Promise<void> {
+/** Set auth lookup index: api_key_hash → github_id key.
+ *
+ * `previousHash` (optional) is deleted as part of the same operation. Pass it
+ * whenever rotating an Author's API key so the old key stops resolving —
+ * without this, every key regeneration (install-nudge, OAuth re-login before
+ * install) accumulates orphan auth: rows that grant permanent access until the
+ * account is deleted. Idempotent when previousHash === apiKeyHash or absent. */
+export async function setAuthIndex(apiKeyHash: string, githubKey: string, previousHash?: string | null): Promise<void> {
   const kv = getKV();
   await kv.put(`auth:${apiKeyHash}`, githubKey);
+  if (previousHash && previousHash !== apiKeyHash) {
+    await kv.delete(`auth:${previousHash}`);
+  }
 }
 
 /** Look up github_id key by api_key_hash. O(1). */

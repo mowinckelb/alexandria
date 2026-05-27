@@ -417,12 +417,14 @@ export type QuizDefinitionResult =
   | { ok: true; quiz: QuizMeta; data: Record<string, unknown> }
   | { ok: false; status: 404 | 500; body: Record<string, unknown> };
 
-/** Quiz definition — checks active flag, fetches R2, parses JSON. */
-export async function readQuizDefinition(opts: { quizId: string }): Promise<QuizDefinitionResult> {
+/** Quiz definition — checks active flag, scopes to author, fetches R2, parses JSON.
+ *  `authorId` is required so a request to /library/A/quiz/QUIZ_FROM_B can't
+ *  bind QUIZ_FROM_B under A's analytics/share-url surface (impersonation). */
+export async function readQuizDefinition(opts: { quizId: string; authorId: string }): Promise<QuizDefinitionResult> {
   const db = getDB();
   const quiz = await db.prepare(
-    'SELECT id, author_id, r2_key FROM quizzes WHERE id = ? AND active = 1'
-  ).bind(opts.quizId).first<QuizMeta>();
+    'SELECT id, author_id, r2_key FROM quizzes WHERE id = ? AND author_id = ? AND active = 1'
+  ).bind(opts.quizId, opts.authorId).first<QuizMeta>();
   if (!quiz) return { ok: false, status: 404, body: { error: 'Quiz not found' } };
 
   const obj = await getR2().get(quiz.r2_key);

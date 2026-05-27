@@ -14,6 +14,16 @@ function escapeHtml(value: string): string {
     .replaceAll("'", '&#39;');
 }
 
+// JSON-encode a string for safe interpolation inside a `<script>` block.
+// JSON.stringify escapes quotes/backslashes/U+2028/U+2029 but does not escape
+// `</`. A value containing `</script>` would break out of the inline-script
+// context. Defense-in-depth: even server-fetched content (factory/block.md,
+// Mechanics.md) flows through here, so a repo compromise can't pop the
+// callback page.
+function jsLiteral(value: string): string {
+  return JSON.stringify(value).replace(/<\/(script|style)/gi, '<\\/$1');
+}
+
 // ---------------------------------------------------------------------------
 // Inline SVG icons — small enough to inline, no external deps
 // ---------------------------------------------------------------------------
@@ -243,17 +253,17 @@ function copyRemote(url, el) {
     window.open(url, '_blank', 'noopener');
   });
 }
-function copyCmd(el) { copyText(${JSON.stringify(curlCmd)}, el); }
+function copyCmd(el) { copyText(${jsLiteral(curlCmd)}, el); }
 function copyBlock(el) {
-  var t = ${JSON.stringify(blockContent)};
-  if (t) copyText(t, el); else copyRemote(${JSON.stringify(BLOCK_URL)}, el);
+  var t = ${jsLiteral(blockContent)};
+  if (t) copyText(t, el); else copyRemote(${jsLiteral(BLOCK_URL)}, el);
 }
 function copyMechanics(el) {
-  var t = ${JSON.stringify(mechanicsContent)};
-  if (t) copyText(t, el); else copyRemote(${JSON.stringify(MECHANICS_URL)}, el);
+  var t = ${jsLiteral(mechanicsContent)};
+  if (t) copyText(t, el); else copyRemote(${jsLiteral(MECHANICS_URL)}, el);
 }
-function copyKinCode(el) { copyText(${JSON.stringify(githubLogin)}, el); }
-function copyKinLink(el) { copyText(${JSON.stringify(kinLink)}, el); }
+function copyKinCode(el) { copyText(${jsLiteral(githubLogin)}, el); }
+function copyKinLink(el) { copyText(${jsLiteral(kinLink)}, el); }
 function toggleTip(el) {
   var wasActive = el.classList.contains('active');
   document.querySelectorAll('.info.active').forEach(function(e) { e.classList.remove('active'); });

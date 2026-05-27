@@ -10,7 +10,7 @@ Founder: Benjamin Mowinckel. Solo founder + ai agents. Relocating to SF April 20
 
 Everything in Alexandria maps to one of four layers:
 
-1. **Protocol** (`server/src/protocol.ts` + `auth.ts` + `kv.ts` + `crypto.ts` + `db.ts`) — The incompressible core. ~455 lines, 7 endpoints. Three obligations: account (payment), file (publish monthly), call (communicate). This is what makes Alexandria a protocol, not a product.
+1. **Protocol** (`server/src/protocol.ts` + `auth.ts` + `kv.ts` + `crypto.ts` + `db.ts` + `file-access.ts` + `marketplace-catalog.ts` + `marketplace.ts` + `audit.ts`) — The incompressible core. 7 endpoints, ~1700 lines including the visibility gate (`file-access.ts`), the module catalog (`marketplace-catalog.ts`), the Author-feedback substrate (`marketplace.ts`), and the tamper-evident access audit (`audit.ts`). Three obligations: account (payment), file (publish monthly), call (communicate). This is what makes Alexandria a protocol, not a product.
 
 2. **Factory** (`factory/`) — The founder's system, public on GitHub, forkable. 19 files: canon (methodology), hooks (shim + payload), setup script, skills (claudecode, cursor, codex, scheduled), templates (agent, machine, notepad, feedback, constitution/, marginalia/, vault/, library/), onboarding block. Any Author can fork and modify. The marketplace evolves canon defaults from cross-Author signal.
 
@@ -22,7 +22,7 @@ Everything in Alexandria maps to one of four layers:
 
 - **Website:** `app/` (Next.js, Vercel). Landing page: `app/components/LandingPage.tsx`.
 - **Server:** `server/src/` (Hono, Cloudflare Workers). One file per concern:
-  - `worker.ts` (entry + middleware), `protocol.ts` (the protocol — file, call, library, marketplace), `routes.ts` (company HTTP handlers), `auth.ts` (accounts + API keys), `accounts.ts` (account management + admin), `email.ts` (Resend + all templates), `cron.ts` (health digest + followup + engagement), `analytics.ts` (event log + dashboard), `billing.ts` (Stripe), `library.ts` (Library CRUD), `kv.ts` (KV persistence), `templates.ts` (HTML), `cors.ts` (CORS), `crypto.ts` (encryption), `db.ts` (D1/R2 accessor).
+  - `worker.ts` (entry + middleware), `protocol.ts` (the protocol — file, call, library, marketplace), `routes.ts` (company HTTP handlers), `auth.ts` (accounts + API keys), `accounts.ts` (account management + admin), `email.ts` (Resend + all templates), `cron.ts` (health digest + followup + engagement), `analytics.ts` (event log + dashboard), `billing.ts` (Stripe), `library.ts` (Library CRUD), `kv.ts` (KV persistence), `templates.ts` (HTML), `cors.ts` (CORS), `crypto.ts` (encryption), `db.ts` (D1/R2 accessor), `file-access.ts` (visibility gate — the only path that reads protocol/shadow/work bytes from R2), `marketplace-catalog.ts` (GitHub module catalog + push-webhook cache busting), `marketplace.ts` (Author-feedback substrate, writes to private GitHub repo), `audit.ts` (tamper-evident access audit mirrored to a hash-chained GitHub repo), `library-signal.ts` (daily funnel/engagement snapshot consumed by the founder), `time.ts` (PT formatter).
   - Stateless server. No private user data stored. KV for accounts/events, D1 for Library metadata + protocol data, R2 for published content.
 - **Factory:** `factory/` — public, forkable. Canon methodology, hooks, skills, templates, setup, onboarding block.
 - **Static assets:** `public/` (includes `public/docs/` for public artifacts).
@@ -160,7 +160,7 @@ Before committing any server code change:
 3. **Test:** Run `npm test` if tests exist. Check the e2e test (`server/test/e2e.ts`).
 4. **No regressions:** Review recent commits for anything the change might break.
 5. **Bitter lesson compliance:** No structured parameters, fixed schemas, or hand-crafted rules. Unstructured text/JSONL. Soft defaults that thin as models improve.
-6. **Statelessness:** Server stores nothing user-specific. Encrypted refresh token IS the access token.
+6. **Statelessness:** Server stores nothing user-specific in plaintext. Account blobs are AES-256-GCM encrypted in KV; the API key is never stored, only its SHA-256 hash, indexed for O(1) auth. There is no refresh token — rotation requires a fresh OAuth round-trip.
 7. **Deployment:** After deploying (`cd server && npx wrangler deploy`), check health: `curl https://api.alexandria-library.com/health`.
 
 ## Working With the Founder

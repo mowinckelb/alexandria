@@ -409,10 +409,12 @@ export async function runInstallNudges(
     if (recipients.length === 0) return { candidates: 0, sent: 0, failed: 0, dry: false };
 
     const { sent, failed } = await sendEmailsBatched(recipients, async ({ key, account }) => {
-      // Regenerate api_key per nudge (we don't store plaintext; this is how the
-      // install page surfaces a runnable curl). Old hash stays in auth_index
-      // since there's no delete path — any previously-saved key still works
-      // alongside the new one. Acceptable at solo-founder threshold.
+      // Regenerate api_key per nudge (we don't store plaintext; this is how
+      // the install page surfaces a runnable curl). Capture the previous hash
+      // so setAuthIndex can rotate it out — without rotation, every nudge
+      // would leave the prior key permanently valid, and any compromised
+      // nudge email would grant access for the lifetime of the account.
+      const previousHash = (account.api_key_hash as string | undefined) || null;
       const apiKey = generateApiKey();
       const apiKeyHash = hashApiKey(apiKey);
       account.api_key_hash = apiKeyHash;
@@ -426,7 +428,7 @@ export async function runInstallNudges(
       );
       const result = await sendInstallNudge(account.email, account.email_token, installToken, account.github_login);
       if (result.ok) {
-        await setAuthIndex(apiKeyHash, key);
+        await setAuthIndex(apiKeyHash, key, previousHash);
         account.install_nudge_last_sent_at = new Date().toISOString();
         account.install_nudge_count = (account.install_nudge_count || 0) + 1;
         await saveAccount(key, account as unknown as Record<string, unknown>);

@@ -433,24 +433,35 @@ export async function recalculateAllKinPricing(): Promise<void> {
   // call per user per day; update here if pricing changes.
   const billDollars = 10;
 
-  for (const account of Object.values(accounts)) {
-    const a = account as any;
-    if (!a.subscription_id || !a.github_login) continue;
-    try {
-      // Period end comes from the Stripe subscription that recalculateKinPricing already
-      // retrieved — not from the KV cache. That cache is empty on the first trial cycle
-      // (until customer.subscription.created/updated lands) and going through Stripe each
-      // pass means the warning fires correctly regardless of cache freshness.
-      const state = await recalculateKinPricing(a.github_login);
-      if (state?.currentPeriodEnd) {
-        const dueMs = state.currentPeriodEnd.getTime();
-        if (dueMs > Date.now() && dueMs <= sevenDaysFromNow) {
-          await maybeWarnAboutBill(state, a.github_login, billDollars, state.currentPeriodEnd);
+  const candidates = Object.values(accounts)
+    .map((a) => a as any)
+    .filter((a) => a.subscription_id && a.github_login);
+
+  // Bounded concurrency: each iteration makes 1-3 Stripe calls (retrieve + maybe
+  // update + countActiveKin's subqueries). Serial loop walls at ~200ms × N, blowing
+  // the daily cron wall budget at ~50-100 subs. 5-wide matches sendEmailsBatched
+  // and stays comfortably under Stripe's 100 req/s live limit.
+  const concurrency = 5;
+  for (let i = 0; i < candidates.length; i += concurrency) {
+    const batch = candidates.slice(i, i + concurrency);
+    await Promise.all(batch.map(async (a) => {
+      try {
+        // Period end comes from the Stripe subscription that recalculateKinPricing
+        // already retrieved — not from the KV cache. That cache is empty on the
+        // first trial cycle (until customer.subscription.created/updated lands)
+        // and going through Stripe each pass means the warning fires correctly
+        // regardless of cache freshness.
+        const state = await recalculateKinPricing(a.github_login);
+        if (state?.currentPeriodEnd) {
+          const dueMs = state.currentPeriodEnd.getTime();
+          if (dueMs > Date.now() && dueMs <= sevenDaysFromNow) {
+            await maybeWarnAboutBill(state, a.github_login, billDollars, state.currentPeriodEnd);
+          }
         }
+      } catch (err) {
+        console.error(`[kin] Recalculation failed for ${a.github_login}:`, err);
       }
-    } catch (err) {
-      console.error(`[kin] Recalculation failed for ${a.github_login}:`, err);
-    }
+    }));
   }
 }
 
@@ -918,18 +929,16 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
       // synchronous context." Use constructEventAsync instead.
       event = await stripe.webhooks.constructEventAsync(rawBody, sig, WEBHOOK_SECRET);
     } catch (err) {
-      // Surface enough info to triage signature drift without exposing the
-      // secret. A non-reversible SHA-256 fingerprint distinguishes "wrong
-      // secret bound" from "secret matches but body was modified mid-flight"
-      // — across rotations the hash changes, across the same secret it's
-      // stable. The raw secret (or any slice of it) never touches the log.
+      // Surface enough info to triage signature drift without exposing
+      // anything sensitive. Body fragments + the signature header itself
+      // were previously logged — removed because both could appear in
+      // downstream log archives with looser access controls than Workers
+      // itself. Fingerprints distinguish "wrong secret bound" from "body
+      // modified mid-flight" with zero leakage.
       const fp = WEBHOOK_SECRET ? await secretFingerprint(WEBHOOK_SECRET) : '<unset>';
+      const bodyFp = rawBody ? await secretFingerprint(rawBody) : '<empty>';
       const errMsg = err instanceof Error ? err.message : String(err);
-      console.error(`[webhook] signature mismatch — bound=${fp}`);
-      console.error(`[webhook] sig_header=${sig}`);
-      console.error(`[webhook] body_len=${rawBody.length} body_head=${JSON.stringify(rawBody.slice(0, 80))}`);
-      console.error(`[webhook] body_tail=${JSON.stringify(rawBody.slice(-30))}`);
-      console.error(`[webhook] err=${errMsg}`);
+      console.error(`[webhook] signature mismatch — bound=${fp} body=${bodyFp} body_len=${rawBody.length} err=${errMsg}`);
       return c.text('Invalid signature', 400);
     }
 
@@ -1312,12 +1321,12 @@ export async function settleMonthlyTabs(): Promise<void> {
 
     if (!results || results.length === 0) return;
 
-    // For each accessor, look up their Stripe customer ID and report usage
-    const accounts = await loadAccounts<Record<string, any>>();
-
+    // For each accessor, look up their Stripe customer ID and report usage.
+    // Uses the indexed login lookup; one O(1) decrypt per tab instead of
+    // loading + decrypting every account in storage.
     for (const tab of results) {
-      // Find account by github_login
-      const account = Object.values(accounts).find((a: any) => a.github_login === tab.accessor_id);
+      const lookup = await getAccountByLogin(tab.accessor_id);
+      const account = lookup?.account;
       if (!account || !(account as any).stripe_customer_id) {
         console.warn(`[billing] Cannot settle tab for ${tab.accessor_id} — no Stripe customer`);
         continue;

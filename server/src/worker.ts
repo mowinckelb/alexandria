@@ -218,7 +218,8 @@ app.get('/health', async (c) => {
 
   // Stripe mode derived from the secret key prefix. Surfaced so we can verify
   // live-vs-test from /health without ever exposing the key value itself.
-  // Handles both standard (sk_*) and restricted (rk_*) keys.
+  // Handles both standard (sk_*) and restricted (rk_*) keys. The unrecognised
+  // branch returns a bare label — never a slice of the key, even truncated.
   const stripeKey = process.env.STRIPE_SECRET_KEY || '';
   const stripe_mode = !stripeKey
     ? 'unset'
@@ -226,7 +227,7 @@ app.get('/health', async (c) => {
       ? 'live'
       : /^(sk|rk)_test_/.test(stripeKey)
         ? 'test'
-        : `unrecognized:${stripeKey.slice(0, 8)}…`;
+        : 'unrecognized';
 
   return c.json({
     status: infraHealthy && digestUrgency !== 'sprint' ? 'ok' : 'degraded',
