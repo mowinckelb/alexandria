@@ -564,20 +564,16 @@ html.app-shell input:focus {
 .pdoc-longform .pdoc-h2 + .pdoc-p::first-letter,
 .pdoc-longform .pdoc-h3 + .pdoc-p::first-letter {
   font-family: var(--font-eb-garamond);
-  font-style: italic;
   font-weight: 600;
-  font-size: 3.2em;
-  line-height: 0.82;
-  /* No negative letter-spacing — at 3.2em scale it pulls the next
-     character into the drop cap's body. The italic slant on letters
-     like F, T, V, W, Y already extends rightward visually beyond the
-     glyph box, so we need a generous, deliberate gap. */
-  vertical-align: -0.28em;
-  padding-right: 0.18em;
   color: var(--accent);
-  text-shadow:
-    0 1px 0 rgba(255, 250, 240, 0.55),
-    0 2px 5px rgba(91, 31, 71, 0.10);
+  /* Raised initial: sits on the first line's baseline and rises ABOVE it,
+     so it never inflates the line box — leading stays identical the whole
+     way down the paragraph. (Previously an inline 3.2em/0.82 ::first-letter,
+     which grew the first line's box and threw off line-1 → line-2 spacing.)
+     Unsupported browsers (Firefox) gracefully fall back to a normal letter. */
+  -webkit-initial-letter: 2.2 1;
+  initial-letter: 2.2 1;
+  margin-right: 0.04em;
 }
 
 .pdoc-longform .pdoc-p em {
