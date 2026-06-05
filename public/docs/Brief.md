@@ -26,7 +26,7 @@ A structured, machine-readable record of who each user is — whatever they choo
 
 *The record cannot be back-filled.* Inbox-scraping reaches what the user does, never what they mean. Five years of capture cannot be compressed into a six-month rush. **The compounding is the years.**
 
-Engineering is done. *One curl command, local files on the user's own machine, two integration points fire whenever the user talks to an AI — capture and inject. Ten dollars a month, free with five referred friends.* The only open question is whether enough people want it.
+Engineering is done. *One curl command, local files on the user's own machine, two integration points fire whenever the user talks to an AI — capture and inject. Free in the seeding stage — every GitHub sign-in is a full Author, no card; the $10/month floor, free with five referred friends, is the standing model that turns on once demand is proven.* The only open question is whether enough people want it.
 
 ---
 
@@ -167,7 +167,7 @@ mowinckel.b@gmail.com · +1 415 503 8178 · mowinckel.ai
 
 | | |
 |---|---|
-| Stage | Live. Taking payments. |
+| Stage | Live. Free while seeding. |
 | Structure | Delaware C-Corp (Stripe Atlas) |
 | Founder | Benjamin a. Mowinckel — San Francisco |
 
