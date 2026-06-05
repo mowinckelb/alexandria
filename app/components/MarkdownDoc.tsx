@@ -14,6 +14,10 @@ type Props = {
    *  part.chapter numbers into headings, and render an auto-generated TOC
    *  in its place. Designed for the whitepaper's parts → chapters structure. */
   numbered?: boolean;
+  /** Casual variant — drops the manuscript dress (justified text, fleurons,
+   *  per-section initials, italic-accent bold) for a clean, plain setting.
+   *  Scoped via .pdoc-plain so other docs keep the formal book look. */
+  plain?: boolean;
 };
 
 type TocEntry = {
@@ -373,7 +377,7 @@ const MD_COMPONENTS_ABSTRACT = {
   p: AbstractParagraph,
 };
 
-export default function MarkdownDoc({ src, header, homeHref = '/', numbered = false }: Props) {
+export default function MarkdownDoc({ src, header, homeHref = '/', numbered = false, plain = false }: Props) {
   const [content, setContent] = useState<string | null>(null);
 
   useEffect(() => {
@@ -418,7 +422,7 @@ export default function MarkdownDoc({ src, header, homeHref = '/', numbered = fa
       <main className="mdoc">
         {header && <div className="mdoc-frame mdoc-header">{header}</div>}
 
-        <article className="mdoc-frame mdoc-article pdoc pdoc-longform">
+        <article className={`mdoc-frame mdoc-article pdoc pdoc-longform${plain ? ' pdoc-plain' : ''}`}>
           {content === null ? (
             <p className="pdoc-p" style={{ color: 'var(--text-ghost)', fontSize: '0.85rem', letterSpacing: '0.08em' }}>...</p>
           ) : parsed ? (

@@ -557,6 +557,61 @@ html.app-shell input:focus {
   font-variant-ligatures: common-ligatures discretionary-ligatures;
 }
 
+/* ──────────────────────────────────────────────────────────────────────
+   PLAIN VARIANT (.pdoc-plain) — the whitepaper's prose is a casual,
+   plain-spoken explainer, so the form drops the illuminated-manuscript
+   dress that suited the old poetic draft: left-aligned ragged-right body
+   (no justification/auto-hyphenation), lining figures, ONE opening initial
+   instead of one per section, quiet dot dividers instead of rotating
+   fleurons, and plain bold instead of italic-accent. Scoped to .pdoc-plain
+   so the Memo and Brief keep their formal book setting. Form is content. */
+
+.pdoc-longform.pdoc-plain .pdoc-p {
+  text-align: left;
+  text-align-last: left;
+  hyphens: manual;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "lnum" 1;
+  font-variant-ligatures: common-ligatures;
+}
+
+/* Bold is upright (not the old decorative italic) but carries the brand
+   maroon — colour pop + scannable key terms, without the manuscript fuss. */
+.pdoc-longform.pdoc-plain .pdoc-p .pdoc-strong {
+  color: var(--accent);
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* Section dividers: a quiet triad of dots, not a Renaissance fleuron. */
+.pdoc-longform.pdoc-plain .pdoc-fleuron {
+  font-family: inherit;
+  font-style: normal;
+  font-size: 0;
+  letter-spacing: 0;
+  opacity: 1;
+}
+.pdoc-longform.pdoc-plain .pdoc-fleuron::after {
+  content: "· · ·";
+  font-size: 1.1rem;
+  letter-spacing: 0.5em;
+  padding-left: 0.5em;
+  color: var(--accent);
+  opacity: 0.55;
+}
+
+/* No illuminated caps anywhere — the casual register doesn't want the
+   manuscript flourish; the opening paragraph starts plain like the rest. */
+.pdoc-longform.pdoc-plain .pdoc-h2 + .pdoc-p::first-letter,
+.pdoc-longform.pdoc-plain .pdoc-h3 + .pdoc-p::first-letter {
+  -webkit-initial-letter: normal;
+  initial-letter: normal;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  color: inherit;
+  margin-right: 0;
+}
+
 /* First paragraph after a chapter heading — illuminated initial. The
    manuscript convention: each chapter opens with a larger first letter
    that signals "this is a new beginning." Subtle enough not to shout;
