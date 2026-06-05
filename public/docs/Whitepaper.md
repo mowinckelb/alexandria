@@ -2,7 +2,7 @@
 
 ## what's left for us?
 
-Intelligence is being industrialized — made cheap, made fast, made at scale. Add robots for the body, and you get the claim this whole decade runs on: whatever you do, a machine will do, and do it better. You don't have to buy it yet; the question it forces stands either way.
+Intelligence is being industrialized — made cheap, made fast, made at scale. Add robots for the body, and you get the claim this whole decade runs on: whatever you do, a machine will do, and do it better. You don't have to believe it yet; the question it forces stands either way.
 
 And it isn't rhetorical: when a machine can do everything you do, and do it better, what are people for?
 
