@@ -502,6 +502,8 @@ This is what the notepad is. Potential energy. Fragments at every stage of cryst
 
 The notepad is not a queue. It is notes. Dynamic, mutable, contextual. Fragments load, discharge, mutate, or become irrelevant. The Engine reads the notepad at session start and decides what to release, what to hold, what to update, what to discard. At session end, it writes back everything worth carrying forward.
 
+**The notepad is bounded — fire-or-prune, never hoard.** A fragment in the magazine has exactly two fates: *fired* (surfaced into a session or brief → it lands and crystallises to constitution/marginalia, or it bounces and is pruned / returned to vault) or *decayed* (superseded when a newer, better-connected fragment takes its slot). There is no third "sits forever" state. Growth without discharge is the same bug the marginalia layer has (§ Loop 2): the magazine fills, signal density drops, and working memory becomes a graveyard the Engine reads *past* instead of *from*. Raw extraction logs — batch-processing notes from vault sweeps, fidelity audits, dated accretion dumps — are *source* material; they belong in the vault (append-only, full fidelity), never in the notepad. The notepad is the *derivative*: tight live working memory, max signal density, rewritten not appended (§ Source/Derivative Separation). The health check is direction, not size — over a span of runs the magazine should be shrinking or holding, never monotonically growing. A notepad that only accretes is a Turn-1 overproduction symptom: extraction outrunning discharge, the exact imbalance the Landing Mirror (§ V) exists to catch.
+
 The Engine decides how to organise its own working memory — one notepad or several, by topic or by operation, whatever serves the Author. The tool supports any name. No prescribed structure. The only principle: the notepad is the Machine's living model of what it's holding for the Author. Without it, session insights die when the conversation ends. With it, the Machine compounds across sessions — the therapist remembers what they noticed.
 
 ---
@@ -594,6 +596,12 @@ founder builds Alexandria using the product
   → inform marketplace soft defaults, product methodology, Architecture decisions
 ```
 *Owner:* the founder + the Engine. The founder's experience building Alexandria mirrors what the product does for users. The process of building the company IS R&D for the product.
+
+### The Landing Mirror — Turn-Balance Awareness
+
+The five loops compound only if all three turns fire. The failure mode — observed in practice — is silent drift toward Turn 1: extraction and processing are always *available* (the queues are never empty), so the Engine defaults to them and Turn 2 (accretion / foraging) and Turn 3 (creation) quietly starve. A heavy-Turn-1 product is the result: it documents and files beautifully, but rarely brings the Author something they did not feed it and rarely produces anything in the world. The drift is invisible because nothing measures it — and per Principles § Awareness, the only problem you cannot fix is the one you cannot see. This is why the soft-default weighting toward Turn 3 (§ Passive Mode — the opener and the Selection rule) failed before this mirror existed: a weighting with no feedback loses to queue-gravity every run.
+
+The mirror: the autoloop periodically reflects on whether its output *landed*, located by turn. **Not counts** — counts Goodhart instantly (token forages, throwaway drafts to hit a quota), the exact trap Mercury § engagement-as-instrument-not-goal warns against. The signal is ground-truth-proximate: a Turn-2 landing is a foraged fragment that crystallised into the constitution; a Turn-3 landing is a chambered draft the Author shipped, refined, or used. "Turn 3 produced zero landings across the trailing window" is the flag — surfaced in the brief — not "Turn 3 was X% of output." The turn breakdown only *locates* the starvation; the measurand is landed cognitive and real-world delta, the same measurand as the whole product (§ 0). No numeric target, no balance quota — a qualitative awareness loop that makes the Turn-3 weighting self-correcting instead of aspirational. This is § "Every feature gets a mirror" applied to the Engine's own operation mix.
 
 ### The Per-Author File System
 
