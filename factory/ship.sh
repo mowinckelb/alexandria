@@ -75,3 +75,16 @@ fi
 msg="${1:-ship: $(date -u +%Y-%m-%dT%H:%MZ)}"
 git commit -m "$msg"
 git push
+
+# Awareness: ship.sh signs + pushes ONLY the gated files above. If other factory
+# changes (skills, templates) are sitting in the working tree, say so loudly —
+# silently leaving them behind is how factory/skills/*.md edits get stranded
+# (e.g. an autoloop spec edit that never reaches the routine). They are not
+# signature-gated and need a separate push.
+unshipped="$(git status --porcelain factory/ | grep -vE 'manifest\.txt(\.sig)?[[:space:]]*$' || true)"
+if [ -n "$unshipped" ]; then
+  echo ""
+  echo "⚠️  factory changes NOT shipped by ship.sh (not signature-gated):"
+  echo "$unshipped" | sed 's/^/    /'
+  echo "    → these need a separate push:  git push   (or: bash scripts/push.sh)"
+fi
