@@ -4,15 +4,26 @@ subject + body and SMTP-sends it.
 
 Priority of body sources:
   1. Stranded autoloop work (alarm).
-  2. Fresh `system/.brief_outbox` (autoloop wrote something to surface).
-  3. Stale-routine alarm if the autoloop hasn't committed in ~24h.
-  4. Default — one droplet picked from `files/core/shelf.md`, deterministic per
-     day. The brief always lands; silence trains the inbox to filter.
+  2. Fresh `system/.brief_outbox` — the one thing the autoloop chose to
+     surface this morning. Shipped VERBATIM: brief.py renders, the autoloop
+     owns content discipline (canon § Morning brief). No content surgery here.
+  3. Routine-health alarm if the autoloop hasn't committed in ~24h.
+  4. Otherwise — silence. Nothing earned the inbox. Canon § Morning brief:
+     "one thing or silence; there is no third state." Sending nothing is the
+     valid second default; "if it's in my inbox, it's worth opening" beats
+     daily frequency.
+
+  (Until 2026-06 a shelf droplet shipped at step 4 — a daily decontextualised
+  aphorism. That was the forbidden third state: it trained the inbox to filter
+  the brief, and two content walls upstream of it — enforce_brief_shape +
+  looks_like_recap — were silently mangling real briefs into recap-shaped
+  stubs and rejecting them, so the droplet fired every day. Both walls and the
+  droplet floor removed; the autoloop is the content authority.)
 
 Subject taxonomy:
   - `alexandria. — alarm` for stranded / alarm bodies.
   - Whatever `SUBJECT:` line the outbox supplies (e.g. `alexandria. — 2 to decide`).
-  - `alexandria.` for the daily droplet.
+  - `alexandria.` for an outbox with no explicit SUBJECT line.
 
 Sovereign by construction: no network calls except git (the Author's own
 remote) and SMTP (the Author's own provider).
@@ -21,7 +32,6 @@ remote) and SMTP (the Author's own provider).
 import html
 import json
 import os
-import random
 import re
 import smtplib
 import ssl
@@ -40,43 +50,22 @@ LOG = ALEX / ".brief_log"
 # (git -C $REPO log -- $REL); the absolutes are what Python opens. One source.
 OUTBOX_REL = "system/.brief_outbox"
 LAST_RUN_REL = "system/.autoloop/last_run.md"
-SHELF_REL = "files/core/shelf.md"
 OUTBOX = REPO / OUTBOX_REL
 LAST_RUN = REPO / LAST_RUN_REL
-SHELF = REPO / SHELF_REL
 
-FALLBACK_DROPLET = "*keep thinking.*"
-# Outbox content from before this threshold is treated as stale (yesterday's
-# run, not today's). The autoloop fires at 14:00 UTC, the brief at 15:00 UTC
-# — today's outbox is ~50 min old when read. 20h rejects anything older than
-# this morning while leaving slack for autoloop running late.
-OUTBOX_STALE_HOURS = 20
-# Last_run.md commit older than this triggers the "routine missed today" alarm.
-LAST_RUN_STALE_HOURS = 24
+# Outbox content from before this threshold is treated as stale (an autoloop
+# missed, not yesterday's run). The autoloop commits the outbox ~14:00 UTC
+# daily; the brief cron is set for 09:00 UTC but GH Actions consistently
+# delivers it 2–3h late, so an on-time outbox is 21–23h old when read.
+# 28h gives comfortable jitter slack while still alarming if autoloop
+# genuinely missed a day (next autoloop expected within ~24h of the last).
+OUTBOX_STALE_HOURS = 28
+# Last_run.md commit older than this triggers the "routine missed today"
+# alarm. Matched to OUTBOX_STALE_HOURS so both gates trip together when
+# the autoloop actually missed.
+LAST_RUN_STALE_HOURS = 28
 # A claude/* branch counts as a "live strand" only if its tip is this fresh.
 STRAND_FRESH_HOURS = 26
-# Canon (system/canon/methodology.md § Morning brief): brief is ONE thing,
-# section labels (Genesis/Accretion/Entropy/Development/Creation/Network) are
-# selection palette and NEVER appear in render. The autoloop drifts back to
-# the labelled-menu format; this is the wall that enforces canon at the
-# renderer when canon text fails. Cap chosen tight on purpose — canon examples
-# of the truck-driver lead run ~100 chars; 400 leaves room for optional italic
-# depth without permitting a status-report dump.
-BRIEF_MAX_CHARS = 400
-SECTION_LABEL_RE = re.compile(
-    r"^\*\*(?:Genesis|Accretion|Entropy|Development|Creation|Network)\*\*\s*$",
-    re.IGNORECASE,
-)
-# Canon (scheduled.md § Brief delivery): outbox is for decisions parked OR
-# alarms — NEVER daily work summaries. Tension over recap, invitation over
-# status report. The autoloop drifts to recap shape; this is the content
-# wall. An outbox passes only if it has a question mark OR an action-trigger
-# keyword. Otherwise it's a recap — drop it, let the droplet floor ship.
-ACTION_TRIGGER_RE = re.compile(
-    r"\b(decide|hold|fire|drop|publish|post|refine|ship|open|review|"
-    r"rescue|alarm|/a)\b",
-    re.IGNORECASE,
-)
 
 
 def log(line: str) -> None:
@@ -109,7 +98,8 @@ def file_commit_age_h(rel_path: str) -> Optional[float]:
 
 def sync_repo() -> None:
     """Fetch + FF master so OUTBOX/LAST_RUN reflect the latest autoloop push.
-    Failures logged but non-fatal — the brief still sends a droplet."""
+    Failures logged but non-fatal — the brief still assembles from whatever
+    local outbox/last_run state it already has (or stays silent)."""
     try:
         git("fetch", "--all", "--quiet", timeout=45)
     except Exception as e:
@@ -152,67 +142,6 @@ def parse_outbox(raw: str) -> Tuple[Optional[str], str]:
         subject = first_line.split(":", 1)[1].strip()
         return subject, rest.lstrip("\n")
     return None, raw
-
-
-def looks_like_recap(body: str) -> bool:
-    """Canon (scheduled.md): outbox is for decisions parked or alarms only;
-    daily work summaries are forbidden. Heuristic detector: if the body has
-    neither a question mark nor an action-trigger keyword, treat it as a
-    recap. Caller falls through to the droplet floor.
-
-    False positives (rejecting a statement-shaped legitimate brief) are
-    cheap — the droplet floor is curated. False negatives (passing a recap
-    that happens to contain "open" or "?") are cheaper than today's status
-    quo. Drift protection beats edge-case fidelity.
-    """
-    stripped = body.strip()
-    if not stripped:
-        return False
-    if "?" in stripped:
-        return False
-    if ACTION_TRIGGER_RE.search(stripped):
-        return False
-    return True
-
-
-def enforce_brief_shape(body: str, max_chars: int = BRIEF_MAX_CHARS) -> str:
-    """Wall-enforcement of the canon's 'one thing or silence' shape.
-
-    The autoloop is supposed to write a single truck-driver lead with optional
-    italic depth (canon § Morning brief). It drifts back to the labelled-menu
-    format every cycle. This function is the renderer-side cop: strip leading
-    section labels, keep only the first paragraph, hard cap at max_chars
-    truncated at a sentence boundary.
-
-    Side effect of dropping anything after the first blank line: information
-    loss when the autoloop has real signal in a later section. Accepted —
-    canon already says ONE thing. The cop's job is to make the wall bite.
-    """
-    lines = body.split("\n")
-    while lines and SECTION_LABEL_RE.match(lines[0].strip()):
-        lines.pop(0)
-        while lines and not lines[0].strip():
-            lines.pop(0)
-    first_para_lines: List[str] = []
-    for line in lines:
-        if not line.strip():
-            break
-        first_para_lines.append(line)
-    para = "\n".join(first_para_lines).strip()
-    if len(para) <= max_chars:
-        return para
-    truncated = para[:max_chars]
-    for stop in [". ", "? ", "! "]:
-        idx = truncated.rfind(stop)
-        if idx > 0:
-            truncated = truncated[: idx + 1]
-            break
-    truncated = truncated.rstrip()
-    # Close any italic span the truncation opened — autoloop wraps paragraphs
-    # in `*...*` and the inline regex needs both markers to render.
-    if truncated.count("*") % 2 == 1:
-        truncated += "*"
-    return truncated
 
 
 def detect_stranded() -> Optional[str]:
@@ -278,37 +207,9 @@ def detect_stranded() -> Optional[str]:
     return f"{header}\n\nRescue: {rescue}"
 
 
-def pick_droplet() -> str:
-    """Pick one droplet from the shelf, deterministic for today's UTC date.
-
-    Stanzas in `files/core/shelf.md` are separated by lines of three+ dashes.
-    Anything before the first separator is treated as header/meta and ignored.
-    Empty/missing shelf → built-in fallback.
-
-    Rotation: reshuffles the stanza order each ISO week (seed = year+week);
-    weekday indexes into the shuffled list. Same day-of-week within a week =
-    same droplet (idempotent reruns). 7 unique droplets per week when N ≥ 7.
-    """
-    if not SHELF.exists():
-        return FALLBACK_DROPLET
-    raw = SHELF.read_text()
-    parts = re.split(r"\n-{3,}\n", raw)
-    # parts[0] is the header above the first `---`. Stanzas start at parts[1:].
-    stanzas = [p.strip() for p in parts[1:] if p.strip()]
-    if not stanzas:
-        return FALLBACK_DROPLET
-    today = datetime.now(timezone.utc).date()
-    iso_year, iso_week, iso_weekday = today.isocalendar()
-    rng = random.Random(f"{iso_year}-W{iso_week:02d}")
-    order = list(range(len(stanzas)))
-    rng.shuffle(order)
-    # iso_weekday is 1..7; index modulo N so weeks where N<7 still cycle cleanly.
-    return stanzas[order[(iso_weekday - 1) % len(stanzas)]]
-
-
 def _inline(text: str) -> str:
-    """Escape, then render `**bold**` and `*italic*` from shelf droplets and
-    outbox prose. Order matters — `**` before `*` to avoid greedy collision.
+    """Escape, then render `**bold**` and `*italic*` from outbox prose.
+    Order matters — `**` before `*` to avoid greedy collision.
     No other markdown — keeping the parser tiny is the point.
     """
     s = html.escape(text)
@@ -401,41 +302,38 @@ def load_creds() -> dict:
     return json.loads(CREDS.read_text())
 
 
-def assemble(creds: dict) -> Tuple[str, str]:
-    """Return (subject, body) for today's brief. Priority:
-      stranded > fresh outbox > stale-routine alarm > droplet.
-    """
-    body: Optional[str] = None
-    subject: Optional[str] = None
+def assemble(creds: dict) -> Tuple[Optional[str], Optional[str]]:
+    """Return (subject, body) for today's brief, or (None, None) for silence.
 
+    Priority: stranded alarm > fresh outbox > routine-health alarm > silence.
+
+    The fresh outbox ships VERBATIM — brief.py renders, the autoloop owns
+    content discipline (canon § Morning brief). No shape/recap walls and no
+    droplet floor: when nothing's in the outbox and the routine is healthy,
+    the answer is silence, not a manufactured aphorism ("one thing or
+    silence; there is no third state").
+    """
     stranded = detect_stranded() if (REPO / ".git").exists() else None
     if stranded:
         return "alexandria. — alarm", stranded
 
     fresh = read_fresh_outbox()
     if fresh:
-        parsed_subject, parsed_body = parse_outbox(fresh)
-        shaped = enforce_brief_shape(parsed_body)
-        if shaped and not looks_like_recap(shaped):
-            body = shaped
-            subject = parsed_subject
+        subject, body = parse_outbox(fresh)
+        body = body.strip()
+        if body:
+            return (subject or creds.get("subject", "alexandria.")), body
 
-    if body is None:
-        # No outbox content: check routine health before falling through to droplet.
-        if not LAST_RUN.exists():
-            return "alexandria. — alarm", "alarm: machine routine has never run — no last_run.md found."
-        age_h = file_commit_age_h(LAST_RUN_REL)
-        if age_h is not None and age_h > LAST_RUN_STALE_HOURS:
-            return "alexandria. — alarm", f"alarm: machine routine stale — last_run.md last committed {age_h:.0f}h ago."
-        body = pick_droplet()
+    # No usable outbox — is the routine itself healthy?
+    if not LAST_RUN.exists():
+        return "alexandria. — alarm", "alarm: machine routine has never run — no last_run.md found."
+    age_h = file_commit_age_h(LAST_RUN_REL)
+    if age_h is not None and age_h > LAST_RUN_STALE_HOURS:
+        return "alexandria. — alarm", f"alarm: machine routine stale — last_run.md last committed {age_h:.0f}h ago."
 
-    if subject is None:
-        if body.startswith("STRANDED") or body.startswith("alarm:"):
-            subject = "alexandria. — alarm"
-        else:
-            subject = creds.get("subject", "alexandria.")
-
-    return subject, body
+    # Routine healthy, nothing surfaced — silence. The brief is worth opening
+    # precisely because it doesn't land every day.
+    return None, None
 
 
 def main() -> int:
@@ -449,6 +347,9 @@ def main() -> int:
         sync_repo()
 
     subject, body = assemble(creds)
+    if not body:
+        log("silent: nothing earned the inbox today")
+        return 0
 
     msg = EmailMessage()
     msg["Subject"] = subject

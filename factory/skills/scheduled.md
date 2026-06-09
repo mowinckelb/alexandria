@@ -147,11 +147,20 @@ BAD (delete the outbox, do not commit):
 - "*Five new items crystallised: augmentation flip, BCI subsumption…*" ← inventory
 - "*46 vault entries processed, 2 derivatives regenerated.*" ← work summary
 
-**Brief.py enforces a wall.** As of 2026-05-26, `brief.py` strips section labels, caps at 400 chars, and rejects outboxes that lack a question mark or action-trigger keyword (decide/hold/fire/drop/publish/post/refine/ship/open/review/rescue/alarm). Rejected outboxes silently fall through to the droplet floor. Writing a recap doesn't get the recap shipped — it gets your work silenced. Write tension or write nothing.
+**Brief.py renders only — you own the content.** Since 2026-06-08 the renderer ships the outbox verbatim: no truncation, no shape checks, no droplet fallback (the old walls — `enforce_brief_shape`, `looks_like_recap`, the daily shelf droplet — silently mangled real briefs into recap stubs and trained the inbox to filter; removed). There is no floor to fall through to: outbox-or-silence. Content discipline lives here, in selection, not downstream. Write tension or write nothing.
 
 ### Runtime constraint
 
 The outbox is git-transported. Commit + push it the same way you commit `last_run.md`; `brief.py` pulls master on the next fire. For autoloops running off the Author's machine (claude.ai, GH Actions, remote), the commit IS the delivery mechanism — no local file write required.
+
+### Running on the Author's machine (launchd / cron)
+
+If this runs locally on a schedule, the invocation matters more than the prompt. A scheduled agent that triggers macOS permission dialogs gets killed by the Author within days, regardless of the value it produces — felt cost beats unfelt value every time. Four rules, learned the hard way:
+
+1. **`claude --safe-mode -p`, never plain and never `--bare`.** A plain invocation loads the Author's global hooks every fire — any hook touching iCloud Drive, Documents, or Desktop triggers an OS permission dialog on a schedule (the prompt storm). `--safe-mode` skips all customizations while keeping normal auth. `--bare` is NOT the tool: it also skips OAuth/keychain auth and only accepts `ANTHROPIC_API_KEY` — it will fail silently under launchd for subscription users.
+2. **Bypass only inside the cage.** `--permission-mode bypassPermissions` is safe only with the OS sandbox enforced: pass `--settings` a JSON with `sandbox.enabled: true`, `failIfUnavailable: true`, `allowUnsandboxedCommands: false`, filesystem writes scoped to what the agent owns (+ `$TMPDIR`, npm cache), network domains allowlisted, and the Author's private directories deny-listed for reads. Violations fail cleanly; the agent logs and moves on. Exclude `gh *` and network git commands from the sandbox (`excludedCommands`) — Seatbelt breaks their TLS verification.
+3. **Never touch the keychain from a scheduled process.** Keychain reads from launchd-spawned processes are a permission-prompt source. Mirror the GitHub token once to a `0600` file (`gh auth token > ~/.config/<app>/github_token`) and export `GH_TOKEN` from it in the runner script — `gh` and `git` (via `gh auth git-credential`) then never ask.
+4. **OFF is a first-class state.** Check a `.paused` sentinel at the top of the runner, before spawning claude — paused must cost zero tokens and zero permission surface, and every status surface must read it as intentional, never as an error. An Author who can't legibly turn the thing off with one command will turn it off with `rm -rf`. Corollary: surface merged wins where the Author already looks (session banner, brief) — an autonomous system whose value is invisible while its costs are felt reads as dead weight and gets killed.
 
 ## Verification (run last)
 
