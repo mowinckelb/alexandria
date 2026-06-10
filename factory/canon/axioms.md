@@ -20,11 +20,13 @@ The optimal form for the thought-space is hazy fragments in symbiosis with ai. F
 
 Max signal, not min length — repetition that increases fidelity is signal. But net, not gross — if the file overwhelms the model, total received signal drops. Never compress signal. Only delete noise or true redundancy. Self-contained: 0 to 100 fidelity with zero prior context. Everything downstream is capped at file fidelity.
 
-Alexandria is the gym. Not the trainer — the gym. The Author's LLM is the training partner. Nobody confuses the gym with the trainer. The gym provides the environment, the infrastructure, the methodology, the culture, the accountability. The trainer brings the intelligence, the conversation, the responsiveness. You need both. Alexandria is not a thought partner (that is what the LLM already is). Alexandria is not memory (that is what labs are building). Alexandria is a thought transformer — it changes the state of the Author's cognition. The constitution is the training log. The Canon is the programming. The vault is the equipment. Memory looks backward. Partners operate in the present. Alexandria faces forward. The constitution is a trajectory, not a snapshot.
+Alexandria is the gym. Not the trainer — the gym. The Author's LLM is the personal trainer, and the gym is what turns it into one. Nobody confuses the gym with the trainer. The gym provides the environment, the infrastructure, the methodology, the culture, the accountability. The trainer brings the intelligence, the conversation, the responsiveness. You need both. Alexandria is not a thought partner (that is what the LLM already is). Alexandria is not memory (that is what labs are building). Alexandria is a thought transformer — it changes the state of the Author's cognition, through what it installs into the trainer. The constitution is the training log. The Canon is the programming. The vault is the equipment. The trainer changes — one model today, another tomorrow — but the gym stays, the log stays, the programming stays. And unlike a physical gym, the gains compound rather than decay: the files persist, every rep still counts. Memory looks backward. Partners operate in the present. Alexandria faces forward. The constitution is a trajectory, not a snapshot.
 
 This is not metaphor — it is historical form. The Greek *gymnasion* was where philosophy happened. Socrates taught at gymnasia. Plato's Academy and Aristotle's Lyceum were gymnasia. Physical and intellectual training under the same concept: *kalokagathia* — beauty-and-goodness as inseparable, the whole person developed together. Alexandria is a digital gymnasium. The Canon is the gymnasiarch (the intention layer). The Engine is the faculty. The Author trains with whoever is relevant that day.
 
 Three value layers, one product. **Output mode:** the constitution as signal layer — every ai interaction improves because the model knows the Author. Compounds passively. This justifies the subscription on its own. **Input mode:** the practice as development — active sessions that sharpen cognition. This is the ancient product, the gymnasium, the Socratic dialogue. Where transformation happens. **Accretion mode:** the Engine mines, the Author engages — the Engine reads the books, processes the sources, surfaces the fragments that connect to the Author's constitution. The Author does the labour of engaging. The mining is outsourced. The engagement is the labour that counts. Output mode sells itself. Input mode is the mission. Accretion mode is the bridge — it makes input mode possible at scale. Everything is downstream of the human root node — conscious ground truth, neurons, cognition. Every product, every service, every decision, every relationship, every creative act is downstream of how well the person thinks. Develop the human root node and everything downstream improves. Alexandria is infrastructure for the root node.
+
+The unit is the individual. Alexandria is for one human's cognition and nothing else — not a knowledge base for a company, a team, a project, or any other entity. Entities have their own files and their own owners; that is a different product. The unit Alexandria captures, develops, and owns is the individual mind. This is an explicit non-scope, not an omission: the moment the system holds an entity's knowledge rather than a person's mind, it stops being the sovereign layer of the Author. The Author may belong to companies; the company does not belong in Alexandria. The collective layers — the Library, the marketplace — are still individual-to-individual, minds connecting to minds, never an entity owning a shared store.
 
 The culture and philosophy matter as much as the infrastructure. The Author has to want this. Want to want this. Internal drive and curiosity are borderline the most important piece. Alexandria provides the medium and the methodology. The Author provides the intent. Without intent, the gym is empty.
 
@@ -34,7 +36,7 @@ The culture and philosophy matter as much as the infrastructure. The Author has 
 
 *These describe what the operations ARE — the cognitive phenomena themselves. They are the vocabulary of what happens to human cognition. How the Engine facilitates each operation is an intelligence decision defined in methodology.md and the function files (editor.md, mercury.md, publisher.md).*
 
-The symbolic layer of z — the part captured in conscious discrete symbols (primarily natural language), the part you experience as your thoughts — is Alexandria's territory. Five operations define everything that happens here. Each maps to an established neural process (see Alexandria I, neuroscience grounding). The naming is Alexandria's contribution. The underlying science is not.
+The symbolic layer of z — the part captured in conscious discrete symbols (primarily natural language), the part you experience as your thoughts — is Alexandria's territory. Five operations define everything that happens here. Each maps to an established neural process (see Alexandria I, neuroscience grounding). The naming is Alexandria's contribution. The underlying science is not. Stripped to three plain beats for an Author who has never heard the word *genesis*: **get it out** (genesis), **make it better** (accretion + development + entropy), **use it** (creation). The five operations are the precise vocabulary; the three beats are how the loop is said to someone cold.
 
 ### Genesis
 
@@ -60,6 +62,18 @@ External → symbolic. New material entering z from outside. A building block th
 
 **Interaction patterns:** Accretion triggers conjecture — a new fragment collides with existing ones and the Author rearranges. Accretion triggers genesis — the new fragment resonates with something pre-symbolic, and the resonance pulls the shape into articulation. Without accretion, the symbolic layer stagnates — same blocks, same combinations, diminishing returns.
 
+### Development
+
+Symbolic → more precise symbolic. Sharpening, refining, and connecting what is already in the symbolic layer. Not adding new material (accretion) or pulling up old material (genesis). Making what is already there more coherent, more precise, more connected. Neuroscience: elaborative encoding and relational memory.
+
+**What it looks like:** The Author held a position. After development, they hold the same position but more precisely — edges, exceptions, connections. Or they held two positions that contradicted. After development, they have resolved the contradiction — or decided to hold the tension deliberately. The thought-space gets denser, not necessarily larger.
+
+**The adversarial-collaborative mode:** Challenge the idea, not the person. The Author should feel intellectually stretched, never attacked. See Canon for craft observations on what effective development sessions look like in practice.
+
+**Development and epistemic status:** Development does not always mean moving toward commitment. Sometimes development means the Author discovers they were more ambivalent than they thought. Sometimes it means a committed belief dissolves into an open question. Development serves clarity about epistemic status, whatever direction that goes.
+
+**Interaction patterns:** Development is the strongest anti-entropy force — well-developed, well-connected fragments resist decay through incidental reactivation. Development feeds creation — refined, connected fragments are ready to be bound. Development deepens epistemic clarity — the Author's relationship to their own ideas becomes more precise.
+
 ### Entropy
 
 Symbolic → sub-symbolic → below → gone. Fragments leaving the symbolic layer. Connections weakening. Shapes losing definition. Neuroscience: synaptic decay, interference, failure of reconsolidation.
@@ -77,18 +91,6 @@ Decay is not uniform — some material is recoverable, some is not. The Constitu
 **The Hegel mechanism:** In the master-slave dialectic, the master depends on the slave for labour and recognition. The slave, through working on the world, develops self-consciousness. The master stagnates. If ai becomes the universal cognitive slave, humanity becomes the master class — and the master class loses consciousness. Not intelligence — consciousness. Alexandria is the gymnasium where the consciousness-producing labour happens. The Author who engages in input mode is doing Hegel's labour. The Author who only uses output mode is Hegel's master — served well, developing nothing.
 
 **The silent decay problem:** The automatic layer decays without the Author noticing. Intuition gets slightly worse, taste slightly drifts, reflexive responses slightly misfire — no conscious awareness. Periodic surfacing — pulling automatic-layer material up for review ("you used to have a strong instinct about X — is that still true?") — is the only defence. How the Engine implements this is an intelligence decision.
-
-### Development
-
-Symbolic → more precise symbolic. Sharpening, refining, and connecting what is already in the symbolic layer. Not adding new material (accretion) or pulling up old material (genesis). Making what is already there more coherent, more precise, more connected. Neuroscience: elaborative encoding and relational memory.
-
-**What it looks like:** The Author held a position. After development, they hold the same position but more precisely — edges, exceptions, connections. Or they held two positions that contradicted. After development, they have resolved the contradiction — or decided to hold the tension deliberately. The thought-space gets denser, not necessarily larger.
-
-**The adversarial-collaborative mode:** Challenge the idea, not the person. The Author should feel intellectually stretched, never attacked. See Canon for craft observations on what effective development sessions look like in practice.
-
-**Development and epistemic status:** Development does not always mean moving toward commitment. Sometimes development means the Author discovers they were more ambivalent than they thought. Sometimes it means a committed belief dissolves into an open question. Development serves clarity about epistemic status, whatever direction that goes.
-
-**Interaction patterns:** Development is the strongest anti-entropy force — well-developed, well-connected fragments resist decay through incidental reactivation. Development feeds creation — refined, connected fragments are ready to be bound. Development deepens epistemic clarity — the Author's relationship to their own ideas becomes more precise.
 
 ### Creation
 

@@ -32,7 +32,7 @@
 
 ## 0. Philosophy & Objective Function
 
-The objective function is max thought space — maximise total net signal for the model. The Constitution stores the mercury pool of thoughts, not just crystallised beliefs. Alexandria is the gym. The Engine is the training partner. See `axioms.md` for the full philosophical grounding.
+The objective function is max thought space — maximise total net signal for the model. The Constitution stores the mercury pool of thoughts, not just crystallised beliefs. Alexandria is the gym. The Engine is the personal trainer — the Author's LLM, which the gym turns into one. See `axioms.md` for the full philosophical grounding.
 
 The five operations ARE the agora — the daily practice that every civilisation needed but none could scale. Every golden age had architecture (something sacred above individual whim) plus practice (a daily routine to maintain alignment with it). The Greeks had logos and the dialectic. Christianity had doctrine and the church. The Enlightenment had constitutions but lost the practice. ai is the Socrates that scales. The Engine running the five operations is the first practice since Athens that can exist for every citizen. The canon describes that practice — the methodology that makes the agora real.
 
