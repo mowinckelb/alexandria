@@ -100,15 +100,26 @@ export default async function SignupPage({
           <section className="primer-section">
             <p className="primer-label">the security.</p>
             <p>
-              in a few minutes you will paste a command into your
-              terminal, text will scroll, and some part of you
-              will ask: <em>am i being hacked?</em> no. alexandria
-              is text files on your own computer &mdash; no app,
-              no binaries. the ai you already use reads them, with
-              the access you already gave it. your thinking cannot
-              be sent to us: our server has no way to receive it.
-              the little that does leave is one short list:{' '}
-              <MechanicsCopy content={mechanicsContent} />.
+              what gets installed is one folder of text files on
+              your own computer, plus a few small entries so your
+              ai knows it exists. nothing else is touched.
+            </p>
+            <p>
+              <em>is alexandria taking my stuff?</em> no. nothing
+              private ever leaves your machine &mdash; only what
+              you choose to publish does.
+            </p>
+            <p>
+              <em>can my ai now mess up my computer?</em> no.
+              alexandria gives your ai reading material, not new
+              powers. it can do exactly what it could yesterday,
+              and it still asks before it acts.
+            </p>
+            <p>
+              and if you ever want out: delete the folder and it
+              is as if it never happened. the exact commands are
+              in <MechanicsCopy content={mechanicsContent} />,
+              along with everything else the install does.
             </p>
           </section>
 
