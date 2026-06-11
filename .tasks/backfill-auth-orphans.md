@@ -154,3 +154,15 @@ node ../.tasks/backfill-auth-orphans.mjs --commit
 ## After running
 
 Delete this file (or move to `.tasks/done/`). The structural fix (`kv.ts:setAuthIndex` rotation) prevents new orphans.
+
+## State as of 2026-06-11 (surge S4 close — analysis done, deletion deliberately deferred)
+
+Full live analysis (CF REST bulk-get, read-only): **11 `auth:` rows / 7 accounts.**
+
+- `github_233047998` (mowinckelb): 2 rows — `060a6f25…` is the founder's additive local admin key (`~/.config/alexandria/admin_key`, documented in private/CLAUDE.md), `0601cb69…` the primary. **Both legitimate — the script's orphan-set logic would delete the admin key. Add an allowlist for it before running, or re-mint the local admin key after.**
+- `github_6433760` (merivercap): **4 rows** (`153b1916…`, `bad839c4…`, `8dcff386…`, `0ac0d785…`) — signup + 3 pre-fix nudge regenerations. 3 are orphans; which one is current is indistinguishable without decrypting the account blob (needs `ENCRYPTION_KEY`).
+- All other accounts: exactly 1 row. Clean.
+
+Why deletion was deferred, not executed: merivercap has never used any key (60-day event log: one `prosumer_signup`, zero installs/calls), their account status blocks write endpoints anyway, and blind deletion (3 of 4 at random) carries a 75% chance of killing the key in their most recent nudge email — breaking a prospective user's return moment for negligible security gain. The structural rotation fix already stops new orphans.
+
+To finish (≈2 min, when ENCRYPTION_KEY is in hand): run the script above in dry-run, confirm it reports exactly 3 orphans all on github_6433760 and does NOT list 060a6f25… (admin key), then `--commit`. Then move this file to .tasks/done/.

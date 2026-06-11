@@ -868,7 +868,16 @@ export async function resolveActiveSubscription(account: Account): Promise<Resol
         status: 'all',
         limit: 10,
       });
-      const active = subs.data.find((s) => MANAGEABLE_STATUSES.includes(s.status));
+      // Shared emails are legal in Stripe (two accounts, one inbox; or one
+      // person, two GitHub logins). Healing writes subscription_id +
+      // customer_id onto THIS account, so a wrong match silently corrupts
+      // billing state. Only heal from a subscription whose metadata names
+      // this login — or carries no login at all (pre-metadata legacy subs,
+      // where email is the only identifier we ever had).
+      const active = subs.data.find((s) =>
+        MANAGEABLE_STATUSES.includes(s.status)
+        && (!s.metadata?.github_login || s.metadata.github_login === account.github_login)
+      );
       if (active) {
         await healAccount(account, active);
         return shapeResolvedSubscription(active, true);

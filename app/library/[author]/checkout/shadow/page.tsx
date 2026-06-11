@@ -17,8 +17,6 @@ export default function ShadowCheckoutPage({ params }: { params: Promise<{ autho
   const [authorId, setAuthorId] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [amount, setAmount] = useState(SLIDER_DEFAULT);
-  const [promoCode, setPromoCode] = useState('');
-  const [promoStatus, setPromoStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pageLoading, setPageLoading] = useState(true);
@@ -42,27 +40,11 @@ export default function ShadowCheckoutPage({ params }: { params: Promise<{ autho
     });
   }, [params]);
 
-  const applyPromo = async () => {
-    if (!promoCode) return;
-    try {
-      const res = await fetch(`${SERVER_URL}/library/promo/${promoCode}`);
-      const data = await res.json();
-      if (data.valid) {
-        setPromoStatus(data.discount_pct >= 100 ? 'free access' : `${data.discount_pct}% off`);
-      } else {
-        setPromoStatus('invalid');
-      }
-    } catch {
-      setPromoStatus('invalid');
-    }
-  };
-
   const handleCheckout = async () => {
     setLoading(true);
     setError('');
     try {
       const body: Record<string, unknown> = { amount_cents: amount * 100 };
-      if (promoCode) body.promo_code = promoCode;
       const res = await fetch(`${SERVER_URL}/library/${authorId}/checkout/shadow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -113,28 +95,6 @@ export default function ShadowCheckoutPage({ params }: { params: Promise<{ autho
           <span>${SLIDER_MAX}</span>
         </div>
         <p style={{ fontSize: '0.65rem', color: 'var(--text-ghost)', margin: '0.5rem 0 0' }}>pay what you want. most of it goes to the author.</p>
-
-        {/* Promo */}
-        <div style={{ margin: '2rem 0 0', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <input
-            type="text"
-            placeholder="promo code"
-            value={promoCode}
-            onChange={e => { setPromoCode(e.target.value); setPromoStatus(''); }}
-            onBlur={applyPromo}
-            onKeyDown={e => e.key === 'Enter' && applyPromo()}
-            style={{
-              background: 'none', border: 'none', borderBottom: '1px solid var(--border-light)',
-              color: 'var(--text-ghost)', fontSize: '0.72rem', fontFamily: 'var(--font-eb-garamond)',
-              width: '100px', padding: '4px 0', outline: 'none',
-            }}
-          />
-          {promoStatus && (
-            <span style={{ fontSize: '0.65rem', color: promoStatus === 'invalid' ? 'var(--text-whisper)' : 'var(--text-muted)' }}>
-              {promoStatus}
-            </span>
-          )}
-        </div>
 
         {/* Pay */}
         <div style={{ margin: '2.5rem 0 0' }}>

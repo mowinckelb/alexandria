@@ -22,8 +22,6 @@ function WorkCheckoutPageContent({ params }: { params: Promise<{ author: string 
   const [authorName, setAuthorName] = useState('');
   const [workTitle, setWorkTitle] = useState('');
   const [amount, setAmount] = useState(SLIDER_DEFAULT);
-  const [promoCode, setPromoCode] = useState('');
-  const [promoStatus, setPromoStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pageLoading, setPageLoading] = useState(true);
@@ -52,21 +50,6 @@ function WorkCheckoutPageContent({ params }: { params: Promise<{ author: string 
     });
   }, [params, workId]);
 
-  const applyPromo = async () => {
-    if (!promoCode) return;
-    try {
-      const res = await fetch(`${SERVER_URL}/library/promo/${promoCode}`);
-      const data = await res.json();
-      if (data.valid) {
-        setPromoStatus(data.discount_pct >= 100 ? 'free access' : `${data.discount_pct}% off`);
-      } else {
-        setPromoStatus('invalid code');
-      }
-    } catch {
-      setPromoStatus('invalid code');
-    }
-  };
-
   const handleCheckout = async () => {
     setLoading(true);
     setError('');
@@ -77,7 +60,6 @@ function WorkCheckoutPageContent({ params }: { params: Promise<{ author: string 
     }
     try {
       const body: Record<string, unknown> = { work_id: workId, amount_cents: amount * 100 };
-      if (promoCode) body.promo_code = promoCode;
 
       const res = await fetch(`${SERVER_URL}/library/${authorId}/checkout/work`, {
         method: 'POST',
@@ -142,28 +124,6 @@ function WorkCheckoutPageContent({ params }: { params: Promise<{ author: string 
               <span>${SLIDER_MIN}</span>
               <span>${SLIDER_MAX}</span>
             </div>
-          </div>
-
-          {/* Promo code */}
-          <div className="mt-8 flex items-center gap-3">
-            <input
-              type="text"
-              placeholder="promo code"
-              value={promoCode}
-              onChange={e => { setPromoCode(e.target.value); setPromoStatus(''); }}
-              onBlur={applyPromo}
-              onKeyDown={e => e.key === 'Enter' && applyPromo()}
-              style={{
-                background: 'none', border: 'none', borderBottom: '1px solid var(--border-light)',
-                color: 'var(--text-ghost)', fontSize: '0.75rem', fontFamily: 'var(--font-eb-garamond)',
-                width: '120px', padding: '4px 0', outline: 'none',
-              }}
-            />
-            {promoStatus && (
-              <span style={{ fontSize: '0.68rem', color: promoStatus === 'invalid code' ? 'var(--text-whisper)' : 'var(--text-muted)' }}>
-                {promoStatus}
-              </span>
-            )}
           </div>
 
           {/* Pay */}
