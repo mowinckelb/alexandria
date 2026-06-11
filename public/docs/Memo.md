@@ -18,7 +18,7 @@ Most AI products are transition assets — value decays into the model with each
 
 A structured record of who each user is — whatever they choose to put in it: worldview, values, mental models, taste, personal thoughts, decisions, blind spots, anything. **The product is the framework; the practice is theirs** (daily Socratic sessions, journals, decision logs, any system works). Local files the user owns. Portable across every AI provider. *The record cannot be back-filled: inbox-scraping reaches what the user does, never what they mean.* **The compounding is the years.**
 
-*Engineering is done. One curl command. Free in the seeding stage — every GitHub sign-in is a full Author, no card; the $10/month floor, free with five referred friends, users choosing what they pay above that, is the standing model that turns on once demand is proven.* The only open question is whether enough people want it.
+*Engineering is done. One curl command. $10/month floor, free with five referred friends, users choose what they pay above that.* The only open question is whether enough people want it.
 
 ---
 

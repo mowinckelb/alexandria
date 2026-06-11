@@ -168,7 +168,7 @@ Cloudflare Worker, stateless re: your private content. KV + D1 + R2.
 
 | Stored | Where | Why |
 |---|---|---|
-| Email + GitHub login, in one encrypted account blob — plus a Stripe customer ID only if you have ever started a subscription (signup itself is free: no card, no Stripe round-trip) | KV (AES-256-GCM at rest) | Account, OAuth, billing |
+| Email + GitHub login + Stripe customer ID, in one encrypted account blob | KV (AES-256-GCM at rest) | Account, OAuth, billing |
 | API key — SHA-256 hash only | KV | Auth check |
 | Event log: which endpoints your account hit, with timestamps and lightweight context (e.g. "canon_status: failures=editor, has_notice=true") | KV (60-day TTL) | Debugging, abuse signal |
 | Library files you explicitly publish | R2 | Public Library content |

@@ -108,15 +108,16 @@ export async function requireAuth(c: { req: { header: (name: string) => string |
 
 /**
  * Gate write endpoints (PUT /file, DELETE /file, POST /call) on an active
- * account. Early stage: joining is free — every new GitHub sign-in lands as
- * `free` and can write immediately, no card, no Stripe round-trip. The paid
- * machinery (createCheckoutSession, kin coupon, $10 price) stays dormant but
- * intact for when billing turns on; until then `free` is the default tier.
- * Reads remain open (see /library/*) so lapsed users still reach their data.
+ * subscription. The deal is "$10/month or 5 active kin" (billing back on
+ * 2026-06-11): new GitHub sign-ins go through Stripe checkout at the OAuth
+ * callback. A cancelled/unpaid sub means neither condition is met, so writes
+ * are blocked at 402 with a reactivate link. Reads remain open (see
+ * /library/*) so users who lapse can still access their own data.
  *
  * Allowed statuses:
- *   - `free`      — early-stage free tier (default for new sign-ins)
- *   - `trialing`  — first 30 days of a paid sub (once billing is on)
+ *   - `free`      — grandfathered seeding-stage cohort (joined 2026-06-05 →
+ *                   06-11 while signup was free); kept active until the gate
+ *   - `trialing`  — first 30 days of a paid sub
  *   - `active`    — paying $10 or free via the kin coupon
  *   - `past_due`  — Stripe is retrying a failed card; grace period
  *   - `beta`      — legacy users from before live billing

@@ -398,9 +398,10 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
       </p>
       <p>
         <span className="beat-title">The collective</span>
-        <em className="em-strong">Share files with the friends you
-        choose.</em>{' '}Both ways, revocable any time. AI stops
-        guessing about the people in your life.{' '}
+        <em className="em-strong">Five friends and your subscription
+        is free.</em>{' '}Share files with friends you choose &mdash;
+        both ways, revocable any time. AI stops guessing about the
+        people in your life.{' '}
         <em>More authors &rarr; richer AI for everyone.</em>
       </p>
       <p>
@@ -617,7 +618,7 @@ export default function LandingPage({ brandClassName = '', mechanicsContent = ''
                       join the tribe
                     </Link>
                     <span className="cta-sub">
-                      free &middot; open source &middot; works with every ai
+                      free with kin &middot; open source &middot; works with every ai
                     </span>
                   </div>
                   <div className="cta-block">
