@@ -119,9 +119,9 @@ factory/
 
 ## Session Close
 
-Capture is a layer, not a trigger. **Every** session that surfaces signal captures it — the methodology bar (`~/alexandria/system/canon/methodology.md` § Session Close, § Passive Mode): extraction fires on *any* natural sign-off, and the Engine is never in a state where closing the terminal loses signal. Close is the safety net, not the primary extraction point. Work sessions additionally report. The two are orthogonal layers, not rival protocols — a coding session that surfaces a constitutional fragment runs both. The old "two mutually-exclusive protocols, clean separation" framing was the bug: it let non-/a sessions drop capture entirely, which is exactly the signal loss the methodology forbids.
+Capture is a layer, not a trigger. **Every** session that surfaces signal captures it — the methodology bar (`factory/canon/methodology.md` § Session Close, § Passive Mode): extraction fires on *any* natural sign-off, and the Engine is never in a state where closing the terminal loses signal. Close is the safety net, not the primary extraction point. Work sessions additionally report. The two are orthogonal layers, not rival protocols — a coding session that surfaces a constitutional fragment runs both. The old "two mutually-exclusive protocols, clean separation" framing was the bug: it let non-/a sessions drop capture entirely, which is exactly the signal loss the methodology forbids.
 
-### Layer 1 — capture (every session, silent). The product behavior.
+### Capture — every session, silent. The product behavior.
 
 Runs whenever crystallised signal surfaced this session — whether the sign-off was "a." or "close"/"end" or any natural exit. Act as a normal Machine would for any Author; this IS the product test. Route each, skip any with nothing:
 
@@ -130,18 +130,18 @@ Runs whenever crystallised signal surfaced this session — whether the sign-off
 - **Notepad.** Parked questions, accretion candidates, what to carry forward → `~/alexandria/files/core/notepad.md`.
 - **Feedback.** Methodology observations → `~/alexandria/files/core/feedback.md`. (Stays local — the Engine never auto-sends. To push to the marketplace, the Author types it into `~/alexandria/system/.session_feedback` himself.)
 
-Silent. No report. This is the product working. A pure-/a session is layer 1 only — capture plus a hazy-fragment delta, nothing more. If Phase 1 feels wrong, the product is wrong.
+Silent. No report. This is the product working. A pure-/a session is capture only — that plus a hazy-fragment delta, nothing more. If this capture feels wrong, the product is wrong.
 
-### Layer 2 — work report (coding / company sessions). Triggered by "close" / "end".
+### Work report — coding / company sessions ("close" / "end").
 
-Additive on top of layer 1, for sessions that did company or code work:
+Additive on top of capture, for sessions that did company or code work:
 
 - **Delta.** What changed about Alexandria the company. Not what you did — what's different now. Hazy fragments only.
 - **Open threads.** What's unresolved. What the next session should pick up. Ordered by priority. Then close them optimally without being asked: execute the drafted or obvious resolution for every thread that doesn't genuinely need the founder (every line revertible via git), commit-protect orphaned work, park the rest with a pre-drafted resolution. Ask the founder only what truly needs his verdict — one line per question — else ask nothing. (Claude Code: the `/close` skill re-injects this protocol fresh at end-of-session.)
 - **Meta loop.** Product learnings → factory canon (`factory/canon/methodology.md`).
-- **Founder loop.** How-to-work-with-the-founder signal (communication patterns, preferences, anti-patterns) → `~/alexandria/files/core/machine.md` / `feedback.md` — canon, never agent memory. (This is layer 1's Machine/Feedback capture, named again here so a work-close never skips it.)
+- **Founder loop.** How-to-work-with-the-founder signal (communication patterns, preferences, anti-patterns) → `~/alexandria/files/core/machine.md` / `feedback.md` — canon, never agent memory. (This is the capture section's Machine/Feedback, named again here so a work-close never skips it.)
 
-**Principles (both layers):**
+**Principles (both):**
 - Hazy fragments scale. Weeds do not. Keep it compressed.
 - Signal, not summary. Don't restate what the founder already saw — extract what compounds.
 - If nothing happened in a loop, skip it. No empty sections.
