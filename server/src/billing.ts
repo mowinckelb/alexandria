@@ -914,13 +914,13 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
         return c.redirect(`${WEBSITE_URL}/signup`);
       }
 
-      let customerId = session.customer as string | null;
+      let customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id ?? null;
       if (!customerId && session.setup_intent) {
         try {
           const intentId = typeof session.setup_intent === 'string'
-            ? session.setup_intent : session.setup_intent;
-          const intent = await stripe.setupIntents.retrieve(intentId as string);
-          customerId = intent.customer as string | null;
+            ? session.setup_intent : session.setup_intent.id;
+          const intent = await stripe.setupIntents.retrieve(intentId);
+          customerId = typeof intent.customer === 'string' ? intent.customer : intent.customer?.id ?? null;
         } catch { /* proceed without customer ID */ }
       }
 
@@ -930,7 +930,7 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
       const billingUpdate: Partial<BillingInfo> = {
         ...(customerId ? { stripe_customer_id: customerId } : {}),
         ...(session.subscription
-          ? { subscription_id: session.subscription as string }
+          ? { subscription_id: typeof session.subscription === 'string' ? session.subscription : session.subscription.id }
           : { subscription_status: 'beta' }),
       };
       await onAccountUpdate(login, billingUpdate);
@@ -1101,8 +1101,8 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
           const ghLogin = session.metadata?.github_login;
           if (ghLogin && session.customer && session.subscription) {
             await onAccountUpdate(ghLogin, {
-              stripe_customer_id: session.customer as string,
-              subscription_id: session.subscription as string,
+              stripe_customer_id: typeof session.customer === 'string' ? session.customer : session.customer?.id || '',
+              subscription_id: typeof session.subscription === 'string' ? session.subscription : session.subscription?.id || '',
             });
             logEvent('billing_checkout_subscription', { github_login: ghLogin });
           }
@@ -1118,7 +1118,7 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
         case 'customer.subscription.created':
         case 'customer.subscription.updated': {
           const sub = event.data.object as Stripe.Subscription;
-          const customerId = sub.customer as string;
+          const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id || '';
           const phase = event.type === 'customer.subscription.created' ? 'created' : 'updated';
 
           if (sub.metadata?.kind === 'patron') {
@@ -1175,7 +1175,7 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
             await onAccountUpdate(subLogin, { subscription_status: 'canceled' });
           }
           logEvent('billing_subscription_canceled', {
-            customer: sub.customer as string,
+            customer: typeof sub.customer === 'string' ? sub.customer : sub.customer?.id || '',
           });
           break;
         }
@@ -1289,7 +1289,7 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
             console.error(`[billing] Payment failed but could not update account — customer: ${invoice.customer}, sub: ${subId || 'unknown'}`);
           }
           logEvent('billing_payment_failed', {
-            customer: invoice.customer as string,
+            customer: typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id || '',
             handled: paymentFailHandled ? 'true' : 'false',
           });
           break;
