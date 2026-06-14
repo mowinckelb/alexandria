@@ -6,7 +6,7 @@ import { logEvent } from './analytics.js';
 import { countActiveKin, createCheckoutSession, createPortalSession, getStripe, recalculateKinPricing, resolveActiveSubscription } from './billing.js';
 import { authErrorHtml, callbackPageHtml } from './templates.js';
 import { getDB, getR2 } from './db.js';
-import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex } from './kv.js';
+import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex, getLoginIndex } from './kv.js';
 import { hashApiKey, generateToken } from './crypto.js';
 import { ACTIVE_AUTHOR_STATUSES, Account, AccountStore, extractApiKey, extractLibrarySessionToken, findByApiKey, findByLibrarySessionToken, requireAuth } from './auth.js';
 import { generateApiKey, getAccounts, getAccountByLogin, requireAdmin } from './accounts.js';
@@ -269,7 +269,16 @@ export function registerRoutes(app: Hono) {
   app.get('/check-kin', async (c) => {
     const code = (c.req.query('code') || '').trim();
     if (!code) return c.json({ valid: false }, 400);
-    const valid = (await getAccountByLogin(code)) !== null;
+    // Index-only (O(1) KV get), never getAccountByLogin: this is a public,
+    // unauthenticated endpoint, and getAccountByLogin falls back to a full
+    // load-and-decrypt of every account on a login-index miss. An attacker
+    // varying `code` per request bypasses the URL-keyed cache below and would
+    // otherwise force one O(all-accounts) decrypt sweep per probe — an
+    // unauthenticated resource-exhaustion amplifier that grows with the user
+    // base. The login index is maintained on every saveAccount, so any active
+    // referrer (the only kind that shares a kin link) resolves here; the real
+    // referral credit at the OAuth callback still uses the full lookup.
+    const valid = (await getLoginIndex(code)) !== null;
     c.header('Cache-Control', 'public, max-age=60');
     return c.json({ valid });
   });
