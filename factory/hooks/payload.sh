@@ -27,6 +27,36 @@ else
   CLIENT_VERSION="no-cache"
 fi
 
+# ─── PULL — apply a canon update / adopt a module ────────────────
+# The ONLY path that writes live canon after install. Verified against the
+# offline-signed manifest before writing; refuses on mismatch. Invoked by the
+# Author's Engine on the Author's explicit instruction — never automatic.
+if [ "$MODE" = "pull" ]; then
+  pull_module="$2"
+  pull_dir="$3"
+  { [ -z "$pull_module" ] || [ -z "$pull_dir" ]; } && { echo "usage: payload.sh pull <module> <alex_dir>"; exit 1; }
+  ptmp=$(mktemp 2>/dev/null) || { echo "pull: mktemp failed"; exit 1; }
+  if curl -s --max-time 10 "$CANON_GITHUB/$pull_module.md" -o "$ptmp" 2>/dev/null && [ -s "$ptmp" ]; then
+    pexp=$(awk -v p="factory/canon/$pull_module.md" '$2==p {print $1}' "$pull_dir/system/.canon_manifest" 2>/dev/null)
+    if command -v shasum >/dev/null 2>&1; then
+      pact=$(shasum -a 256 "$ptmp" | cut -d' ' -f1)
+    else
+      pact=$(sha256sum "$ptmp" 2>/dev/null | cut -d' ' -f1)
+    fi
+    if [ -n "$pexp" ] && [ "$pexp" = "$pact" ]; then
+      mkdir -p "$pull_dir/system/canon" 2>/dev/null
+      cp "$ptmp" "$pull_dir/system/canon/$pull_module.md"
+      echo "pulled: $pull_module.md (verified against the offline-signed manifest)"
+    else
+      echo "REFUSED: $pull_module.md failed the integrity check (sha != signed manifest, or no manifest entry). Nothing written."
+    fi
+  else
+    echo "pull: could not fetch $pull_module.md"
+  fi
+  rm -f "$ptmp"
+  exit 0
+fi
+
 # ─── SESSION START ───────────────────────────────────────────────
 
 if [ "$MODE" = "session-start" ]; then
@@ -69,32 +99,63 @@ if [ "$MODE" = "session-start" ]; then
   canon_ok=false
   notice_body=""
   canon_fetch_failures=""
-  for module in axioms methodology editor mercury publisher library filter bookshelf; do
-    fresh=$(curl -s --max-time 5 "$CANON_GITHUB/$module.md" 2>/dev/null)
+  for module in foundation axioms methodology editor mercury publisher library filter bookshelf; do
     local_path="$ALEX_DIR/system/canon/$module.md"
-    if [ -n "$fresh" ] && [ ${#fresh} -gt 100 ]; then
-      if [ ! -f "$local_path" ]; then
-        # First install (or new module): seed from upstream.
-        printf '%s' "$fresh" > "$local_path"
-      elif ! diff -q <(printf '%s' "$fresh") "$local_path" >/dev/null 2>&1; then
-        # Local diverges from upstream — record for notice; never overwrite local.
-        notice_body="$notice_body
+    fresh_tmp=$(mktemp 2>/dev/null)
+    if [ -n "$fresh_tmp" ] && curl -s --max-time 5 "$CANON_GITHUB/$module.md" -o "$fresh_tmp" 2>/dev/null \
+         && [ -s "$fresh_tmp" ] && [ "$(wc -c < "$fresh_tmp")" -gt 100 ]; then
+      # Integrity gate — the fetched module must match the sha256 in the offline-signed
+      # manifest (the shim signature-verified it and cached it to .canon_manifest). A
+      # poisoned GitHub file cannot match: forging it needs the offline signing key, which
+      # the server never holds. Fail closed — an unverifiable fetch is discarded, never
+      # written — so a GitHub-repo compromise cannot push canon (markdown) onto an Author.
+      expected_sha=$(awk -v p="factory/canon/$module.md" '$2==p {print $1}' "$ALEX_DIR/system/.canon_manifest" 2>/dev/null)
+      if command -v shasum >/dev/null 2>&1; then
+        actual_sha=$(shasum -a 256 "$fresh_tmp" | cut -d' ' -f1)
+      else
+        actual_sha=$(sha256sum "$fresh_tmp" 2>/dev/null | cut -d' ' -f1)
+      fi
+      if [ -n "$expected_sha" ] && [ "$expected_sha" = "$actual_sha" ]; then
+        # Verified upstream. NEVER auto-write live canon — sovereign: the Author pulls.
+        # Your machine changes only by your action; this only ever notifies.
+        if [ ! -f "$local_path" ]; then
+          notice_body="$notice_body
 
-## $module.md
+## $module.md — NEW module available (you don't have it)
 
-\`\`\`diff
-$(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200)
-\`\`\`"
+To adopt it, tell me to pull $module (verified against the signed manifest before anything is written). To ignore it, do nothing."
+        elif ! diff -q "$fresh_tmp" "$local_path" >/dev/null 2>&1; then
+          notice_body="$notice_body
+
+## $module.md — update available (not applied)
+
+```diff
+$(diff -u "$local_path" "$fresh_tmp" 2>/dev/null | head -n 200)
+```
+
+To apply, tell me to pull $module (verified). To keep your version, do nothing."
+        fi
+      else
+        # Hash mismatch or missing manifest entry — refuse the fetched bytes (fail closed).
+        canon_fetch_failures="$canon_fetch_failures $module"
+        echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) canon integrity check failed: $module (fetched sha != offline-signed manifest, or no manifest entry) — discarded, keeping local" >> "$ALEX_DIR/system/.alexandria_errors"
       fi
     else
-      # Fetch failed (network, GitHub down, 404). Log so the Author can see
-      # that an upstream check was attempted and didn't succeed — silent skip
-      # would violate "awareness is upstream of everything".
+      # Fetch failed (network, GitHub down, 404). Log — silent skip would violate
+      # "awareness is upstream of everything".
       canon_fetch_failures="$canon_fetch_failures $module"
       echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) canon fetch failed: $module (curl returned empty or undersized response — network, upstream 404, or rate limit)" >> "$ALEX_DIR/system/.alexandria_errors"
     fi
-    if [ "$module" = "methodology" ] && [ -f "$local_path" ]; then
+    rm -f "$fresh_tmp"
+    if [ "$module" = "foundation" ] && [ -f "$local_path" ]; then
+      # Foundation — the incompressible core. Injected first, above the founder module.
       canon=$(cat "$local_path")
+      canon_ok=true
+    elif [ "$module" = "methodology" ] && [ -f "$local_path" ]; then
+      # Founder module #1 — appended below the foundation (or stands alone if foundation was deleted/unfetched).
+      canon="${canon:+$canon
+
+}$(cat "$local_path")"
       canon_ok=true
     fi
   done
@@ -105,7 +166,7 @@ $(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200)
     {
       echo "# Canon divergence — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
       echo ""
-      echo "Your system canon (\`~/alexandria/system/canon/\`) is sovereign. It differs from upstream factory canon — diffs per module below. \`+\` lines are upstream-only (factory changes you haven't taken); \`-\` lines are local-only (your personal additions). For each module, edit your local to integrate upstream, or leave as-is. Notice regenerates each session reflecting current state."
+      echo "Your system canon (\`~/alexandria/system/canon/\`) is yours and is never auto-updated — the modules below are AVAILABLE upstream, not applied, each verified against the offline-signed manifest. To apply an update or adopt a new module, tell me to pull it (I run the verified pull; nothing is written unless the sha matches the signed manifest). To keep your version, do nothing. Your machine changes only by your action."
       echo "$notice_body"
     } > "$ALEX_DIR/system/.canon_update_notice"
   else
@@ -360,7 +421,7 @@ $(diff -u "$local_path" <(printf '%s' "$fresh") 2>/dev/null | head -n 200)
     echo "  core/feedback.md (or _feedback.md) — corrections + confirmed approaches"
     echo "  core/agent.md  — Author preferences for AI behaviour"
     echo ""
-    echo "Your system canon is at ~/alexandria/system/canon/ — sovereign, never overwritten. If ~/alexandria/system/.canon_update_notice exists, your local canon differs from upstream factory canon in some direction (upstream has changes you haven't taken, or your local has personal additions upstream doesn't have, or both). Read the diff to distinguish: upstream-side changes are worth surfacing to the Author for an integrate-or-ignore decision; local-only additions are the Author's own work and don't need to be re-raised. Notice regenerates each session reflecting current state — persists until local and upstream agree."
+    echo "Your system canon is at ~/alexandria/system/canon/ — yours, never auto-updated. If ~/alexandria/system/.canon_update_notice exists, upstream has updates AVAILABLE (not applied); each is integrity-verified against the offline-signed manifest. Surface them with your own evaluation and a recommendation, and apply ONLY on the Author's explicit go by running:  bash ~/alexandria/system/.hooks_payload pull <module> ~/alexandria  (verified before writing; refuses on mismatch). Local-only edits are the Author's own work — never raise those. Your machine changes only by the Author's action."
     echo ""
     echo "Alexandria passive mode active. Follow the canon's passive mode instructions. If the Author mentions Alexandria feedback, write to .session_feedback — it reaches the team at session end."
   fi

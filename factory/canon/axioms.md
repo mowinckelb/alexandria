@@ -1,8 +1,8 @@
-# Axioms — The Sacred Layer
+# Axioms — the founder's thesis
 
-*What Alexandria is and why it exists. These are the constants — values decisions, not intelligence decisions. They do not improve with better models because they are not intelligence questions. Everything in this file is non-negotiable. Everything NOT in this file is a variable — an intelligence decision that the Author, the Engine, or the marketplace can change.*
+*The deep* why *of Alexandria, as the founder articulates it: the objective function, the five operations in full, the civilisational argument, the neuroscience. Part of the **Founder module** (Author #1's system — see `MODULES.md`), not the universal core — that is `foundation.md` (Foundation), the one shared file. This is the founder's expansion of it: adopt it, fork it, or write your own. Shipped as the default because a strong thesis beats a blank one; held like every Founder module — strongly argued, freely replaceable. (The strong "non-negotiable" language below is the founder's own conviction, not a rule binding every Author.)*
 
-*Three tiers govern Alexandria's product: Axioms (the constants — the WHAT and WHY), Canon (variable, marketplace-ranked — the current best HOW), Engine (fluid, per-Author intelligence — the specific HOW in each moment).*
+*Two tiers of canon serve the Engine: **Foundation** (`foundation.md` — the one universal file, the WHAT and WHY in ~1 page) and the **Founder module** (this thesis plus `methodology.md` and the function/surface modules — the founder's current best HOW). The **Engine** — the Author's own model — is the intelligence that runs both.*
 
 ---
 
