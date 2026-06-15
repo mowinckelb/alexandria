@@ -8,6 +8,7 @@ import { formatPT } from './time.js';
 import { publishLibrarySignalSnapshot } from './marketplace.js';
 import { computeLibrarySignalText } from './library-signal.js';
 import { reconcilePatronSubscriptions, syncStripeWebhookEvents } from './billing.js';
+import { getAuditHead } from './audit.js';
 import type { AccountStore, Account } from './auth.js';
 
 // ---------------------------------------------------------------------------
@@ -66,6 +67,37 @@ async function probeD1(escalate: Escalate): Promise<void> {
   } catch (e) {
     escalate('sprint', `D1 probe failed: ${e instanceof Error ? e.message : String(e)}`);
   }
+}
+
+// Audit mirror is alive only while its chain is advancing. The */10 cron
+// updates last_run_at on every run — even when there is nothing to commit —
+// and skips that update only when a commit throws (GitHub down, token
+// expired): see worker.ts scheduled(), which re-throws before saveState. So a
+// stale last_run_at catches BOTH a dead cron AND silently-failing commits —
+// the two ways the tamper-evidence chain freezes without anyone noticing.
+// /audit/head exposes this, but exposure is not detection; the digest closes
+// the loop. (Awareness is upstream: a green that nobody checks is suspicious.)
+export const AUDIT_MIRROR_STALE_LIMIT_MS = 30 * 60 * 1000; // 3 missed */10 runs
+
+/** Pure liveness verdict for the audit mirror. Returns the escalation reason,
+ *  or null when the chain is advancing normally. No I/O — unit-tested in
+ *  server/test/audit-liveness.ts. */
+export function auditMirrorStaleness(
+  lastRunAtIso: string,
+  nowMs: number,
+  headN: number,
+  limitMs: number = AUDIT_MIRROR_STALE_LIMIT_MS,
+): { reason: string } | null {
+  const lastRun = Date.parse(lastRunAtIso);
+  if (!Number.isFinite(lastRun)) {
+    return { reason: `Audit mirror last_run_at unparseable ("${lastRunAtIso}") — chain state suspect` };
+  }
+  const staleMs = nowMs - lastRun;
+  if (staleMs > limitMs) {
+    const mins = Math.round(staleMs / 60000);
+    return { reason: `Audit mirror stale — last run ${mins}m ago (n=${headN}); tamper-evidence chain frozen` };
+  }
+  return null;
 }
 
 export interface EventScanResult {
@@ -238,6 +270,17 @@ export async function runHealthDigest(opts: { sendEmailOnAlarm?: boolean } = { s
       }
     } catch (e) {
       escalate('sprint', `R2 probe failed: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    // Audit mirror liveness — the tamper-evidence chain is a load-bearing trust
+    // claim and is only credible while advancing. last_run_at staleness catches
+    // both a dead */10 cron and silently-failing commits (see auditMirrorStaleness).
+    try {
+      const head = await getAuditHead();
+      const verdict = auditMirrorStaleness(head.last_run_at, Date.now(), head.head_n);
+      if (verdict) escalate('sprint', verdict.reason);
+    } catch (e) {
+      escalate('stroll', `Audit head unreadable: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     // Canon now served from GitHub, not from this server. No KV cache to verify.
