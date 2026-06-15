@@ -49,9 +49,9 @@ The setup is one bash script. The hooks payload is one bash script. The shim is 
 | `files/network.md` | Opt-in. URLs of other Authors whose shadows you want pulled into context. The hook fetches each to `files/network/<slug>/shadow.md`, once per day. |
 | `system/hooks/shim.sh` | Bash wrapper. Refetches and verifies the payload at every session start. |
 | `system/.hooks_payload` | The most recently verified payload, cached. |
-| `system/.canon_manifest` | The signed manifest that backed this cached payload — kept so canon modules can also be hash-checked. |
+| `system/.canon_manifest` | The signed manifest that backed this cached payload — every canon module is hash-checked against it before being written, so a compromised GitHub repo cannot push poisoned canon either. |
 | `system/allowed_signers` | The maintainer's offline ed25519 public key. Trust root for payload + manifest signature verification. |
-| `system/canon/` | Eight canon modules cached locally: `axioms.md`, `methodology.md`, `editor.md`, `mercury.md`, `publisher.md`, `library.md`, `filter.md`, `bookshelf.md`. **Sovereign** — once seeded, never overwritten. Divergence from upstream surfaces a notice for you to integrate or ignore. |
+| `system/canon/` | The canon modules, cached locally. **Foundation:** `foundation.md` (the incompressible core — the minimal closed-loop system). **Founder module** (Author #1's default, forkable): `axioms.md`, `methodology.md`, `editor.md`, `mercury.md`, `publisher.md`, `library.md`, `filter.md`, `bookshelf.md`. Plus `MODULES.md` (the tier map). **Sovereign and never auto-written** — seeded once at install; after that nothing is auto-applied. Each session checks upstream, **verifies it against the signed manifest**, and surfaces any update as a notice; you pull it (verified) or ignore it. |
 | `system/.api_key` | Your API key, mode 0600. |
 | `system/.block` | One-time onboarding instructions cached locally. |
 | `system/.*` (other) | Ephemeral state — session ID markers, sync logs, the error log, autoloop dedup, protocol-status cache, last-maintenance timestamps. All readable. None leave the machine. |
@@ -105,7 +105,7 @@ The shim at `~/alexandria/system/hooks/shim.sh` is installed by `setup.sh` (re-r
 
 So **the code that processes your session is whatever is on `main` right now AND signed by the offline key.** Bare GitHub access isn't enough to ship code — the attacker also needs to produce a fresh signed manifest with the new payload's hash, which requires the offline private key. Full mechanism in [`TRUST.md`](https://github.com/mowinckelb/alexandria/blob/main/TRUST.md).
 
-Why this exists: improvements to the engine reach you without you having to re-install. Bugs get fixed once, for everyone, on push. The canon evolves and your machine picks it up — but only with a valid signed manifest.
+Why this exists: payload (engine) fixes reach you without re-installing — bugs get fixed once, for everyone, the moment a new payload passes the offline-key signature check. The **canon** works differently: it is never auto-applied. Updates are verified against the signed manifest and surfaced as a notice; you pull what you want. The verified mechanism updates itself; your cognition changes only when you choose.
 
 What you're trusting: the maintainer's offline ed25519 private key. The public repo is auditable; the key is the only thing that can ship new signed code.
 
