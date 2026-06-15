@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { UpdateMeta } from '../lib/updates';
-import { INK, PAPER, INK_MUTED, INK_FAINT, RULE } from '../lib/palette';
+import { INK, PAPER, INK_MUTED, RULE } from '../lib/palette';
 
 export default function UpdatesIndex({ updates }: { updates: UpdateMeta[] }) {
   return (
@@ -24,9 +24,10 @@ export default function UpdatesIndex({ updates }: { updates: UpdateMeta[] }) {
             {updates.map((u) => (
               <li key={u.slug} className="row">
                 <Link href={`/updates/${u.slug}`} className="row-link">
-                  <span className="row-slug">{u.slug}</span>
-                  <span className="row-subject">{u.subject}</span>
-                  <span className="row-date">{u.date}</span>
+                  <span className="row-inner">
+                    <span className="row-subject">{u.subject}</span>
+                    <span className="row-date">{u.date}</span>
+                  </span>
                 </Link>
               </li>
             ))}
@@ -105,22 +106,19 @@ export default function UpdatesIndex({ updates }: { updates: UpdateMeta[] }) {
           border-bottom: 1px solid ${RULE};
         }
         .row-link {
-          display: grid;
-          grid-template-columns: 64px 1fr auto;
-          gap: 24px;
-          align-items: baseline;
-          padding: 22px 0;
+          display: block;
           color: ${INK};
           text-decoration: none;
+        }
+        .row-inner {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 24px;
+          padding: 22px 0;
           transition: opacity 200ms ease;
         }
-        .row-link:hover { opacity: 0.62; }
-        .row-slug {
-          font-size: 14px;
-          color: ${INK_FAINT};
-          letter-spacing: 0.02em;
-          font-variant-numeric: tabular-nums;
-        }
+        .row-link:hover .row-inner { opacity: 0.62; }
         .row-subject {
           font-size: 20px;
           letter-spacing: -0.005em;
@@ -147,9 +145,8 @@ export default function UpdatesIndex({ updates }: { updates: UpdateMeta[] }) {
           .watermark { font-size: 20px; bottom: 18px; right: 22px; }
           .page { padding: 104px 24px 80px; }
           .page-title { font-size: 32px; }
-          .row-link { grid-template-columns: 48px 1fr; gap: 16px; }
+          .row-inner { gap: 16px; }
           .row-subject { font-size: 17px; }
-          .row-date { display: none; }
         }
       `}</style>
     </main>
