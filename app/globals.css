@@ -612,6 +612,53 @@ html.app-shell input:focus {
   margin-right: 0;
 }
 
+/* ──────────────────────────────────────────────────────────────────────
+   FAQ ACCORDION (.pdoc-faq) — the questions page renders as a collapsible
+   Q&A list. Intro renders normally; each question is a clickable summary,
+   its answer expands below. First item open by default. Plain register. */
+.pdoc-faq {
+  margin: 2.75rem 0 0;
+  border-top: 1px solid var(--border-light);
+}
+.pdoc-faq-item {
+  border-bottom: 1px solid var(--border-light);
+}
+.pdoc-faq-q {
+  font-family: var(--font-eb-garamond);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2vw, 1.55rem);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.3rem 0;
+  transition: color 200ms ease;
+}
+.pdoc-faq-q::-webkit-details-marker { display: none; }
+.pdoc-faq-q:hover { color: var(--accent); }
+.pdoc-faq-q::after {
+  content: "+";
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-style: normal;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.55;
+  flex: none;
+  transform: translateY(0.05em);
+  transition: opacity 200ms ease;
+}
+.pdoc-faq-item[open] > .pdoc-faq-q { color: var(--accent); }
+.pdoc-faq-item[open] > .pdoc-faq-q::after { content: "\2212"; opacity: 0.9; }
+.pdoc-faq-a { padding: 0 0 1.6rem; }
+.pdoc-faq-a .pdoc-p:first-child { margin-top: 0; }
+
 /* First paragraph after a chapter heading — illuminated initial. The
    manuscript convention: each chapter opens with a larger first letter
    that signals "this is a new beginning." Subtle enough not to shout;

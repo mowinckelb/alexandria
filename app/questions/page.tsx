@@ -38,6 +38,7 @@ export default function QuestionsPage() {
       header=""
       homeHref="/"
       plain
+      faq
     />
   );
 }

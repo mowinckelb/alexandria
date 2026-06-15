@@ -4,7 +4,21 @@
 
 ## what is alexandria.
 
-a mental gym that turns any ai into your personal trainer — and a [library](/library) of the minds who train in it. you write yourself into plain files; every ai you use reads them and thinks *with* you, not for you.
+most designers keep a simple file that tells their ai how they work — their taste, their rules, the way they think about design. the ai reads it, so its work comes out in their style instead of something generic. it isn't only a design thing: coders keep one for code, and it works for anything. it's just a file of how you do something.
+
+and grabbing them is a no-brainer. a designer you rate shares theirs, and you just take it: free, instant, and it only ever helps. no design.md of your own yet? now you've got one. already have one? you download theirs and let your ai pull the good bits into yours. want to build your own? start from theirs. you don't weigh it up. you add it.
+
+so if you value design, you keep a design.md. and if you value your mind — how you reason, what you believe, how you decide — you'd want the same for that: a "mind.md". it's the most valuable one there could be, because everything you do comes from how you think.
+
+a mind.md is different in one way, though. a design file you can copy off someone else. your mind, you can't — it's you, your fingerprint, unlike anyone else's. so no one can hand you a mind.md. you make your own.
+
+which is where the "mind.py" comes in. you can't download a mind.md, but you can download a mind.py. it's the same kind of grab-and-tweak file as a design.md — just the version that builds your mind instead of holding your design. ai now edits code as easily as text, so you take it the exact same way: no system, use ours; got one, add ours; want your own, start from ours. you tweak it, and out comes your mind.md.
+
+so why bother? think about what ai does to a mind. hand all your thinking to it, and your own fades. refuse it, and you stay capped. the win is the middle — let ai multiply your mind. but it can only multiply what it can see, and a mind.md is how it sees yours. you can't multiply a zero. no one has built a cleaner way to do this.
+
+and it gets better with other people. you can't take someone's mind, but you can see how they think, and you can borrow the systems they built. so two more things open up: a [library of minds](/library) to get inspired by, and a [marketplace of systems](/marketplace) to build your own mind.md from. your mind, sharpened by everyone else's.
+
+that's all alexandria is: a tribe who decided their own mind is worth keeping — Alexandrians — and the ground they stand on. we don't tell you how to think or what to believe. we lay the foundation, make starting easy, and run the two. it's less a product than a republic of independent minds, built on one belief: the human mind is worth multiplying, not replacing. keep thinking.
 
 ## is it free.
 

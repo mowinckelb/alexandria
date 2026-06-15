@@ -18,6 +18,11 @@ type Props = {
    *  per-section initials, italic-accent bold) for a clean, plain setting.
    *  Scoped via .pdoc-plain so other docs keep the formal book look. */
   plain?: boolean;
+  /** FAQ accordion — render the doc as a collapsible Q&A list: the intro
+   *  (everything before the first H2) renders normally, then each
+   *  `## question` becomes a clickable summary whose answer expands below.
+   *  First item open by default. */
+  faq?: boolean;
 };
 
 type TocEntry = {
@@ -394,7 +399,45 @@ const MD_COMPONENTS_ABSTRACT = {
   p: AbstractParagraph,
 };
 
-export default function MarkdownDoc({ src, header, homeHref = '/', numbered = false, plain = false }: Props) {
+// FAQ accordion parsing — split a Q&A doc into the intro (everything before
+// the first H2) and a list of {q, a} items (each `## question` plus the body
+// that follows it, up to the next H2).
+function parseFaq(md: string): { intro: string; items: { q: string; a: string }[] } {
+  const i = md.indexOf('\n## ');
+  const intro = i === -1 ? md : md.slice(0, i);
+  const rest = i === -1 ? '' : md.slice(i + 1);
+  const chunks = rest ? rest.split(/\n(?=## )/) : [];
+  const items = chunks.map((chunk) => {
+    const nl = chunk.indexOf('\n');
+    const q = (nl === -1 ? chunk : chunk.slice(0, nl)).replace(/^##\s*/, '').trim();
+    const a = nl === -1 ? '' : chunk.slice(nl + 1).trim();
+    return { q, a };
+  });
+  return { intro, items };
+}
+
+function FaqBody({ content }: { content: string }) {
+  const { intro, items } = parseFaq(content);
+  return (
+    <>
+      {intro.trim() && (
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{intro}</ReactMarkdown>
+      )}
+      <div className="pdoc-faq">
+        {items.map((it, idx) => (
+          <details className="pdoc-faq-item" key={idx} open={idx === 0}>
+            <summary className="pdoc-faq-q">{it.q}</summary>
+            <div className="pdoc-faq-a">
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{it.a}</ReactMarkdown>
+            </div>
+          </details>
+        ))}
+      </div>
+    </>
+  );
+}
+
+export default function MarkdownDoc({ src, header, homeHref = '/', numbered = false, plain = false, faq = false }: Props) {
   const [content, setContent] = useState<string | null>(null);
 
   useEffect(() => {
@@ -469,6 +512,8 @@ export default function MarkdownDoc({ src, header, homeHref = '/', numbered = fa
                 {parsed.post}
               </ReactMarkdown>
             </>
+          ) : faq ? (
+            <FaqBody content={content} />
           ) : (
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
               {content}
