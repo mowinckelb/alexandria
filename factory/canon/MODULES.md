@@ -1,6 +1,6 @@
 # Canon modules — Foundation and Founder
 
-*The canon is just files on your machine — a `mind.py` (the working loop) and a `mind.md` (how to run it well) — like a `design.md` or any script you keep. They are yours: edit, replace, or ignore them. Alexandria is an aggregation hub you optionally connect to; it offers strong defaults and aggregates what works across everyone. The only thing that is not a file is the protocol (account · file · call) — the connection to the hub itself.*
+*The canon is just files on your machine — your `alexandria.md`, the system that develops your mind (the working loop plus how to run it well), like a `design.md` or any script you keep. What it produces is your `mind.md` — your mind itself, the data. Both are yours: edit, replace, or ignore them. Alexandria is an aggregation hub you optionally connect to; it offers strong defaults and aggregates what works across everyone. The only thing that is not a file is the protocol (account · file · call) — the connection to the hub itself.*
 
 *Two layers make the canon. Below them sits a third layer that is **not** canon — the marketplace — where person-specific modules live. The line between canon and marketplace is **generality**.*
 
@@ -8,7 +8,7 @@
 
 ## Foundation — the minimal closed loop (objective · universal)
 
-`foundation.md` — the smallest *complete working system* that develops a mind and connects it to the network: the loop, its invariants, the spine. Incompressible (remove a piece and the loop stops closing), objective (it works for everyone before any personalisation, because none of it is taste). The `mind.py` every Author runs. Not marketplace-ranked — it is values, not a guess.
+`foundation.md` — the smallest *complete working system* that develops a mind and connects it to the network: the loop, its invariants, the spine. Incompressible (remove a piece and the loop stops closing), objective (it works for everyone before any personalisation, because none of it is taste). The shared `alexandria.md` core every Author runs. Not marketplace-ranked — it is values, not a guess.
 
 ## Founder — the subjective general-optimal (a default · download and personalise)
 

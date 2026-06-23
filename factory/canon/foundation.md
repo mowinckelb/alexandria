@@ -1,6 +1,6 @@
 # Foundation — the minimal closed loop
 
-*The objective base: the smallest complete system that develops a mind and connects it to others. Incompressible — remove any piece and the loop no longer closes. Universal — it works for everyone before any personalisation, because none of it is a matter of taste. This is the shared floor every Author stands on. The **Founder module** (see `MODULES.md`) is one person's best general way to build on it; the marketplace is where hyper-personal variants live. Foundation is the `mind.py` everyone runs — the rest is what you bolt on, and all of it is just files on your own machine.*
+*The objective base: the smallest complete system that develops a mind and connects it to others. Incompressible — remove any piece and the loop no longer closes. Universal — it works for everyone before any personalisation, because none of it is a matter of taste. This is the shared floor every Author stands on. The **Founder module** (see `MODULES.md`) is one person's best general way to build on it; the marketplace is where hyper-personal variants live. Foundation is the shared `alexandria.md` core everyone runs — the rest is what you bolt on, and all of it is just files on your own machine.*
 
 ---
 
