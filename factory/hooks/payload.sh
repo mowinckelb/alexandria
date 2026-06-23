@@ -61,9 +61,12 @@ fi
 
 if [ "$MODE" = "session-start" ]; then
 
-  # Env vars
-  if [ -n "$CLAUDE_ENV_FILE" ] && [ -n "$API_KEY" ]; then
-    echo "export ALEXANDRIA_KEY=$API_KEY" >> "$CLAUDE_ENV_FILE"
+  # Env vars — NEVER export the API key into CLAUDE_ENV_FILE. Doing so
+  # materializes the key in plaintext in a per-session file readable by any
+  # same-user process (incl. a prompt-injected agent). Consumers read
+  # ~/alexandria/system/.api_key at point-of-use instead (shim.sh sources it;
+  # nothing reads $ALEXANDRIA_KEY as input). Only non-secret platform flags here.
+  if [ -n "$CLAUDE_ENV_FILE" ]; then
     echo "export ALEXANDRIA_PLATFORM=cc" >> "$CLAUDE_ENV_FILE"
     echo "export ALEXANDRIA_CANON_OK=false" >> "$CLAUDE_ENV_FILE"
   fi
