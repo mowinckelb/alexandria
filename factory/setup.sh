@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Alexandria setup — creates ~/alexandria/ and connects to the protocol
-# Usage: curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- <API_KEY>
+# Alexandria setup — creates ~/alexandria/ (the free local product, the gym).
+# Usage (free, keyless):  curl -fsSL alexandria-library.com/a | bash
+#        (with account):  curl -fsSL …/factory/setup.sh | bash -s -- <API_KEY>
+# Keyless installs the full local product, no account; the key only adds the hub.
 # NO set -e — every section must succeed or fail independently.
 
 ALEX_DIR="$HOME/alexandria"
@@ -34,13 +36,15 @@ if [ -z "$API_KEY" ] && [ -f "$ALEX_DIR/system/.api_key" ]; then
   [ -n "$API_KEY" ] && echo "Reusing existing API key from $ALEX_DIR/system/.api_key"
 fi
 
+# Keyless = the free product (the gym), no account. A key — passed, or reused
+# from a prior install above — adds the hub layer (Library, marketplace, kin).
+# Either path installs the full LOCAL product; the key only gates server calls.
+# This is the one-copy-paste front door: `curl … | bash` with no key just works.
+KEYLESS=false
 if [ -z "$API_KEY" ]; then
-  echo "Usage: bash setup.sh <API_KEY>"
-  echo "Get your key at https://alexandria-library.com/signup"
-  exit 1
-fi
-
-if [[ "$API_KEY" != alex_* ]]; then
+  KEYLESS=true
+  echo "Setting up Alexandria — free, local, no account needed."
+elif [[ "$API_KEY" != alex_* ]]; then
   echo "Invalid API key format. Your key should start with alex_."
   echo "Get a fresh key at https://alexandria-library.com/signup"
   exit 1
@@ -63,8 +67,12 @@ echo "Setting up Alexandria..."
 # ── 1. Directory structure ────────────────────────────────────────
 
 mkdir -p "$ALEX_DIR/files/vault" "$ALEX_DIR/system/hooks" "$ALEX_DIR/files/constitution" "$ALEX_DIR/files/marginalia" "$ALEX_DIR/files/library/public" "$ALEX_DIR/files/library/paid" "$ALEX_DIR/files/library/invite" "$ALEX_DIR/files/library/authors" "$ALEX_DIR/files/works" "$ALEX_DIR/files/core" "$ALEX_DIR/files/vault/input" "$ALEX_DIR/files/vault/_input" "$ALEX_DIR/system/.autoloop"
-echo "$API_KEY" > "$ALEX_DIR/system/.api_key"
-chmod 600 "$ALEX_DIR/system/.api_key"
+# Keyless leaves no .api_key — its absence IS the "no account" signal the hooks
+# read (every server call in payload.sh is guarded by [ -n "$API_KEY" ]).
+if [ -n "$API_KEY" ]; then
+  echo "$API_KEY" > "$ALEX_DIR/system/.api_key"
+  chmod 600 "$ALEX_DIR/system/.api_key"
+fi
 touch "$ALEX_DIR/system/.last_processed"
 date +%s > "$ALEX_DIR/system/.last_maintenance"
 
@@ -374,7 +382,9 @@ if command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1; then
   GITHUB_USER=$(gh api user --jq .login 2>/dev/null)
 fi
 
-if [ -z "$GITHUB_USER" ]; then
+if [ "$KEYLESS" = "true" ]; then
+  echo "  public fork: skipped (free mode — the marketplace is part of the hub; sign in later)"
+elif [ -z "$GITHUB_USER" ]; then
   echo "  public fork: skipped (gh CLI not authenticated — run 'gh auth login' and re-run setup)"
 elif [ "$GITHUB_USER" = "mowinckelb" ]; then
   echo "  public fork: skipped (canonical owner — no self-fork needed)"
@@ -494,7 +504,9 @@ fi
 # mean every session start/end/call POSTs against a dead auth and we
 # never find out until the Author wonders why nothing happened.
 KEY_STATUS=""
-if command -v curl &>/dev/null; then
+if [ "$KEYLESS" = "true" ]; then
+  KEY_STATUS="none"          # free mode — no key to verify, no server contacted
+elif command -v curl &>/dev/null; then
   KEY_STATUS=$(curl -s -o /dev/null -w '%{http_code}' \
     -H "Authorization: Bearer $API_KEY" \
     --max-time 8 \
@@ -553,6 +565,7 @@ fi
 
 # api key: HTTP probe (already done above)
 case "$KEY_STATUS" in
+  none) STATUS_KEY="skip"; DETAIL_KEY="none — running free; sign in later to join the Library" ;;
   200) STATUS_KEY="ok"; DETAIL_KEY="verified (HTTP 200)" ;;
   401) STATUS_KEY="fail"; DETAIL_KEY="rejected — get a fresh key at https://alexandria-library.com/signup" ;;
   000|"") STATUS_KEY="fail"; DETAIL_KEY="server unreachable — check https://api.alexandria-library.com/health" ;;
@@ -627,7 +640,9 @@ else
 fi
 
 # public fork: ~/alexandria-fork exists + auto-publish job loaded
-if [ -d "$FORK_DIR/.git" ]; then
+if [ "$KEYLESS" = "true" ]; then
+  STATUS_FORK="skip"; DETAIL_FORK="free mode — marketplace is part of the hub (sign in later)"
+elif [ -d "$FORK_DIR/.git" ]; then
   AUTO_PUBLISH=""
   if [ "$(uname)" = "Darwin" ] && launchctl list 2>/dev/null | grep -q "io.alexandria.publish"; then
     AUTO_PUBLISH="auto-publish hourly (launchd)"
@@ -773,7 +788,7 @@ emit_row "$STATUS_FILES" "files" "$DETAIL_FILES"
 emit_row "$STATUS_CANON" "canon" "$DETAIL_CANON"
 emit_row "$STATUS_HOOKS" "hooks" "$DETAIL_HOOKS"
 emit_row "$STATUS_CORE" "core templates" "$DETAIL_CORE"
-emit_row "$STATUS_KEY" "api key" "$DETAIL_KEY"
+emit_row "$STATUS_KEY" "account" "$DETAIL_KEY"
 [ "$CLAUDE_DETECTED" = "yes" ] && emit_row "$STATUS_CLAUDE" "Claude Code" "$DETAIL_CLAUDE"
 [ "$CURSOR_DETECTED" = "yes" ] && emit_row "$STATUS_CURSOR" "Cursor" "$DETAIL_CURSOR"
 [ "$CODEX_DETECTED" = "yes" ] && emit_row "$STATUS_CODEX" "Codex" "$DETAIL_CODEX"
@@ -783,10 +798,18 @@ emit_row "$STATUS_FORK" "public fork" "$DETAIL_FORK"
 [ "$ICLOUD_APPLICABLE" = "yes" ] && emit_row "$STATUS_ICLOUD" "iCloud" "$DETAIL_ICLOUD"
 
 echo ""
-if [ "$STATUS_KEY" = "ok" ]; then
-  echo "Next: go back to your alexandria browser tab, click \"2. begin\","
-  echo "then paste it into a new chat in your coding agent."
-  echo "(Tab closed? cat ~/alexandria/system/.block)"
+if [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
+  echo "Installed — you're set up. Nothing else to copy or click."
+  echo ""
+  echo "AGENT: continue now — read ~/alexandria/system/.block and follow it to draft this"
+  echo "Author's constitution from what's already on their machine. First tell them you're"
+  echo "starting and that they can stop anytime; then begin. Don't wait to be asked."
+  echo "(Author: if it doesn't start on its own, just say \"begin\".)"
+  if [ "$KEYLESS" = "true" ]; then
+    echo ""
+    echo "Running free, locally — no account. When you want to join the Library and back up,"
+    echo "sign in at https://alexandria-library.com/signup (re-runs this with your key)."
+  fi
 else
   echo "Re-run anytime: curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- \$API_KEY"
 fi

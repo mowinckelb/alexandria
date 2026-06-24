@@ -60,7 +60,6 @@ export function authErrorHtml(message: string): string {
 // Callback page — the first brand moment after signup
 // ---------------------------------------------------------------------------
 
-const BLOCK_URL = 'https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/block.md';
 const MECHANICS_URL = 'https://raw.githubusercontent.com/mowinckelb/alexandria/main/public/docs/Mechanics.md';
 // Keep in sync with app/shortcut/page.tsx — the iCloud Shortcuts install URL.
 const SHORTCUT_URL = 'https://www.icloud.com/shortcuts/0ea1bb7333fd43a9881e9c7b9938a337';
@@ -79,13 +78,18 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   const WEBSITE_URL = getWebsiteUrl();
   const isReturning = !apiKey;
   const curlCmd = isReturning ? '' : `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}`;
+  // One-click deep link: opens Claude Code (v2.1.91+) with the setup command pre-filled in
+  // the prompt box — the user presses enter (never auto-executed). The OS routes claude-cli://
+  // locally to the app; nothing external sees the key. Older Claude Code / Cursor / Codex /
+  // Factory fall back to the copy-the-command path below.
+  const deepLink = isReturning ? '' : `claude-cli://open?q=${encodeURIComponent(`Set up Alexandria now — run this, then follow its final instruction:\n${curlCmd}`)}`;
   const kinCode = githubLogin ? escapeHtml(githubLogin) : '';
   const kinLink = githubLogin ? `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}` : '';
-  // Inline block.md + Mechanics.md so copy buttons can run synchronously inside the click handler.
+  // Inline Mechanics.md so its copy button runs synchronously inside the click handler.
   // Async fetch + clipboard.writeText loses user activation and falls back to opening the raw URL.
-  const [blockContent, mechanicsContent] = isReturning
-    ? ['', '']
-    : await Promise.all([fetchRawText(BLOCK_URL), fetchRawText(MECHANICS_URL)]);
+  // (block.md is no longer copied here — the agent reads the locally-cached .block after install
+  // and continues into the constitution draft itself; see factory/setup.sh tail.)
+  const mechanicsContent = isReturning ? '' : await fetchRawText(MECHANICS_URL);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -206,9 +210,9 @@ ${isReturning ? `<a class="brand-corner" href="${WEBSITE_URL}/">alexandria.</a>`
 <div class="container">
   <h1 class="welcome">${isReturning ? `welcome back.` : `welcome to alexandria.`}</h1>
   ${isReturning ? `<p class="line welcome-back">call /alexandria in your coding agent.</p>` : `<div class="steps">
-    <p class="line"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy install command">1. install <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; now paste it into your coding agent (eg claude code, cursor, etc) and hit enter <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">creates your local ~/alexandria folder and connects your agent to it. everything stays on your machine, nothing sent anywhere.</span></button></p>
-    <p class="line"><button type="button" class="action" onclick="copyBlock(this)" aria-label="copy begin block">2. begin <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; now paste it into a fresh chat <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">drafts a constitution from your files &mdash; reads what is on your computer and writes your starting one. up to an hour.</span></button></p>
-    <p class="line"><a class="action" href="${SHORTCUT_URL}" target="_blank" rel="noopener">3. shortcut <span class="icon">${ICON_EXTERNAL}</span></a> &mdash; add it on iphone or mac <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">save anything worth thinking about &mdash; tap share on a voice memo, podcast, article or tweet and pick alexandria. lands in your folder; bring it up with your agent whenever you want, or it surfaces when relevant.</span></button></p>
+    <p class="line"><a class="action" href="${deepLink}" aria-label="open in claude code">start in claude code <span class="icon">${ICON_EXTERNAL}</span></a> &mdash; opens it set up and ready; hit enter and you're off. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">opens claude code with the setup ready. press enter: it installs to ~/alexandria and starts drafting your mind from what is already on your machine. everything stays local, nothing sent anywhere.</span></button></p>
+    <p class="line" style="font-size:0.85rem;color:#8a8078;"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy command">or copy the command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; for cursor, codex, or if the button doesn&rsquo;t open: paste into your agent.</p>
+    <p class="line"><a class="action" href="${SHORTCUT_URL}" target="_blank" rel="noopener">shortcut <span class="icon">${ICON_EXTERNAL}</span></a> &mdash; add it on iphone or mac to save anything worth thinking about <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">tap share on a voice memo, podcast, article or tweet and pick alexandria. lands in your folder; bring it up with your agent whenever, or it surfaces when relevant.</span></button></p>
   </div>${viaToken ? '' : `
   <p class="aside">no agent on hand? add the shortcut and start saving &mdash; what you save becomes your first session, we'll email the rest.</p>`}`}
   ${kinCode ? `<div class="kin">
@@ -254,10 +258,6 @@ function copyRemote(url, el) {
   });
 }
 function copyCmd(el) { copyText(${jsLiteral(curlCmd)}, el); }
-function copyBlock(el) {
-  var t = ${jsLiteral(blockContent)};
-  if (t) copyText(t, el); else copyRemote(${jsLiteral(BLOCK_URL)}, el);
-}
 function copyMechanics(el) {
   var t = ${jsLiteral(mechanicsContent)};
   if (t) copyText(t, el); else copyRemote(${jsLiteral(MECHANICS_URL)}, el);

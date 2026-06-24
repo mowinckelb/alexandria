@@ -4,6 +4,16 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: '/patron', destination: '/follow', permanent: true },
+      // The install one-liner: `curl -fsSL alexandria-library.com/a | bash`.
+      // `/a` is the protocol's name (lowercase, like git). Redirects to the raw
+      // setup.sh on GitHub; curl -fsSL follows it (-L). NON-permanent (307) so the
+      // target stays changeable without breaking the command everyone copied.
+      // Humans land on /start (the primer); `/a` is the machine target only.
+      {
+        source: '/a',
+        destination: 'https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh',
+        permanent: false,
+      },
       // Marketplace detail pages were retired in favour of linking straight to
       // github (the markdown source is rendered there with full file tree, forks,
       // history, and comments — no point rebuilding any of it). Old inbound links

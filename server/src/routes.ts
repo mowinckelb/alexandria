@@ -434,9 +434,15 @@ export function registerRoutes(app: Hono) {
         email_token: emailToken,
         created_at: existing?.created_at || new Date().toISOString(),
         last_session: new Date().toISOString(),
-        // Billing is on (2026-06-11): new accounts carry no status until the
-        // Stripe webhook lands `trialing`. Existing statuses — including the
-        // grandfathered seeding-stage `free` cohort — ride through the spread.
+        // FREE (2026-06-24): new accounts are `free` — already an active status
+        // (ACTIVE_AUTHOR_STATUSES), so they skip checkout (the good-standing branch
+        // below matches) AND can publish immediately (requireAuthor passes). The
+        // product is free; depth/B2B monetisation comes later as a different shape.
+        // Existing statuses (incl. the grandfathered seeding-stage `free` cohort)
+        // ride through the `...existing` spread above. The Stripe checkout block
+        // below is now dead for new users; full billing-code removal is a separate
+        // deploy-verified pass (it's entangled with the Library pay-for-depth tier).
+        subscription_status: existing?.subscription_status || 'free',
       };
       delete updatedAccount.api_key;
       await saveAccount(key, updatedAccount as unknown as Record<string, unknown>);
