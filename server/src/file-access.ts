@@ -252,6 +252,24 @@ export async function readProtocolFile(opts: ReadProtocolFileOpts): Promise<Read
   return { ok: true, reason: decision.reason, file, obj, contentType };
 }
 
+/**
+ * Delete every protocol R2 object for an account (the `protocol/{github_id}/*`
+ * prefix). Lives here because file-access.ts is the sanctioned owner of
+ * `protocol/*` R2 keys (build.yml guard) — the account-purge caller routes the
+ * R2 deletion through this rather than constructing the key itself. The D1 rows
+ * are deleted by the caller; this clears the bytes. (audit H1)
+ */
+export async function deleteAllProtocolR2(authorGithubId: string | number): Promise<void> {
+  const r2 = getR2();
+  const prefix = `protocol/${String(authorGithubId)}/`;
+  let cursor: string | undefined;
+  do {
+    const listed = await r2.list({ prefix, cursor });
+    await Promise.all(listed.objects.map(obj => r2.delete(obj.key)));
+    cursor = listed.truncated ? listed.cursor : undefined;
+  } while (cursor);
+}
+
 // ---------------------------------------------------------------------------
 // Shadow access
 // ---------------------------------------------------------------------------

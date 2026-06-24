@@ -6,6 +6,7 @@ import { logEvent } from './analytics.js';
 import { countActiveKin, createCheckoutSession, createPortalSession, getStripe, recalculateKinPricing, resolveActiveSubscription } from './billing.js';
 import { authErrorHtml, callbackPageHtml } from './templates.js';
 import { getDB, getR2 } from './db.js';
+import { deleteAllProtocolR2 } from './file-access.js';
 import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex } from './kv.js';
 import { hashApiKey, generateToken } from './crypto.js';
 import { ACTIVE_AUTHOR_STATUSES, Account, AccountStore, extractApiKey, extractLibrarySessionToken, findByApiKey, findByLibrarySessionToken, requireAuth } from './auth.js';
@@ -84,8 +85,10 @@ async function purgeAuthorAccount(account: Account, storeKey: string | null, aut
   try {
     const r2 = getR2();
     const login = account.github_login;
-    // protocol/* is keyed by github_id, the rest by login. (audit H1)
-    for (const prefix of [`protocol/${account.github_id}/`, `shadows/${login}/`, `pulses/${login}/`, `quizzes/${login}/`, `works/${login}/`]) {
+    // protocol/* R2 is keyed by github_id and routed through file-access.ts (the
+    // sanctioned owner of protocol/* keys — build.yml guard); the rest by login. (audit H1)
+    await deleteAllProtocolR2(account.github_id);
+    for (const prefix of [`shadows/${login}/`, `pulses/${login}/`, `quizzes/${login}/`, `works/${login}/`]) {
       let cursor: string | undefined;
       do {
         const listed = await r2.list({ prefix, cursor });
