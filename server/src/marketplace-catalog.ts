@@ -96,7 +96,10 @@ export function deriveDescription(body: string): string {
     // Skip paragraphs that are wholly inline code (e.g. a module-id line) —
     // they're metadata, not prose; try the next paragraph instead.
     if (/^`[^`]+`$/.test(p)) continue;
-    if (p) return p;
+    // Cap the user-derived description so a malicious module can't dump a giant
+    // blob into the public catalog / founder's view (content poisoning — it's
+    // React-escaped so not XSS, just a length/abuse bound). (audit L3)
+    if (p) return p.length > 280 ? p.slice(0, 279).trimEnd() + '…' : p;
   }
   return '';
 }
