@@ -78,13 +78,10 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   const WEBSITE_URL = getWebsiteUrl();
   const isReturning = !apiKey;
   const curlCmd = isReturning ? '' : `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}`;
-  // One-click deep link: opens Claude Code (v2.1.91+) with the setup command pre-filled in
-  // the prompt box — the user presses enter (never auto-executed). The OS routes claude-cli://
-  // locally to the app; nothing external sees the key. Older Claude Code / Cursor / Codex /
-  // Factory fall back to the copy-the-command path below.
-  const deepLink = isReturning ? '' : `claude-cli://open?q=${encodeURIComponent(`Set up Alexandria now — run this, then follow its final instruction:\n${curlCmd}`)}`;
-  const kinCode = githubLogin ? escapeHtml(githubLogin) : '';
-  const kinLink = githubLogin ? `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}` : '';
+  // The signed-in install is copy-paste, matching /start. (A claude-cli:// deep link was tried
+  // and removed 2026-06-24: it auto-ran the script and felt like a terminal hijack — copy-paste
+  // is calmer and universal across Claude Code / Cursor / Codex / Factory.) Kin (the old
+  // "five kin → free" referral) was dropped when the product went free — nothing to earn toward.
   // Inline Mechanics.md so its copy button runs synchronously inside the click handler.
   // Async fetch + clipboard.writeText loses user activation and falls back to opening the raw URL.
   // (block.md is no longer copied here — the agent reads the locally-cached .block after install
@@ -120,10 +117,6 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   .mechanics-row { display: block; }
   .mechanics-hint { color: #bbb4aa; }
   .mechanics .action { color: #8a8078; }
-  .kin { font-size: 0.9rem; line-height: 1.9; color: #8a8078; margin-top: 2rem; }
-  .kin-row { display: block; }
-  .kin code { color: #3d3630; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.85em; padding: 1px 6px; background: rgba(61,54,48,0.05); border-radius: 3px; }
-  .kin .action { color: #3d3630; }
   .welcome-back { color: #8a8078; margin-top: 1.5rem; }
   .signout { font-size: 0.78rem; line-height: 1.7; color: #bbb4aa; margin-top: 2.5rem; }
   .signout a { color: inherit; text-decoration: none; border-bottom: 1px dotted #bbb4aa; transition: color 0.15s, border-color 0.15s; }
@@ -210,15 +203,10 @@ ${isReturning ? `<a class="brand-corner" href="${WEBSITE_URL}/">alexandria.</a>`
 <div class="container">
   <h1 class="welcome">${isReturning ? `welcome back.` : `welcome to alexandria.`}</h1>
   ${isReturning ? `<p class="line welcome-back">call /alexandria in your coding agent.</p>` : `<div class="steps">
-    <p class="line"><a class="action" href="${deepLink}" aria-label="open in claude code">start in claude code <span class="icon">${ICON_EXTERNAL}</span></a> &mdash; opens it set up and ready; hit enter and you're off. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">opens claude code with the setup ready. press enter: it installs to ~/alexandria and starts drafting your mind from what is already on your machine. everything stays local, nothing sent anywhere.</span></button></p>
-    <p class="line" style="font-size:0.85rem;color:#8a8078;"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy command">or copy the command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; for cursor, codex, or if the button doesn&rsquo;t open: paste into your agent.</p>
+    <p class="line"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy install command">copy your command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; paste it into your coding agent (claude code, cursor, codex&hellip;) and hit enter. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">installs to ~/alexandria and links this account, so you can publish to the library. your thinking stays on your machine &mdash; only what you publish is ever sent.</span></button></p>
     <p class="line"><a class="action" href="${SHORTCUT_URL}" target="_blank" rel="noopener">shortcut <span class="icon">${ICON_EXTERNAL}</span></a> &mdash; add it on iphone or mac to save anything worth thinking about <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">tap share on a voice memo, podcast, article or tweet and pick alexandria. lands in your folder; bring it up with your agent whenever, or it surfaces when relevant.</span></button></p>
   </div>${viaToken ? '' : `
   <p class="aside">no agent on hand? add the shortcut and start saving &mdash; what you save becomes your first session, we'll email the rest.</p>`}`}
-  ${kinCode ? `<div class="kin">
-    <span class="kin-row">your kin code: <button type="button" class="action" onclick="copyKinCode(this)" aria-label="copy kin code"><code>${kinCode}</code> <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></span>
-    <span class="kin-row"><button type="button" class="action" onclick="copyKinLink(this)" aria-label="copy invite link">copy invite link <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> <button type="button" class="info" onclick="toggleTip(this)" aria-label="how kin works">${ICON_INFO}<span class="tooltip">share the link or just the code. when five kin become active, alexandria is free.</span></button></span>
-  </div>` : ''}
   ${isReturning ? '' : `<div class="mechanics">
     <span class="mechanics-row">we never see your data &mdash; <button type="button" class="action" onclick="copyMechanics(this)" aria-label="copy Mechanics.md">Mechanics.md <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></span>
     <span class="mechanics-row mechanics-hint">paste into your ai chat to verify.</span>
@@ -262,8 +250,6 @@ function copyMechanics(el) {
   var t = ${jsLiteral(mechanicsContent)};
   if (t) copyText(t, el); else copyRemote(${jsLiteral(MECHANICS_URL)}, el);
 }
-function copyKinCode(el) { copyText(${jsLiteral(githubLogin)}, el); }
-function copyKinLink(el) { copyText(${jsLiteral(kinLink)}, el); }
 function toggleTip(el) {
   var wasActive = el.classList.contains('active');
   document.querySelectorAll('.info.active').forEach(function(e) { e.classList.remove('active'); });
