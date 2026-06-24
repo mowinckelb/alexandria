@@ -35,6 +35,8 @@ SIGNED_FILES=(
   factory/canon/bookshelf.md
   factory/canon/MODULES.md
   factory/skills/scheduled.md
+  factory/skills/machine.md
+  factory/skills/factory.md
   factory/scripts/brief.py
   factory/scripts/install.sh
   factory/scripts/publish.sh
@@ -42,12 +44,15 @@ SIGNED_FILES=(
 )
 
 # ── Coverage enforcement (permanent fix: no executable/steering file ships unsigned) ──
-# Anything that EXECUTES or STEERS the model on a user machine must be signed,
-# or an attacker who swaps it on GitHub/MITM gets code execution around the
-# signature (the scheduled.md class). Hard-fail on the known must-sign set;
-# warn loudly on any other executable so a newly-added one can't silently bypass.
+# Anything that EXECUTES or STEERS the model on a user machine — OR is fetched
+# and "executed literally" by the founder's cloud routines (machine.md daily on
+# the private vault, factory.md weekly) — must be signed, or an attacker who
+# swaps it on GitHub/MITM gets code/instruction execution around the signature
+# (the scheduled.md class). Hard-fail on the known must-sign set; warn loudly on
+# any other executable so a newly-added one can't silently bypass.
 MUST_SIGN=(
   factory/hooks/payload.sh factory/skills/scheduled.md
+  factory/skills/machine.md factory/skills/factory.md
   factory/scripts/brief.py factory/scripts/install.sh factory/scripts/publish.sh factory/migrate.sh
 )
 for f in "${MUST_SIGN[@]}"; do
