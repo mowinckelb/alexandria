@@ -63,7 +63,7 @@ export default function StartCTA() {
         <span className="install-copy">{copied ? ICON_CHECK : ICON_COPY}</span>
       </button>
       <p className="install-hint">
-        {copied ? 'copied — now paste it into your ai.' : 'copy, then paste into your ai (claude code, cursor, codex, factory).'}
+        {copied ? 'copied — now paste it into your ai.' : 'copy, then paste it into your ai.'}
       </p>
       <a href={DEEP_LINK} className="install-deeplink">
         or open it in claude code {ICON_EXTERNAL}

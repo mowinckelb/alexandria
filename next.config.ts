@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
         destination: 'https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh',
         permanent: false,
       },
+      // The front door is now the keyless primer at /start (free, one copy-paste,
+      // no account). The old /signup OAuth covenant ($10/kin) is retired with the
+      // free model. The homepage + library pages still link to /signup; they land
+      // on /start. NON-permanent so we can restore an OAuth page when the hub
+      // (joining the Library / being seen) is built. Query (?ref=…) is dropped —
+      // /start is keyless, no referral.
+      { source: '/signup', destination: '/start', permanent: false },
       // Marketplace detail pages were retired in favour of linking straight to
       // github (the markdown source is rendered there with full file tree, forks,
       // history, and comments — no point rebuilding any of it). Old inbound links

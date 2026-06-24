@@ -807,8 +807,8 @@ if [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
   echo "(Author: if it doesn't start on its own, just say \"begin\".)"
   if [ "$KEYLESS" = "true" ]; then
     echo ""
-    echo "Running free, locally — no account. When you want to join the Library and back up,"
-    echo "sign in at https://alexandria-library.com/signup (re-runs this with your key)."
+    echo "Running free, locally — no account, nothing sent anywhere. Joining the Library"
+    echo "(being seen, connecting with other Alexandrians) is opt-in and coming soon."
   fi
 else
   echo "Re-run anytime: curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- \$API_KEY"

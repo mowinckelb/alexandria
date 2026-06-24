@@ -60,7 +60,7 @@ yes. the install is one command that drops a folder on your machine and pulls co
 
 ## what does it cost.
 
-ten dollars a month, or free if five people you bring stay active. it's open source and works with every ai. the price is a floor, not a ceiling — pay what it's worth to you.
+nothing — it's free. open source, runs on your own ai, on your own machine; you paste one line and you're in. (later, joining the library — being seen, connecting with other minds — may have paid depth, but the thing itself stays free.)
 
 ## who is it for.
 
