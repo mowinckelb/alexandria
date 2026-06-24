@@ -7,8 +7,8 @@ import StartCTA from './StartCTA';
 
 export const dynamic = 'force-dynamic';
 
-// The front door. Free, local, one copy-paste — no account. The hub (joining
-// the Library, being seen) is opt-in and comes later, so it isn't here.
+// The front door, stripped to the incompressible core: one true line of what it
+// is, the line to paste, three words of trust, a close. Nothing else earns space.
 export default async function StartPage() {
   const mechanicsContent = await readFile(
     path.join(process.cwd(), 'public', 'docs', 'Mechanics.md'),
@@ -26,31 +26,19 @@ export default async function StartPage() {
       </header>
 
       <main className="primer-main">
-        <article className="primer">
-          <p className="primer-salutation">to the new alexandrian.</p>
+        <h1 className="primer-h1">
+          your mind, in words &mdash; so every ai thinks <em>with</em> you, not
+          for you.
+        </h1>
 
-          <h1 className="primer-h1">
-            one line, pasted into your ai, and you&rsquo;re in.
-          </h1>
+        <StartCTA />
 
-          <StartCTA />
+        <p className="primer-trust">
+          free, local, yours &mdash; the full{' '}
+          <MechanicsCopy content={mechanicsContent} /> if you want it.
+        </p>
 
-          <p className="primer-body">
-            it installs a folder on your own machine &mdash; plain markdown,
-            your files. every ai you use reads it and thinks <em>with</em> you,
-            not for you. and as you use it, it develops your mind &mdash; the one
-            thing ai can&rsquo;t do for you.
-          </p>
-
-          <p className="primer-body">
-            free, local, nothing sent anywhere. it gives your ai reading
-            material, not new powers. and if you ever want out: delete the folder
-            and it&rsquo;s as if it never happened &mdash; the exact commands are
-            in <MechanicsCopy content={mechanicsContent} />.
-          </p>
-
-          <p className="primer-coda"><em>welcome to alexandria.</em></p>
-        </article>
+        <p className="primer-coda"><em>keep thinking.</em></p>
       </main>
 
       <style>{`
@@ -58,6 +46,8 @@ export default async function StartPage() {
           background: var(--bg-primary);
           color: var(--text-primary);
           min-height: 100vh;
+          display: flex;
+          flex-direction: column;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           background-image:
             radial-gradient(ellipse 120% 80% at 30% 20%, rgba(91, 31, 71, 0.025) 0%, transparent 60%),
@@ -79,53 +69,41 @@ export default async function StartPage() {
         .primer-brand:hover { opacity: 0.6; }
         .primer-brand-dot { font-style: normal; }
 
-        /* Centred column, generous breathing room — the page is mostly the one
-           action and two quiet beats around it. Earned restraint. */
-        .primer-main { max-width: 560px; margin: 0 auto; padding: 7rem 24px 6rem; }
-
-        .primer-salutation {
-          margin: 0 0 30px; font-style: italic; font-size: 12px; font-weight: 400;
-          letter-spacing: 0.22em; color: var(--text-muted, rgba(26, 19, 24, 0.55));
-          text-transform: lowercase; text-align: center;
+        /* The whole page is centred in the viewport — the command floating in
+           space, framed by one line above and a few words below. */
+        .primer-main {
+          flex: 1;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          max-width: 540px; margin: 0 auto; padding: 3rem 24px 6rem; width: 100%;
         }
+
         .primer-h1 {
-          margin: 0 0 52px; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic; font-weight: 400; font-size: 30px; line-height: 1.4;
-          letter-spacing: -0.005em; color: var(--text-primary); text-wrap: pretty;
+          margin: 0 0 56px; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic; font-weight: 400; font-size: 31px; line-height: 1.4;
+          letter-spacing: -0.005em; color: var(--text-primary); text-wrap: balance;
           text-align: center; font-feature-settings: "kern" 1, "liga" 1, "dlig" 1;
         }
+        .primer-h1 em { font-style: italic; }
 
-        /* The two supporting beats — short, plain, room to breathe after the
-           action. White space is absorption time. */
-        .primer-body {
-          margin: 44px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 17px; line-height: 1.72; color: var(--text-secondary, rgba(26, 19, 24, 0.85));
-          letter-spacing: 0.005em; font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
-          text-wrap: pretty; text-align: center;
+        .primer-trust {
+          margin: 40px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 14px; line-height: 1.6; letter-spacing: 0.01em;
+          color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: center;
+          font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
         }
-        .primer em { font-style: italic; color: var(--text-primary); }
-        .primer code {
-          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-          font-size: 0.88em; padding: 0.08em 0.4em; border-radius: 3px;
-          background: var(--bg-secondary); color: var(--text-primary);
-        }
-        .primer button.mechanics-copy {
+        .primer-trust button.mechanics-copy {
           display: inline-flex; align-items: baseline; gap: 0.3em; background: transparent;
           border: none; padding: 0; margin: 0; font: inherit; font-family: inherit;
-          font-size: inherit; color: var(--text-primary); cursor: pointer;
-          text-decoration: underline; text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.45));
+          font-size: inherit; color: var(--text-secondary, rgba(26, 19, 24, 0.8)); cursor: pointer;
+          text-decoration: underline; text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
           text-underline-offset: 3px; text-decoration-thickness: 1px;
           transition: opacity 200ms, text-decoration-color 200ms;
         }
-        .primer button.mechanics-copy:hover { text-decoration-color: var(--text-primary); opacity: 0.85; }
-        .primer .mechanics-copy-icon { display: inline-flex; align-items: center; opacity: 0.55; }
+        .primer-trust button.mechanics-copy:hover { text-decoration-color: var(--text-primary); color: var(--text-primary); }
+        .primer-trust .mechanics-copy-icon { display: inline-flex; align-items: center; opacity: 0.5; }
 
-        /* CTA — the install copy-block, the hero. A bordered card with the
-           monospace command + a copy affordance; the literary register frames it. */
-        .cta-section {
-          display: flex; flex-direction: column; align-items: center;
-          gap: 0; margin: 0;
-        }
+        /* CTA — the install copy-block, the one action on the page. */
+        .cta-section { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 0; }
         .install-block {
           display: flex; align-items: center; justify-content: space-between; gap: 16px;
           width: 100%; max-width: 440px; background: var(--bg-secondary);
@@ -153,17 +131,16 @@ export default async function StartPage() {
         }
 
         .primer-coda {
-          margin: 64px 0 0; text-align: center; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 21px; font-style: italic; color: var(--text-primary);
-          letter-spacing: 0.005em; opacity: 0.78;
+          margin: 60px 0 0; text-align: center; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 20px; font-style: italic; color: var(--text-primary);
+          letter-spacing: 0.005em; opacity: 0.72;
         }
 
         @media (max-width: 640px) {
-          .primer-main { padding: 4.5rem 20px 4rem; }
-          .primer-h1 { font-size: 24px; line-height: 1.4; margin-bottom: 44px; }
-          .primer-body { font-size: 16px; margin-top: 36px; }
+          .primer-main { padding: 2rem 20px 4rem; }
+          .primer-h1 { font-size: 25px; line-height: 1.4; margin-bottom: 48px; }
           .install-cmd { font-size: 12.5px; }
-          .primer-coda { font-size: 19px; margin-top: 56px; }
+          .primer-coda { font-size: 18px; margin-top: 52px; }
         }
       `}</style>
     </div>
