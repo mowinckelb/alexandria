@@ -151,13 +151,6 @@ export default async function StartPage() {
           font-size: 13px; letter-spacing: 0.04em; color: var(--text-muted, rgba(26, 19, 24, 0.55));
           margin: 16px 0 0; text-align: center;
         }
-        .install-deeplink {
-          display: inline-flex; align-items: center; gap: 0.4em;
-          font-family: var(--font-serif), ui-serif, Georgia, serif; font-style: italic;
-          font-size: 14px; color: var(--text-muted, rgba(26, 19, 24, 0.6)); text-decoration: none;
-          margin-top: 14px; transition: color 200ms;
-        }
-        .install-deeplink:hover { color: var(--text-primary); }
 
         .primer-coda {
           margin: 64px 0 0; text-align: center; font-family: var(--font-serif), ui-serif, Georgia, serif;
