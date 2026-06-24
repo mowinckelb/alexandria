@@ -35,6 +35,10 @@ SIGNED_FILES=(
   factory/canon/bookshelf.md
   factory/canon/MODULES.md
   factory/skills/scheduled.md
+  factory/scripts/brief.py
+  factory/scripts/install.sh
+  factory/scripts/publish.sh
+  factory/migrate.sh
 )
 
 # ── Coverage enforcement (permanent fix: no executable/steering file ships unsigned) ──
@@ -42,7 +46,10 @@ SIGNED_FILES=(
 # or an attacker who swaps it on GitHub/MITM gets code execution around the
 # signature (the scheduled.md class). Hard-fail on the known must-sign set;
 # warn loudly on any other executable so a newly-added one can't silently bypass.
-MUST_SIGN=( factory/hooks/payload.sh factory/skills/scheduled.md )
+MUST_SIGN=(
+  factory/hooks/payload.sh factory/skills/scheduled.md
+  factory/scripts/brief.py factory/scripts/install.sh factory/scripts/publish.sh factory/migrate.sh
+)
 for f in "${MUST_SIGN[@]}"; do
   printf '%s\n' "${SIGNED_FILES[@]}" | grep -qxF "$f" || {
     echo "error: $f executes on user machines but is NOT in SIGNED_FILES — refusing to ship" >&2
@@ -63,6 +70,7 @@ done
 # gated), so the proper fix is a reusable verify-fetch helper, tracked separately.
 UNSIGNED_OK=(
   factory/hooks/shim.sh factory/setup.sh factory/ship.sh
+  factory/scripts/verify-fetch.sh
   factory/hooks/cursor/alexandria-session-start.py
   factory/hooks/cursor/alexandria-session-end.py
   factory/hooks/cursor/alexandria-stop.py

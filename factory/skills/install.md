@@ -17,11 +17,11 @@ The install script appends the module ID to `~/alexandria/.call_manifest`. The n
 
 1. Resolve the request to a single canonical module ID. If ambiguous, ask the Author which one they meant; never guess silently.
 
-2. Run the installer. The script lives in the public alexandria repo — fetch it fresh each install so the Author runs the current logic without an SDK update step:
+2. Run the installer. The script lives in the public alexandria repo — fetch it fresh each install (current logic, no SDK update step), but route the fetch through `verify-fetch.sh` so it's checked against the offline-signed manifest and tampered/unsigned code is refused (never raw `curl|bash` a factory script):
 
    ```bash
-   curl -sf https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/scripts/install.sh \
-     | bash -s -- "<module-id>"
+   VF="$HOME/alexandria/system/scripts/verify-fetch.sh"; [ -f "$VF" ] || { mkdir -p "$(dirname "$VF")"; curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/scripts/verify-fetch.sh -o "$VF" && chmod +x "$VF"; }
+   bash "$VF" scripts/install.sh | bash -s -- "<module-id>"
    ```
 
 3. Read back the result. Three outcomes:

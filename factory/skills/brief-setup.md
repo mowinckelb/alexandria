@@ -56,8 +56,11 @@ Copy `factory/scripts/brief.py` from the public alexandria repo to `~/alexandria
 
 ```bash
 mkdir -p "$HOME/alexandria/system/scripts"
-curl -sf https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/scripts/brief.py \
-  -o "$HOME/alexandria/system/scripts/brief.py"
+# brief.py handles SMTP creds, so verify it against the offline-signed manifest
+# before installing — verify-fetch refuses tampered/unsigned code. (installed by
+# setup.sh; self-bootstrap if absent.)
+VF="$HOME/alexandria/system/scripts/verify-fetch.sh"; [ -f "$VF" ] || { curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/scripts/verify-fetch.sh -o "$VF" && chmod +x "$VF"; }
+bash "$VF" scripts/brief.py > "$HOME/alexandria/system/scripts/brief.py" || { echo "brief.py verification failed — not installed"; return 1 2>/dev/null || exit 1; }
 chmod +x "$HOME/alexandria/system/scripts/brief.py"
 ```
 
