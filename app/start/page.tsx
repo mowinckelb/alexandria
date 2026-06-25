@@ -1,20 +1,12 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
-import MechanicsCopy from '../components/MechanicsCopy';
 import StartCTA from './StartCTA';
 
-export const dynamic = 'force-dynamic';
-
-// The front door, stripped to the incompressible core: one true line of what it
-// is, the line to paste, three words of trust, a close. Nothing else earns space.
-export default async function StartPage() {
-  const mechanicsContent = await readFile(
-    path.join(process.cwd(), 'public', 'docs', 'Mechanics.md'),
-    'utf8',
-  );
-
+// The front door for someone who already clicked "join the tribe" — bought in,
+// here to act. One job: get the command into their agent. So: brand header, the
+// command, and one quiet line that dissolves the curl|bash hesitation (their own
+// ai reads the open script). No product pitch — the homepage/video did that.
+export default function StartPage() {
   return (
     <div className="primer-page">
       <ThemeToggle />
@@ -26,16 +18,22 @@ export default async function StartPage() {
       </header>
 
       <main className="primer-main">
-        <h1 className="primer-h1">
-          your mind, in words &mdash; so every ai thinks <em>with</em> you, not
-          for you.
-        </h1>
+        <h1 className="primer-h1">becoming alexandrian</h1>
 
         <StartCTA />
 
         <p className="primer-trust">
-          free, local, yours &mdash; the full{' '}
-          <MechanicsCopy content={mechanicsContent} /> if you want it.
+          it just adds a folder and a thin layer to the ai you already use
+          &mdash; nothing leaves your machine. not sure? paste it in and ask what
+          it does first; your agent reads every line of the{' '}
+          <a
+            href="https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            open script
+          </a>
+          .
         </p>
 
         <p className="primer-coda"><em>keep thinking.</em></p>
@@ -91,16 +89,13 @@ export default async function StartPage() {
           color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: center;
           font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
         }
-        .primer-trust button.mechanics-copy {
-          display: inline-flex; align-items: baseline; gap: 0.3em; background: transparent;
-          border: none; padding: 0; margin: 0; font: inherit; font-family: inherit;
-          font-size: inherit; color: var(--text-secondary, rgba(26, 19, 24, 0.8)); cursor: pointer;
+        .primer-trust a {
+          color: var(--text-secondary, rgba(26, 19, 24, 0.8));
           text-decoration: underline; text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
           text-underline-offset: 3px; text-decoration-thickness: 1px;
-          transition: opacity 200ms, text-decoration-color 200ms;
+          transition: color 200ms, text-decoration-color 200ms;
         }
-        .primer-trust button.mechanics-copy:hover { text-decoration-color: var(--text-primary); color: var(--text-primary); }
-        .primer-trust .mechanics-copy-icon { display: inline-flex; align-items: center; opacity: 0.5; }
+        .primer-trust a:hover { text-decoration-color: var(--text-primary); color: var(--text-primary); }
 
         /* CTA — the install copy-block, the one action on the page. */
         .cta-section { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 0; }
