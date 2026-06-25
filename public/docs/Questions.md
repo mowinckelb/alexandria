@@ -4,6 +4,8 @@
 
 ## what is alexandria.
 
+the shortest version: it's strava, but for your mind. runners keep fit; you keep your thinking sharp — with a practice you own, a profile, and a tribe doing it alongside you. here's how it works.
+
 most designers keep a simple file that tells their ai how they work — their taste, their rules, the way they think about design. the ai reads it, so its work comes out in their style instead of something generic. it isn't only a design thing: coders keep one for code, and it works for anything. it's just a file of how you do something.
 
 and grabbing them is a no-brainer. a designer you rate shares theirs, and you just take it: free, instant, and it only ever helps. no design.md of your own yet? now you've got one. already have one? you download theirs and let your ai pull the good bits into yours. want to build your own? start from theirs. you don't weigh it up. you add it.
@@ -14,11 +16,11 @@ a mind.md is different in one way, though. a design file you can copy off someon
 
 which is where the "alexandria.md" comes in. you can't download a mind.md, but you can download an alexandria.md. it's the same kind of grab-and-tweak file as a design.md — just the version that builds your mind instead of holding your design. you take it the exact same way: no system, use ours; got one, add ours; want your own, start from ours. you tweak it, and out comes your mind.md.
 
-so why bother? think about what ai does to a mind. hand all your thinking to it, and your own fades. refuse it, and you stay capped. the win is the middle — let ai multiply your mind. but it can only multiply what it can see, and a mind.md is how it sees yours. you can't multiply a zero. no one has built a cleaner way to do this.
+so why bother? think about what ai does to a mind. hand all your thinking to it, and your own fades. refuse it, and you stay capped. the win is the middle — have ai think *with* you, not *for* you: sharpen your mind, don't replace it, so the effort stays yours. you do it for the same reason anyone runs — because it's good for you. but ai can only sharpen what it can see, and a mind.md is how it sees yours. you can't multiply a zero. no one has built a cleaner way to do this.
 
 and it gets better with other people. you can't take someone's mind, but you can see how they think, and you can borrow the systems they built. so two more things open up: a [library of minds](/library) to get inspired by, and a [marketplace of systems](/marketplace) to build your own mind.md from. your mind, sharpened by everyone else's.
 
-that's all alexandria is: a tribe who decided their own mind is worth keeping — Alexandrians — and the ground they stand on. we don't tell you how to think or what to believe. we lay the foundation, make starting easy, and run the two. it's less a product than a republic of independent minds, built on one belief: the human mind is worth multiplying, not replacing. keep thinking.
+that's all alexandria is: a tribe who decided their own mind is worth keeping — Alexandrians — and the ground they stand on. we don't tell you how to think or what to believe. we lay the foundation, make starting easy, and run the two. each of you gets a profile — the front of your mind: a bio (who you are), your works and projects (what you make and what you're building), and your shadows (how you think, the published version of your mind). it's less a product than a republic of independent minds, built on one belief: the human mind is worth multiplying, not replacing. keep thinking.
 
 ## isn't this just my ai's memory.
 
@@ -60,7 +62,13 @@ yes. the install is one command that drops a folder on your machine and pulls co
 
 ## what does it cost.
 
-nothing — it's free. open source, runs on your own ai, on your own machine; you paste one line and you're in. (later, joining the library — being seen, connecting with other minds — may have paid depth, but the thing itself stays free.)
+the tool is free, always. you paste one line, it lives in a folder you own, and we can't take it back — you never pay to think. open source, runs on your own ai, on your own machine.
+
+what you pay for is the tribe. joining the collective makes you a founding member with your own number — alexandrian #14, yours for good. that's $10/month, and the first month is free. or bring three friends you'd want thinking too, and it's free. or, if that's a stretch, just email and we'll waive it. you're never paying for the tool — you're backing the thing and taking your place in it.
+
+## what's a founding member.
+
+it's your place in the collective, with your own number — alexandrian #14 — yours for good. not a feature you unlock; the tool already works for free. it's being a real part of the tribe as it forms, and backing the thing early. you join in-flow, right after you install and it's just shown you something real about your own mind — that's the moment it lands. and it's free for good if three friends join through you, because the people you'd want thinking alongside you are exactly who makes the place worth being in.
 
 ## who is it for.
 

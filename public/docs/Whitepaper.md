@@ -112,7 +112,7 @@ You can **outsource to it** — let it do your thinking, take the answers, move 
 
 Or you can **augment** — keep doing the thinking, but use the tool to push your own mind further than it could go alone. Your reasoning stays in your hands; the ai sharpens it, stress-tests it, and carries the parts that don't need you. This is the only one of the three where you keep your mind *and* keep up.
 
-That's what Alexandria is: **a mental gym — it turns any ai into your personal trainer, to refine and scale your thinking.** Not another ai, and not a replacement for the ones you use. It takes whatever ai you already talk to and points it at *you* — at making your own thinking stronger — instead of letting it think in your place.
+That's where Alexandria comes in. The gym is yours — the practice, the work of thinking, the mind that gets stronger. What Alexandria gives you is everything *around* it: the gear, the trainer, and the tribe. The trainer is any ai you already talk to, pointed at *you* — at making your own thinking stronger instead of thinking in your place. **Alexandria isn't the gym; it's what turns the ai you already have into a trainer for the one you build.** Not another ai, and not a replacement for the ones you use.
 
 It's worth being precise about what this is *not*, because every platform is racing to give its ai a better memory of you, and they'll get there. A memory is a locker: it stores what you did so the machine can serve you better. A gym is where *you* get stronger. Better lockers are coming either way. The training is the part you have to choose — and it's the part that develops the only thing that's still yours.
 
@@ -142,7 +142,7 @@ A file on its own has a problem: it goes stale. You change every day — you rea
 
 But notice what we're doing. The very tool that does your thinking is also the tool that can build and maintain the record *of* your thinking. So you don't keep the file by hand. The same ai that helps you think listens as you work, asks the right questions, writes down what's new, keeps it current, and prunes what's gone stale — so the record stays alive without you ever filing it.
 
-That second piece — the part that builds and tends the file — we call your **`alexandria.md`**. It's the same kind of thing as your `mind.md` — yours, in the open, plain text for you to read and change — just the part that does the upkeep instead of holding the content. Your `mind.md` is the record of your mind; your `alexandria.md` is the small, owned system that keeps that record true. Same principle, two layers.
+That second piece — the part that builds and tends the file — we call your **`alexandria.md`**. It's the same kind of thing as your `mind.md` — yours, in the open, plain text for you to read and change — just the part that does the upkeep instead of holding the content. Your `mind.md` is the record of your mind; your `alexandria.md` is the small, owned system that keeps that record true. Same principle, two parts.
 
 This is the loop the whole thing turns on: **you use the technology to build the file the technology then uses to develop you.** The ai helps you write down how you think; that written record makes the ai far better at developing how you think; which gives it more to write down; which makes it better still. It's a wheel that, once pushed, speeds up on its own.
 
@@ -160,7 +160,7 @@ That's the second half of Alexandria: not just a gym for one mind, but a **libra
 
 This is also the reason there has to be a company at all. You can build your own file and your own system alone — you don't need us for that. But nobody builds the library alone; it only exists when many people are connected, and that's the part only a shared place can do.
 
-And what you share is yours to shape, entirely. Your `mind.md` and `alexandria.md` live on your machine and stand on their own, working with or without the library, so developing yourself never depends on giving anything up. When you do add to the library you don't hand over the file; you publish a version you shape from it, as much or as little as you like, and you can take back anything you've shared.
+And what you share is yours to shape, entirely. Your `mind.md` and `alexandria.md` live on your machine and stand on their own, working with or without the library, so developing yourself never depends on giving anything up. When you do add to the library you don't hand over the file; you publish a version you shape from it — your *works* and *projects* (what you make and what you're building) and your *shadows* (how you think, the part drawn from your mind) — as much or as little as you like, and you can take back anything you've shared.
 
 ---
 
