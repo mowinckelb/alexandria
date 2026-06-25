@@ -10,7 +10,7 @@ import { deleteAllProtocolR2 } from './file-access.js';
 import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex } from './kv.js';
 import { hashApiKey, generateToken } from './crypto.js';
 import { ACTIVE_AUTHOR_STATUSES, Account, AccountStore, extractApiKey, extractLibrarySessionToken, findByApiKey, findByLibrarySessionToken, requireAuth } from './auth.js';
-import { generateApiKey, getAccounts, getAccountByLogin, requireAdmin } from './accounts.js';
+import { assignAuthorNumber, generateApiKey, getAccounts, getAccountByLogin, requireAdmin } from './accounts.js';
 import { sendEmail, sendEmailsBatched, sendWelcomeEmail, sendInstallNudge, FOUNDER_EMAIL } from './email.js';
 import { runHealthDigest, runWeekOneCheckIns, runInstallNudges } from './cron.js';
 import { publishFeedback } from './marketplace.js';
@@ -237,7 +237,7 @@ export function registerRoutes(app: Hono) {
     try {
       kinData = await countActiveKin(account.github_login);
     } catch { /* D1 unavailable — degrade gracefully */ }
-    const kinNeeded = parseInt(process.env.KIN_THRESHOLD || '5', 10);
+    const kinNeeded = parseInt(process.env.KIN_THRESHOLD || '3', 10);
 
     return c.json({
       connected: true,
@@ -434,15 +434,16 @@ export function registerRoutes(app: Hono) {
         email_token: emailToken,
         created_at: existing?.created_at || new Date().toISOString(),
         last_session: new Date().toISOString(),
-        // FREE (2026-06-24): new accounts are `free` — already an active status
-        // (ACTIVE_AUTHOR_STATUSES), so they skip checkout (the good-standing branch
-        // below matches) AND can publish immediately (requireAuthor passes). The
-        // product is free; depth/B2B monetisation comes later as a different shape.
-        // Existing statuses (incl. the grandfathered seeding-stage `free` cohort)
-        // ride through the `...existing` spread above. The Stripe checkout block
-        // below is now dead for new users; full billing-code removal is a separate
-        // deploy-verified pass (it's entangled with the Library pay-for-depth tier).
-        subscription_status: existing?.subscription_status || 'free',
+        // FOUNDING-MEMBER JOIN (Strava-for-thought, ground truth e1cd27f): the
+        // local tool is free and keyless (no account); JOINING the collective is
+        // the one paid thing. So a NEW account carries NO active status — it falls
+        // through to the Stripe-trial checkout below ($10/mo, first month free,
+        // free with 3 active kin, or email-to-waive as a manual comp). The webhook
+        // sets `trialing` on checkout completion. Existing statuses ride the
+        // `...existing` spread: the grandfathered seeding-stage `free` cohort
+        // (joined 2026-06-05 → 06-11) and returning members keep their status and
+        // skip checkout via the good-standing branch below.
+        subscription_status: existing?.subscription_status,
       };
       delete updatedAccount.api_key;
       await saveAccount(key, updatedAccount as unknown as Record<string, unknown>);
@@ -525,8 +526,9 @@ export function registerRoutes(app: Hono) {
         logEvent('library_signup_referral_self', { attempted_ref: ref, referred: user.login });
       }
 
-      // Welcome email — carries the deal ($10/month or free with 5 active
-      // kin) and the user's kin link so they have a portable reference.
+      // Welcome email — carries the deal ($10/month, first month free, or free
+      // with 3 active kin) and the user's invite link so they have a portable
+      // reference.
       if (email && isNewAccount) {
         await sendWelcomeEmail(email, user.login, emailToken);
       }
@@ -535,15 +537,21 @@ export function registerRoutes(app: Hono) {
       // file, or an active status — which includes the grandfathered
       // seeding-stage `free` cohort (joined 2026-06-05 → 06-11 while signup
       // was free; billing turning back on applies to new sign-ins only).
+      // They're founding members already, so claim their #N and show the page.
       if (updatedAccount.stripe_customer_id || ACTIVE_AUTHOR_STATUSES.has(updatedAccount.subscription_status || '')) {
         if (stateData.intent === 'library' && stateData.next) {
           return c.redirect(`${getWebsiteUrl()}${stateData.next}`);
         }
-        return c.html(await callbackPageHtml(apiKey, user.login));
+        const number = await assignAuthorNumber(user.login);
+        return c.html(await callbackPageHtml(apiKey, user.login, false, number ?? 0));
       }
 
-      // Redirect to Stripe Checkout ($10/mo, 30-day trial, free with 5 active
-      // kin via coupon). For pure Library login intent we skip billing redirect.
+      // New join → Stripe Checkout ($10/mo, first month free via 30-day trial,
+      // free with 3 active kin via coupon). The founding-member page (with #N +
+      // the connect command) renders at /billing/success after checkout, so
+      // stash the freshly-minted key for that round-trip — billing/success can't
+      // regenerate it (key is shown once, hash-only at rest). Short TTL, deleted
+      // on read. For pure Library login intent we skip the billing redirect.
       if (stateData.intent !== 'library' && process.env.STRIPE_SECRET_KEY && email) {
         try {
           const checkoutUrl = await createCheckoutSession({
@@ -552,6 +560,9 @@ export function registerRoutes(app: Hono) {
             stripeCustomerId: updatedAccount.stripe_customer_id,
           });
           if (checkoutUrl) {
+            if (apiKey) {
+              await kv.put(`joinkey:${user.login.toLowerCase()}`, apiKey, { expirationTtl: 3600 });
+            }
             return c.redirect(checkoutUrl);
           }
         } catch (err) {
@@ -562,7 +573,8 @@ export function registerRoutes(app: Hono) {
       if (stateData.intent === 'library' && stateData.next) {
         return c.redirect(`${getWebsiteUrl()}${stateData.next}`);
       }
-      return c.html(await callbackPageHtml(apiKey, user.login));
+      const number = await assignAuthorNumber(user.login);
+      return c.html(await callbackPageHtml(apiKey, user.login, false, number ?? 0));
     } catch (err: any) {
       console.error('GitHub callback error:', err);
       return c.html(authErrorHtml('something broke signing you in. please try again.'), 500);
@@ -1070,7 +1082,8 @@ export function registerRoutes(app: Hono) {
     }
     const { api_key, github_login } = JSON.parse(stored) as { api_key: string; github_login: string };
     logEvent('install_token_redeemed', { author: github_login });
-    const html = await callbackPageHtml(api_key, github_login, true);
+    const number = await assignAuthorNumber(github_login);
+    const html = await callbackPageHtml(api_key, github_login, true, number ?? 0);
     return c.html(html);
   });
 
@@ -1083,7 +1096,8 @@ export function registerRoutes(app: Hono) {
     // Dummy must not be credential-shaped (`sk_test_` reads as a Stripe key
     // to scanners and to anyone who copies the rendered curl command).
     const apiKey = returning ? '' : 'PREVIEW-NOT-A-REAL-KEY';
-    const html = await callbackPageHtml(apiKey, 'mowinckelb');
+    // Dummy number for the founding-member preview; no side effects.
+    const html = await callbackPageHtml(apiKey, 'mowinckelb', false, returning ? 0 : 142);
     return c.html(html);
   });
 

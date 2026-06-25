@@ -23,6 +23,9 @@ export interface Account {
   subscription_id?: string;
   current_period_end?: string;
   constitution_size?: number;
+  /** Founding-member number (alexandrian #N). Sequential, permanent, assigned
+   *  on first join via assignAuthorNumber(). Source of truth for display. */
+  number?: number;
   week_one_email_sent_at?: string;
   install_nudge_last_sent_at?: string;
   install_nudge_count?: number;
@@ -108,9 +111,9 @@ export async function requireAuth(c: { req: { header: (name: string) => string |
 
 /**
  * Gate write endpoints (PUT /file, DELETE /file, POST /call) on an active
- * subscription. The deal is "$10/month or 5 active kin" (billing back on
- * 2026-06-11): new GitHub sign-ins go through Stripe checkout at the OAuth
- * callback. A cancelled/unpaid sub means neither condition is met, so writes
+ * subscription. The deal is "$10/month (first month free) or 3 active kin":
+ * new GitHub sign-ins go through Stripe checkout at the OAuth callback (the
+ * founding-member join). A cancelled/unpaid sub means neither condition is met, so writes
  * are blocked at 402 with a reactivate link. Reads remain open (see
  * /library/*) so users who lapse can still access their own data.
  *

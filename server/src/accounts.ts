@@ -3,6 +3,7 @@
 import { randomBytes } from 'crypto';
 import { getAuthIndex, getLoginIndex, setLoginIndex, deleteLoginIndex, loadAccount, loadAccounts, saveAccount } from './kv.js';
 import { hashApiKey } from './crypto.js';
+import { getDB } from './db.js';
 import { requireAuth } from './auth.js';
 import type { Account, AccountStore } from './auth.js';
 
@@ -74,6 +75,72 @@ export async function getBillingSummary(): Promise<Record<string, number>> {
 
 export function generateApiKey(): string {
   return `alex_${randomBytes(16).toString('hex')}`;
+}
+
+// ---------------------------------------------------------------------------
+// Founding-member numbers (alexandrian #N)
+// ---------------------------------------------------------------------------
+
+// Lazily ensure the counter table exists, so #N works even before migration
+// 0024 is applied (mirrors ensureRateLimitSchema in worker.ts). Memoized per
+// isolate; on failure the flag stays false so the next call retries.
+let _counterSchemaReady = false;
+async function ensureCounterSchema(db: D1Database): Promise<void> {
+  if (_counterSchemaReady) return;
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS counters (name TEXT PRIMARY KEY, value INTEGER NOT NULL)`
+  ).run();
+  _counterSchemaReady = true;
+}
+
+/**
+ * Assign the founding-member number (alexandrian #N) — sequential, permanent,
+ * idempotent. Called the first time an Author reaches the founding-member page
+ * (post-checkout, or the skip-checkout good-standing path). Persisted on the
+ * account (KV — the source of truth for display) and best-effort mirrored to
+ * the Library profile (authors.number, live once migration 0024 is applied).
+ *
+ * The counter lives in D1 because SQLite serialises writes: `INSERT … ON
+ * CONFLICT … RETURNING value` is atomic, where a KV read-modify-write would
+ * race two concurrent joins onto the same number. Joins are human-paced and the
+ * existing-number guard returns early, so a re-view never burns a number.
+ */
+export async function assignAuthorNumber(githubLogin: string): Promise<number | null> {
+  if (!githubLogin) return null;
+  const result = await getAccountByLogin(githubLogin);
+  if (!result) return null;
+  const { storeKey, account } = result;
+  if (typeof account.number === 'number' && account.number > 0) return account.number;
+
+  const db = getDB();
+  try {
+    await ensureCounterSchema(db);
+    const row = await db.prepare(
+      `INSERT INTO counters (name, value) VALUES ('author_number', 1)
+       ON CONFLICT(name) DO UPDATE SET value = counters.value + 1
+       RETURNING value`
+    ).first<{ value: number }>();
+    const n = row?.value;
+    if (!n) return null;
+
+    account.number = n;
+    await saveAccount(storeKey, account as unknown as Record<string, unknown>);
+
+    // Library-profile mirror — best-effort. The `number` column ships in
+    // migration 0024; if it isn't applied yet the account-level number still
+    // drives display, so swallow the missing-column error.
+    try {
+      await db.prepare(
+        `UPDATE authors SET number = ?, updated_at = ? WHERE id = ? AND number IS NULL`
+      ).bind(n, new Date().toISOString(), githubLogin).run();
+    } catch (e) {
+      console.error('[number] authors.number mirror failed (migration 0024 pending?):', e);
+    }
+    return n;
+  } catch (e) {
+    console.error('[number] assignAuthorNumber failed:', e);
+    return null;
+  }
 }
 
 export async function requireAdmin(c: { req: { header: (name: string) => string | undefined; query: (name: string) => string | undefined } }): Promise<{ key: string; account: Account } | null> {

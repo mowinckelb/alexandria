@@ -1,7 +1,7 @@
 /**
  * Billing — Stripe subscription management + Library payment
  *
- * Subscription: $10/mo, or free with 5+ active kin. Binary. Slider open above floor.
+ * Subscription: $10/mo (first month free), or free with 3+ active kin. Binary. Slider open above floor.
  * Library: monthly tab billing (micro-transactions settled monthly via Stripe Billing Meters).
  * Non-Author: instant payment via Stripe Checkout.
  */
@@ -12,7 +12,7 @@ import { logEvent } from './analytics.js';
 import { callbackPageHtml } from './templates.js';
 import { requireAuth } from './auth.js';
 import { loadAccounts, getKV } from './kv.js';
-import { getAccountByLogin, updateAccountBilling } from './accounts.js';
+import { assignAuthorNumber, getAccountByLogin, updateAccountBilling } from './accounts.js';
 import type { Account } from './auth.js';
 import { getDB } from './db.js';
 import { sendEmail, sendPatronWelcome } from './email.js';
@@ -128,10 +128,10 @@ function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// Price ID — one price, $10/month. Free with 5+ active kin (coupon).
+// Price ID — one price, $10/month. Free with 3+ active kin (coupon).
 // ---------------------------------------------------------------------------
 
-const KIN_THRESHOLD = parseInt(process.env.KIN_THRESHOLD || '5', 10);
+const KIN_THRESHOLD = parseInt(process.env.KIN_THRESHOLD || '3', 10);
 const KIN_WINDOW_MS = 30 * 86400 * 1000; // rolling 30-day activity window
 
 let _priceId: string | null = null;
@@ -207,7 +207,7 @@ async function ensurePrice(): Promise<string> {
   const stripe = getStripe();
   const productCopy = {
     name: 'The Examined Life',
-    description: 'a tribe of humans who put their minds into writing, so ai thinks with them, not for them. free with five friends who join through you and stay active. otherwise $10 a month.',
+    description: 'a tribe of humans who put their minds into writing, so ai thinks with them, not for them. free with three friends who join through you and stay active. otherwise $10 a month, first month free.',
   };
 
   const products = await stripe.products.list({ limit: 10 });
@@ -560,7 +560,7 @@ export async function createCheckoutSession(opts: {
       },
       metadata: { kind: 'author', github_login: opts.githubLogin },
       custom_text: {
-        submit: { message: 'free if five friends join through you and stay active. otherwise $10/month after the 30-day trial.' },
+        submit: { message: 'free if three friends join through you and stay active. otherwise $10/month after your first month free.' },
       },
       success_url: `${SERVER_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${WEBSITE_URL}/signup?billing=cancel`,
@@ -936,7 +936,16 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
       await onAccountUpdate(login, billingUpdate);
       logEvent('billing_checkout_completed', { mode: session.mode || 'unknown' });
 
-      return c.html(await callbackPageHtml(''));
+      // Founding-member page. The API key was minted at the OAuth callback and
+      // stashed for this round-trip (it's shown once, hash-only at rest, so it
+      // can't be regenerated here). Read it once and clear it. Claim the
+      // sequential #N now that they've joined.
+      const kv = getKV();
+      const stashKey = `joinkey:${login.toLowerCase()}`;
+      const apiKey = (await kv.get(stashKey)) || '';
+      if (apiKey) await kv.delete(stashKey);
+      const number = await assignAuthorNumber(login);
+      return c.html(await callbackPageHtml(apiKey, login, false, number ?? 0));
     } catch (err) {
       console.error('Billing success page error:', err);
       return c.redirect(`${WEBSITE_URL}/signup`);
@@ -1429,14 +1438,15 @@ async function sendPreBillWarningEmail(
   dueAt: Date | null,
 ): Promise<void> {
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
-  const kinLink = `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}`;
+  const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
 
   // Warning fires only when not-free, so at least one of (kinShort, authorQuiet) is true.
   const kinShort = state.kinNeeded > 0;
   const authorQuiet = !state.authorHasFile || !state.authorHasCall;
-  // "you're nearly there" / "just N more" only when actually nearly there —
-  // saying it at 0/5 reads as gaslighting.
-  const nearlyThere = state.kinCompliant >= 3;
+  // "you're nearly there" / "just N more" only when actually nearly there (one
+  // kin away) — saying it at 0 reads as gaslighting. Derived from kinNeeded so
+  // it tracks the threshold (now 3) without a hard-coded count.
+  const nearlyThere = state.kinNeeded === 1;
   const just = nearlyThere ? 'just ' : '';
 
   let affirmationLine: string;

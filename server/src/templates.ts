@@ -74,14 +74,27 @@ async function fetchRawText(url: string): Promise<string> {
   }
 }
 
-export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false): Promise<string> {
+export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false, authorNumber = 0): Promise<string> {
   const WEBSITE_URL = getWebsiteUrl();
-  const isReturning = !apiKey;
-  const curlCmd = isReturning ? '' : `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}`;
-  // The signed-in install is copy-paste, matching /start. (A claude-cli:// deep link was tried
+  const host = WEBSITE_URL.replace(/^https?:\/\//, '');
+  // The founding-member page (Strava-for-thought, ground truth e1cd27f). You've
+  // just JOINED the collective — the local tool was already free. So the page
+  // shows three things: your number (alexandrian #N), the connect command (links
+  // your local install to the collective so you can publish + be seen), and your
+  // invite link (carries your code; three friends through it = free for good).
+  // `isReturning` is the bare re-login fallback — nothing minted, no number yet.
+  const isReturning = !apiKey && authorNumber <= 0;
+  const numberLabel = authorNumber > 0 ? `alexandrian #${authorNumber}` : '';
+  // The connect command is copy-paste, matching /start. (A claude-cli:// deep link was tried
   // and removed 2026-06-24: it auto-ran the script and felt like a terminal hijack — copy-paste
-  // is calmer and universal across Claude Code / Cursor / Codex / Factory.) Kin (the old
-  // "five kin → free" referral) was dropped when the product went free — nothing to earn toward.
+  // is calmer and universal across Claude Code / Cursor / Codex / Factory.) Same command whether
+  // they installed keyless first (it links the account) or join from the web first (it installs +
+  // links) — re-running setup.sh with the key is idempotent.
+  const curlCmd = apiKey ? `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}` : '';
+  // The invite link carries the member's code (their github login). A friend who opens it is
+  // pre-credited as kin (server validates ref → existing login, rejects self-referral).
+  const inviteUrl = githubLogin ? `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}` : '';
+  const inviteDisplay = githubLogin ? `${host}/join?ref=${githubLogin}` : '';
   // Inline Mechanics.md so its copy button runs synchronously inside the click handler.
   // Async fetch + clipboard.writeText loses user activation and falls back to opening the raw URL.
   // (block.md is no longer copied here — the agent reads the locally-cached .block after install
@@ -114,6 +127,8 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   .line { font-size: 1.1rem; line-height: 1.9; }
   .mechanics { font-size: 0.85rem; line-height: 1.9; color: #bbb4aa; margin-top: 2.5rem; }
   .aside { font-size: 0.85rem; line-height: 1.9; color: #bbb4aa; margin-top: 1.5rem; }
+  .deal { font-size: 0.9rem; line-height: 1.8; color: #8a8078; margin-top: 2rem; }
+  .deal .free { color: #3d3630; }
   .mechanics-row { display: block; }
   .mechanics-hint { color: #bbb4aa; }
   .mechanics .action { color: #8a8078; }
@@ -201,11 +216,13 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
 <body>
 ${isReturning ? `<a class="brand-corner" href="${WEBSITE_URL}/">alexandria.</a>` : ''}
 <div class="container">
-  <h1 class="welcome">${isReturning ? `welcome back.` : `welcome to alexandria.`}</h1>
+  <h1 class="welcome">${isReturning ? `welcome back.` : (numberLabel ? `welcome, ${numberLabel}.` : `welcome to alexandria.`)}</h1>
   ${isReturning ? `<p class="line welcome-back">call /alexandria in your coding agent.</p>` : `<div class="steps">
-    <p class="line"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy install command">copy your command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; paste it into your coding agent (claude code, cursor, codex&hellip;) and hit enter. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">installs to ~/alexandria and links this account, so you can publish to the library. your thinking stays on your machine &mdash; only what you publish is ever sent.</span></button></p>
+    ${curlCmd ? `<p class="line"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy connect command">copy your connect command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; paste it into your coding agent (claude code, cursor, codex&hellip;) and hit enter. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">links your install to your founding membership, so you can publish to the library and be seen. your thinking stays on your machine &mdash; only what you publish is ever sent.</span></button></p>` : `<p class="line">you're in. call /alexandria in your coding agent.</p>`}
+    ${inviteUrl ? `<p class="line"><button type="button" class="action" onclick="copyInvite(this)" aria-label="copy your invite link">copy your invite link <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; send it to the people you want thinking for themselves too. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">${escapeHtml(inviteDisplay)} &mdash; it carries your code, so anyone who joins through it is credited to you. three active friends and your membership is free for good.</span></button></p>` : ''}
     <p class="line"><a class="action" href="${SHORTCUT_URL}" target="_blank" rel="noopener">shortcut <span class="icon">${ICON_EXTERNAL}</span></a> &mdash; add it on iphone or mac to save anything worth thinking about <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">tap share on a voice memo, podcast, article or tweet and pick alexandria. lands in your folder; bring it up with your agent whenever, or it surfaces when relevant.</span></button></p>
-  </div>${viaToken ? '' : `
+  </div>
+  <p class="deal"><span class="free">first month free</span>, then $10/month &mdash; or <span class="free">free for good</span> when three friends join through you. if that's a stretch, just email and it's waived. you're joining the collective, never paying to use the tool.</p>${viaToken ? '' : `
   <p class="aside">no agent on hand? add the shortcut and start saving &mdash; what you save becomes your first session, we'll email the rest.</p>`}`}
   ${isReturning ? '' : `<div class="mechanics">
     <span class="mechanics-row">we never see your data &mdash; <button type="button" class="action" onclick="copyMechanics(this)" aria-label="copy Mechanics.md">Mechanics.md <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></span>
@@ -246,6 +263,7 @@ function copyRemote(url, el) {
   });
 }
 function copyCmd(el) { copyText(${jsLiteral(curlCmd)}, el); }
+function copyInvite(el) { copyText(${jsLiteral(inviteUrl)}, el); }
 function copyMechanics(el) {
   var t = ${jsLiteral(mechanicsContent)};
   if (t) copyText(t, el); else copyRemote(${jsLiteral(MECHANICS_URL)}, el);

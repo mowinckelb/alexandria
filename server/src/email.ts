@@ -144,14 +144,14 @@ export async function sendFollowerWelcome(email: string, unsubscribeToken?: stri
 
 export async function sendWelcomeEmail(email: string, githubLogin: string, emailToken?: string): Promise<void> {
   const websiteHost = WEBSITE_URL.replace(/^https?:\/\//, '');
-  const kinLink = `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}`;
-  const kinLinkDisplay = `${websiteHost}/signup?ref=${githubLogin}`;
+  const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
+  const kinLinkDisplay = `${websiteHost}/join?ref=${githubLogin}`;
   await sendEmail(email, 'welcome to alexandria.',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; text-align: left; line-height: 1.7;">
   <p style="font-size: 1.1rem; margin: 0 0 1.5rem;">welcome to alexandria.</p>
-  <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.5rem;">your data lives on your machine. free with five active kin &mdash; otherwise $10/month after your 30-day trial.</p>
-  <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.75rem;">your kin link: <a href="${kinLink}" style="color: #3d3630;">${kinLinkDisplay}</a> &mdash; send it to ten people, knowing some will not stick.</p>
-  <p style="font-size: 0.95rem; margin: 0 0 1.8rem;"><a href="${WEBSITE_URL}/signup" style="color: #3d3630; text-decoration: none;">open alexandria</a></p>
+  <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.5rem;">the tool is yours, free, on your machine. membership in the collective is $10/month with the first month free &mdash; or free for good with three active friends who join through you.</p>
+  <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.75rem;">your invite link: <a href="${kinLink}" style="color: #3d3630;">${kinLinkDisplay}</a> &mdash; send it to the people you want thinking for themselves too.</p>
+  <p style="font-size: 0.95rem; margin: 0 0 1.8rem;"><a href="${WEBSITE_URL}/join" style="color: #3d3630; text-decoration: none;">open alexandria</a></p>
   <p style="margin: 0 0 0.4rem;">Benjamin a. Mowinckel</p>
   <p style="margin: 0; font-style: italic; color: #8a8078;">a.</p>${emailToken ? `
   <p style="margin: 1.5rem 0 0; font-size: 0.72rem; color: #bbb4aa;"><a href="${SERVER_URL}/email/stop?t=${emailToken}" style="color: #8a8078;">stop these emails</a></p>` : ''}
@@ -188,7 +188,7 @@ export async function sendInstallNudge(
   const SHORTCUT_URL = 'https://www.icloud.com/shortcuts/0ea1bb7333fd43a9881e9c7b9938a337';
   const MECHANICS_URL = `${WEBSITE_URL}/Mechanics.md`;
   const installUrl = `${SERVER_URL}/install/${installToken}`;
-  const kinLink = `${WEBSITE_URL}/signup?ref=${encodeURIComponent(githubLogin)}`;
+  const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.8rem; color: #8a8078;">ready when you are.</p>
 
