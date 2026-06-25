@@ -2237,7 +2237,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .install-cta-icon svg { display: block; }
         /* Caption sits under the button's label (matching its left padding),
            not flush to the button's outer edge — reads as inside the box.
-           Scoped to .cta-pair to outrank .cta-sub's later `padding-left: 0`. */
+           Scoped to .cta-pair so it outranks .cta-sub's later padding-left:0. */
         .cta-pair .install-cta-sub { padding-left: 26px; }
         /* Subtitle — does the explanatory work so the buttons stay
            terse. Italic, faint. Hangs flush left from the button's
