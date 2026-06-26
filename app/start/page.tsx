@@ -24,7 +24,7 @@ export default function StartPage() {
 
         <p className="primer-trust">
           it just adds a folder and a thin layer to the ai you already use
-          &mdash; nothing leaves your machine. not sure? paste it in and ask what
+          &mdash; nothing&rsquo;s ever sent to us. not sure? paste it in and ask what
           it does first; your agent reads every line of the{' '}
           <a
             href="https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh"

@@ -9,7 +9,7 @@ import { pageMetadata } from '../lib/config';
 // price, the sovereignty claim) so the snippet itself answers.
 const TITLE = 'questions — alexandria.';
 const DESCRIPTION =
-  'plain answers about alexandria: what it is, how it works, that it is free, who it is for, and why your data never leaves your machine.';
+  'plain answers about alexandria: what it is, how it works, that it is free, who it is for, and why your data is never sent to us.';
 
 const PAGE_META = pageMetadata({
   path: '/questions',

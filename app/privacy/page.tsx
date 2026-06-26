@@ -29,8 +29,8 @@ export default function Privacy() {
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: 400 }}>Your data stays on your machine</h2>
-        <p>Your Constitution, Vault, feedback log, notepad, and ontology are local markdown files on your device. They never leave your machine. Alexandria&apos;s server cannot access, read, or retrieve them. This is not a policy — it is architecture. There is no mechanism in the system for your private cognitive data to reach our servers.</p>
+        <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: 400 }}>Your private data never reaches us</h2>
+        <p>Your Constitution, Vault, feedback log, notepad, and ontology are local markdown files on your device. They are backed up only to accounts you control — a private GitHub repo (if you&apos;re logged into the GitHub CLI) and your iCloud (on a Mac) — and never to Alexandria. Our server cannot access, read, or retrieve them. This is not a policy — it is architecture: there is no mechanism in the system for your private cognitive data to reach our servers.</p>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>

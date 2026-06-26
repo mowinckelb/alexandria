@@ -876,7 +876,8 @@ elif [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
   echo "(Author: if it doesn't start on its own, just say \"begin\".)"
   if [ "$KEYLESS" = "true" ]; then
     echo ""
-    echo "The tool is yours — free, local, no account, nothing sent anywhere. When the agent"
+    echo "The tool is yours — free, local, no account, never sent to us (backups go only to"
+    echo "your own GitHub + iCloud). When the agent"
     echo "finishes your first draft it'll show you how to JOIN the collective (your own"
     echo "founding-member number, the library, the tribe) at alexandria-library.com/join —"
     echo "first month free, or free for good with 3 friends. The tool stays free either way."
