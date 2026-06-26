@@ -2171,8 +2171,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .cta-pair a.lr-cta {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 16px;
-          padding: 10px 22px;
+          /* Matches button.install-cta exactly (font-size + padding) so the
+             two CTAs are the same size and their captions align — standardized
+             pair, not two slightly different boxes. */
+          font-size: 17px;
+          padding: 12px 26px;
           border-radius: 8px;
           text-decoration: none;
           font-weight: 500;
@@ -2716,10 +2719,6 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .cta-pair {
             padding-left: 0;
             gap: 14px;
-          }
-          .cta-pair a.lr-cta {
-            font-size: 14px;
-            padding: 10px 22px;
           }
 
           /* Wordmark scales by viewport so it fits on one line. At 12.5vw it
