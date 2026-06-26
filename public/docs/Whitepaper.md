@@ -160,7 +160,7 @@ That's the second half of Alexandria: not just a gym for one mind, but a **libra
 
 This is also the reason there has to be a company at all. You can build your own file and your own system alone — you don't need us for that. But nobody builds the library alone; it only exists when many people are connected, and that's the part only a shared place can do.
 
-And what you share is yours to shape, entirely. Your `mind.md` and `alexandria.md` live on your machine and stand on their own, working with or without the library, so developing yourself never depends on giving anything up. When you do add to the library you don't hand over the file; you publish a version you shape from it — your *works* and *projects* (what you make and what you're building) and your *shadows* (how you think, the part drawn from your mind) — as much or as little as you like, and you can take back anything you've shared.
+And what you share is yours to shape, entirely. Your `mind.md` and `alexandria.md` live on your machine and stand on their own, working with or without the library, so developing yourself never depends on giving anything up. When you do add to the library you don't hand over the file; you publish a version you shape from it — your *works* and *projects* (what you make and what you're building) and your *shadows* (how you think, the part drawn from your mind) — as much or as little as you like, and you can take back anything you've shared. Reading what others have opened is free — an open library is the only kind that grows — and on each thing you publish, you choose how wide it opens.
 
 ---
 

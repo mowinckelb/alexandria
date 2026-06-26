@@ -171,14 +171,14 @@ Cloudflare Worker, stateless re: your private content. KV + D1 + R2.
 | Email + GitHub login + Stripe customer ID, in one encrypted account blob | KV (AES-256-GCM at rest) | Account, OAuth, billing |
 | API key — SHA-256 hash only | KV | Auth check |
 | Event log: which endpoints your account hit, with timestamps and lightweight context (e.g. "canon_status: failures=editor, has_notice=true") | KV (60-day TTL) | Debugging, abuse signal |
-| Library files you explicitly publish | R2 | Public Library content |
+| Library files you explicitly publish | R2 | Published Library content |
 | Library file metadata (name, visibility tier, content hash, updated_at) | D1 | Discovery, listing |
 | Per-account record of every module call: module ID, your account ID, timestamp, optional notes (≤2000 chars) | D1 (`protocol_calls`) | Powers the marketplace. Catalog of modules used in the last 90 days is exposed at public `/marketplace`; per-module caller list is exposed at authed `/marketplace/<module>`. |
 | Feedback text you explicitly type and submit (including the one-line install status report at setup) | Private GitHub repo `mowinckelb/alexandria-feedback` (founder-only access) | Founder reads + factory autoloop processes weekly to draft canon updates |
 
 **Not stored anywhere we control:** your constitution, vault, marginalia, transcripts, machine.md, notepad, raw API key, ai-vendor (Anthropic/OpenAI/etc) API keys, or any file you did not explicitly `PUT /file/...`. There is no endpoint that accepts them.
 
-**What a complete server breach yields:** account emails, GitHub user IDs, hashed (un-reversible) API keys, the 60-day event log, your full `protocol_calls` history (the per-module portion is already exposed by design via the authed marketplace endpoint), published Library content (already public), and Cloudflare-level access logs (IPs, timing). It does not yield private cognition, unpublished files, or ai-vendor credentials, because those never reach the server.
+**What a complete server breach yields:** account emails, GitHub user IDs, hashed (un-reversible) API keys, the 60-day event log, your full `protocol_calls` history (the per-module portion is already exposed by design via the authed marketplace endpoint), published Library content (files you explicitly published), and Cloudflare-level access logs (IPs, timing). It does not yield private cognition, unpublished files, or ai-vendor credentials, because those never reach the server.
 
 **What a `mowinckelb/alexandria-feedback` breach yields:** feedback text you explicitly typed and submitted, attributed to your GitHub login. Same trust posture as the public repo: protected by GitHub account security.
 

@@ -14,7 +14,7 @@ The code maps to four layers:
 
 1. **The collective plumbing** (`server/src/protocol.ts` + `auth.ts` + `kv.ts` + `crypto.ts` + `db.ts` + `file-access.ts` + `marketplace-catalog.ts` + `marketplace.ts` + `audit.ts`) — the incompressible core that makes the library/marketplace/tribe work. 7 endpoints, ~1700 lines including the visibility gate (`file-access.ts`), the module catalog (`marketplace-catalog.ts`), the Author-feedback substrate (`marketplace.ts`), and the tamper-evident access audit (`audit.ts`). Three obligations: account (membership), file (publish monthly), call (communicate). Internally still named `protocol.ts` — a code label for the plumbing, never the public framing.
 
-2. **Factory** (`factory/`) — The founder's system, public on GitHub, forkable. 19 files: canon (methodology), hooks (shim + payload), setup script, skills (claudecode, cursor, codex, scheduled), templates (agent, machine, notepad, feedback, constitution/, marginalia/, vault/, library/), onboarding block. This is the gear — shipped default-on but deletable, forkable, replaceable. Any Author can fork and modify. The marketplace evolves canon defaults from cross-Author signal.
+2. **Factory** (`factory/`) — The founder's system, public on GitHub, forkable. ~48 files: **canon** (10 modules in two tiers — Foundation: `foundation.md` (universal); Founder: `axioms·methodology·editor·mercury·publisher·library·filter·bookshelf` (his default, personalisable) — plus `MODULES.md` index), **hooks** (shim + payload), **setup.sh**, **ship.sh** + signed **manifest.txt**, **skills** (claudecode, codex, cursor, droid, scheduled, install, publish, brief-setup, nudge, …), **systems/** (Author-0 modules, e.g. state-based-sync), **scripts/**, **templates/**, onboarding block. This is the gear — shipped default-on but deletable, forkable, replaceable. The marketplace evolves canon defaults from cross-Author signal. Canon + payload + skills are signature-gated (`ship.sh` re-signs `manifest.txt`).
 
 3. **Machine** (`~/alexandria/`) — Each Author's personal system. Constitution, vault, marginalia, machine.md, notepad, feedback. Lives locally, never on the server — the sovereign tool running on the Author's own files. The product IS this folder. Alexandria stores what Authors publish, never what they think.
 
@@ -74,25 +74,23 @@ Operational overhead — OAuth, billing, email, admin:
 factory/
   block.md                  # Onboarding block instructions
   setup.sh                  # Setup script (curl → install)
-  canon/
-    methodology.md          # The canon — how to develop human cognition
+  ship.sh                   # Sign + commit + push factory changes (re-signs manifest.txt)
+  manifest.txt              # Signed sha256 manifest the shim verifies (canon + payload + skills)
+  canon/                    # The canon — two tiers (see MODULES.md)
+    MODULES.md              # Index: Foundation (universal) vs Founder (his default)
+    foundation.md           # Foundation — the universal closed loop + invariants
+    axioms.md               # Founder — the thesis (the why)
+    methodology.md          # Founder — the craft (the how)
+    editor.md  mercury.md  publisher.md   # Founder — the three functions (extract/amplify/create)
+    library.md  filter.md   # Founder — Library surface + publishing conventions
+    bookshelf.md            # Founder — reference shelf
   hooks/
     shim.sh                 # Immutable local shim
-    payload.sh              # GitHub-delivered hook logic
-  skills/
-    claudecode.md           # Claude Code skill definition
-    codex.md                # Codex skill definition
-    cursor.mdc              # Cursor rules
-    scheduled.md            # Scheduled agent skill
-  templates/
-    agent.md                # Agent instructions template
-    machine.md              # Machine.md template
-    notepad.md              # Notepad template
-    feedback.md             # Feedback template
-    constitution/README.md  # Constitution directory scaffold
-    marginalia/README.md    # Marginalia directory scaffold
-    vault/README.md         # Vault directory scaffold
-    library/README.md       # Library directory scaffold
+    payload.sh              # GitHub-delivered hook logic (signed)
+  skills/                   # claudecode · codex · cursor · droid · scheduled(-bootstrap) · install · publish · brief-setup · nudge · factory
+  systems/                  # Author-0 modules pulled from the marketplace (e.g. state-based-sync)
+  scripts/                  # brief.py · install.sh · publish(-fork).sh · verify-fetch.sh
+  templates/                # agent · machine · notepad · feedback · module · constitution/ · marginalia/ · vault/ · library/
 ```
 
 ## Visual Workflow
