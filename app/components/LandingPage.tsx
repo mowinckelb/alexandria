@@ -647,7 +647,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   you. your mind, alongside an intelligence
                   that{' '}<em>compounds</em> without end.
                   <br /><br />
-                  you belong here. the door stands open &mdash; low agency is the only friction left.
+                  two ways from here. ready now &mdash; join the tribe, one line and you&rsquo;re an author. not yet &mdash; stay close.
                 </p>
 
                 <div className="cta-pair">
