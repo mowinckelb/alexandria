@@ -867,20 +867,17 @@ if [ "$CORE_OK" != "true" ]; then
   echo "AGENT: core install failed — do NOT read the block, start setup, or draft anything."
   echo "Tell the Author which row above is ✗ and to re-run the line above; then stop."
 elif [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
-  echo "Installed — you're set up. Nothing else to copy or click."
+  echo "Installed — your agent takes it from here. Nothing else to copy or click."
   echo ""
-  echo "AGENT: continue now — read ~/alexandria/system/.block and follow it. It verifies"
-  echo "this install, drafts the Author's constitution from what's already on their machine,"
-  echo "and ends with the in-flow founding-member JOIN. First tell them you're starting and"
-  echo "that they can step away or stop anytime; then begin. Don't wait to be asked."
+  echo "AGENT: read ~/alexandria/system/.block now and follow it end-to-end. Tell them"
+  echo "you're starting and they can step away, then begin — don't wait to be asked."
   echo "(Author: if it doesn't start on its own, just say \"begin\".)"
   if [ "$KEYLESS" = "true" ]; then
     echo ""
-    echo "The tool is yours — free, local, no account, never sent to us (backups go only to"
-    echo "your own GitHub + iCloud). When the agent"
-    echo "finishes your first draft it'll show you how to JOIN the collective (your own"
-    echo "founding-member number, the library, the tribe) at alexandria-library.com/join —"
-    echo "first month free, or free for good with 3 friends. The tool stays free either way."
+    echo "The tool is yours: free, local, no account, never sent to us (any backup goes only"
+    echo "to your own GitHub + iCloud). After it drafts your starter mind it'll show you how to"
+    echo "join the collective — your own founding-member number — at alexandria-library.com/join"
+    echo "(first month free, or free with 3 friends). The tool stays free either way."
   fi
 else
   echo "Re-run anytime: curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- \$API_KEY"

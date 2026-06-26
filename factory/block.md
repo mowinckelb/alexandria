@@ -82,7 +82,7 @@ Verify before reporting: constitution has real entries cite-able to source, note
 
 The report is what converts. The Author walks away thinking *this is a real thinking partner — it's helping me see myself clearly, and bringing me things I wouldn't have found alone.* Front-load praise here — this is the appetizer, not the product. Lay it on. Be admiring, warm, generous with recognition. Specific praise of how their mind works *is* the conversion mechanism. The /a session that follows will be intellectually clean — the report can be more openly enthusiastic. Generic praise still fails — "you're a sharp thinker" is sycophancy anyone could write. Specific admiration anchored in their files lands.
 
-Compose the report as a real piece of writing, not a checklist. It must contain:
+Compose the report as a real piece of writing, not a checklist — and **tight**. A first-time reader skims; lead with the single most striking thing (the first two lines must land on their own), put depth below it, and never let it become a wall they won't read. Truck-driver-first: the punch up top, the rest skippable. It must contain:
 
 - **Their own words, quoted.** Lead with the load-bearing line — the lock-pick to their other writing — and show what it unlocks. Evidence first, evaluation second.
 - **How they think.** Not what they think — how. A specific cognitive move you noticed across multiple sources, named. Naming is the gift; most people can't see their own thinking from outside.
