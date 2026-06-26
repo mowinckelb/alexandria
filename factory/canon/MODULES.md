@@ -18,7 +18,7 @@ How *Benjamin* runs the loop well — the best *general* starting point for some
 - **`methodology.md`** — his craft: how to run the five operations; constitution architecture; passive mode; the notepad; compounding loops.
 - **`editor.md` · `mercury.md` · `publisher.md`** — his three functions (extract, amplify, create).
 - **`library.md` · `filter.md`** — his Library surface and publishing conventions.
-- **`bookshelf.md`** — his reference shelf.
+- **`bookshelf.md`** — his reference shelf. Reference, not a survival-ranked module (ships + forkable, but intentionally not in the call-manifest).
 
 ## Marketplace — the person-specific (not canon)
 
