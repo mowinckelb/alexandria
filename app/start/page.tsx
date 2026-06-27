@@ -124,6 +124,12 @@ export default function StartPage() {
           font-size: 13px; letter-spacing: 0.04em; color: var(--text-muted, rgba(26, 19, 24, 0.55));
           margin: 16px 0 0; text-align: center;
         }
+        .install-where {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 12px; line-height: 1.6; letter-spacing: 0.01em;
+          color: var(--text-muted, rgba(26, 19, 24, 0.42)); text-align: center;
+          margin: 8px 0 0; max-width: 420px;
+        }
 
         .primer-coda {
           margin: 60px 0 0; text-align: center; font-family: var(--font-serif), ui-serif, Georgia, serif;

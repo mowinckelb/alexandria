@@ -50,7 +50,10 @@ export default function StartCTA() {
         <span className="install-copy">{copied ? ICON_CHECK : ICON_COPY}</span>
       </button>
       <p className="install-hint">
-        {copied ? 'copied — now paste it into your ai.' : 'copy, then paste it into your ai.'}
+        {copied ? 'copied — now paste it into your coding agent.' : 'copy, then paste it into your coding agent.'}
+      </p>
+      <p className="install-where">
+        claude code · cursor · codex · factory. in a chat or cowork? open one of those first &mdash; it needs a terminal.
       </p>
     </section>
   );
