@@ -19,6 +19,12 @@ export interface Account {
   installed_at?: string;
   engagement_opt_out?: boolean;
   stripe_customer_id?: string;
+  /** Stripe Connect (Express) account id — where this Author's marketplace
+   *  earnings are paid out. Set when they begin payout onboarding. */
+  stripe_connect_account_id?: string;
+  /** True once Stripe reports the connected account can receive payouts
+   *  (synced from the account.updated webhook). Gates paid checkout. */
+  connect_payouts_enabled?: boolean;
   subscription_status?: string;
   subscription_id?: string;
   current_period_end?: string;

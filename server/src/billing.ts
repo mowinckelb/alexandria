@@ -10,7 +10,7 @@ import Stripe from 'stripe';
 import type { Hono } from 'hono';
 import { logEvent } from './analytics.js';
 import { callbackPageHtml } from './templates.js';
-import { requireAuth } from './auth.js';
+import { requireAuth, type Account } from './auth.js';
 import { loadAccounts, getKV } from './kv.js';
 import { assignAuthorNumber, getAccountByLogin, updateAccountBilling } from './accounts.js';
 import type { Account } from './auth.js';
@@ -67,6 +67,7 @@ export const HANDLED_EVENTS = [
   'setup_intent.setup_failed',
   'payment_intent.payment_failed',
   'checkout.session.expired',
+  'account.updated',
 ] as const;
 
 /**
@@ -514,6 +515,8 @@ export interface BillingInfo {
   subscription_status?: string;
   subscription_id?: string;
   current_period_end?: string;
+  stripe_connect_account_id?: string;
+  connect_payouts_enabled?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -893,6 +896,45 @@ export async function resolveActiveSubscription(account: Account): Promise<Resol
 // Billing routes
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Stripe Connect — creator payouts for the Library marketplace
+// ---------------------------------------------------------------------------
+// Authors who sell gated content are paid via Stripe Connect (Express). The
+// platform never holds creator funds: checkout is a destination charge — the
+// buyer pays price × 1.10, a 10% application fee stays with Alexandria, and the
+// Author's set price transfers to their connected account. The Author nets
+// exactly what they set; the 10% is an add-on the buyer pays (a3 § marketplace).
+
+/** Return the Author's Stripe Connect account id, creating an Express account on
+ *  first call. The caller persists the returned id (it may be newly created). */
+export async function getOrCreateConnectAccount(account: Account): Promise<string> {
+  if (account.stripe_connect_account_id) return account.stripe_connect_account_id;
+  const acct = await getStripe().accounts.create({
+    type: 'express',
+    email: account.email || undefined,
+    business_type: 'individual',
+    capabilities: { transfers: { requested: true } },
+    metadata: { github_login: account.github_login, github_id: String(account.github_id) },
+  });
+  return acct.id;
+}
+
+/** Hosted Stripe onboarding link for a connected account. The Author completes
+ *  KYC + payout details on Stripe; we never touch their bank credentials. */
+export async function createConnectOnboardingLink(
+  accountId: string,
+  returnUrl: string,
+  refreshUrl: string,
+): Promise<string> {
+  const link = await getStripe().accountLinks.create({
+    account: accountId,
+    type: 'account_onboarding',
+    return_url: returnUrl,
+    refresh_url: refreshUrl,
+  });
+  return link.url;
+}
+
 export type AccountUpdater = (identifier: string, billing: Partial<BillingInfo>) => Promise<void>;
 
 export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater) {
@@ -1064,9 +1106,18 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
             const artifactType = session.metadata?.artifact_type || 'shadow';
             const artifactId = session.metadata?.artifact_id || '';
             const accessorId = session.metadata?.github_login || session.customer_email || 'anonymous';
-            const cutRate = parseFloat(process.env.LIBRARY_CUT_PERCENT || '50') / 100;
-            const alexandriaCut = Math.round(amountCents * cutRate);
-            const authorCut = amountCents - alexandriaCut;
+            // Connect destination charges record the exact split in metadata
+            // (platform_fee_cents = the 10% add-on Alexandria keeps; author_amount_cents
+            // = the Author's set price, transferred to their connected account). The
+            // ledger records reality, not a re-derived percent. Legacy sessions
+            // without the metadata fall back to the old percent-of-total cut.
+            const metaFee = parseInt(session.metadata?.platform_fee_cents || '', 10);
+            const metaAuthor = parseInt(session.metadata?.author_amount_cents || '', 10);
+            const hasSplit = Number.isFinite(metaFee) && Number.isFinite(metaAuthor);
+            const alexandriaCut = hasSplit
+              ? metaFee
+              : Math.round(amountCents * (parseFloat(process.env.LIBRARY_CUT_PERCENT || '50') / 100));
+            const authorCut = hasSplit ? metaAuthor : amountCents - alexandriaCut;
             const createdAt = new Date().toISOString();
             const month = createdAt.slice(0, 7);
 
@@ -1121,6 +1172,22 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
               subscription_id: session.subscription as string,
             });
             logEvent('billing_checkout_subscription', { github_login: ghLogin });
+          }
+          break;
+        }
+
+        // Connected-account status change — sync whether this Author can receive
+        // payouts. payouts_enabled flips true once Stripe clears KYC; paid
+        // checkout gates on it (fail-closed: no payouts → no sale).
+        case 'account.updated': {
+          const acct = event.data.object as Stripe.Account;
+          const login = acct.metadata?.github_login;
+          if (login) {
+            await onAccountUpdate(login, {
+              stripe_connect_account_id: acct.id,
+              connect_payouts_enabled: !!acct.payouts_enabled && !!acct.charges_enabled,
+            });
+            logEvent('billing_connect_account_updated', { login, payouts_enabled: !!acct.payouts_enabled });
           }
           break;
         }

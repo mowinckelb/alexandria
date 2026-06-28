@@ -3,14 +3,14 @@
 import { randomBytes } from 'crypto';
 import type { Hono } from 'hono';
 import { logEvent } from './analytics.js';
-import { countActiveKin, createCheckoutSession, createPortalSession, getStripe, recalculateKinPricing, resolveActiveSubscription } from './billing.js';
+import { countActiveKin, createCheckoutSession, createConnectOnboardingLink, createPortalSession, getOrCreateConnectAccount, getStripe, recalculateKinPricing, resolveActiveSubscription } from './billing.js';
 import { authErrorHtml, callbackPageHtml } from './templates.js';
 import { getDB, getR2 } from './db.js';
 import { deleteAllProtocolR2 } from './file-access.js';
 import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex } from './kv.js';
 import { hashApiKey, generateToken } from './crypto.js';
 import { ACTIVE_AUTHOR_STATUSES, Account, AccountStore, extractApiKey, extractLibrarySessionToken, findByApiKey, findByLibrarySessionToken, requireAuth } from './auth.js';
-import { assignAuthorNumber, generateApiKey, getAccounts, getAccountByLogin, requireAdmin } from './accounts.js';
+import { assignAuthorNumber, generateApiKey, getAccounts, getAccountByLogin, requireAdmin, updateAccountBilling } from './accounts.js';
 import { sendEmail, sendEmailsBatched, sendWelcomeEmail, sendInstallNudge, FOUNDER_EMAIL } from './email.js';
 import { runHealthDigest, runWeekOneCheckIns, runInstallNudges } from './cron.js';
 import { publishFeedback } from './marketplace.js';
@@ -725,6 +725,41 @@ export function registerRoutes(app: Hono) {
       const message = err instanceof Error ? err.message : 'cancel_failed';
       return c.json({ ok: false, error: message }, 500);
     }
+  });
+
+  // Stripe Connect payout onboarding — start (or resume) payout setup for an
+  // Author who wants to sell gated content. Returns a hosted Stripe onboarding
+  // URL. The connected-account id is persisted now; payouts_enabled flips later
+  // via the account.updated webhook once Stripe clears KYC.
+  app.post('/account/connect', async (c) => {
+    const auth = await requireAuth(c);
+    if (!auth) return c.json({ error: 'Unauthorized' }, 401);
+    try {
+      const acctId = await getOrCreateConnectAccount(auth.account);
+      if (acctId !== auth.account.stripe_connect_account_id) {
+        await updateAccountBilling(auth.account.github_login, { stripe_connect_account_id: acctId });
+      }
+      const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
+      const url = await createConnectOnboardingLink(
+        acctId,
+        `${WEBSITE_URL}/account?payouts=connected`,
+        `${WEBSITE_URL}/account?payouts=refresh`,
+      );
+      return c.json({ url });
+    } catch (err) {
+      console.error('[account/connect] Stripe Connect onboarding failed:', err);
+      return c.json({ error: 'connect_failed' }, 500);
+    }
+  });
+
+  // Whether the Author can currently receive payouts — gates the "set a price" UI.
+  app.get('/account/connect/status', async (c) => {
+    const auth = await requireAuth(c);
+    if (!auth) return c.json({ error: 'Unauthorized' }, 401);
+    return c.json({
+      connected: !!auth.account.stripe_connect_account_id,
+      payouts_enabled: !!auth.account.connect_payouts_enabled,
+    });
   });
 
   app.post('/account/reactivate', async (c) => {

@@ -342,12 +342,26 @@ export function registerLibraryRoutes(app: Hono): void {
     const returnOrigin = requestedOrigin && allowedOrigins.has(requestedOrigin) ? requestedOrigin : WEBSITE_URL;
     const gatePath = `/library/${encodeURIComponent(authorId)}/open/${encodeURIComponent(name)}`;
 
+    // Creator payout (Stripe Connect) — fail closed: an Author who has not
+    // completed payout onboarding cannot sell (we never take money we can't
+    // split). a3 § marketplace: 10% add-on fee, the Author nets their set price.
+    const connectAcct = authorAccount.stripe_connect_account_id;
+    if (!connectAcct || !authorAccount.connect_payouts_enabled) {
+      return c.json({ error: 'This author has not set up payouts yet.' }, 409);
+    }
+    const platformFeeCents = Math.round(amountCents * 0.10);
+    const buyerTotalCents = amountCents + platformFeeCents;
+
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
+      payment_intent_data: {
+        application_fee_amount: platformFeeCents,
+        transfer_data: { destination: connectAcct },
+      },
       line_items: [{
         price_data: {
           currency: 'usd',
-          unit_amount: amountCents,
+          unit_amount: buyerTotalCents,
           product_data: {
             name: `${authorId}/${name}.md`,
             description: `Alexandria Library protocol file by ${authorId}`,
@@ -361,6 +375,8 @@ export function registerLibraryRoutes(app: Hono): void {
         author_id: authorId,
         artifact_type: 'protocol_file',
         artifact_id: name,
+        platform_fee_cents: String(platformFeeCents),
+        author_amount_cents: String(amountCents),
         ...(accessor?.github_login ? { github_login: accessor.github_login } : {}),
       },
       success_url: `${returnOrigin}${gatePath}?session_id={CHECKOUT_SESSION_ID}&purchased=1`,
@@ -695,6 +711,17 @@ export function registerLibraryRoutes(app: Hono): void {
       : 2000;
     const amountCents = Math.max(2000, Math.min(20000, requestedAmount));
 
+    // Creator payout (Stripe Connect) — fail closed (a3 § marketplace: 10% add-on).
+    const authorLookup = await getAccountByLogin(authorId);
+    const authorAccount = authorLookup?.account;
+    if (!authorAccount?.github_id) return c.json({ error: 'Author not found' }, 404);
+    const connectAcct = authorAccount.stripe_connect_account_id;
+    if (!connectAcct || !authorAccount.connect_payouts_enabled) {
+      return c.json({ error: 'This author has not set up payouts yet.' }, 409);
+    }
+    const platformFeeCents = Math.round(amountCents * 0.10);
+    const buyerTotalCents = amountCents + platformFeeCents;
+
     const accessorKey = extractApiKey(c);
     const accessor = accessorKey ? await findByApiKey(accessorKey) : null;
     const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
@@ -705,10 +732,14 @@ export function registerLibraryRoutes(app: Hono): void {
 
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
+      payment_intent_data: {
+        application_fee_amount: platformFeeCents,
+        transfer_data: { destination: connectAcct },
+      },
       line_items: [{
         price_data: {
           currency: 'usd',
-          unit_amount: amountCents,
+          unit_amount: buyerTotalCents,
           product_data: {
             name: work.title,
             description: `Alexandria Library work by ${authorId}`,
@@ -722,6 +753,8 @@ export function registerLibraryRoutes(app: Hono): void {
         author_id: authorId,
         artifact_type: 'work',
         artifact_id: workId,
+        platform_fee_cents: String(platformFeeCents),
+        author_amount_cents: String(amountCents),
         ...(accessor?.github_login ? { github_login: accessor.github_login } : {}),
       },
       // Success lands directly on the work content with the session grant —
