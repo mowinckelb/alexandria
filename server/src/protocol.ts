@@ -39,6 +39,12 @@ export function registerProtocol(app: Hono) {
     const text = typeof body.text === 'string' ? body.text : null;
     const visibility = ['authors', 'public', 'invite', 'paid'].includes(body.visibility) ? body.visibility : 'authors';
 
+    // Just-in-time payout gate: marking a file `paid` is the moment the Author
+    // needs payouts. Surface a nudge in the response (the agent prompts them to
+    // POST /account/connect); the hard backstop is the fail-closed 409 at
+    // purchase. Invisible until this moment — never at install.
+    const payoutsRequired = visibility === 'paid' && !auth.account.connect_payouts_enabled;
+
     // content_type: absent → markdown default; present → must be one of the
     // types JSON PUT can faithfully carry. Rejecting unsupported types here
     // (rather than silently storing markdown bytes under a .pdf key) means
@@ -100,7 +106,7 @@ export function registerProtocol(app: Hono) {
       && existing.content_type === contentType
       && (existing.text ?? null) === (text ?? null)
     ) {
-      return c.json({ ok: true, unchanged: true });
+      return c.json({ ok: true, unchanged: true, ...(payoutsRequired ? { payouts_required: true } : {}) });
     }
 
     // Same abuse floor for file count — only gates NEW names, so a full
@@ -135,7 +141,7 @@ export function registerProtocol(app: Hono) {
       content_type: contentType,
     });
 
-    return c.json({ ok: true });
+    return c.json({ ok: true, ...(payoutsRequired ? { payouts_required: true } : {}) });
   });
 
   app.delete('/file/:name', async (c) => {

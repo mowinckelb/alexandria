@@ -71,6 +71,9 @@ type LibraryAccessGrant = {
   buyer_github_login?: string | null;
 };
 
+// a3 § marketplace — 10% add-on fee (a values decision, single source of truth).
+const MARKETPLACE_FEE_RATE = 0.10;
+
 function clampPaidAmount(amountCents: number): number {
   return Math.max(100, Math.min(100000, amountCents));
 }
@@ -349,7 +352,7 @@ export function registerLibraryRoutes(app: Hono): void {
     if (!connectAcct || !authorAccount.connect_payouts_enabled) {
       return c.json({ error: 'This author has not set up payouts yet.' }, 409);
     }
-    const platformFeeCents = Math.round(amountCents * 0.10);
+    const platformFeeCents = Math.round(amountCents * MARKETPLACE_FEE_RATE);
     const buyerTotalCents = amountCents + platformFeeCents;
 
     const session = await getStripe().checkout.sessions.create({
@@ -719,7 +722,7 @@ export function registerLibraryRoutes(app: Hono): void {
     if (!connectAcct || !authorAccount.connect_payouts_enabled) {
       return c.json({ error: 'This author has not set up payouts yet.' }, 409);
     }
-    const platformFeeCents = Math.round(amountCents * 0.10);
+    const platformFeeCents = Math.round(amountCents * MARKETPLACE_FEE_RATE);
     const buyerTotalCents = amountCents + platformFeeCents;
 
     const accessorKey = extractApiKey(c);

@@ -931,6 +931,9 @@ export async function createConnectOnboardingLink(
     type: 'account_onboarding',
     return_url: returnUrl,
     refresh_url: refreshUrl,
+    // Featherlight: collect only what's needed right now (≈ just an email); Stripe
+    // defers fuller KYC until the Author has earnings to withdraw. Lowest first-step friction.
+    collection_options: { fields: 'currently_due' },
   });
   return link.url;
 }

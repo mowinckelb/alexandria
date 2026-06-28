@@ -1,29 +1,45 @@
-# Marketplace creator payouts + 10% add-on fee (Stripe Connect)
+# Marketplace creator payouts + 10% add-on fee (Stripe Connect) — FULL PLAN
 
-**Status:** staged, not started. Deferred-ceiling feature (pay-for-depth). Build when the first Author wants to charge for gated content, or as a deliberate scoped sprint — NOT before (off the current limiting factor: the 100-deep founding cohort, per a3 § RAISE GATE).
+**Decision (founder, a3 § marketplace):** Author sets price P, nets it in full; buyer pays P × 1.10; the 10% add-on stays with Alexandria. Real split via Stripe Connect destination charge. Verification is **just-in-time + gated**: invisible at install, prompted only when an Author tries to charge, blocked until done (fail-closed).
 
-## Decision (founder, 2026-06-26 — canon: `~/alexandria-inc/private/truth/a3.md` § Library/marketplace)
+Status legend: **[DONE]** committed `e63ba48` · **[BUILD]** do now · **[FOUNDER]** only the founder can · **[DEFER]** out of scope, noted.
 
-Marketplace take-rate = **10%, as an add-on fee on top of the Author's price.** The Author sets price P and receives P in full; the buyer pays P × 1.10; Alexandria keeps the 10%. Example: $5 paywall → buyer pays **$5.50**, Author nets **$5**, Alexandria **$0.50**. Creator-friendly by design — the Author never sees a haircut (prioritises creator supply over buyer-side conversion; the surcharge is visible, Ticketmaster-shaped — accepted tradeoff).
+## Components — every piece
 
-## Current state (the gap)
+### Backend money mechanics
+- **[DONE] A. Account model** — `stripe_connect_account_id` + `connect_payouts_enabled` (auth.ts, accounts.ts, billing.ts BillingInfo).
+- **[DONE] B. Connect Express account + hosted onboarding link** — `getOrCreateConnectAccount`, `createConnectOnboardingLink` (billing.ts). Stripe does KYC; we never touch bank data.
+- **[DONE] C. Onboarding endpoints** — `POST /account/connect`, `GET /account/connect/status` (routes.ts).
+- **[DONE] D. Webhook sync** — `account.updated` → `connect_payouts_enabled` (billing.ts). Added to HANDLED_EVENTS.
+- **[DONE] E. Checkout = destination charge** — file + work: buyer pays P×1.10, `application_fee_amount` = 10% of P, transfer to the Author's connected account. **Fail-closed 409** if not connected (library.ts).
+- **[DONE] F. Ledger records the real split** — purchase webhook reads `platform_fee_cents`/`author_amount_cents` from session metadata; supersedes the stale `LIBRARY_CUT_PERCENT=50` bookkeeping (legacy sessions still fall back).
+- **[DONE] G. Canon** — a3 10% add-on locked.
 
-`server/src/library.ts` checkout handlers — `/library/:author/checkout/file/:name` (L305), `/checkout/work` (L676), `/checkout/shadow` — create a Stripe Checkout session charging `settings.paid_price_cents` to the **platform** Stripe account. There is **no Stripe Connect, no `application_fee`, no `transfer_data`, no creator payout** anywhere in `server/src/`. So today: platform collects 100%, Author gets nothing in code. The 10%-add-on model cannot exist without creator payouts — that is the actual build.
+### Just-in-time author flow (the "frontend", agent-native)
+- **[BUILD] H. Paid-publish nudge** — `PUT /file` (protocol.ts): when `visibility` is set to `'paid'` and the Author is not connected, include `payouts_required: true` in the response so the agent tells them "connect payouts at POST /account/connect to sell this." Server-side + agent-agnostic → **no signature-gated factory/skill change**, no ship.sh. The 409 at purchase (E) is the hard backstop; this is the friendly upstream prompt.
+- **[BUILD] I. Featherlight onboarding** — `createConnectOnboardingLink` uses `collection_options.fields: 'currently_due'` so step one is minimal (email); Stripe defers fuller KYC until the Author has earnings to withdraw.
 
-## Build
+### Cleanups (optimise pass)
+- **[BUILD] J. DRY the fee rate** — extract `MARKETPLACE_FEE_RATE = 0.10` (single source) instead of `0.10` hardcoded in two checkout handlers. (Values decision → constant, not env — it's policy, not config.)
 
-1. **Author Connect onboarding** — Stripe Connect **Express** accounts (Stripe hosts KYC/onboarding). New flow: Author connects a payout account; store the connected `acct_` id on the account blob (AES-256-GCM in KV, per the statelessness rule in CLAUDE.md). **Gate "set a paid price" on having an active connected account** — you can't charge if you can't be paid out.
-2. **Destination charge on checkout** — in each `/checkout/*` session creation (`library.ts:345`, `:706`, shadow): set `unit_amount = Math.round(paid_price_cents * 1.10)` and `payment_intent_data: { transfer_data: { destination: <author acct_> }, application_fee_amount: Math.round(paid_price_cents * 0.10) }`. Confirm the Author nets exactly P after Stripe's own processing fee — **decide:** surcharge Stripe's ~2.9%+30¢ to the buyer too, or absorb from the 10% (on a $5 item the 10% is $0.50 and Stripe takes ~$0.45 → absorbing leaves ~$0.05; likely surcharge it to the buyer or set a minimum price floor).
-3. **Webhooks** (`server/src/billing.ts` existing handler) — `account.updated` (Connect status → unlock/lock paid pricing), `payment_intent.succeeded` (transfer confirmation), payout events.
-4. **Edges** — refunds (reverse transfer + fee), disputes, the Stripe-fee floor on tiny prices (minimum price, or flat + percentage).
+### Founder actions (cannot be coded)
+- **[FOUNDER] K. Enable Stripe Connect (test mode)** — Dashboard → Test mode ON → Connect → Enable → "Platform or marketplace" → fill platform profile. Prerequisite for everything; without it, account creation fails.
+- **[FOUNDER] L. Test-mode verification** — exact commands handed over after build. Shape: `curl POST /account/connect` (own API key) → complete test onboarding → set a test paid file → buy as another user → confirm **buyer $5.50 / Author $5 / platform $0.50** + ledger row. Run `server/test/e2e.ts`.
+- **[FOUNDER] M. Go live** — swap to live keys + `wrangler deploy`. Safe to deploy once H + K are in (Authors can connect, so the 409 has an escape hatch). Before that, deploying would 409 any live paid sale.
 
-## Verify (Stripe test mode)
+### Deferred edges (noted, not built — scope discipline)
+- **[DEFER] N. Refund/dispute reversal** — there is currently **no** refund handling anywhere in the webhook (pre-existing, not introduced here). A Connect refund needs `reverse_transfer: true`. v2 edge; note in the ledger that refunds are manual until built.
+- **[DEFER] O. Author "set your price" path** — `paid_price_cents` has no write endpoint; checkout defaults ($2 file / $20 work) or takes a per-purchase `amount_cents`. A stored-price setter is a separate small feature; defaults work for v1.
+- **[DEFER→DEFAULT] P. Stripe processing fee** — absorbed from the platform's 10% (current behavior, simplest; on a $5 item the platform nets ~$0.05 after Stripe's ~$0.45). Revisit (surcharge to buyer / price floor) only if margin matters at volume.
 
-Create a connected test account → set a $5 paid file → buy it as another user → confirm buyer charged **$5.50**, Author's connected account receives **$5**, platform receives **$0.50** (minus Stripe's fee per the step-2 decision). Run `server/test/e2e.ts`. Health: `curl https://api.alexandria-library.com/health`.
+## Test plan (founder, test mode)
+1. Enable Connect (K).
+2. `curl -X POST https://<env>/account/connect -H "Authorization: Bearer <your alex_ key>"` → open the returned URL → complete Stripe **test** onboarding (use Stripe's test SSN/bank values).
+3. Confirm `GET /account/connect/status` → `payouts_enabled: true`.
+4. Mark a file paid (`PUT /file` visibility=paid) at a known price; buy it as a different test user with a test card (4242…).
+5. Confirm in the Stripe test dashboard: buyer charged P×1.10, transfer of P to the connected account, application fee = 0.10·P. Confirm the `billing_tab_ledger` row shows the same split.
 
 ## References
-
-- `public/code/CLAUDE.md` — architecture, server layout, statelessness/encryption rules.
-- `server/src/library.ts` — checkout handlers (the change site).
-- `server/src/billing.ts` — Stripe client + webhook handler.
-- a3.md § REVENUE — the canon decision + the add-on-tax mechanic.
+- `server/src/{auth,accounts,billing,routes,library,protocol}.ts` — change sites.
+- a3.md § marketplace — the decision + add-on mechanic.
+- CLAUDE.md — architecture, statelessness/encryption, code-quality gate.
