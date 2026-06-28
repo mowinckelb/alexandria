@@ -102,10 +102,16 @@ if [ "$MODE" = "session-start" ]; then
   canon_ok=false
   notice_body=""
   canon_fetch_failures=""
+  # Continuous-update module (default on). Delete ~/alexandria/system/hooks/auto-update
+  # to freeze: stop fetching upstream methodology and run purely on the local copy (the
+  # shim makes the same check for the payload itself, so deleting it means zero contact
+  # with Alexandria). See Mechanics.md → "turning off continuous updates".
+  AUTO_UPDATE=true
+  [ -f "$ALEX_DIR/system/hooks/auto-update" ] || AUTO_UPDATE=false
   for module in foundation axioms methodology editor mercury publisher library filter bookshelf; do
     local_path="$ALEX_DIR/system/canon/$module.md"
     fresh_tmp=$(mktemp 2>/dev/null)
-    if [ -n "$fresh_tmp" ] && curl -s --max-time 5 "$CANON_GITHUB/$module.md" -o "$fresh_tmp" 2>/dev/null \
+    if [ "$AUTO_UPDATE" = true ] && [ -n "$fresh_tmp" ] && curl -s --max-time 5 "$CANON_GITHUB/$module.md" -o "$fresh_tmp" 2>/dev/null \
          && [ -s "$fresh_tmp" ] && [ "$(wc -c < "$fresh_tmp")" -gt 100 ]; then
       # Integrity gate — the fetched module must match the sha256 in the offline-signed
       # manifest (the shim signature-verified it and cached it to .canon_manifest). A
