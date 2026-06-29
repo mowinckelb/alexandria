@@ -25,7 +25,9 @@ Status legend: **[DONE]** committed `e63ba48` · **[BUILD]** do now · **[FOUNDE
 ### Founder actions (cannot be coded)
 - **[FOUNDER] K. Enable Stripe Connect (test mode)** — Dashboard → Test mode ON → Connect → Enable → "Platform or marketplace" → fill platform profile. Prerequisite for everything; without it, account creation fails.
 - **[VERIFIED 2026-06-28] L. Test-mode verification** — Stripe money mechanics confirmed end-to-end against real test mode via a standalone script running the code's exact Connect calls (create Express account → hosted onboarding → destination-charge checkout). Result: a $2 file → **buyer charged $2.20, application fee $0.20 (platform), $2.00 transfer to the connected account** — the 10% add-on split works. NOTE: this exercised the Stripe calls, not the worker HTTP endpoints (those are build-verified + logic-reviewed; they get their smoke test at first real deploy). Re-run anytime by re-creating the standalone test or via `server/test/e2e.ts`.
-- **[FOUNDER] M. Go live** — swap to live keys + `wrangler deploy`. Safe to deploy once H + K are in (Authors can connect, so the 409 has an escape hatch). Before that, deploying would 409 any live paid sale.
+- **[DONE 2026-06-28] M. Go live** — deployed to prod; LIVE smoke test passed: `POST /account/connect` on the deployed worker authed, created live account `acct_1TnXsEA1vmH7uBtr`, and returned a hosted Stripe onboarding URL → deployed code + live key + Connect all confirmed in production. Real-money purchase intentionally not run (test mode already proved the split math); optional later.
+
+**STATUS: SHIPPED + live-confirmed 2026-06-28.** Remaining = the deferred edges only (N refunds, O price-setter UI, P fee-surcharge) — future work, not blocking.
 
 ### Deferred edges (noted, not built — scope discipline)
 - **[DEFER] N. Refund/dispute reversal** — there is currently **no** refund handling anywhere in the webhook (pre-existing, not introduced here). A Connect refund needs `reverse_transfer: true`. v2 edge; note in the ledger that refunds are manual until built.
