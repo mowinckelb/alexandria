@@ -13,7 +13,6 @@ import { callbackPageHtml } from './templates.js';
 import { requireAuth, type Account } from './auth.js';
 import { loadAccounts, getKV } from './kv.js';
 import { assignAuthorNumber, getAccountByLogin, updateAccountBilling } from './accounts.js';
-import type { Account } from './auth.js';
 import { getDB } from './db.js';
 import { sendEmail, sendPatronWelcome } from './email.js';
 import { generateToken } from './crypto.js';
@@ -1217,7 +1216,7 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
               // payouts_enabled (bank can come later; funds wait in balance).
               connect_payouts_enabled: acct.capabilities?.transfers === 'active',
             });
-            logEvent('billing_connect_account_updated', { login, transfers: acct.capabilities?.transfers });
+            logEvent('billing_connect_account_updated', { login, transfers: acct.capabilities?.transfers ?? 'none' });
           }
           break;
         }
