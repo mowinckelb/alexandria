@@ -24,7 +24,7 @@ Status legend: **[DONE]** committed `e63ba48` · **[BUILD]** do now · **[FOUNDE
 
 ### Founder actions (cannot be coded)
 - **[FOUNDER] K. Enable Stripe Connect (test mode)** — Dashboard → Test mode ON → Connect → Enable → "Platform or marketplace" → fill platform profile. Prerequisite for everything; without it, account creation fails.
-- **[FOUNDER] L. Test-mode verification** — exact commands handed over after build. Shape: `curl POST /account/connect` (own API key) → complete test onboarding → set a test paid file → buy as another user → confirm **buyer $5.50 / Author $5 / platform $0.50** + ledger row. Run `server/test/e2e.ts`.
+- **[VERIFIED 2026-06-28] L. Test-mode verification** — Stripe money mechanics confirmed end-to-end against real test mode via a standalone script running the code's exact Connect calls (create Express account → hosted onboarding → destination-charge checkout). Result: a $2 file → **buyer charged $2.20, application fee $0.20 (platform), $2.00 transfer to the connected account** — the 10% add-on split works. NOTE: this exercised the Stripe calls, not the worker HTTP endpoints (those are build-verified + logic-reviewed; they get their smoke test at first real deploy). Re-run anytime by re-creating the standalone test or via `server/test/e2e.ts`.
 - **[FOUNDER] M. Go live** — swap to live keys + `wrangler deploy`. Safe to deploy once H + K are in (Authors can connect, so the 409 has an escape hatch). Before that, deploying would 409 any live paid sale.
 
 ### Deferred edges (noted, not built — scope discipline)
