@@ -3,7 +3,7 @@
 import { randomBytes } from 'crypto';
 import type { Hono } from 'hono';
 import { logEvent } from './analytics.js';
-import { countActiveKin, createCheckoutSession, createConnectOnboardingLink, createPortalSession, getOrCreateConnectAccount, getStripe, recalculateKinPricing, resolveActiveSubscription } from './billing.js';
+import { countActiveKin, createCheckoutSession, createConnectOnboardingLink, createPortalSession, ensurePayoutsReady, getOrCreateConnectAccount, getStripe, recalculateKinPricing, resolveActiveSubscription } from './billing.js';
 import { authErrorHtml, callbackPageHtml } from './templates.js';
 import { getDB, getR2 } from './db.js';
 import { deleteAllProtocolR2 } from './file-access.js';
@@ -758,7 +758,7 @@ export function registerRoutes(app: Hono) {
     if (!auth) return c.json({ error: 'Unauthorized' }, 401);
     return c.json({
       connected: !!auth.account.stripe_connect_account_id,
-      payouts_enabled: !!auth.account.connect_payouts_enabled,
+      payouts_enabled: await ensurePayoutsReady(auth.account, updateAccountBilling),
     });
   });
 

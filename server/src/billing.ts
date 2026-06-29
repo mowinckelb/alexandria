@@ -938,6 +938,30 @@ export async function createConnectOnboardingLink(
   return link.url;
 }
 
+/** True if the Author can receive a destination-charge transfer. The webhook
+ *  caches `connect_payouts_enabled`, but that flag is a proxy — a missed or
+ *  delayed `account.updated` would leave it stale-false and permanently 409 the
+ *  Author's sales. So when the cached flag is false, check Stripe directly
+ *  (ground truth) and self-heal. The `transfers` capability is the ONLY thing a
+ *  destination needs — NOT `charges_enabled` (the platform makes the charge) and
+ *  NOT `payouts_enabled` (the Author can add a bank later; funds wait in their
+ *  connected balance). */
+export async function ensurePayoutsReady(
+  account: Pick<Account, 'connect_payouts_enabled' | 'stripe_connect_account_id' | 'github_login'>,
+  persist: (identifier: string, billing: Partial<BillingInfo>) => Promise<void>,
+): Promise<boolean> {
+  if (account.connect_payouts_enabled) return true;
+  if (!account.stripe_connect_account_id) return false;
+  try {
+    const acct = await getStripe().accounts.retrieve(account.stripe_connect_account_id);
+    const ready = acct.capabilities?.transfers === 'active';
+    if (ready) await persist(account.github_login, { connect_payouts_enabled: true });
+    return ready;
+  } catch {
+    return false;
+  }
+}
+
 export type AccountUpdater = (identifier: string, billing: Partial<BillingInfo>) => Promise<void>;
 
 export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater) {
@@ -1188,9 +1212,12 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
           if (login) {
             await onAccountUpdate(login, {
               stripe_connect_account_id: acct.id,
-              connect_payouts_enabled: !!acct.payouts_enabled && !!acct.charges_enabled,
+              // `transfers === 'active'` is the ONLY thing a destination charge
+              // needs — NOT charges_enabled (the platform makes the charge) or
+              // payouts_enabled (bank can come later; funds wait in balance).
+              connect_payouts_enabled: acct.capabilities?.transfers === 'active',
             });
-            logEvent('billing_connect_account_updated', { login, payouts_enabled: !!acct.payouts_enabled });
+            logEvent('billing_connect_account_updated', { login, transfers: acct.capabilities?.transfers });
           }
           break;
         }

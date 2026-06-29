@@ -17,9 +17,9 @@ import {
   type Account,
 } from './auth.js';
 import { getAllowedOrigins } from './cors.js';
-import { getStripe } from './billing.js';
+import { getStripe, ensurePayoutsReady } from './billing.js';
 import { getKV, loadAccounts } from './kv.js';
-import { getAccountByLogin } from './accounts.js';
+import { getAccountByLogin, updateAccountBilling } from './accounts.js';
 import {
   isInternalProtocolFileName,
   readProtocolFile,
@@ -349,7 +349,8 @@ export function registerLibraryRoutes(app: Hono): void {
     // completed payout onboarding cannot sell (we never take money we can't
     // split). a3 § marketplace: 10% add-on fee, the Author nets their set price.
     const connectAcct = authorAccount.stripe_connect_account_id;
-    if (!connectAcct || !authorAccount.connect_payouts_enabled) {
+    const payoutsReady = await ensurePayoutsReady(authorAccount, updateAccountBilling);
+    if (!connectAcct || !payoutsReady) {
       return c.json({ error: 'This author has not set up payouts yet.' }, 409);
     }
     const platformFeeCents = Math.round(amountCents * MARKETPLACE_FEE_RATE);
@@ -719,7 +720,8 @@ export function registerLibraryRoutes(app: Hono): void {
     const authorAccount = authorLookup?.account;
     if (!authorAccount?.github_id) return c.json({ error: 'Author not found' }, 404);
     const connectAcct = authorAccount.stripe_connect_account_id;
-    if (!connectAcct || !authorAccount.connect_payouts_enabled) {
+    const payoutsReady = await ensurePayoutsReady(authorAccount, updateAccountBilling);
+    if (!connectAcct || !payoutsReady) {
       return c.json({ error: 'This author has not set up payouts yet.' }, 409);
     }
     const platformFeeCents = Math.round(amountCents * MARKETPLACE_FEE_RATE);
