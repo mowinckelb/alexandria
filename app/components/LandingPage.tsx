@@ -185,7 +185,6 @@ const FILMS = [
   {
     src: '/demo-public.mp4',
     label: 'the demo',
-    length: 'ten minutes',
   },
 ];
 
@@ -1298,10 +1297,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            swipes; films play at their own aspect in the lightbox. */
         .film-canvas {
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 22px;
           width: 100%;
           aspect-ratio: 16 / 9;
           padding: 0;
