@@ -640,14 +640,26 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-close">
-                  alexandria is for those few. write yourself into
-                  plain files, kept on your own ground, in your
-                  own shape; every ai you <em>ever</em> use will
-                  read them and think <em>with</em> you, not for
-                  you. your mind, alongside an intelligence
-                  that{' '}<em>compounds</em> without end.
+                  alexandria is for those few. an <em>agents.md</em> tells your
+                  ai how you build; an <em>&ldquo;alexandria.md&rdquo;</em>{' '}
+                  tells it how you think, so it works{' '}<em>with</em>{' '}you,
+                  not for you. the concept is the point &mdash; the shape is
+                  yours.
                   <br /><br />
-                  two ways from here. ready now &mdash; join the tribe, one line and you&rsquo;re an author. not yet &mdash; stay close.
+                  a working first version is the hard part, so take the
+                  founder&rsquo;s, free. like being handed an agents.md, it
+                  doesn&rsquo;t matter if you have one, meant to build one, or
+                  wouldn&rsquo;t know how &mdash; you grab it, make it your own,
+                  and join the others already building theirs. not a system to
+                  download &mdash; a culture to join.
+                  <br /><br />
+                  <span className="way-num">1</span>{' '}
+                  <em className="way-label">the product</em> &mdash; one line,
+                  and you&rsquo;re an author.
+                  <br />
+                  <span className="way-num">2</span>{' '}
+                  <em className="way-label">the company</em> &mdash; not yet?
+                  stay close.
                 </p>
 
                 <div className="cta-pair">
@@ -2000,7 +2012,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-top: 0;
           transform: none;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 20px;
+          font-size: 18px;
           line-height: 1.55;
           font-style: normal;
           letter-spacing: 0.005em;
@@ -2017,6 +2029,20 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .statement-close::before {
           content: none;
+        }
+        /* Two ways — the numbered product/company split closing the letter,
+           labelling the two buttons below. Accent numerals, italic labels. */
+        .statement-close .way-num {
+          color: var(--accent);
+          font-weight: 600;
+          margin-right: 0.15em;
+          letter-spacing: 0.02em;
+          font-variant-numeric: lining-nums;
+          font-feature-settings: "lnum" 1, "kern" 1;
+        }
+        .statement-close .way-label {
+          font-style: italic;
+          color: var(--theme-fg);
         }
         /* Salutation — small italic intro, like a Renaissance epistle
            opener ("Lettore," "To the Reader,"). Letter-spaced lowercase
@@ -2127,7 +2153,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, auto));
           gap: 56px;
-          margin-top: 163px;
+          margin-top: 44px;
           padding-top: 28px;
           border-top: 1px solid rgba(26, 19, 24, 0.12);
         }
