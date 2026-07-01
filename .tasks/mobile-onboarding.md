@@ -1,3 +1,34 @@
+# Mobile onboarding — SHIPPED 2026-07-01
+
+Worker deployed (health ok) + site pushed (CI green, Vercel live). Verified in
+prod: /onboard validates (400 on reserved domain), /a/:token 302s to setup.sh
+via the website hop, /start carries open-in-claude-code (desktop) + shortcut/
+email (mobile), homepage film card + follow along + founder's letter live.
+Full local loop was verified pre-ship (capture → email → tokenized fetch →
+installed → unsubscribe → idempotent resubmit). Install itself proven by
+running the real one-liner against a fake HOME (exit 0, core all ok).
+
+**Remaining — founder, real device (~3 min):**
+1. Phone → alexandria-library.com/start → add the shortcut → send yourself the
+   email → run the emailed command on the laptop → `GET /admin/onboard-conversion`
+   should show installed=1. (Also eyeballs the email template.)
+2. Desktop → /start → tap "open in claude code" once (deep link is registered;
+   the click itself is the one thing I couldn't test headlessly).
+
+**Now-live decision (revert = one line):** onboard follow-ups ride the daily
+15:00 UTC cron as a carve-out from the no-server-push rule (user explicitly
+requested the delivery; cap 2; stops on install/unsub). To revert: remove
+runOnboardFollowups() from scheduled() in worker.ts — admin trigger remains.
+
+Note: GitHub flags 1 low dependabot vulnerability on the default branch
+(pre-existing, unrelated) — dependabot/36.
+
+Delete this file after the real-device pass.
+
+---
+
+(Older account-based plan below, items 1/2/5 still open.)
+
 # Mobile-first onboarding
 
 Make signup work end-to-end on a phone. Most signups today bounce at the curl command on the onboarding page because they're not at a computer. Fix: single page with honest copy + daily reminder email + verified /a opener surfaces what they captured via the shortcut.
