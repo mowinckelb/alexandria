@@ -467,39 +467,84 @@ async function maybeWarnAboutBill(
  * Stripe's account-level invoice.upcoming lead time setting.
  */
 export async function recalculateAllKinPricing(): Promise<void> {
-  const accounts = await loadAccounts<Record<string, any>>();
   const sevenDaysFromNow = Date.now() + 7 * 86400 * 1000;
   // $10 unit price — matches ensurePrice(). Hardcoded to avoid an extra Stripe
   // call per user per day; update here if pricing changes.
   const billDollars = 10;
 
-  const candidates = Object.values(accounts)
-    .map((a) => a as any)
-    .filter((a) => a.subscription_id && a.github_login);
+  // Source of truth is Stripe, not the KV `subscription_id` field. An account
+  // whose blob never got subscription_id (a webhook that set it missed, a
+  // pre-index legacy account) was invisible to the old KV filter and could
+  // renew with no 7-day warning — exactly what the paid-without-warning mirror
+  // keeps catching after the money has already moved. Enumerate live
+  // subscriptions from Stripe and self-heal the KV blob (same shape as the
+  // Stripe-email fallback in maybeWarnAboutBill) so the warning fires this
+  // cycle and every future one, regardless of KV drift.
+  const stripe = getStripe();
+  const accounts = await loadAccounts<Record<string, any>>();
+  const accountByLogin = new Map<string, any>();
+  for (const a of Object.values(accounts) as any[]) {
+    if (a?.github_login) accountByLogin.set(a.github_login, a);
+  }
+
+  const BILLABLE_STATUSES = new Set(['active', 'trialing', 'past_due']);
+  const logins: string[] = [];
+  const seenLogins = new Set<string>();
+  let startingAfter: string | undefined;
+  // Hard page cap (50 × 100 = 5000 subs) so a pagination bug can't spin the
+  // cron forever; far above any near-term subscriber count.
+  for (let page = 0; page < 50; page++) {
+    const resp = await stripe.subscriptions.list({
+      status: 'all',
+      limit: 100,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+    for (const sub of resp.data) {
+      if (!BILLABLE_STATUSES.has(sub.status)) continue;
+      const login = sub.metadata?.github_login || sub.metadata?.api_key;
+      if (!login || seenLogins.has(login)) continue;
+      seenLogins.add(login);
+      // Self-heal: recalculateKinPricing bails when the KV blob lacks
+      // subscription_id, so backfill it from the live sub. Read-after-write KV
+      // lag may push this cycle's fire to the next daily run, but the 7-day
+      // window has seven chances, so the warning still lands before the charge.
+      const acct = accountByLogin.get(login);
+      if (acct && acct.subscription_id !== sub.id) {
+        try {
+          await updateAccountBilling(login, { subscription_id: sub.id });
+        } catch (e) {
+          console.error(`[kin] subscription_id backfill failed for ${login}:`, e);
+        }
+      }
+      logins.push(login);
+    }
+    if (!resp.has_more) break;
+    startingAfter = resp.data[resp.data.length - 1]?.id;
+  }
 
   // Bounded concurrency: each iteration makes 1-3 Stripe calls (retrieve + maybe
   // update + countActiveKin's subqueries). Serial loop walls at ~200ms × N, blowing
   // the daily cron wall budget at ~50-100 subs. 5-wide matches sendEmailsBatched
   // and stays comfortably under Stripe's 100 req/s live limit.
   const concurrency = 5;
-  for (let i = 0; i < candidates.length; i += concurrency) {
-    const batch = candidates.slice(i, i + concurrency);
-    await Promise.all(batch.map(async (a) => {
+  for (let i = 0; i < logins.length; i += concurrency) {
+    const batch = logins.slice(i, i + concurrency);
+    await Promise.all(batch.map(async (login) => {
       try {
         // Period end comes from the Stripe subscription that recalculateKinPricing
         // already retrieved — not from the KV cache. That cache is empty on the
         // first trial cycle (until customer.subscription.created/updated lands)
         // and going through Stripe each pass means the warning fires correctly
         // regardless of cache freshness.
-        const state = await recalculateKinPricing(a.github_login);
+        const state = await recalculateKinPricing(login);
         if (state?.currentPeriodEnd) {
           const dueMs = state.currentPeriodEnd.getTime();
           if (dueMs > Date.now() && dueMs <= sevenDaysFromNow) {
-            await maybeWarnAboutBill(state, a.github_login, billDollars, state.currentPeriodEnd);
+            await maybeWarnAboutBill(state, login, billDollars, state.currentPeriodEnd);
           }
         }
       } catch (err) {
-        console.error(`[kin] Recalculation failed for ${a.github_login}:`, err);
+        console.error(`[kin] Recalculation failed for ${login}:`, err);
       }
     }));
   }
