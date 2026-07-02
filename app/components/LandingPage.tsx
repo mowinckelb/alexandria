@@ -562,14 +562,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 slide itself (the film frame), so the header carries only
                 the reading: whitepaper (the argument) + letter (the soul). */}
             <span className="nav-group">
-              {/* Two reading documents, differentiated by register:
-                  whitepaper roman (the argument), founder's letter italic
-                  (the author's hand). "founder's letter" over "letter" —
-                  a genre everyone recognises, so the click decision is
-                  legible; "manifesto" rejected (the connotations). */}
-              <a href="/whitepaper">whitepaper</a>
+              {/* Two reading documents, two registers: the whitepaper is
+                  a LABEL (tracked uppercase, wax accent — a document
+                  category), the founder's letter is a HAND (italic,
+                  underlined — a signature). Same differentiation the
+                  demo link used to carry. */}
+              <a href="/whitepaper" className="nav-label">whitepaper</a>
               <span className="nav-sep" aria-hidden>·</span>
-              <a href="/docs/letter.pdf" className="nav-letter" target="_blank" rel="noopener noreferrer">founder&rsquo;s letter</a>
+              <a href="/docs/letter.pdf" target="_blank" rel="noopener noreferrer">founder&rsquo;s letter</a>
             </span>
           </div>
         </div>
@@ -729,18 +729,16 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   but it can read words &mdash; put your thoughts into words,
                   and it can think{' '}<em>with</em>{' '}you, not for you.
                   Adding an <em>&ldquo;alexandria.md&rdquo;</em>{' '}to your AI
-                  makes that automatic &mdash; it becomes a thought partner,
-                  channelling its intelligence to improve yours, not replace
-                  it.
+                  makes that automatic &mdash; a thought partner, channelling
+                  its intelligence to improve yours, not replace it.
                 </p>
 
                 <p className="statement-close">
                   A working first version is the hard part, so take the
                   founder&rsquo;s &mdash; his whole system, open-sourced, free.
-                  Treat it like a good agents.md &mdash; it doesn&rsquo;t
-                  matter if you have one, planned your own, or wouldn&rsquo;t
-                  know where to start. Five minutes, and it&rsquo;s yours to
-                  reshape into any answer you like.
+                  Treat it like a good agents.md &mdash; grab it, and in five
+                  minutes it&rsquo;s yours to reshape into any answer you
+                  like.
                 </p>
 
                 <p className="statement-beat">
@@ -874,11 +872,6 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .nav-links a:hover {
           color: #1a1318;
-        }
-        /* The founder's letter in italic — the author's hand against the
-           whitepaper's roman argument. Same size, different voice. */
-        .nav-links a.nav-letter {
-          font-style: italic;
         }
         .nav-links a sup {
           color: rgba(26, 19, 24, 0.38);
@@ -1091,14 +1084,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           color: #1a1318;
           text-decoration-color: rgba(26, 19, 24, 0.6);
         }
-        /* demo — uppercase in wax-seal accent. No underline (color +
+        /* whitepaper — uppercase in wax-seal accent. No underline (color +
            letterform carry the link affordance). Reads as a label against
-           the italic letter (the work). Uppercase instead of small-caps
+           the italic letter (the hand). Uppercase instead of small-caps
            because the smcp OpenType feature only activates after EB
            Garamond loads, which caused a visible reflow on first paint
            (lowercase fallback → small-caps). Plain uppercase renders
            identically in fallback and webfont, no flicker. */
-        .nav-group .nav-demo {
+        .nav-group .nav-label {
           font-style: normal;
           font-feature-settings: "kern" 1;
           text-transform: uppercase;
@@ -1109,15 +1102,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           opacity: 0.7;
           text-decoration: none;
         }
-        .nav-group .nav-demo:hover {
+        .nav-group .nav-label:hover {
           color: var(--accent-hover);
           opacity: 1;
           text-decoration: none;
         }
-        .nav.on-bottom .nav-group .nav-demo {
+        .nav.on-bottom .nav-group .nav-label {
           color: var(--accent);
         }
-        .nav.on-bottom .nav-group .nav-demo:hover {
+        .nav.on-bottom .nav-group .nav-label:hover {
           color: var(--accent-hover);
         }
         .nav-copy {
@@ -1312,25 +1305,28 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .film-invite-btn {
           display: inline-flex;
           align-items: center;
-          gap: 11px;
+          gap: 10px;
           padding: 10px 14px;
           margin: -10px -14px;
           border: none;
           background: none;
           cursor: pointer;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: clamp(15px, calc(0.0115 * var(--wall-w)), 26px);
-          letter-spacing: 0.02em;
-          color: rgba(26, 19, 24, 0.66);
+          /* Museum-caption register (the alpha-mark's family): small,
+             tracked, faint — the arch is the art, the plate whispers.
+             Hover wakes it to full ink. */
+          font-size: clamp(12.5px, calc(0.0095 * var(--wall-w)), 20px);
+          letter-spacing: 0.12em;
+          color: rgba(26, 19, 24, 0.46);
           transition: color 200ms ease;
         }
         .film-invite-btn em { font-style: italic; }
         .film-invite-btn:hover { color: #1a1318; }
         .film-play-glyph {
-          width: 0.5em;
-          height: 0.5em;
+          width: 0.55em;
+          height: 0.55em;
           margin-top: 0.1em;
-          color: rgba(26, 19, 24, 0.45);
+          color: rgba(26, 19, 24, 0.35);
           transition: color 200ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
         }
         .film-invite-btn:hover .film-play-glyph {
@@ -2926,7 +2922,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             transform: translate(-50%, -50%);
           }
           .film-invite-btn {
-            font-size: 16px;
+            font-size: 13.5px;
           }
 
           /* Statement — drop the absolute roman numerals (they hang in
