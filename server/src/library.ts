@@ -211,8 +211,23 @@ export function registerLibraryRoutes(app: Hono): void {
     });
   });
 
-  // Company directory over accounts. Protocol files remain on author pages.
+  // The member directory. Two rules, both by design (/a 2026-07-01):
+  //   1. Authors-only browse — the roster is a tribe surface, never a public
+  //      catalog. The public surface is each /library/{author} page, reached
+  //      per-link (a4 — discovery is per-link, not per-search). Signed-out
+  //      callers get an empty list + signed_in:false so the site shows a gate.
+  //   2. Fill-to-appear — an Author is listed only once they have set BOTH a
+  //      location and a contact (the two fields the "find the Alexandrians in
+  //      London and reach them" use case needs). No forced disclosure: you
+  //      appear by choosing to be findable, or you stay unlisted.
   app.get('/library', async (c) => {
+    const key = extractApiKey(c);
+    const byKey = key ? await findByApiKey(key) : null;
+    const token = extractLibrarySessionToken(c);
+    const bySession = token ? await findByLibrarySessionToken(token) : null;
+    const viewer = byKey || bySession;
+    if (!viewer) return c.json({ signed_in: false, authors: [], you_listed: false });
+
     const db = getDB();
     const accounts = await loadAccounts<AccountStore>();
     const authorRows = await db.prepare('SELECT id, display_name, settings, bio FROM authors')
@@ -236,10 +251,14 @@ export function registerLibraryRoutes(app: Hono): void {
         return directoryAuthor(account, profilesById.get(account.github_login) || null, index);
       })
       .filter((author): author is NonNullable<typeof author> => !!author?.id)
+      // Fill-to-appear: both location and contact must be present.
+      .filter((author) => !!author.location && !!author.contact)
       .sort((a, b) => b.id.localeCompare(a.id, undefined, { sensitivity: 'base' }));
 
+    const youListed = authors.some((a) => a.id === viewer.github_login);
+
     logEvent('library_directory_view', { authors: String(authors.length) });
-    return c.json({ authors });
+    return c.json({ signed_in: true, authors, you_listed: youListed });
   });
 
   app.get('/library/:author', async (c) => {

@@ -57,13 +57,27 @@ async function main() {
   // URLs remain the canonical shelf for each Author.
   const authorId = process.env.TEST_AUTHOR_ID || 'mowinckelb';
 
-  await test('Author catalog returns structured data', async () => {
+  // The member directory is authors-only: signed-out callers get a gate
+  // (signed_in:false, empty list); a signed-in member gets the fill-to-appear
+  // roster (only Authors who set both location and contact).
+  await test('Member directory gates signed-out callers', async () => {
     const res = await fetch(`${BASE}/library`);
-    const body = await res.json() as { authors: unknown[] };
+    const body = await res.json() as { signed_in?: boolean; authors?: unknown[] };
     return {
-      test: 'Author catalog',
-      passed: res.ok && Array.isArray(body.authors),
-      details: `HTTP ${res.status}, authors: ${body.authors?.length || 0}`,
+      test: 'Directory gate (no auth)',
+      passed: res.ok && body.signed_in === false && Array.isArray(body.authors) && body.authors.length === 0,
+      details: `HTTP ${res.status}, signed_in: ${body.signed_in}, authors: ${body.authors?.length}`,
+    };
+  });
+
+  await test('Member directory returns roster to a signed-in member', async () => {
+    const res = await fetch(`${BASE}/library`, { headers });
+    const body = await res.json() as { signed_in?: boolean; authors?: Array<{ location?: unknown; contact?: unknown }>; you_listed?: unknown };
+    const allComplete = (body.authors || []).every((a) => !!a.location && !!a.contact);
+    return {
+      test: 'Directory roster (authed)',
+      passed: res.ok && body.signed_in === true && Array.isArray(body.authors) && allComplete && typeof body.you_listed === 'boolean',
+      details: `HTTP ${res.status}, signed_in: ${body.signed_in}, listed: ${body.authors?.length}, you_listed: ${body.you_listed}`,
     };
   });
 
