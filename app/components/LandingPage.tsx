@@ -704,31 +704,45 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   <em>to the reader.</em>
                 </p>
 
+                {/* Letter convention (letter.pdf + whitepaper, founder's
+                    2026-07-01 ruling extended to the site): proper-grammar
+                    prose — AI, Alexandria, sentence capitals — lowercase
+                    only as brand mark (wordmark, titles, buttons, plates,
+                    filenames). The collective is deliberately one beat, not
+                    a paragraph: the post-install block makes the join ask
+                    at peak conviction, so the page doesn't pre-explain. */}
                 <p className="statement-epigraph">
-                  this is humanity&rsquo;s greatest challenge
-                  &mdash; and perhaps our last. soon, ai will do
-                  most of the thinking. most minds will atrophy
+                  This is humanity&rsquo;s greatest challenge
+                  &mdash; and perhaps our last. Soon, AI will do
+                  most of the thinking. Most minds will atrophy
                   quietly; a few will compound through every model
                   that comes.
                 </p>
 
                 <p className="statement-close">
-                  alexandria is for those few. ai can&rsquo;t read your mind,
+                  Alexandria is for those few. AI can&rsquo;t read your mind,
                   but it can read words &mdash; put your thoughts into words,
                   and it can think{' '}<em>with</em>{' '}you, not for you.
-                  adding an <em>&ldquo;alexandria.md&rdquo;</em>{' '}to your ai
+                  Adding an <em>&ldquo;alexandria.md&rdquo;</em>{' '}to your AI
                   makes that automatic &mdash; it becomes a thought partner,
                   channelling its intelligence to improve yours, not replace
                   it.
-                  <br /><br />
-                  a working first version is the hard part, so take the
+                </p>
+
+                <p className="statement-close">
+                  A working first version is the hard part, so take the
                   founder&rsquo;s &mdash; his whole system, open-sourced, free.
-                  treat it like a good agents.md &mdash; it doesn&rsquo;t
+                  Treat it like a good agents.md &mdash; it doesn&rsquo;t
                   matter if you have one, planned your own, or wouldn&rsquo;t
-                  know where to start. five minutes, and it&rsquo;s yours to
-                  reshape into any answer you like. not a system to download
-                  &mdash; a culture to join.
-                  <br /><br />
+                  know where to start. Five minutes, and it&rsquo;s yours to
+                  reshape into any answer you like.
+                </p>
+
+                <p className="statement-beat">
+                  <em>Not a system to download &mdash; a culture to join.</em>
+                </p>
+
+                <p className="statement-close statement-ways">
                   <span className="way-num">1</span>{' '}
                   <em className="way-label">the product</em>{' '}&mdash; the
                   founder&rsquo;s system, but make it your own.
@@ -756,7 +770,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
                 {/* The letter's true last line. */}
                 <p className="low-agency">
-                  <em>low agency is the only friction left.</em>
+                  <em>Low agency is the only friction left.</em>
                 </p>
 
                 {/* One faint line instead of the old 3-column directory
@@ -2243,6 +2257,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .statement-close::before {
           content: none;
         }
+        /* The pulled-out beat — the one line carrying the collective,
+           set as its own typographic event between the paragraphs and
+           the numbered ways. Italic, a half-step up, room around it. */
+        .statement-beat {
+          margin: 4px 0;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 20px;
+          font-style: italic;
+          letter-spacing: 0.005em;
+          color: var(--theme-fg);
+          hanging-punctuation: first last;
+        }
         /* Two ways — the numbered product/company split closing the letter,
            labelling the two buttons below. Accent numerals, italic labels. */
         .statement-close .way-num {
@@ -2900,7 +2926,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .statement-epigraph {
             order: 3;
           }
-          .statement-close {
+          .statement-close,
+          .statement-beat {
             order: 4;
           }
           .cta-pair {
