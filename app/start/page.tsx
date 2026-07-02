@@ -199,6 +199,10 @@ export default function StartPage() {
         .mobile-email {
           display: flex; flex-direction: column; align-items: center;
           width: 100%; margin-top: 52px;
+          /* Reserve the form's footprint (lead 22 + row 48 + hint 25 +
+             gaps) so the swap to the one-line "sent" state doesn't
+             collapse the block and shift the coda up. */
+          min-height: 122px;
         }
         .mobile-email-lead {
           margin: 0 0 14px; font-family: var(--font-serif), ui-serif, Georgia, serif;

@@ -196,16 +196,24 @@ function FrontFilm() {
     setIdx((idx + d + FILMS.length) % FILMS.length);
     setOpen(false);
   };
-  // Lightbox plumbing — Esc closes, page scroll locks while open.
+  // Lightbox plumbing — Esc closes, page scroll locks while open. The
+  // lock removes the scrollbar, which would shift the whole page left by
+  // its width (visible on Windows / mac-with-mouse); compensate with
+  // padding so nothing under the dim moves.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
     window.addEventListener('keydown', onKey);
-    const prev = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
+    const root = document.documentElement;
+    const scrollbar = window.innerWidth - root.clientWidth;
+    const prevOverflow = root.style.overflow;
+    const prevPad = root.style.paddingRight;
+    root.style.overflow = 'hidden';
+    if (scrollbar > 0) root.style.paddingRight = `${scrollbar}px`;
     return () => {
       window.removeEventListener('keydown', onKey);
-      document.documentElement.style.overflow = prev;
+      root.style.overflow = prevOverflow;
+      root.style.paddingRight = prevPad;
     };
   }, [open]);
   return (
@@ -621,14 +629,17 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             is absolute pixels, so type, drop-caps, and corner marks never
             reflow with viewport changes. Mobile (<899px) sets this to
             display:contents so the existing flow layout takes over. */}
-        <div className="stage-top">
-        <span className="alpha-mark">san francisco · mmxxvi</span>
         {/* Frontispiece composition — the wall scene is the slide; the
             film frame hangs where the fresco niche sits, a screen in a
-            museum tableau. Poster + plate at rest (the painting's
-            silence, kept); click plays in place. The FILMS rotation
-            grows sideways as the launch film + ads ship. */}
+            museum tableau. It lives OUTSIDE the stage: the stage scales
+            by min(vw/1440, vh/900) while the wall background scales by
+            cover — two different laws, so a stage-anchored frame lets
+            the baked-in arch peek out at non-16:10 aspect ratios. The
+            frame instead tracks the wall's own cover geometry (CSS calc
+            below), covering the arch exactly at every viewport. */}
         <FrontFilm />
+        <div className="stage-top">
+        <span className="alpha-mark">san francisco · mmxxvi</span>
         <div className="top-inner" />
         </div>
       </div>
@@ -1285,23 +1296,28 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           z-index: 1;
         }
         /* FILM FRAME — the screen hung on the wall where the fresco niche
-           sits. Sized past the arch (~440×400 at stage scale) so it covers
-           it at every reasonable crop; warm-tinted layered shadow so it
-           reads as an object in the scene, not a UI card. */
+           sits. Anchored to the WALL's cover geometry, not the stage:
+           --wall-w/--wall-h reproduce background-size: cover for the
+           1498×843 image (AR 1.7771), and the offsets place the frame on
+           the arch's centre (image-fraction x 0.5245 with the 75% crop
+           position, y 0.433) at every aspect ratio. Width 0.46·wall-w:
+           enough for the 16:9 canvas to cover the arch (w 0.275, h 0.4446
+           in image fractions) with margin. Type scales with the scene via
+           font-size = 0.01877·wall-w (≈30px at the 1440×900 baseline). */
         .film-frame {
           position: absolute;
-          left: 50%;
-          /* Canvas must fully cover the arch baked into the wall image
-             (stage y 190–590): 760px wide at 16:9 = 427px tall, column
-             centre 398 → canvas spans ~161–588 with the plate below. */
-          top: 398px;
+          --wall-w: max(100vw, 177.71vh);
+          --wall-h: max(100vh, 56.27vw);
+          left: calc(75vw - 0.2255 * var(--wall-w));
+          top: calc(50vh - 0.067 * var(--wall-h));
           transform: translate(-50%, -50%);
-          width: 760px;
+          width: calc(0.46 * var(--wall-w));
+          font-size: calc(0.01877 * var(--wall-w));
           margin: 0;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 15px;
+          gap: 0.5em;
           z-index: 2;
         }
         /* The canvas at rest is a title card — mounted print, not a
@@ -1327,26 +1343,24 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             0 1px 4px rgba(59, 47, 47, 0.12),
             0 12px 28px -10px rgba(59, 47, 47, 0.22),
             0 34px 64px -26px rgba(59, 47, 47, 0.18);
-          transition: box-shadow 250ms cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .film-canvas:hover {
-          box-shadow:
-            0 2px 5px rgba(59, 47, 47, 0.14),
-            0 16px 34px -10px rgba(59, 47, 47, 0.26),
-            0 42px 76px -26px rgba(59, 47, 47, 0.2);
+          /* No shadow-hop on hover — box-shadow animation is paint-
+             triggering, and the glyph's colour + nudge already carries
+             the affordance. */
         }
         .film-title {
           display: inline-flex;
           align-items: center;
-          gap: 15px;
+          gap: 0.5em;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 30px;
+          font-size: 1em;
           letter-spacing: 0.01em;
           color: #1a1318;
         }
         .film-play-glyph {
-          margin-top: 2px;
+          width: 0.5em;
+          height: 0.5em;
+          margin-top: 0.07em;
           color: rgba(26, 19, 24, 0.5);
           transition: color 200ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -1411,9 +1425,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .film-plate {
           display: flex;
           align-items: center;
-          gap: 18px;
+          gap: 0.6em;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 13.5px;
+          font-size: 0.45em;
           letter-spacing: 0.04em;
           color: rgba(26, 19, 24, 0.55);
           user-select: none;

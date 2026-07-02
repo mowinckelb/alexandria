@@ -37,6 +37,8 @@ export default function MobileStart() {
         all picked up when you install.
       </p>
 
+      {/* min-height on the block (CSS) reserves the form's footprint, so
+          the swap to "sent" doesn't shift the coda below. */}
       <div className="mobile-email">
         <p className="mobile-email-lead">and for when you&rsquo;re at your computer &mdash;</p>
         {state === 'sent' ? (
