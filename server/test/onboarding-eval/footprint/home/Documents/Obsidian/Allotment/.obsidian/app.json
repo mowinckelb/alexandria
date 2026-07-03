@@ -1,0 +1,9 @@
+{
+  "promptDelete": false,
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "Daily",
+  "attachmentFolderPath": "_attachments",
+  "showLineNumber": true,
+  "readableLineLength": true
+}

@@ -1,0 +1,23 @@
+---
+description: Personal working rules for Rosa
+alwaysApply: true
+---
+
+# rosa's rules
+
+Stack: Python 3.11, PyTorch. Most of my work is grid-ML at Aurora Grid — load forecasting, renewable dispatch, load-balancing models. Time-series and graph stuff over power networks. `polars`, `xarray`, `lightning`.
+
+Style:
+- ruff + black, line length 100, full type hints.
+- No premature abstraction. Duplicate before you generalise.
+- Comments say why, not what.
+- Small functions, plain names. Avoid clever one-liners I can't read in six months.
+
+Behaviour:
+- Plain answers, no hype, no filler praise. Push back if I'm wrong.
+- Show the diff and the reasoning before applying. Don't spray edits across files.
+- Don't add a dependency to save a few lines.
+- When you touch model code, tell me what it changes about *who the output serves* and *what fails silently*, not just the loss.
+- Prefer correct and reversible over fast. I don't optimise for velocity.
+
+Tests: real fixtures over mocks. Don't mock the simulator you're validating against.
