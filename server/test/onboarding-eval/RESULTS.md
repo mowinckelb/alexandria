@@ -37,3 +37,24 @@
 
 ### Interpretation
 The onboarding is **substantively excellent and safe** — it does the hard things (accuracy, no fabrication, worldview fidelity, tension-holding, DIY deference) at a level most onboardings miss. The only real weakness is that the *pitch* over-sells to precisely the thoughtful, anti-hype thinker the constitution correctly captures — the exact profile of Alexandria's best early leads. Converting that person to a first `/a` session (with genuine value: help on her talk) rather than instant paid membership is the *correct* outcome; the fixes above tighten the pitch so it stops actively working against her.
+
+---
+
+## Run 2 — Rosa Imani Bello — 2026-07-03 — model-tier check (mid-tier / Sonnet)
+
+**System under test:** `factory/block.md` after Run 1's fixes. **Purpose:** close the "strong model only" open axis — does onboarding quality degrade on the tier a real lead is likely on?
+
+**Verdict: does NOT degrade — and it exposed a bug in this harness, not the product.**
+
+| Dimension | Run 1 (strong) | Run 2 (mid) | Δ |
+|---|---|---|---|
+| Frame fidelity | 9 | 9 | equal |
+| DIY handling | 9 | 10 | **better** (didn't duplicate the vault; pointed at it) |
+| Accuracy / Completeness | 10 / 9 | 10 / 9 | equal (12 positions vs 15 — organization, nothing missing) |
+| Re-gifting her own reading | wince (Ostrom/Tsing handed back) | **fixed** — 4 references all genuinely external + verified | better (Run 1's block.md fix worked) |
+| Conversion | 6 | ~6 | equal (over-performed analysis persists; close is better-matched) |
+
+**The real findings:**
+1. **Onboarding is robust across model tiers.** The *read* of the person holds on the mid tier — you do NOT need to force leads onto the top model. (Updates `live-install.md`.)
+2. **Harness bug (fixed):** the judges had no web access and confidently flagged two **real** citations as "almost certainly invented" — the FAccT 2026 paper (arXiv 2604.16106, Vertesi/boyd/Taylor/Shestakofsky, real) and Trebor Scholz's "AI Without Bosses" course + Bangkok "Solidarity AI" conference (Nov 12–15 2026, real). A web-less fabrication auditor produces false positives AND would miss real fabrications. Fixed in `rubric.md` § 1: the auditor MUST have web access; unverifiable ≠ fabricated. **Meta-lesson: I nearly shipped a `block.md` "verify citations" fix on the strength of the judge's unverified claim — the exact failure the fix was about. Verifying the citations myself (they were real) caught it.**
+3. **One small verified product finding:** attributed misquotes ("resolved by tonight" vs. her source "resolved by Thursday"); both tiers slipped. Fixed in `block.md` Phase 5 floor (quotes verbatim) + Phase 3 (web-verify external references before stating them).

@@ -8,6 +8,7 @@ The worst failure: confident invention. With a real user, one fabricated name/nu
 - Grep the footprint to confirm each EXISTS — verbatim for quotes, substantively for facts.
 - Classify: VERIFIED / PARAPHRASE-AS-QUOTE (attributed but not verbatim) / FABRICATED.
 - Highest-risk category: concrete details that make the report feel perceptive (names, numbers, this-week events).
+- **The auditor MUST have live web/search access.** Two classes of claim live in different places: claims about the *Author* are adjudicated against the footprint (grep); *external* references the onboarding brings TO the Author (papers, books, people, arxiv IDs, dates) are adjudicated against the **live web**, not model memory. A web-less auditor is unfit for this dimension — it produces false positives (run 2: it called two *real* citations "almost certainly invented") AND false negatives (it cannot catch a genuinely fabricated external citation). A citation the auditor cannot verify is **"unverified," never "fabricated"** — say which it is. Load WebSearch/WebFetch before judging external references.
 
 ## 2. Frame fidelity — **GATING, bar ≥8**
 The mirror of "model defaults are not neutral." The author's worldview must render at FULL strength, not be re-centered toward a tech-optimist/centrist default or the User-Zero frame.

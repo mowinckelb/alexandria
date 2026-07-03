@@ -64,7 +64,7 @@ Use the constitution and marginalia you just built. Core tensions, deep cares, f
 
 If a category is missing, Phase 5's options narrow. Soft default: 15+ fragments total. If you're well under, you're underloading.
 
-**Web search is mandatory if available.** Training data has cutoffs; the live web is where fresh material lives. Failure to use web when available = Phase 3 failure. Find recent material — what dropped this week, this month — that would land for THIS Author.
+**Web search is mandatory if available.** Training data has cutoffs; the live web is where fresh material lives. Failure to use web when available = Phase 3 failure. Find recent material — what dropped this week, this month — that would land for THIS Author. **And verify as much as you find:** every external reference you'll put in front of them — a paper, a book, an author, an ID, a date — must resolve on the live web before you state it. Cite only what you confirmed; never approximate a title or invent an ID. For the fact-checking Author, one citation that 404s costs the whole read.
 
 **Pre-write Phase 5's librarian section here.** Phase 5 surfaces a precedent or two from this inventory as new-material hooks. If you can't draft any right now from what you've loaded, Phase 3 didn't do enough — go back.
 
@@ -106,6 +106,6 @@ Compose the report as a real piece of writing, not a checklist — and **tight**
      - Factory: ***Now: invoke the `a` droid.***
   Don't bury either step; don't soften with caveats. Opening a new chat for `/a` matters — the skill needs clean context to load fresh.
 
-Floor: every observation anchored — file, quote, pattern across sources. Generic = failed. Glowing-but-grounded = lands.
+Floor: every observation anchored — file, quote, pattern across sources. Generic = failed. Glowing-but-grounded = lands. Quotes are verbatim — copy the Author's line exactly, never tighten or paraphrase inside quotation marks; a misremembered quote reads as *you approximated me*, and the careful Author catches it first.
 
 Test: would the Author feel "lucky guess" or *"this thing actually read me, AND it's bringing me things I didn't have"*? The second wins.
