@@ -10,7 +10,7 @@ import Stripe from 'stripe';
 import type { Hono } from 'hono';
 import { logEvent } from './analytics.js';
 import { callbackPageHtml } from './templates.js';
-import { requireAuth, type Account } from './auth.js';
+import { requireAuth, ACTIVE_AUTHOR_STATUSES, type Account } from './auth.js';
 import { loadAccounts, getKV } from './kv.js';
 import { assignAuthorNumber, getAccountByLogin, updateAccountBilling } from './accounts.js';
 import { getDB } from './db.js';
@@ -132,7 +132,11 @@ function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
 // ---------------------------------------------------------------------------
 
 const KIN_THRESHOLD = parseInt(process.env.KIN_THRESHOLD || '3', 10);
-const KIN_WINDOW_MS = 30 * 86400 * 1000; // rolling 30-day activity window
+// Kin = members, not usage. A referral counts while their subscription is in a
+// member status (ACTIVE_AUTHOR_STATUSES); it stops only when they cancel. There
+// is no activity window (removed 2026-07-03 to match the locked kin canon, a3
+// 2026-06-25). Anti-cheat is structural: joining requires a card at checkout, so
+// a free-tool-only user is never a member and never counts as a kin.
 
 let _priceId: string | null = null;
 let _couponId: string | null = null;
@@ -278,47 +282,17 @@ export async function countActiveKin(githubLogin: string): Promise<{ count: numb
   const kinLogins = results.map(r => r.referred_github_login).filter(Boolean);
   if (kinLogins.length === 0) return { count: 0, compliant: 0 };
 
-  // Compliant kin = meets all three obligations within the rolling window:
-  // 1. Account exists
-  // 2. File edited (protocol_files.updated_at within window)
-  // 3. Call made (protocol_calls.time within window)
-  // Rolling, not calendar-month — no cliff at midnight on the 1st where every
-  // kin must reactivate before the next invoice fires a few days later.
-  const cutoff = new Date(Date.now() - KIN_WINDOW_MS).toISOString();
-
-  // Resolve each kin's account in parallel via the login index (O(1) per lookup, no full-account scan)
+  // Compliant kin = a referral who has JOINED the collective and not cancelled —
+  // their subscription is in a member status (paying, on trial, past-due, beta,
+  // or grandfathered-free, i.e. ACTIVE_AUTHOR_STATUSES). Membership, not usage: a
+  // kin who is quiet in the app still counts; they stop counting only if they
+  // deliberately leave (cancel). Matches the locked kin canon (a3, 2026-06-25).
+  // Resolve each kin's account in parallel via the login index (O(1) per lookup).
   const kinResults = await Promise.all(kinLogins.map(login => getAccountByLogin(login)));
-  const kinWithAccounts: { login: string; githubId: string }[] = [];
-  for (let i = 0; i < kinLogins.length; i++) {
-    const r = kinResults[i];
-    if (!r) continue; // No account — not compliant
-    kinWithAccounts.push({ login: kinLogins[i], githubId: String(r.account.github_id) });
-  }
-
-  if (kinWithAccounts.length === 0) return { count: kinLogins.length, compliant: 0 };
-
-  const githubIds = kinWithAccounts.map(k => k.githubId);
-  const idPlaceholders = githubIds.map(() => '?').join(',');
-
-  // Batch D1 query for file freshness — protocol_files keyed by github_id
-  const { results: files } = await db.prepare(
-    `SELECT account_id, MAX(updated_at) as last_edit FROM protocol_files WHERE account_id IN (${idPlaceholders}) GROUP BY account_id`
-  ).bind(...githubIds).all<{ account_id: string; last_edit: string }>();
-  const fileEdits = new Map((files || []).map(f => [f.account_id, f.last_edit]));
-
-  // Batch D1 query for protocol calls — one query for all kin
-  const { results: callResults } = await db.prepare(
-    `SELECT DISTINCT account_id FROM protocol_calls WHERE account_id IN (${idPlaceholders}) AND time > ?`
-  ).bind(...githubIds, cutoff).all<{ account_id: string }>();
-  const hasCallSet = new Set((callResults || []).map(r => r.account_id));
-
   let compliant = 0;
-  for (const { githubId } of kinWithAccounts) {
-    const hasCall = hasCallSet.has(githubId);
-    const lastEdit = fileEdits.get(githubId);
-    const hasFile = !!lastEdit && lastEdit > cutoff;
-
-    if (hasCall && hasFile) compliant++;
+  for (const r of kinResults) {
+    if (!r) continue; // No account — never joined, not a member
+    if (ACTIVE_AUTHOR_STATUSES.has(r.account.subscription_status || '')) compliant++;
   }
 
   return { count: kinLogins.length, compliant };
@@ -330,8 +304,6 @@ export interface KinPricingState {
   /** Stripe customer id from the retrieved subscription — lets the warning
    *  path resolve an email from Stripe when the KV account has none. */
   customerId: string | null;
-  authorHasCall: boolean;
-  authorHasFile: boolean;
   kinCompliant: number;
   kinNeeded: number;
   nowHasDiscount: boolean;
@@ -346,23 +318,11 @@ export async function recalculateKinPricing(githubLogin: string): Promise<KinPri
   const user = result?.account as any;
   if (!user?.subscription_id) return null;
 
-  // Author must be compliant themselves (file + call within rolling window) to get kin discount.
-  // D1 errors propagate — silently treating "no data" as "non-compliant" would quietly revoke
-  // discounts when the database hiccups; let the caller's try/catch keep state unchanged instead.
-  const cutoff = new Date(Date.now() - KIN_WINDOW_MS).toISOString();
-  const db = getDB();
-  const callCheck = await db.prepare(
-    `SELECT 1 FROM protocol_calls WHERE account_id = ? AND time > ? LIMIT 1`
-  ).bind(String(user.github_id), cutoff).first();
-  const authorHasCall = !!callCheck;
-  const file = await db.prepare(
-    `SELECT MAX(updated_at) as last_edit FROM protocol_files WHERE account_id = ?`
-  ).bind(String(user.github_id)).first<{ last_edit: string | null }>();
-  const authorHasFile = !!file?.last_edit && file.last_edit > cutoff;
-  const authorCompliant = authorHasCall && authorHasFile;
-
+  // Free with 3+ member-kin. No author-activity requirement — membership, not
+  // usage (a3 kin canon, 2026-06-25). The author is already a member (they hold a
+  // subscription); they just need three referrals who are themselves members.
   const kinData = await countActiveKin(githubLogin);
-  const shouldBeFree = authorCompliant && kinData.compliant >= KIN_THRESHOLD;
+  const shouldBeFree = kinData.compliant >= KIN_THRESHOLD;
 
   const stripe = getStripe();
   const sub = await stripe.subscriptions.retrieve(user.subscription_id);
@@ -393,8 +353,6 @@ export async function recalculateKinPricing(githubLogin: string): Promise<KinPri
     email: user.email,
     subscriptionId: user.subscription_id,
     customerId: typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null,
-    authorHasCall,
-    authorHasFile,
     kinCompliant: kinData.compliant,
     kinNeeded: Math.max(0, KIN_THRESHOLD - kinData.compliant),
     nowHasDiscount,
@@ -1581,28 +1539,16 @@ async function sendPreBillWarningEmail(
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
   const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
 
-  // Warning fires only when not-free, so at least one of (kinShort, authorQuiet) is true.
-  const kinShort = state.kinNeeded > 0;
-  const authorQuiet = !state.authorHasFile || !state.authorHasCall;
-  // "you're nearly there" / "just N more" only when actually nearly there (one
-  // kin away) — saying it at 0 reads as gaslighting. Derived from kinNeeded so
-  // it tracks the threshold (now 3) without a hard-coded count.
+  // Warning fires only when not-free — i.e. the author is short of the 3
+  // member-kin needed for the discount. Author usage is no longer a condition
+  // (kin is membership-based, a3 2026-06-25), so the only message is "N more".
+  // "you're nearly there" only when one kin away — saying it at 0 reads as
+  // gaslighting; derived from kinNeeded so it tracks the threshold.
   const nearlyThere = state.kinNeeded === 1;
-  const just = nearlyThere ? 'just ' : '';
-
-  let affirmationLine: string;
-  let actionLine: string | null = null;
-  if (kinShort && authorQuiet) {
-    affirmationLine = `${state.kinCompliant} active kin, ${just}${state.kinNeeded} more &mdash; plus a quick file edit or /a from you &mdash; and it&rsquo;s free.`;
-    actionLine = 'send your link to a couple friends.';
-  } else if (kinShort) {
-    affirmationLine = nearlyThere
-      ? `you&rsquo;re nearly there. ${state.kinCompliant} active kin, just ${state.kinNeeded} more and it&rsquo;s free.`
-      : `${state.kinCompliant} active kin, ${state.kinNeeded} more and it&rsquo;s free.`;
-    actionLine = 'send your link to a couple friends.';
-  } else {
-    affirmationLine = `${state.kinCompliant} active kin already. one quick file edit or /a from you and it&rsquo;s free.`;
-  }
+  const affirmationLine = nearlyThere
+    ? `you&rsquo;re nearly there. ${state.kinCompliant} active kin, just ${state.kinNeeded} more and it&rsquo;s free.`
+    : `${state.kinCompliant} active kin, ${state.kinNeeded} more and it&rsquo;s free.`;
+  const actionLine: string | null = 'send your link to a couple friends.';
 
   const dateStr = dueAt
     ? dueAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
