@@ -60,13 +60,18 @@ WEBSITE_URL = "https://alexandria-library.com"
 LIBRARY_CUT_PERCENT = "50"
 KIN_THRESHOLD = "3"
 
-# PLM "ask this mind" twin inference. The Worker relays questions to a sidecar
-# that fronts Tinker sampling and holds TINKER_API_KEY (never the Worker). Empty
-# TWIN_INFERENCE_URL ⇒ the ask feature reports "twin offline" (zero-regret: the
-# surface ships, the engine slots in later). To go live: set TWIN_INFERENCE_URL
-# to the sidecar, `wrangler secret put TWIN_INFERENCE_SECRET`, and set
-# DEFAULT_TWIN_CHECKPOINT (the current User-Zero compile) here or per-author via
-# POST /library/{id}/twin. The checkpoint is not a secret; the Tinker key is.
+# PLM "ask this mind" twin inference — two variants (plm.md § both-twin arch):
+#   • weights twin (privacy floor, default PUBLIC): a LoRA compiled from the
+#     Author's substrate. DEFAULT_TWIN_CHECKPOINT + DEFAULT_TWIN_BASE.
+#   • context twin (fidelity ceiling, default AUTHORS): a frontier model reading
+#     the substrate in context — exposes it, so gated. DEFAULT_TWIN_CONTEXT_MODEL.
+# The Worker relays questions to a sidecar that fronts the model(s) and holds the
+# keys/substrate (never the Worker). Empty TWIN_INFERENCE_URL ⇒ "twin offline"
+# (zero-regret: the surface ships, the engine slots in later). To go live: set
+# TWIN_INFERENCE_URL to the sidecar, `wrangler secret put TWIN_INFERENCE_SECRET`,
+# and set the per-variant defaults here or per-author via POST /library/{id}/twin.
+# Checkpoint/model handles are not secrets; the Tinker/model API keys are.
 TWIN_INFERENCE_URL = ""
 DEFAULT_TWIN_BASE = "Qwen/Qwen3.6-35B-A3B"
 DEFAULT_TWIN_CHECKPOINT = ""
+DEFAULT_TWIN_CONTEXT_MODEL = ""

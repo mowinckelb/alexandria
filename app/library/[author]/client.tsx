@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { FETCH_TIMEOUT_MS, SERVER_URL } from '../../lib/config';
 import { safeUrl } from '../../lib/url';
-import AskThisMind from './AskThisMind';
+import AskThisMind, { type TwinVariantSummary } from './AskThisMind';
 
 interface ProtocolFile {
   name: string;
@@ -28,7 +28,7 @@ interface AuthorData {
     website: string | null;
     text: string | null;
   };
-  twin?: { enabled: boolean; label: string | null };
+  twin?: { enabled: boolean; label: string | null; variants?: TwinVariantSummary[] };
   files?: ProtocolFile[];
 }
 
@@ -314,7 +314,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             <AskThisMind
               authorId={authorId}
               authorName={author.display_name || author.id}
-              label={data.twin.label}
+              variants={data.twin.variants || []}
             />
           )}
           {shadowFiles.length === 0 && openFiles.length === 0 ? (

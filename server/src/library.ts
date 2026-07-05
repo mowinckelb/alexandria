@@ -10,6 +10,7 @@ import { Hono, type Context } from 'hono';
 import { getDB, generateId, ensureFilePriceColumn, clampPaidAmount } from './db.js';
 import { logEvent } from './analytics.js';
 import {
+  ACTIVE_AUTHOR_STATUSES,
   extractApiKey,
   extractLibrarySessionToken,
   findByApiKey,
@@ -31,7 +32,25 @@ import {
 } from './file-access.js';
 import { getAuditHead, getAuthorAuditEntries } from './audit.js';
 import { generateToken } from './crypto.js';
-import { resolveTwinConfig, twinPublicSummary, twinDisclaimer, runTwinInference } from './twin.js';
+import {
+  resolveTwinVariants,
+  twinPublicSummary,
+  twinDisclaimer,
+  runTwinInference,
+  authorizeTwinAccess,
+  type TwinVariant,
+  type TwinConfig,
+  type TwinEnv,
+} from './twin.js';
+
+// Env defaults for both twin variants, read once per call site.
+function twinEnv(): TwinEnv {
+  return {
+    DEFAULT_TWIN_CHECKPOINT: process.env.DEFAULT_TWIN_CHECKPOINT,
+    DEFAULT_TWIN_BASE: process.env.DEFAULT_TWIN_BASE,
+    DEFAULT_TWIN_CONTEXT_MODEL: process.env.DEFAULT_TWIN_CONTEXT_MODEL,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // CORS-safe R2 response
@@ -301,16 +320,35 @@ export function registerLibraryRoutes(app: Hono): void {
       .first<CompanyAuthorRow>()
       .catch(() => null);
 
-    // Twin ("ask this mind") availability — public summary only (never the
-    // checkpoint handle). Drives whether the website renders the ask box.
-    const twinConfig = resolveTwinConfig(librarySettings(legacyAuthor), {
-      DEFAULT_TWIN_CHECKPOINT: process.env.DEFAULT_TWIN_CHECKPOINT,
-      DEFAULT_TWIN_BASE: process.env.DEFAULT_TWIN_BASE,
-    });
+    // Twin ("ask this mind") availability — public summary only (never a
+    // checkpoint/model handle or system line). Drives whether the website
+    // renders the minds section and how many variants it offers THIS viewer.
+    //
+    // The route is otherwise unauthenticated (public directory), but an API
+    // key or library session cookie, if present, decides which gated variants
+    // the viewer can reach — so the page can render the right toggle (both /
+    // one / none) without a second round-trip.
+    const viewerKey = extractApiKey(c);
+    const viewerFromKey = viewerKey ? await findByApiKey(viewerKey) : null;
+    const viewerToken = extractLibrarySessionToken(c);
+    const viewerFromSession = viewerToken ? await findByLibrarySessionToken(viewerToken) : null;
+    const viewer = viewerFromKey || viewerFromSession;
+    const viewerSubscriber = !!viewer && ACTIVE_AUTHOR_STATUSES.has(viewer.subscription_status || '');
+
+    const twinVariants = resolveTwinVariants(librarySettings(legacyAuthor), twinEnv());
+    // Per-variant reachability reuses the file-access gate. Invite is not
+    // evaluated here (a directory view carries no code); an invite-gated
+    // variant reads as inaccessible until queried with a valid code.
+    const twinAccessible = (cfg: TwinConfig): boolean => authorizeTwinAccess({
+      visibility: cfg.visibility,
+      authorGithubId: account!.github_id,
+      accessorGithubId: viewer?.github_id ?? null,
+      context: { subscriberValid: viewerSubscriber },
+    }).allowed;
 
     return c.json({
       author: directoryAuthor(account!, legacyAuthor, fallbackIndex),
-      twin: twinPublicSummary(twinConfig),
+      twin: twinPublicSummary(twinVariants, twinAccessible),
       files: protocolFiles.map(file => ({
         name: file.name,
         // This route is unauthenticated (public directory). Don't leak the
@@ -546,6 +584,122 @@ export function registerLibraryRoutes(app: Hono): void {
     }
   }
 
+  // Invite-code validation for twin queries — same access_codes table the file
+  // gate uses. Author-scoped, revocation-aware. Result feeds the shared gate.
+  async function validateTwinInvite(authorId: string, code: string): Promise<boolean> {
+    if (!code) return false;
+    const row = await getDB().prepare(
+      'SELECT id FROM access_codes WHERE author_id = ? AND code = ? AND revoked_at IS NULL LIMIT 1'
+    ).bind(authorId, code).first<{ id: string }>().catch(() => null);
+    return !!row?.id;
+  }
+
+  // Resolve the querier from an API key or the browser library session cookie.
+  // Anonymous (null) is allowed by callers that permit the public floor.
+  async function resolveTwinAccessor(c: Context): Promise<Account | null> {
+    const key = extractApiKey(c);
+    const byKey = key ? await findByApiKey(key) : null;
+    if (byKey) return byKey;
+    const token = extractLibrarySessionToken(c);
+    return token ? await findByLibrarySessionToken(token) : null;
+  }
+
+  type TwinQueryOutcome =
+    | { ok: true; answer: string; variant: TwinVariant; label: string | null; disclaimer: string }
+    | { ok: false; status: number; body: Record<string, unknown> };
+
+  // Shared query core — used by BOTH the website `/ask` box and the
+  // programmatic `/v1/twin/:author/query` API. Picks the variant, applies the
+  // (reused) visibility gate, relays to the inference sidecar, and writes the
+  // twin_query credits-ledger row. Rate-limiting stays at the route (the key
+  // differs: IP for the browser, API-key owner for the API).
+  async function runTwinQuery(p: {
+    authorId: string;
+    authorAccount: Account;
+    displayName: string;
+    settings: Record<string, unknown>;
+    question: string;
+    requestedVariant: TwinVariant | null;
+    accessor: Account | null;
+    inviteValid: boolean;
+    surface: 'library' | 'api';
+  }): Promise<TwinQueryOutcome> {
+    const variants = resolveTwinVariants(p.settings, twinEnv());
+
+    // Variant selection. Explicit request must be enabled; otherwise default to
+    // the weights FLOOR, falling back to the context ceiling.
+    let cfg: TwinConfig | null;
+    if (p.requestedVariant === 'weights') cfg = variants.weights.enabled ? variants.weights : null;
+    else if (p.requestedVariant === 'context') cfg = variants.context.enabled ? variants.context : null;
+    else cfg = variants.weights.enabled ? variants.weights : variants.context.enabled ? variants.context : null;
+
+    if (!cfg) {
+      return {
+        ok: false,
+        status: 404,
+        body: { error: p.requestedVariant ? `the ${p.requestedVariant} twin is not available.` : 'This author has not enabled a twin.' },
+      };
+    }
+
+    // Visibility gate — the SAME file-access brain, no parallel rules. "paid"
+    // for a twin means the querier holds an active subscription (metered model).
+    const subscriberValid = !!p.accessor && ACTIVE_AUTHOR_STATUSES.has(p.accessor.subscription_status || '');
+    const decision = authorizeTwinAccess({
+      visibility: cfg.visibility,
+      authorGithubId: p.authorAccount.github_id,
+      accessorGithubId: p.accessor?.github_id ?? null,
+      context: { inviteValid: p.inviteValid, subscriberValid },
+    });
+    if (!decision.allowed) {
+      logEvent('library_twin_ask', { author: p.authorId, surface: p.surface, variant: cfg.variant, status: String(decision.status), reason: decision.reason });
+      return { ok: false, status: decision.status, body: { ...decision.body, variant: cfg.variant } };
+    }
+
+    const system = cfg.system || `You are ${p.displayName}. Speak as yourself.`;
+    const result = await runTwinInference(
+      cfg.variant === 'weights'
+        ? { variant: 'weights', question: p.question, system, maxTokens: 512, checkpoint: cfg.checkpoint, base: cfg.base }
+        : { variant: 'context', question: p.question, system, maxTokens: 512, model: cfg.model, tools: cfg.tools },
+      { url: process.env.TWIN_INFERENCE_URL, secret: process.env.TWIN_INFERENCE_SECRET },
+    );
+
+    if (!result.ok) {
+      logEvent('library_twin_ask', { author: p.authorId, surface: p.surface, variant: cfg.variant, status: String(result.status), reason: result.reason });
+      return { ok: false, status: result.status, body: { error: result.error, reason: result.reason, variant: cfg.variant } };
+    }
+
+    // Internal-credits ledger (plm.md § payment): each answered query is a debit
+    // on the querier's tier allowance and a credit to the queried Author. The
+    // MVP records the event as the ledger primitive (queryable per author,
+    // per variant); amount + settlement is the founder's pricing call — see the
+    // task note. The variant lands in both `tier` (queryable) and `meta`.
+    try {
+      await getDB().prepare(
+        `INSERT INTO access_log (event, author_id, accessor_id, artifact_id, tier, meta, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        'twin_query',
+        p.authorId,
+        p.accessor?.github_login || 'anonymous',
+        'twin',
+        cfg.variant,
+        JSON.stringify({ q_len: p.question.length, a_len: result.answer.length, variant: cfg.variant, surface: p.surface }),
+        new Date().toISOString(),
+      ).run();
+    } catch (e) {
+      console.error('[twin/query] ledger insert failed:', e);
+    }
+
+    logEvent('library_twin_ask', {
+      author: p.authorId,
+      surface: p.surface,
+      variant: cfg.variant,
+      status: '200',
+      accessor: p.accessor?.github_login || 'anonymous',
+    });
+
+    return { ok: true, answer: result.answer, variant: cfg.variant, label: cfg.label, disclaimer: twinDisclaimer(p.displayName, cfg.variant) };
+  }
+
   app.post('/library/:author/ask', async (c) => {
     const authorId = c.req.param('author');
 
@@ -553,90 +707,101 @@ export function registerLibraryRoutes(app: Hono): void {
     const authorAccount = lookup?.account;
     if (!authorAccount?.github_id) return c.json({ error: 'Author not found' }, 404);
 
-    // Resolve the Author's twin config (schemaless settings.twin + env default).
-    const profile = await getDB().prepare('SELECT display_name, settings FROM authors WHERE id = ?')
-      .bind(authorId)
-      .first<{ display_name: string | null; settings: string | null }>()
-      .catch(() => null);
-    const settings = parseJson<Record<string, unknown>>(profile?.settings, {});
-    const twin = resolveTwinConfig(settings, {
-      DEFAULT_TWIN_CHECKPOINT: process.env.DEFAULT_TWIN_CHECKPOINT,
-      DEFAULT_TWIN_BASE: process.env.DEFAULT_TWIN_BASE,
-    });
-    if (!twin.enabled || !twin.checkpoint) {
-      return c.json({ error: 'This author has not enabled a twin.' }, 404);
-    }
-
-    // Rate limit before doing any (paid) inference work.
+    // Rate limit before doing any (paid) inference work — per IP+author.
     const ip = c.req.header('cf-connecting-ip') || 'unknown';
     if (await checkTwinRateLimit(authorId, ip)) {
       return c.json({ error: 'Too many questions — give the twin a minute.' }, 429);
     }
 
-    const body = await c.req.json().catch(() => ({})) as { question?: unknown };
+    const body = await c.req.json().catch(() => ({})) as { question?: unknown; variant?: unknown; invite?: unknown };
     const question = typeof body.question === 'string' ? body.question.trim() : '';
     if (!question) return c.json({ error: 'Ask a question.' }, 400);
     if (question.length > 2000) return c.json({ error: 'Question too long (2000 chars max).' }, 400);
+    const requestedVariant: TwinVariant | null = body.variant === 'weights' || body.variant === 'context' ? body.variant : null;
 
+    const profile = await getDB().prepare('SELECT display_name, settings FROM authors WHERE id = ?')
+      .bind(authorId)
+      .first<{ display_name: string | null; settings: string | null }>()
+      .catch(() => null);
+    const settings = parseJson<Record<string, unknown>>(profile?.settings, {});
     const displayName = profile?.display_name?.trim() || authorAccount.github_name?.trim() || authorId;
-    const system = twin.system || `You are ${displayName}. Speak as yourself.`;
 
-    const result = await runTwinInference(
-      { question, checkpoint: twin.checkpoint, base: twin.base, system, maxTokens: 512 },
-      {
-        url: process.env.TWIN_INFERENCE_URL,
-        secret: process.env.TWIN_INFERENCE_SECRET,
-      },
-    );
+    // Anonymous is allowed — the weights floor is the stranger-facing default.
+    const accessor = await resolveTwinAccessor(c);
+    const inviteCode = c.req.query('invite')?.trim() || (typeof body.invite === 'string' ? body.invite.trim() : '');
+    const inviteValid = await validateTwinInvite(authorId, inviteCode);
 
-    if (!result.ok) {
-      logEvent('library_twin_ask', { author: authorId, status: String(result.status), reason: result.reason });
-      return c.json({ error: result.error, reason: result.reason }, result.status as 502 | 503 | 504);
-    }
-
-    // Internal-credits ledger (plm.md § payment): each answered query is a debit
-    // on the querier's tier allowance and a credit to the queried Author. The
-    // MVP records the event as the ledger primitive (queryable per author);
-    // amount + settlement is the founder's pricing call — see the task note.
-    const accessorKey = extractApiKey(c);
-    const accessor = accessorKey ? await findByApiKey(accessorKey) : null;
-    try {
-      await getDB().prepare(
-        `INSERT INTO access_log (event, author_id, accessor_id, artifact_id, tier, meta, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
-      ).bind(
-        'twin_query',
-        authorId,
-        accessor?.github_login || 'anonymous',
-        'twin',
-        null,
-        JSON.stringify({ q_len: question.length, a_len: result.answer.length }),
-        new Date().toISOString(),
-      ).run();
-    } catch (e) {
-      console.error('[twin/ask] ledger insert failed:', e);
-    }
-
-    logEvent('library_twin_ask', {
-      author: authorId,
-      status: '200',
-      accessor: accessor?.github_login || 'anonymous',
+    const outcome = await runTwinQuery({
+      authorId, authorAccount, displayName, settings, question, requestedVariant, accessor, inviteValid, surface: 'library',
     });
-
+    if (!outcome.ok) return c.json(outcome.body, outcome.status as 401 | 402 | 403 | 404 | 502 | 503 | 504);
     return c.json({
       ok: true,
       twin: true,
       author: authorId,
       author_name: displayName,
-      label: twin.label,
-      answer: result.answer,
-      disclaimer: twinDisclaimer(displayName),
+      variant: outcome.variant,
+      label: outcome.label,
+      answer: outcome.answer,
+      disclaimer: outcome.disclaimer,
     });
   });
 
-  // Owner-only twin config. Enable/disable the twin and (optionally) set the
-  // checkpoint/base/label. The checkpoint is not a secret; keeping the write
-  // owner-scoped stops anyone else from pointing an Author's twin at other
-  // weights. Public read of {enabled,label} rides GET /library/:author.
+  // Programmatic twin API — plug a mind into your own app. API-key auth (reuses
+  // the account key mechanism); rate-limited per key owner; same visibility
+  // gate (the key owner's access level decides which variants they can hit);
+  // same twin_query credits-ledger row. Returns { answer, variant, disclaimer }.
+  // Contract documented in .tasks/plm-ask-feature.md.
+  app.post('/v1/twin/:author/query', async (c) => {
+    const authorId = c.req.param('author');
+    if (!isValidAuthorId(authorId)) return c.json({ error: 'Invalid author ID' }, 400);
+
+    // Programmatic surface = API key only (no anonymous, no cookie). A caller
+    // plugging a twin into their app authenticates with their Alexandria key.
+    const key = extractApiKey(c);
+    const accessor = key ? await findByApiKey(key) : null;
+    if (!accessor) return c.json({ error: 'API key required — Authorization: Bearer alex_...' }, 401);
+
+    const lookup = await getAccountByLogin(authorId);
+    const authorAccount = lookup?.account;
+    if (!authorAccount?.github_id) return c.json({ error: 'Author not found' }, 404);
+
+    // Rate limit keyed on the API-key owner (not IP) — the API is per-account.
+    if (await checkTwinRateLimit(authorId, `key:${accessor.github_login}`, 30, 60)) {
+      return c.json({ error: 'Rate limit exceeded — slow down.' }, 429);
+    }
+
+    const body = await c.req.json().catch(() => ({})) as { question?: unknown; variant?: unknown; invite?: unknown };
+    const question = typeof body.question === 'string' ? body.question.trim() : '';
+    if (!question) return c.json({ error: 'Provide a question.' }, 400);
+    if (question.length > 2000) return c.json({ error: 'Question too long (2000 chars max).' }, 400);
+    const requestedVariant: TwinVariant | null = body.variant === 'weights' || body.variant === 'context' ? body.variant : null;
+
+    const profile = await getDB().prepare('SELECT display_name, settings FROM authors WHERE id = ?')
+      .bind(authorId)
+      .first<{ display_name: string | null; settings: string | null }>()
+      .catch(() => null);
+    const settings = parseJson<Record<string, unknown>>(profile?.settings, {});
+    const displayName = profile?.display_name?.trim() || authorAccount.github_name?.trim() || authorId;
+
+    const inviteCode = typeof body.invite === 'string' ? body.invite.trim() : (c.req.query('invite')?.trim() || '');
+    const inviteValid = await validateTwinInvite(authorId, inviteCode);
+
+    const outcome = await runTwinQuery({
+      authorId, authorAccount, displayName, settings, question, requestedVariant, accessor, inviteValid, surface: 'api',
+    });
+    if (!outcome.ok) return c.json(outcome.body, outcome.status as 401 | 402 | 403 | 404 | 502 | 503 | 504);
+    return c.json({ answer: outcome.answer, variant: outcome.variant, disclaimer: outcome.disclaimer });
+  });
+
+  // Owner-only twin config. Configure EITHER variant independently:
+  //   { weights: { enabled, visibility, checkpoint, base, label, system },
+  //     context: { enabled, visibility, model, label, system, tools } }
+  // Legacy flat fields ({ enabled, checkpoint, base, label, system }) still work
+  // and apply to the WEIGHTS variant (back-compat with the single-twin config).
+  // The checkpoint/model are not secrets; keeping the write owner-scoped stops
+  // anyone else from pointing an Author's twin at other weights. Public read of
+  // the variant summary rides GET /library/:author.
   app.post('/library/:author/twin', async (c) => {
     const authorId = c.req.param('author');
     const accessorKey = extractApiKey(c);
@@ -647,9 +812,7 @@ export function registerLibraryRoutes(app: Hono): void {
     if (!accessor) return c.json({ error: 'Authentication required' }, 401);
     if (accessor.github_login !== authorId) return c.json({ error: 'Only the author can configure their twin' }, 403);
 
-    const body = await c.req.json().catch(() => ({})) as {
-      enabled?: unknown; checkpoint?: unknown; base?: unknown; label?: unknown; system?: unknown;
-    };
+    const body = await c.req.json().catch(() => ({})) as Record<string, unknown>;
 
     const db = getDB();
     const row = await db.prepare('SELECT settings FROM authors WHERE id = ?')
@@ -657,26 +820,69 @@ export function registerLibraryRoutes(app: Hono): void {
       .first<{ settings: string | null }>()
       .catch(() => null);
     const settings = parseJson<Record<string, unknown>>(row?.settings, {});
-    const prev = (settings.twin && typeof settings.twin === 'object' ? settings.twin : {}) as Record<string, unknown>;
 
-    const nextTwin: Record<string, unknown> = { ...prev };
-    if (typeof body.enabled === 'boolean') nextTwin.enabled = body.enabled;
-    if (typeof body.checkpoint === 'string') {
-      const cp = body.checkpoint.trim();
-      // Loose shape check — a tinker:// handle or empty (clear it).
+    // Start from the current stored twin, migrating a legacy flat blob into the
+    // weights slot so an old single-twin config upgrades cleanly on first write.
+    const rawTwin = (settings.twin && typeof settings.twin === 'object' ? settings.twin : {}) as Record<string, unknown>;
+    const hasNested = (rawTwin.weights && typeof rawTwin.weights === 'object')
+      || (rawTwin.context && typeof rawTwin.context === 'object');
+    const curWeights: Record<string, unknown> = hasNested
+      ? { ...(rawTwin.weights && typeof rawTwin.weights === 'object' ? rawTwin.weights as Record<string, unknown> : {}) }
+      : { ...rawTwin };
+    delete curWeights.weights; delete curWeights.context; // strip if legacy flat carried junk keys
+    const curContext: Record<string, unknown> = rawTwin.context && typeof rawTwin.context === 'object'
+      ? { ...(rawTwin.context as Record<string, unknown>) }
+      : {};
+
+    const VALID_VIS = new Set(['public', 'authors', 'paid', 'invite']);
+    // Apply the fields common to both variants; returns an error string or null.
+    const applyCommon = (target: Record<string, unknown>, patch: Record<string, unknown>): string | null => {
+      if (typeof patch.enabled === 'boolean') target.enabled = patch.enabled;
+      if (typeof patch.visibility === 'string') {
+        const v = patch.visibility.trim();
+        if (!VALID_VIS.has(v)) return 'visibility must be one of: public, authors, paid, invite';
+        target.visibility = v;
+      }
+      if (typeof patch.label === 'string') {
+        const label = patch.label.trim().slice(0, 80);
+        if (label) target.label = label; else delete target.label;
+      }
+      if (typeof patch.system === 'string') {
+        const sys = patch.system.trim().slice(0, 4000);
+        if (sys) target.system = sys; else delete target.system;
+      }
+      return null;
+    };
+
+    // weights patch = nested body.weights merged with any legacy flat fields.
+    const weightsPatch: Record<string, unknown> = {
+      ...(body.weights && typeof body.weights === 'object' ? body.weights as Record<string, unknown> : {}),
+    };
+    for (const k of ['enabled', 'checkpoint', 'base', 'label', 'system']) {
+      if (!(k in weightsPatch) && k in body) weightsPatch[k] = body[k];
+    }
+    const contextPatch: Record<string, unknown> = body.context && typeof body.context === 'object'
+      ? body.context as Record<string, unknown>
+      : {};
+
+    let err = applyCommon(curWeights, weightsPatch);
+    if (err) return c.json({ error: err }, 400);
+    if (typeof weightsPatch.checkpoint === 'string') {
+      const cp = weightsPatch.checkpoint.trim();
       if (cp && !cp.startsWith('tinker://')) return c.json({ error: 'checkpoint must be a tinker:// handle' }, 400);
-      if (cp) nextTwin.checkpoint = cp; else delete nextTwin.checkpoint;
+      if (cp) curWeights.checkpoint = cp; else delete curWeights.checkpoint;
     }
-    if (typeof body.base === 'string' && body.base.trim()) nextTwin.base = body.base.trim().slice(0, 120);
-    if (typeof body.label === 'string') {
-      const label = body.label.trim().slice(0, 80);
-      if (label) nextTwin.label = label; else delete nextTwin.label;
+    if (typeof weightsPatch.base === 'string' && weightsPatch.base.trim()) curWeights.base = weightsPatch.base.trim().slice(0, 120);
+
+    err = applyCommon(curContext, contextPatch);
+    if (err) return c.json({ error: err }, 400);
+    if (typeof contextPatch.model === 'string') {
+      const m = contextPatch.model.trim().slice(0, 120);
+      if (m) curContext.model = m; else delete curContext.model;
     }
-    if (typeof body.system === 'string') {
-      const sys = body.system.trim().slice(0, 500);
-      if (sys) nextTwin.system = sys; else delete nextTwin.system;
-    }
-    settings.twin = nextTwin;
+    if (typeof contextPatch.tools === 'boolean') curContext.tools = contextPatch.tools;
+
+    settings.twin = { weights: curWeights, context: curContext };
 
     // Upsert — the author row may not exist yet for a brand-new account.
     const now = new Date().toISOString();
@@ -685,12 +891,20 @@ export function registerLibraryRoutes(app: Hono): void {
        ON CONFLICT(id) DO UPDATE SET settings = excluded.settings, updated_at = excluded.updated_at`
     ).bind(authorId, JSON.stringify(settings), now, now).run();
 
-    const twin = resolveTwinConfig(settings, {
-      DEFAULT_TWIN_CHECKPOINT: process.env.DEFAULT_TWIN_CHECKPOINT,
-      DEFAULT_TWIN_BASE: process.env.DEFAULT_TWIN_BASE,
+    const variants = resolveTwinVariants(settings, twinEnv());
+    logEvent('library_twin_config', {
+      author: authorId,
+      weights_enabled: String(variants.weights.enabled),
+      context_enabled: String(variants.context.enabled),
     });
-    logEvent('library_twin_config', { author: authorId, enabled: String(twin.enabled) });
-    return c.json({ ok: true, ...twinPublicSummary(twin), has_checkpoint: !!twin.checkpoint });
+    // Owner view: full summary (owner sees every variant as accessible) plus the
+    // resolved config state per variant so the settings UI can reflect it.
+    return c.json({
+      ok: true,
+      ...twinPublicSummary(variants),
+      weights: { enabled: variants.weights.enabled, visibility: variants.weights.visibility, has_checkpoint: !!variants.weights.checkpoint, base: variants.weights.base },
+      context: { enabled: variants.context.enabled, visibility: variants.context.visibility, has_model: !!variants.context.model, tools: variants.context.tools },
+    });
   });
 
   // =========================================================================
