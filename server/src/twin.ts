@@ -51,6 +51,27 @@ export type TwinVariant = 'weights' | 'context';
 export type TwinVisibility = 'public' | 'authors' | 'paid' | 'invite';
 const VISIBILITIES: readonly TwinVisibility[] = ['public', 'authors', 'paid', 'invite'];
 
+/**
+ * Per-tool capability for the context (deep) twin. Schemaless in
+ * `authors.settings.twin.context.tools` (bitter lesson — free JSON, no
+ * migration). Two tools today:
+ *   • works — the "living page": retrieval over the Author's OWN published
+ *     Library content, so the twin can discuss the Author's essays/projects AS
+ *     the Author. Default ON — this is what makes the page come alive.
+ *   • web   — web_search + fetch_url. Default OFF (needs a search key on the
+ *     sidecar; degrades to "not configured" without one).
+ * The weights twin is hard-forced both-off (no native tool-use). */
+export interface TwinToolConfig {
+  works: boolean;
+  web: boolean;
+}
+
+/** True when the context twin has ANY tool enabled — drives the tool-use seam,
+ *  the public "tools" badge, and the agent-vs-sampling endpoint choice. */
+export function anyToolEnabled(t: TwinToolConfig): boolean {
+  return t.works || t.web;
+}
+
 export interface WeightsTwinConfig {
   variant: 'weights';
   /** Published + enabled AND has a resolvable checkpoint. */
@@ -65,8 +86,8 @@ export interface WeightsTwinConfig {
   label: string | null;
   /** Identity system line the twin was trained with. */
   system: string | null;
-  /** Always false — a small fine-tuned model has no native tool-use. */
-  tools: false;
+  /** Always both-off — a small fine-tuned model has no native tool-use. */
+  tools: TwinToolConfig;
 }
 
 export interface ContextTwinConfig {
@@ -82,10 +103,10 @@ export interface ContextTwinConfig {
   label: string | null;
   /** Identity system line. */
   system: string | null;
-  /** Tool-use capability flag (web search etc.). The frontier model CAN use
-   *  tools natively; this flips the seam in runTwinInference on. Execution is a
-   *  separate epic — the flag + seam are here, the wiring is not. Default: false. */
-  tools: boolean;
+  /** Per-tool capability for the frontier model (native tool-use). Drives the
+   *  agent loop in the sidecar. Default: { works: true, web: false } — the
+   *  living page (own-works retrieval) is on, web search is opt-in. */
+  tools: TwinToolConfig;
 }
 
 export type TwinConfig = WeightsTwinConfig | ContextTwinConfig;
@@ -122,6 +143,26 @@ function obj(value: unknown): Record<string, unknown> | null {
 function vis(value: unknown): TwinVisibility | null {
   const v = str(value);
   return v && (VISIBILITIES as readonly string[]).includes(v) ? (v as TwinVisibility) : null;
+}
+
+/**
+ * Parse the context twin's `tools` slot. Back-compat + schemaless:
+ *   • object `{ works?, web? }` → each field read as boolean, defaults applied.
+ *   • legacy boolean `true`      → `{ works: true, web: false }` (old "tool-capable").
+ *   • legacy boolean `false`     → `{ works: false, web: false }`.
+ *   • absent                     → `{ works: true, web: false }` (living page on by default).
+ */
+function toolConfig(value: unknown): TwinToolConfig {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const o = value as Record<string, unknown>;
+    return {
+      works: typeof o.works === 'boolean' ? o.works : true,
+      web: typeof o.web === 'boolean' ? o.web : false,
+    };
+  }
+  if (value === true) return { works: true, web: false };
+  if (value === false) return { works: false, web: false };
+  return { works: true, web: false };
 }
 
 /** Extract the `twin` slot from an already-parsed settings object. */
@@ -168,7 +209,7 @@ export function resolveTwinVariants(
     base,
     label: str(wRaw.label),
     system: str(wRaw.system),
-    tools: false,
+    tools: { works: false, web: false },
   };
 
   const model = str(cRaw.model) || str(env.DEFAULT_TWIN_CONTEXT_MODEL);
@@ -179,7 +220,7 @@ export function resolveTwinVariants(
     model,
     label: str(cRaw.label),
     system: str(cRaw.system),
-    tools: cRaw.tools === true,
+    tools: toolConfig(cRaw.tools),
   };
 
   return { weights, context };
@@ -206,7 +247,9 @@ export interface TwinVariantSummary {
   enabled: boolean;
   visibility: TwinVisibility;
   label: string | null;
-  tools: boolean;
+  /** Per-tool capability, surfaced so the UI can badge what the twin can do
+   *  (reference the Author's works / search the web). Never a model handle. */
+  tools: TwinToolConfig;
   accessible: boolean;
 }
 
@@ -296,6 +339,17 @@ export function authorizeTwinAccess(opts: {
 // Inference adapter — the single integration point (both variants)
 // ---------------------------------------------------------------------------
 
+/** One published piece the querier is allowed to see, pre-gated by the Worker
+ *  (the visibility authority). The sidecar's `search_my_works` tool retrieves
+ *  over this corpus — it never re-derives the gate, so visibility is correct by
+ *  construction. Content is the Author's PUBLISHED markdown, not private
+ *  substrate (the substrate stays sidecar-loaded, never through the Worker). */
+export interface TwinWork {
+  name: string;
+  visibility: string;
+  content: string;
+}
+
 export interface TwinInferenceRequest {
   variant: TwinVariant;
   question: string;
@@ -306,9 +360,14 @@ export interface TwinInferenceRequest {
   base?: string | null;
   // context variant
   model?: string | null;
-  /** Tool-use capability (context variant only). Passed to the sidecar; the
-   *  sidecar decides tool wiring. */
-  tools?: boolean;
+  /** Per-tool capability (context variant only). Passed to the sidecar, which
+   *  runs the tool-use agent loop. */
+  tools?: TwinToolConfig;
+  /** Author id (github login) — lets the sidecar label the living-page tool and
+   *  fall back to the public Library API if no works are passed inline. */
+  author?: string | null;
+  /** Pre-gated published works for the `search_my_works` tool (context only). */
+  works?: TwinWork[];
 }
 
 export type TwinInferenceResult =
@@ -338,6 +397,19 @@ export interface TwinInferenceOpts {
  * The Worker stays stateless: it never holds the checkpoint weights, the
  * substrate, or the model keys — only the sidecar URL + bearer secret.
  */
+/**
+ * The sidecar exposes two POST endpoints:
+ *   • /infer — single-shot sampling (weights via Tinker, or context single-turn).
+ *   • /agent — the context tool-use agent loop (frontier model + tools).
+ * The Worker holds one URL (TWIN_INFERENCE_URL, conventionally ".../infer");
+ * derive the agent path from it so only one secret/URL is configured.
+ */
+export function agentEndpointFrom(url: string): string {
+  const u = url.replace(/\/+$/, '');
+  if (u.endsWith('/infer')) return `${u.slice(0, -'/infer'.length)}/agent`;
+  return `${u}/agent`;
+}
+
 export async function runTwinInference(
   req: TwinInferenceRequest,
   opts: TwinInferenceOpts,
@@ -348,21 +420,21 @@ export async function runTwinInference(
   }
 
   // -----------------------------------------------------------------------
-  // Tool-use seam (context variant, frontier model).
+  // Tool-use routing (context variant, frontier model).
   //
-  // A frontier model can natively call tools (web search, code, retrieval).
-  // When `req.tools` is set on a context query, THIS is where the tool
-  // definitions + tool-execution loop would attach before/around the sidecar
-  // call. Deliberately NOT built here — tool execution is a separate epic. For
-  // now the flag is forwarded to the sidecar (which may ignore it) and the
-  // weights variant never reaches this branch with tools=true (config forces
-  // weights.tools=false: a small fine-tuned model has no native tool-use).
-  const toolsRequested = req.variant === 'context' && req.tools === true;
-  // toolsRequested is threaded to the sidecar in the body below; no local
-  // tool loop yet. (seam: attach tool defs + execution here.)
+  // A frontier model can natively call tools. When ANY tool is enabled on a
+  // context query, the request goes to the sidecar's /agent endpoint, which
+  // runs a real tool-use loop (search_my_works over the Author's published
+  // works, plus web_search/fetch_url when configured) and returns the final
+  // answer the model gives AS the Author. Otherwise (no tools, or weights) it
+  // goes to /infer for single-shot sampling. The weights variant never reaches
+  // the agent path (config forces weights.tools all-off).
+  const toolsRequested = req.variant === 'context' && !!req.tools && (req.tools.works || req.tools.web);
+  const target = toolsRequested ? agentEndpointFrom(url) : url;
 
   const ctrl = new AbortController();
-  const timeout = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? 45000);
+  // Tool loops make several model round-trips — give the agent path more room.
+  const timeout = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? (toolsRequested ? 120000 : 45000));
   try {
     const body: Record<string, unknown> = {
       variant: req.variant,
@@ -375,10 +447,13 @@ export async function runTwinInference(
       body.base = req.base;
     } else {
       body.model = req.model;
-      body.tools = toolsRequested;
+      body.tools = req.tools ?? { works: false, web: false };
+      body.author = req.author ?? null;
+      // Pre-gated published works for search_my_works (the Worker is the gate).
+      if (req.works && req.works.length) body.works = req.works;
     }
 
-    const res = await fetch(url, {
+    const res = await fetch(target, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

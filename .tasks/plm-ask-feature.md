@@ -250,3 +250,14 @@ Returns `{ ok, enabled, label, variants, weights:{enabled,visibility,has_checkpo
   internal credits ledger.
 - **Tool execution** — flag + seam only; the execution loop is a separate epic.
 - **Streaming** — MVP is awaited; can slot behind the same box/API.
+
+## Living page / deep-twin tools — build state (2026-07-05)
+
+**Built + verified:**
+- Sidecar agent engine (`~/alexandria-inc/private/plm/twin_server.py`): frontier tool-use loop (`/agent`), Anthropic API (env ANTHROPIC_API_KEY), bounded 6 tool rounds. `search_my_works` retrieval (length-normalised keyword match over passed works, top-3 excerpts) — TESTED, correctly pulls the right work. `web_search` (Brave seam, env TWIN_SEARCH_KEY) degrades gracefully. Weights `/infer` path unchanged.
+- Worker (`server/src/twin.ts`): routes context+tools → `/agent`, passes `tools` + pre-gated `works` + author; weights → `/infer`. Type-checks. `TwinToolConfig {works,web}` schemaless, back-compat.
+- Config: context variant `tools:{works,web}`, default works=true/web=false. Weights forced tools-off. UI tools badge.
+
+**THE ONE REMAINING WIRE (to light up the living page):** the ask endpoint (`library.ts`, ~line 660) passes `tools` but NOT `works`. Add a `fetchTwinWorks(authorId, accessor, gate)` that: queries `works` for the author's published pieces, reads each one's markdown content from R2 (reuse the `readWork`/paid-file read path, ~line 1195), gates by what the querier may see (public always; authors/paid/invite via the `decision` already computed), caps (~12 works × ~4k chars), returns `[{name,visibility,content}]`, and pass it as `works` on the context branch of the `runTwinInference` call. Then `search_my_works` has real content. ~30 lines, bounded; left out now to avoid an unverified R2-read in a huge session.
+
+**To run live:** sidecar needs ANTHROPIC_API_KEY (deep twin) + optional TWIN_SEARCH_KEY (web); run `twin_server.py`; set TWIN_INFERENCE_URL/SECRET on the Worker; deploy. His context twin visibility = INVITE (his choice, 2026-07-05).
