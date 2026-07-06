@@ -41,6 +41,7 @@ import {
   type TwinVariant,
   type TwinConfig,
   type TwinEnv,
+  type TwinWork,
 } from './twin.js';
 
 // Env defaults for both twin variants, read once per call site.
@@ -170,6 +171,29 @@ function directoryAuthor(account: Account, profile: CompanyAuthorRow | null, fal
 
 function fileAccessUrl(authorId: string, name: string): string {
   return `/library/${authorId}/file/${name}`;
+}
+
+/**
+ * The living-page corpus for the deep twin's `search_my_works` tool: the Author's
+ * published works CONTENT, gated to what THIS querier may see. readWork() is the
+ * single visibility authority (same gate as a direct read), so denied works are
+ * simply skipped — the corpus is correct by construction, no parallel rules.
+ * Bounded (12 works × 4k chars) to keep the payload sane.
+ */
+async function fetchTwinWorks(authorId: string, accessor: Account | null): Promise<TwinWork[]> {
+  const db = getDB();
+  const { results } = await db.prepare(
+    'SELECT id, title, tier FROM works WHERE author_id = ? ORDER BY published_at DESC LIMIT 12',
+  ).bind(authorId).all<{ id: string; title: string; tier: string }>();
+  const out: TwinWork[] = [];
+  for (const w of results ?? []) {
+    const r = await readWork({ authorId, workId: w.id, accessor });
+    if (!r.ok || !r.obj?.body) continue; // gate denied or missing → skip
+    let content = '';
+    try { content = await new Response(r.obj.body).text(); } catch { continue; }
+    if (content.trim()) out.push({ name: w.title, visibility: w.tier, content: content.slice(0, 4000) });
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -656,10 +680,18 @@ export function registerLibraryRoutes(app: Hono): void {
     }
 
     const system = cfg.system || `You are ${p.displayName}. Speak as yourself.`;
+    // Living page: when the deep twin has the works tool on, hand it the Author's
+    // published works CONTENT — but only the pieces this querier is allowed to see.
+    // readWork() is the visibility authority (same gate as direct reads), so the
+    // corpus is correct by construction — search_my_works never re-derives it.
+    let works: TwinWork[] | undefined;
+    if (cfg.variant === 'context' && cfg.tools?.works) {
+      works = await fetchTwinWorks(p.authorId, p.accessor ?? null);
+    }
     const result = await runTwinInference(
       cfg.variant === 'weights'
         ? { variant: 'weights', question: p.question, system, maxTokens: 512, checkpoint: cfg.checkpoint, base: cfg.base }
-        : { variant: 'context', question: p.question, system, maxTokens: 512, model: cfg.model, tools: cfg.tools },
+        : { variant: 'context', question: p.question, system, maxTokens: 512, model: cfg.model, tools: cfg.tools, author: p.authorId, works },
       { url: process.env.TWIN_INFERENCE_URL, secret: process.env.TWIN_INFERENCE_SECRET },
     );
 
