@@ -432,6 +432,31 @@ export function agentEndpointFrom(url: string): string {
   return `${u}/agent`;
 }
 
+/** The sidecar's liveness endpoint, derived from the configured inference URL —
+ *  same base, `/health` path. Used by the online/offline check. */
+export function healthEndpointFrom(url: string): string {
+  const u = url.replace(/\/+$/, '');
+  const base = u.endsWith('/infer') ? u.slice(0, -'/infer'.length) : u;
+  return `${base}/health`;
+}
+
+/** Guard an Author-supplied sidecar URL before the Worker will call it. Must be
+ *  https and must not point at a private/loopback host — otherwise a registered
+ *  URL becomes an SSRF handle into internal infra. Returns an error string or null. */
+export function validateSidecarUrl(raw: string): string | null {
+  let u: URL;
+  try { u = new URL(raw); } catch { return 'sidecar url must be a valid URL'; }
+  if (u.protocol !== 'https:') return 'sidecar url must be https';
+  const host = u.hostname.toLowerCase();
+  const privateHost = host === 'localhost'
+    || host === '127.0.0.1' || host === '::1' || host.endsWith('.local')
+    || /^10\./.test(host) || /^192\.168\./.test(host)
+    || /^172\.(1[6-9]|2\d|3[01])\./.test(host)
+    || /^169\.254\./.test(host) || /^0\./.test(host);
+  if (privateHost) return 'sidecar url must be a public host (not localhost/private)';
+  return null;
+}
+
 export async function runTwinInference(
   req: TwinInferenceRequest,
   opts: TwinInferenceOpts,

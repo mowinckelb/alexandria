@@ -69,10 +69,15 @@ export default function AskThisMind({
   authorId,
   authorName,
   variants,
+  online = true,
 }: {
   authorId: string;
   authorName: string;
   variants: TwinVariantSummary[];
+  /** Is the Author's sidecar reachable right now? When false the twin exists but
+   *  isn't answering (their machine is asleep) — show an honest offline state
+   *  instead of the ask box, so no one hits a dead end. */
+  online?: boolean;
 }) {
   const name = authorName || authorId;
 
@@ -119,6 +124,22 @@ export default function AskThisMind({
   }, [loading]);
 
   if (usable.length === 0) return null;
+
+  // Offline: the twin is real but its machine isn't answering right now. Show a
+  // calm state, not the ask box (so no one types a question into a dead end).
+  if (!online) {
+    return (
+      <div style={{ borderTop: '1px solid var(--border-light)', marginTop: '1.6rem', paddingTop: '1.1rem' }}>
+        <p style={sectionLabelStyle}>
+          ask this mind
+          <span style={{ color: 'var(--text-ghost)', marginLeft: '0.5rem', letterSpacing: '0.02em' }}>offline</span>
+        </p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, margin: 0 }}>
+          {name}’s twin is offline right now — check back soon.
+        </p>
+      </div>
+    );
+  }
 
   const activeSummary = usable.find((v) => v.variant === active) ?? usable[0];
   const showToggle = usable.length > 1;

@@ -31,13 +31,15 @@ import {
   readWork,
 } from './file-access.js';
 import { getAuditHead, getAuthorAuditEntries } from './audit.js';
-import { generateToken } from './crypto.js';
+import { generateToken, encrypt, decrypt } from './crypto.js';
 import {
   resolveTwinVariants,
   twinPublicSummary,
   twinDisclaimer,
   runTwinInference,
   authorizeTwinAccess,
+  healthEndpointFrom,
+  validateSidecarUrl,
   type TwinVariant,
   type TwinConfig,
   type TwinEnv,
@@ -51,6 +53,50 @@ function twinEnv(): TwinEnv {
     DEFAULT_TWIN_BASE: process.env.DEFAULT_TWIN_BASE,
     DEFAULT_TWIN_CONTEXT_MODEL: process.env.DEFAULT_TWIN_CONTEXT_MODEL,
   };
+}
+
+// Per-Author inference sidecar. Each Author runs their OWN sidecar (their keys,
+// their substrate) — the Worker holds neither. Registration is a dedicated
+// ENCRYPTED KV entry (`twin_sidecar:{author}`) so the query path and the online
+// check read it the same way and the secret never rides in a settings blob.
+// Falls back to the Worker env sidecar (User Zero's default) when an Author
+// hasn't registered their own — so the same code path serves everyone.
+interface SidecarConn { url: string; secret: string }
+
+async function getSidecar(authorId: string): Promise<SidecarConn | null> {
+  try {
+    const raw = await getKV().get(`twin_sidecar:${authorId}`);
+    if (raw) {
+      const conn = JSON.parse(decrypt(raw)) as SidecarConn;
+      if (conn?.url) return { url: conn.url, secret: conn.secret || '' };
+    }
+  } catch { /* fall through to the env default */ }
+  const url = process.env.TWIN_INFERENCE_URL;
+  return url ? { url, secret: process.env.TWIN_INFERENCE_SECRET || '' } : null;
+}
+
+// Is the Author's sidecar reachable right now? Cheap `/health` ping, cached ~30s
+// (both online AND offline) so a page load never waits on the tunnel more than
+// once per window. This is what powers the online/offline state on the page.
+async function twinOnline(authorId: string): Promise<boolean> {
+  const kv = getKV();
+  try {
+    const cached = await kv.get(`twin_online:${authorId}`);
+    if (cached !== null) return cached === '1';
+  } catch { /* ignore cache miss */ }
+  const conn = await getSidecar(authorId);
+  let online = false;
+  if (conn?.url) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 2500);
+      const res = await fetch(healthEndpointFrom(conn.url), { signal: ctrl.signal });
+      clearTimeout(t);
+      online = res.ok;
+    } catch { online = false; }
+  }
+  try { await kv.put(`twin_online:${authorId}`, online ? '1' : '0', { expirationTtl: 30 }); } catch { /* best effort */ }
+  return online;
 }
 
 // ---------------------------------------------------------------------------
@@ -370,9 +416,15 @@ export function registerLibraryRoutes(app: Hono): void {
       context: { subscriberValid: viewerSubscriber },
     }).allowed;
 
+    const twinSummary = twinPublicSummary(twinVariants, twinAccessible);
+    // Online/offline: only ping the sidecar when the Author actually has a twin
+    // enabled (skip the round-trip for the overwhelming majority who don't).
+    const twinOut = twinSummary.enabled
+      ? { ...twinSummary, online: await twinOnline(authorId) }
+      : { ...twinSummary, online: false };
     return c.json({
       author: directoryAuthor(account!, legacyAuthor, fallbackIndex),
-      twin: twinPublicSummary(twinVariants, twinAccessible),
+      twin: twinOut,
       files: protocolFiles.map(file => ({
         name: file.name,
         // This route is unauthenticated (public directory). Don't leak the
@@ -706,11 +758,12 @@ export function registerLibraryRoutes(app: Hono): void {
     if (cfg.variant === 'context' && cfg.tools?.works) {
       works = await fetchTwinWorks(p.authorId, p.accessor ?? null);
     }
+    const sidecar = await getSidecar(p.authorId);
     const result = await runTwinInference(
       cfg.variant === 'weights'
         ? { variant: 'weights', question: p.question, system, maxTokens: 512, checkpoint: cfg.checkpoint, base: cfg.base }
         : { variant: 'context', question: p.question, system, maxTokens: 512, model: cfg.model, tools: cfg.tools, author: p.authorId, works, tier: cfg.visibility },
-      { url: process.env.TWIN_INFERENCE_URL, secret: process.env.TWIN_INFERENCE_SECRET },
+      { url: sidecar?.url, secret: sidecar?.secret },
     );
 
     if (!result.ok) {
@@ -963,6 +1016,52 @@ export function registerLibraryRoutes(app: Hono): void {
       weights: { enabled: variants.weights.enabled, visibility: variants.weights.visibility, has_checkpoint: !!variants.weights.checkpoint, base: variants.weights.base },
       context: { enabled: variants.context.enabled, visibility: variants.context.visibility, has_model: !!variants.context.model, tools: variants.context.tools },
     });
+  });
+
+  // Register / update the Author's inference sidecar (the machine that runs their
+  // twin — their keys, their substrate). Owner-only. Stored ENCRYPTED in a
+  // dedicated KV entry; the secret is never returned by any read. This is what
+  // makes the twin universal: every Author points Alexandria at their OWN
+  // sidecar, so the Worker holds neither keys nor substrate for anyone.
+  app.put('/library/:author/twin/sidecar', async (c) => {
+    const authorId = c.req.param('author');
+    const owner = await resolveOwnerOnly(c, authorId);
+    if ('error' in owner) return owner.error;
+
+    const body = await c.req.json().catch(() => ({})) as { url?: unknown; secret?: unknown };
+    const url = typeof body.url === 'string' ? body.url.trim() : '';
+    const secret = typeof body.secret === 'string' ? body.secret.trim() : '';
+    if (!url) return c.json({ error: 'sidecar url required' }, 400);
+    const urlErr = validateSidecarUrl(url);
+    if (urlErr) return c.json({ error: urlErr }, 400);
+    if (!secret) return c.json({ error: 'sidecar secret required (same value as the sidecar’s TWIN_INFERENCE_SECRET)' }, 400);
+
+    await getKV().put(`twin_sidecar:${authorId}`, encrypt(JSON.stringify({ url, secret })));
+    await getKV().delete(`twin_online:${authorId}`).catch(() => {}); // force a fresh online check
+    logEvent('twin_sidecar_registered', { author: authorId });
+    return c.json({ ok: true, url }); // never echo the secret
+  });
+
+  // Disconnect the sidecar — the twin goes offline, nothing is served.
+  app.delete('/library/:author/twin/sidecar', async (c) => {
+    const authorId = c.req.param('author');
+    const owner = await resolveOwnerOnly(c, authorId);
+    if ('error' in owner) return owner.error;
+    await getKV().delete(`twin_sidecar:${authorId}`).catch(() => {});
+    await getKV().delete(`twin_online:${authorId}`).catch(() => {});
+    logEvent('twin_sidecar_removed', { author: authorId });
+    return c.json({ ok: true });
+  });
+
+  // Owner status: is a sidecar registered, and is it reachable right now?
+  app.get('/library/:author/twin/sidecar', async (c) => {
+    const authorId = c.req.param('author');
+    const owner = await resolveOwnerOnly(c, authorId);
+    if ('error' in owner) return owner.error;
+    const conn = await getKV().get(`twin_sidecar:${authorId}`);
+    let url: string | null = null;
+    if (conn) { try { url = (JSON.parse(decrypt(conn)) as SidecarConn).url; } catch { url = null; } }
+    return c.json({ configured: !!conn, url, online: await twinOnline(authorId) });
   });
 
   // =========================================================================
