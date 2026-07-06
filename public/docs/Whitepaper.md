@@ -114,7 +114,7 @@ It’s the one part of you nothing else even reaches. Every system built to know
 
 Putting it into words costs a little — a thought forced onto the page is slower than the fluid version inside, and always a rough copy of it, the way a sketch on a whiteboard is rougher than the idea in your mind. What you get back dwarfs the cost. Once a thought is on the board it stops being a private blur and becomes a piece you can pick up, turn over, and rebuild — and a piece someone else can take hold of too. You can’t think through a hard problem with another person while you both sit in silence; someone has to put it on the board. Then the others pile on — a friend, an AI, or just you tomorrow — and push it further than the silent version ever could. Then you carry it back inside, and act.
 
-That drawing-out is the practice, and it is exactly what nothing else does for you. The rest of the world records what you did; Alexandria helps you get the thinking itself onto the page, where you and your AI can build on it together. That is the missing piece.
+That drawing-out is the practice. And now, for the first time, you do it beside an AI that can think in your place — which turns the practice into a choice you can’t dodge: how you let it meet your mind.
 
 There are three ways to face AI with your mind, and only one of them works.
 
@@ -124,7 +124,7 @@ You can **outsource to it** — let it do your thinking, take the answers, move 
 
 Or you can **augment** — keep doing the thinking, but use the tool to push your own mind further than it could go alone. Your reasoning stays in your hands; the AI sharpens it, stress-tests it, and carries the parts that don’t need you. This is the only one of the three where you keep your mind *and* keep up.
 
-That’s where Alexandria comes in. The gym is yours — the practice, the work of thinking, the mind that gets stronger. What Alexandria gives you is everything *around* it: the gear, the trainer, and the tribe. The trainer is any AI you already talk to, pointed at *you* — at making your own thinking stronger instead of thinking in your place. **Alexandria isn’t the gym; it’s what turns the AI you already have into a trainer for the mind you’re building.** Not another AI, and not a replacement for the ones you use.
+That’s where Alexandria comes in. The gym is yours — the practice, the work of thinking, the mind that gets stronger. What Alexandria gives you is everything *around* it: the gear, the trainer, and the tribe. The trainer is any AI you already talk to, pointed at *you* — at making your own thinking stronger instead of thinking in your place. **Alexandria isn’t the gym; it’s what turns the AI you already have into a trainer for the mind you’re building.** Not another AI, and not a replacement for the ones you use. That is the missing piece — the one everyone else is racing past.
 
 It’s worth being precise about what this is *not*. The memory every platform is racing to build is a locker: it stores what you did so the machine can serve you better. A gym is where *you* get stronger. One holds your past for the machine’s use; the other builds the part of you that’s still yours — and that second one is the part you have to choose.
 
