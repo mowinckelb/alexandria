@@ -266,9 +266,27 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem', letterSpacing: '0.02em', margin: '0.35rem 0 0' }}>
             {author.alexandria_id}
           </p>
-          {(author.location || socialLinks.length > 0) && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', marginTop: '0.9rem', fontSize: '0.92rem', alignItems: 'baseline' }}>
-              {author.location && <span style={{ color: 'var(--text-ghost)' }}>{author.location}</span>}
+          {/* Alexandria features — location + contact as pills. */}
+          {(author.location || author.contact) && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.9rem' }}>
+              {author.location && author.location_key && (
+                <Link href={`/library?locations=${encodeURIComponent(author.location_key)}`} style={tagStyle} className="hover:opacity-60">
+                  {author.location}
+                </Link>
+              )}
+              {author.contact && (
+                <a href={contactHref(author.contact)}
+                  target={author.contact.startsWith('http') ? '_blank' : undefined}
+                  rel={author.contact.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  style={tagStyle} className="hover:opacity-60">
+                  contact
+                </a>
+              )}
+            </div>
+          )}
+          {/* Socials — plain links, below the pills. */}
+          {socialLinks.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', marginTop: '0.7rem', fontSize: '0.9rem' }}>
               {socialLinks.map((s) => (
                 <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer"
                   className="hover:opacity-60"
