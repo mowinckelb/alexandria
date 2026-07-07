@@ -189,59 +189,58 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
     textDecoration: 'none',
   };
 
-  const fileRow = (file: ProtocolFile) => {
-    // One clean line — trim long internal notes so rows stay tidy like the demo.
+  // Entry row — exact demo rhythm: title left, tier right, on one baseline, in a
+  // bordered list (hairline top+bottom). `isFirst` draws the top line.
+  const fileRow = (file: ProtocolFile, isFirst: boolean) => {
     const rawPreview = normalizePreviewText(file.text) || '';
     const firstLine = rawPreview.split('\n')[0].trim();
     const preview = firstLine.length > 110 ? `${firstLine.slice(0, 110).trimEnd()}…` : firstLine;
-    const body = (
+    const rowStyle: CSSProperties = {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      gap: '1.25rem',
+      width: '100%',
+      padding: '0.72rem 0',
+      border: 'none',
+      borderBottom: '1px solid var(--border-light)',
+      ...(isFirst ? { borderTop: '1px solid var(--border-light)' } : {}),
+      background: 'none',
+      color: 'inherit',
+      textDecoration: 'none',
+      fontFamily: 'inherit',
+      textAlign: 'left',
+      cursor: 'pointer',
+      transition: 'opacity 0.15s',
+    };
+    const inner = (
       <>
-        <span style={{ color: 'var(--text-primary)', fontSize: '0.95rem' }}>{fileDisplayName(file.name)}</span>
-        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.03em', marginLeft: '0.55rem' }}>
+        <span style={{ minWidth: 0 }}>
+          <span style={{ color: 'var(--text-primary)', fontSize: '0.98rem' }}>{fileDisplayName(file.name)}</span>
+          {preview && (
+            <span style={{ display: 'block', color: 'var(--text-ghost)', fontSize: '0.82rem', lineHeight: 1.45, marginTop: '0.2rem' }}>
+              {preview}
+            </span>
+          )}
+        </span>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', flex: 'none', whiteSpace: 'nowrap' }}>
           {visibilityLabel(file.visibility)}
         </span>
-        {preview && (
-          <span style={{ display: 'block', color: 'var(--text-ghost)', fontSize: '0.8rem', lineHeight: 1.45, marginTop: '0.25rem' }}>
-            {preview}
-          </span>
-        )}
       </>
     );
 
     if (file.visibility === 'public') {
       return (
-        <a
-          key={file.name}
-          href={`/api/library/${encodeURIComponent(authorId)}/file/${encodeURIComponent(file.name)}`}
-          style={{ display: 'block', textDecoration: 'none', color: 'inherit', margin: '0 0 0.9rem', transition: 'opacity 0.15s' }}
-          className="hover:opacity-60"
-        >
-          {body}
+        <a key={file.name} href={`/api/library/${encodeURIComponent(authorId)}/file/${encodeURIComponent(file.name)}`}
+          className="hover:opacity-60" style={rowStyle}>
+          {inner}
         </a>
       );
     }
-
     return (
-      <button
-        key={file.name}
-        type="button"
-        onClick={() => void openProtocolFile(file)}
-        className="hover:opacity-60"
-        style={{
-          display: 'block',
-          width: '100%',
-          margin: '0 0 0.9rem',
-          padding: 0,
-          border: 'none',
-          background: 'none',
-          color: 'inherit',
-          cursor: 'pointer',
-          fontFamily: 'inherit',
-          textAlign: 'left',
-          transition: 'opacity 0.15s',
-        }}
-      >
-        {body}
+      <button key={file.name} type="button" onClick={() => void openProtocolFile(file)}
+        className="hover:opacity-60" style={rowStyle}>
+        {inner}
       </button>
     );
   };
@@ -254,7 +253,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           <Link href="/library" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }} className="hover:opacity-60">
             library
           </Link>
-          <h1 style={{ color: 'var(--text-primary)', fontSize: '1.55rem', fontWeight: 400, letterSpacing: '-0.01em', margin: '2rem 0 0.35rem' }}>
+          <h1 style={{ color: 'var(--text-primary)', fontSize: '2rem', fontWeight: 500, letterSpacing: '-0.012em', margin: '2rem 0 0.35rem' }}>
             {author.display_name || author.id}
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', letterSpacing: '0.02em', margin: 0, lineHeight: 1.45 }}>
@@ -329,9 +328,10 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             )
           ) : (
             grouped.map(({ cat, items }) => (
-              <div key={cat} style={{ borderTop: '1px solid var(--border-light)', marginTop: '1.6rem', paddingTop: '1.1rem' }}>
+              <div key={cat}>
+                <hr style={{ height: 1, background: 'var(--border-light)', border: 'none', margin: '2.6rem 0 1.3rem' }} />
                 <p style={sectionLabelStyle}>{cat}</p>
-                {items.map(fileRow)}
+                {items.map((f, i) => fileRow(f, i === 0))}
               </div>
             ))
           )}
