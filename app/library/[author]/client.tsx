@@ -12,6 +12,7 @@ interface ProtocolFile {
   name: string;
   text: string | null;
   visibility: string;
+  category?: string;
   updated_at: string;
   url: string;
 }
@@ -137,14 +138,12 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   // there is no backend for any of them. `works` / `projects` / `other` are open
   // text sections rendered inline with clickable URLs; `other` is the freeform
   // catch-all (invisible until the Author publishes it). Everything else is a
-  // shadow — rendered as gated rows that carry their own permission tier.
-  const sectionFile = (name: string): ProtocolFile | null =>
-    files.find((f) => f.name === name && f.visibility === 'public') || null;
-  const worksFile = sectionFile('works');
-  const projectsFile = sectionFile('projects');
-  const otherFile = sectionFile('other');
-  const openFiles = [worksFile, projectsFile, otherFile].filter((f): f is ProtocolFile => f !== null);
-  const shadowFiles = files.filter((f) => !openFiles.includes(f));
+  // Group every entry into neat category sections (like the demo). Category comes
+  // from the server's per-file map; untagged falls to 'shadows'.
+  const CATEGORY_ORDER = ['works', 'projects', 'shadows', 'other'] as const;
+  const grouped = CATEGORY_ORDER
+    .map((cat) => ({ cat, items: files.filter((f) => (f.category || 'shadows') === cat) }))
+    .filter((g) => g.items.length > 0);
   const renderLinkedText = (text: string) =>
     text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
       /^https?:\/\//.test(part) ? (
@@ -191,7 +190,10 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   };
 
   const fileRow = (file: ProtocolFile) => {
-    const preview = normalizePreviewText(file.text);
+    // One clean line — trim long internal notes so rows stay tidy like the demo.
+    const rawPreview = normalizePreviewText(file.text) || '';
+    const firstLine = rawPreview.split('\n')[0].trim();
+    const preview = firstLine.length > 110 ? `${firstLine.slice(0, 110).trimEnd()}…` : firstLine;
     const body = (
       <>
         <span style={{ color: 'var(--text-primary)', fontSize: '0.95rem' }}>{fileDisplayName(file.name)}</span>
@@ -319,24 +321,19 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               signedIn={data.twin.signed_in === true}
             />
           )}
-          {shadowFiles.length === 0 && openFiles.length === 0 ? (
+          {grouped.length === 0 ? (
             !data.twin?.enabled && (
               <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem', margin: 0 }}>
                 nothing published yet.
               </p>
             )
           ) : (
-            <>
-              {textSection('works', worksFile)}
-              {shadowFiles.length > 0 && (
-                <div style={{ borderTop: '1px solid var(--border-light)', marginTop: '1.6rem', paddingTop: '1.1rem' }}>
-                  <p style={sectionLabelStyle}>shadows</p>
-                  {shadowFiles.map(fileRow)}
-                </div>
-              )}
-              {textSection('projects', projectsFile)}
-              {textSection('other', otherFile)}
-            </>
+            grouped.map(({ cat, items }) => (
+              <div key={cat} style={{ borderTop: '1px solid var(--border-light)', marginTop: '1.6rem', paddingTop: '1.1rem' }}>
+                <p style={sectionLabelStyle}>{cat}</p>
+                {items.map(fileRow)}
+              </div>
+            ))
           )}
         </section>
       </main>

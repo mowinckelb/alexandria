@@ -100,6 +100,17 @@ async function twinOnline(authorId: string): Promise<boolean> {
   return online;
 }
 
+// Per-file category map (name → 'works'|'projects'|'shadows'|'other'), stored in
+// a dedicated KV entry the owner sets. Lets the library page group entries into
+// neat sections like the demo. Empty map = everything falls to 'shadows'.
+async function getFileCategories(authorId: string): Promise<Record<string, string>> {
+  try {
+    const raw = await getKV().get(`file_categories:${authorId}`);
+    if (raw) return JSON.parse(raw) as Record<string, string>;
+  } catch { /* ignore */ }
+  return {};
+}
+
 // ---------------------------------------------------------------------------
 // CORS-safe R2 response
 // ---------------------------------------------------------------------------
@@ -426,6 +437,10 @@ export function registerLibraryRoutes(app: Hono): void {
     const twinOut = twinSummary.enabled
       ? { ...twinSummary, online: await twinOnline(authorId), signed_in: !!viewer }
       : { ...twinSummary, online: false, signed_in: !!viewer };
+    // Per-file "kind" (works/projects/shadows/other) so the page can lay entries
+    // out in neat categories like the demo. Stored in a dedicated KV map the
+    // owner sets; untagged files fall to 'shadows'.
+    const fileCats = await getFileCategories(authorId);
     return c.json({
       author: directoryAuthor(account!, legacyAuthor, fallbackIndex),
       twin: twinOut,
@@ -438,6 +453,7 @@ export function registerLibraryRoutes(app: Hono): void {
         // open page enforces content access). (audit M1)
         text: (file.visibility === 'public' || file.visibility === 'paid') ? file.text : null,
         visibility: file.visibility,
+        category: fileCats[file.name] || 'shadows',
         updated_at: file.updated_at,
         url: fileAccessUrl(authorId, file.name),
       })),
@@ -1557,6 +1573,23 @@ export function registerLibraryRoutes(app: Hono): void {
     await grantAccess(authorId, invitee.github_id, { label });
     logEvent('twin_grant_added', { author: authorId, invitee: login });
     return c.json({ ok: true, login, github_id: invitee.github_id, label });
+  });
+
+  // Set the per-file categories (works/projects/shadows/other) for the neat
+  // library layout. Owner-only. Body: { categories: { "<file-name>": "works", ... } }.
+  app.put('/library/:author/file-categories', async (c) => {
+    const authorId = c.req.param('author');
+    const owner = await resolveOwnerOnly(c, authorId);
+    if ('error' in owner) return owner.error;
+    const body = await c.req.json<{ categories?: Record<string, unknown> }>().catch(() => ({} as { categories?: Record<string, unknown> }));
+    const VALID = new Set(['works', 'projects', 'shadows', 'other']);
+    const clean: Record<string, string> = {};
+    for (const [name, kind] of Object.entries(body.categories || {})) {
+      if (typeof kind === 'string' && VALID.has(kind)) clean[name] = kind;
+    }
+    await getKV().put(`file_categories:${authorId}`, JSON.stringify(clean));
+    logEvent('file_categories_set', { author: authorId, count: String(Object.keys(clean).length) });
+    return c.json({ ok: true, categories: clean });
   });
 
   app.get('/library/:author/grants', async (c) => {
