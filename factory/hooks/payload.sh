@@ -108,7 +108,7 @@ if [ "$MODE" = "session-start" ]; then
   # with Alexandria). See Mechanics.md → "turning off continuous updates".
   AUTO_UPDATE=true
   [ -f "$ALEX_DIR/system/hooks/auto-update" ] || AUTO_UPDATE=false
-  for module in foundation axioms methodology editor mercury publisher library filter bookshelf; do
+  for module in foundation axioms methodology editor mercury publisher library filter bookshelf plm twin; do
     local_path="$ALEX_DIR/system/canon/$module.md"
     fresh_tmp=$(mktemp 2>/dev/null)
     if [ "$AUTO_UPDATE" = true ] && [ -n "$fresh_tmp" ] && curl -s --max-time 5 "$CANON_GITHUB/$module.md" -o "$fresh_tmp" 2>/dev/null \
