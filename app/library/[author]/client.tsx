@@ -27,6 +27,7 @@ interface AuthorData {
     location_key: string | null;
     contact: string | null;
     website: string | null;
+    socials: { label: string; url: string }[] | null;
     text: string | null;
   };
   twin?: { enabled: boolean; label: string | null; variants?: TwinVariantSummary[]; online?: boolean; signed_in?: boolean };
@@ -138,12 +139,20 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   // there is no backend for any of them. `works` / `projects` / `other` are open
   // text sections rendered inline with clickable URLs; `other` is the freeform
   // catch-all (invisible until the Author publishes it). Everything else is a
-  // Group every entry into neat category sections (like the demo). Category comes
-  // from the server's per-file map; untagged falls to 'shadows'.
-  const CATEGORY_ORDER = ['works', 'projects', 'shadows', 'other'] as const;
-  const grouped = CATEGORY_ORDER
+  // Group entries into category sections. 'other' is a low-key bucket that is NOT
+  // shown here — it holds files not meant for the router (uncategorised/internal).
+  const VISIBLE_CATEGORIES = ['works', 'projects', 'shadows'] as const;
+  const grouped = VISIBLE_CATEGORIES
     .map((cat) => ({ cat, items: files.filter((f) => (f.category || 'shadows') === cat) }))
     .filter((g) => g.items.length > 0);
+
+  // Socials as clean links: the author's linked accounts (X, LinkedIn, …) plus
+  // their website, shown plainly — never as buttons/pills.
+  const cleanUrl = (u: string) => (u.startsWith('http') ? u : `https://${u}`);
+  const socialLinks: { label: string; url: string }[] = [
+    ...((author.socials || []).filter((s) => s && s.label && s.url).map((s) => ({ label: s.label, url: safeUrl(cleanUrl(s.url)) }))),
+    ...(author.website ? [{ label: author.website.replace(/^https?:\/\//, '').replace(/\/$/, ''), url: safeUrl(cleanUrl(author.website)) }] : []),
+  ];
   const renderLinkedText = (text: string) =>
     text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
       /^https?:\/\//.test(part) ? (
@@ -189,9 +198,8 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
     textDecoration: 'none',
   };
 
-  // Entry row — exact demo rhythm: title left, tier right, on one baseline, in a
-  // bordered list (hairline top+bottom). `isFirst` draws the top line.
-  const fileRow = (file: ProtocolFile, isFirst: boolean) => {
+  // Entry row — title left, tier right, on one baseline, with a bottom hairline.
+  const fileRow = (file: ProtocolFile) => {
     const rawPreview = normalizePreviewText(file.text) || '';
     const firstLine = rawPreview.split('\n')[0].trim();
     const preview = firstLine.length > 110 ? `${firstLine.slice(0, 110).trimEnd()}…` : firstLine;
@@ -204,7 +212,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
       padding: '0.72rem 0',
       border: 'none',
       borderBottom: '1px solid var(--border-light)',
-      ...(isFirst ? { borderTop: '1px solid var(--border-light)' } : {}),
       background: 'none',
       color: 'inherit',
       textDecoration: 'none',
@@ -256,55 +263,19 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           <h1 style={{ color: 'var(--text-primary)', fontSize: '2rem', fontWeight: 500, letterSpacing: '-0.012em', margin: '2rem 0 0.35rem' }}>
             {author.display_name || author.id}
           </h1>
-          {profileText && (
-            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.45, margin: '0.5rem 0 0' }}>
-              {profileText}
-            </p>
-          )}
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', letterSpacing: '0.02em', margin: '0.3rem 0 0', lineHeight: 1.45 }}>
+          <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem', letterSpacing: '0.02em', margin: '0.35rem 0 0' }}>
             {author.alexandria_id}
           </p>
-          {(author.location || author.contact || author.website) && (
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '0.45rem',
-                marginTop: '0.9rem',
-                alignItems: 'flex-start',
-              }}
-            >
-              {author.location && author.location_key && (
-                <Link
-                  href={`/library?locations=${encodeURIComponent(author.location_key)}`}
-                  style={tagStyle}
+          {(author.location || socialLinks.length > 0) && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', marginTop: '0.9rem', fontSize: '0.92rem', alignItems: 'baseline' }}>
+              {author.location && <span style={{ color: 'var(--text-ghost)' }}>{author.location}</span>}
+              {socialLinks.map((s) => (
+                <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer"
                   className="hover:opacity-60"
-                >
-                  {author.location}
-                </Link>
-              )}
-              {author.contact && (
-                <a
-                  href={contactHref(author.contact)}
-                  target={author.contact.startsWith('http') ? '_blank' : undefined}
-                  rel={author.contact.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  style={tagStyle}
-                  className="hover:opacity-60"
-                >
-                  contact
+                  style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+                  {s.label}
                 </a>
-              )}
-              {author.website && (
-                <a
-                  href={safeUrl(author.website.startsWith('http') ? author.website : `https://${author.website}`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={tagStyle}
-                  className="hover:opacity-60"
-                >
-                  website
-                </a>
-              )}
+              ))}
             </div>
           )}
         </header>
@@ -327,10 +298,9 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             )
           ) : (
             grouped.map(({ cat, items }) => (
-              <div key={cat}>
-                <hr style={{ height: 1, background: 'var(--border-light)', border: 'none', margin: '2.6rem 0 1.3rem' }} />
+              <div key={cat} style={{ marginTop: '2.8rem' }}>
                 <p style={sectionLabelStyle}>{cat}</p>
-                {items.map((f, i) => fileRow(f, i === 0))}
+                {items.map(fileRow)}
               </div>
             ))
           )}

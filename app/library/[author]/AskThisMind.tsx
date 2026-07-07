@@ -155,22 +155,13 @@ export default function AskThisMind({
   if (needsLogin) {
     return (
       <div style={{ marginTop: '1.6rem' }}>
-        <p style={sectionLabelStyle}>
-          ask this mind
-          <span style={{ color: 'var(--accent)', marginLeft: '0.5rem', letterSpacing: '0.02em' }}>twin</span>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, margin: '0.15rem 0 0' }}>
+          a living model of {name}’s mind —{' '}
+          <a href={signInUrl} className="hover:opacity-60"
+            style={{ color: 'var(--accent)', textDecoration: 'none', borderBottom: '1px solid var(--accent)' }}>
+            {invite.trim() ? 'sign in to use your invite' : 'sign in to ask'}
+          </a>.
         </p>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 1rem' }}>
-          {invite.trim()
-            ? `you’ve got an invite to ${name}’s twin — sign in once and it’s yours for good.`
-            : `${name}’s twin is open to people they’ve invited. sign in to continue — if you’re on the list, you’re in.`}
-        </p>
-        <a
-          href={signInUrl}
-          style={{ display: 'inline-block', borderRadius: '11px', background: 'var(--accent)', color: 'var(--bg-primary)',
-            fontFamily: 'inherit', fontSize: '0.95rem', padding: '0.6rem 1.25rem', textDecoration: 'none' }}
-        >
-          {invite.trim() ? 'sign in to use your invite' : 'sign in to ask'}
-        </a>
       </div>
     );
   }

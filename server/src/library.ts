@@ -222,6 +222,13 @@ function directoryAuthor(account: Account, profile: CompanyAuthorRow | null, fal
     location_key: slugSlot(stringSlot(settings, 'location_key')) || slugSlot(location),
     contact: stringSlot(settings, 'contact'),
     website: stringSlot(settings, 'website'),
+    // Linked accounts (X, LinkedIn, …) — [{label, url}], rendered as clean links.
+    socials: Array.isArray(settings.socials)
+      ? (settings.socials as unknown[])
+          .map((s) => (s && typeof s === 'object' ? s as Record<string, unknown> : {}))
+          .filter((s) => typeof s.label === 'string' && typeof s.url === 'string')
+          .map((s) => ({ label: (s.label as string).trim(), url: (s.url as string).trim() }))
+      : [],
     text: textSlot(settings, profile),
     files_url: `/library/${account.github_login}`,
   };
