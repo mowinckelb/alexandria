@@ -436,6 +436,16 @@ export function agentEndpointFrom(url: string): string {
   return `${u}/agent`;
 }
 
+/** The sidecar's PUBLIC Alexandria-guide endpoint (the homepage "ask Alexandria"
+ *  company twin), derived from the same base URL as /infer and /agent. Same
+ *  transport (bearer + Access headers); the route reads only public product
+ *  knowledge, never any substrate. */
+export function guideEndpointFrom(url: string): string {
+  const u = url.replace(/\/+$/, '');
+  if (u.endsWith('/infer')) return `${u.slice(0, -'/infer'.length)}/guide`;
+  return `${u}/guide`;
+}
+
 /** Cloudflare Access service-token headers for reaching an Access-protected
  *  sidecar tunnel. When set, "found the tunnel URL + bearer secret" is no longer
  *  enough — the request must ALSO carry the Worker's Access service identity, so

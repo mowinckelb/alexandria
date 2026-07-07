@@ -41,6 +41,7 @@ import {
   authorizeTwinAccess,
   healthEndpointFrom,
   accessHeaders,
+  guideEndpointFrom,
   validateSidecarUrl,
   type TwinVariant,
   type TwinVisibility,
@@ -976,6 +977,77 @@ export function registerLibraryRoutes(app: Hono): void {
       answer: outcome.answer,
       disclaimer: outcome.disclaimer,
     });
+  });
+
+  // The homepage "ask Alexandria" box — the PUBLIC company guide (plm.md §
+  // Website integration). This is a pure RELAY, never inference: it forwards the
+  // question to the sidecar's isolated /guide route (which reads only public
+  // product knowledge — no substrate, no shadow, no tiers), so the Worker stays
+  // relay-only per the settled security model. Anonymous; nothing secret is in
+  // reach, so a compromise of this whole path leaks nothing. Rate-limit + daily
+  // cap reuse the twin limiters (keyed to a fixed pseudo-author); the raw
+  // question is logged as the demand-signal mirror (what visitors actually ask).
+  app.post('/ask', async (c) => {
+    const GUIDE = 'alexandria-guide'; // rate-limit / cap / ledger key (not a real author)
+    const ip = c.req.header('cf-connecting-ip') || 'unknown';
+    if (await checkTwinRateLimit(GUIDE, ip)) {
+      return c.json({ error: 'Too many questions — give it a minute.' }, 429);
+    }
+    if (await twinDailyCapReached(GUIDE)) {
+      return c.json({ error: 'The guide has answered its limit for today — try again tomorrow.' }, 429);
+    }
+
+    const body = await c.req.json().catch(() => ({})) as { question?: unknown };
+    const question = typeof body.question === 'string' ? body.question.trim() : '';
+    if (!question) return c.json({ error: 'Ask a question.' }, 400);
+    if (question.length > 2000) return c.json({ error: 'Question too long (2000 chars max).' }, 400);
+
+    // The guide runs on the founder's always-on sidecar (env fallback if not
+    // separately registered). getSidecar → the same relay every other twin uses.
+    const conn = await getSidecar(process.env.ADMIN_GITHUB_LOGIN || 'mowinckelb');
+    if (!conn?.url) return c.json({ error: 'the guide is offline right now.' }, 503);
+
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 45000);
+    try {
+      const res = await fetch(guideEndpointFrom(conn.url), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(conn.secret ? { Authorization: `Bearer ${conn.secret}` } : {}),
+          ...accessHeaders(),
+        },
+        body: JSON.stringify({ question }),
+        signal: ctrl.signal,
+      });
+      if (!res.ok) {
+        logEvent('ask_alexandria', { status: String(res.status), reason: 'upstream' });
+        return c.json({ error: 'the guide could not answer just now.' }, 502);
+      }
+      const rb = (await res.json().catch(() => null)) as { answer?: unknown } | null;
+      const answer = typeof rb?.answer === 'string' ? rb.answer.trim() : '';
+      if (!answer) return c.json({ error: 'the guide returned nothing.' }, 502);
+
+      // Billable success → consume the daily budget (mirrors the twin path).
+      await bumpTwinDaily(GUIDE);
+      logEvent('ask_alexandria', { status: '200', q_len: String(question.length) });
+      // The mirror: store the raw question (anonymous, public product Q) so the
+      // founder can see what visitors ask and where the copy fails.
+      try {
+        await getDB().prepare(
+          `INSERT INTO access_log (event, author_id, accessor_id, artifact_id, tier, meta, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+        ).bind('ask_alexandria', GUIDE, 'anonymous', 'guide', 'public',
+          JSON.stringify({ q: question.slice(0, 500), a_len: answer.length }),
+          new Date().toISOString()).run();
+      } catch (e) { console.error('[ask] mirror insert failed:', e); }
+
+      return c.json({ ok: true, answer });
+    } catch (e) {
+      const aborted = e instanceof Error && e.name === 'AbortError';
+      return c.json({ error: aborted ? 'the guide took too long to answer.' : 'could not reach the guide.' }, aborted ? 504 : 502);
+    } finally {
+      clearTimeout(t);
+    }
   });
 
   // Programmatic twin API — plug a mind into your own app. API-key auth (reuses

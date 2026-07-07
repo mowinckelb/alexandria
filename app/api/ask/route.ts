@@ -1,29 +1,28 @@
 import { NextRequest } from 'next/server';
-import { SERVER_URL, ASK_AUTHOR } from '../../lib/config';
+import { SERVER_URL } from '../../lib/config';
 
 /**
  * Same-origin proxy for the homepage "ask Alexandria" box.
  *
  * SECURITY (plm.md § SETTLED structural security model): this does NOT run
- * inference — it forwards the question to the EXISTING device-sidecar twin
- * endpoint (/library/{author}/ask), where the Worker only relays question-in /
- * answer-out and the model runs on the author's own device. Worker-side
- * inference was proposed and retracted ("the mind stays on the device, period").
- * So the homepage box reuses the one live, audited relay — no new Worker
- * endpoint, no company Anthropic key on our infra, no new trust surface.
+ * inference. It forwards the question to the Worker's `/ask` route, which is
+ * itself a pure RELAY to the sidecar's isolated `/guide` endpoint — the model
+ * runs on the founder's device, reading ONLY public product knowledge (no
+ * substrate, no shadow). Worker-side inference was proposed and retracted ("the
+ * mind stays on the device"). So the whole path is relay-only, holds no key, and
+ * — because nothing secret is in its reach — leaks nothing even if fully hacked.
  *
- * Anonymous by construction: no auth is forwarded, so the twin resolves to the
- * PUBLIC tier (public shadow only — never substrate). Rate-limit, per-author
- * daily cap, visibility gate, and the credits ledger all live in the shared
- * runTwinQuery core the endpoint already uses.
+ * Anonymous by construction: no auth forwarded. Rate-limit, daily cap, and the
+ * demand-signal log all live in the Worker `/ask` handler.
  */
 export async function POST(req: NextRequest): Promise<Response> {
   const bodyText = await req.text();
 
-  const upstream = await fetch(
-    `${SERVER_URL}/library/${encodeURIComponent(ASK_AUTHOR)}/ask`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodyText },
-  );
+  const upstream = await fetch(`${SERVER_URL}/ask`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: bodyText,
+  });
 
   const text = await upstream.text();
   return new Response(text, {
