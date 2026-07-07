@@ -39,10 +39,15 @@ function normalizePreviewText(value: string | null | undefined): string | null {
   return value.replace(/\uFFFD/g, '-');
 }
 
+// Small words stay lowercase (unless first): "Droplets of Grace". Overrides let an
+// Author style a name their own way (e.g. lowercase brand "mowinckels").
+const SMALL_WORDS = new Set(['of', 'the', 'a', 'an', 'and', 'or', 'for', 'to', 'in', 'on', 'at', 'by', 'with']);
+const TITLE_OVERRIDE: Record<string, string> = { mowinckels: 'mowinckels' };
 function fileDisplayName(name: string): string {
-  return name
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  if (TITLE_OVERRIDE[name]) return TITLE_OVERRIDE[name];
+  return name.split('-')
+    .map((w, i) => (i > 0 && SMALL_WORDS.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
 }
 
 function visibilityLabel(value: string): string {
@@ -150,7 +155,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
   // their website, shown plainly — never as buttons/pills.
   // General account sign-in — lives at the top of the page, not tied to the twin.
   const signedIn = data.twin?.signed_in === true;
-  const signInUrl = `${SERVER_URL}/auth/github?intent=library&next=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`;
+  const signInUrl = `${SERVER_URL}/auth/github?intent=library&next=${typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : ''}`;
   const cleanUrl = (u: string) => (u.startsWith('http') ? u : `https://${u}`);
   const socialLinks: { label: string; url: string }[] = [
     ...((author.socials || []).filter((s) => s && s.label && s.url).map((s) => ({ label: s.label, url: safeUrl(cleanUrl(s.url)) }))),

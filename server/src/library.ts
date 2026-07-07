@@ -91,7 +91,8 @@ async function twinOnline(authorId: string): Promise<boolean> {
   if (conn?.url) {
     try {
       const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 2500);
+      // Quick tunnels can be slow to first-byte; be tolerant so we don't flap offline.
+      const t = setTimeout(() => ctrl.abort(), 6000);
       const res = await fetch(healthEndpointFrom(conn.url), { signal: ctrl.signal });
       clearTimeout(t);
       online = res.ok;

@@ -61,9 +61,9 @@ const sectionLabelStyle: CSSProperties = {
 
 function restingDisclaimerFor(name: string, variant: TwinVariant): string {
   if (variant === 'context') {
-    return `you're talking to ${name}'s twin — a top model reading everything ${name} has published, not ${name} themselves. it can be wrong, and may not reflect their real views.`;
+    return `you're talking to ${name}'s personal language model — a top model reading everything ${name} has published, not ${name} themselves. it can be wrong, and may not reflect their real views.`;
   }
-  return `you're talking to ${name}'s trained twin — a model compiled from their published writing, not ${name}. it can be wrong, and may not reflect their real views.`;
+  return `you're talking to ${name}'s trained personal language model — a model compiled from their published writing, not ${name}. it can be wrong, and may not reflect their real views.`;
 }
 
 export default function AskThisMind({
@@ -136,7 +136,7 @@ export default function AskThisMind({
           <span style={{ color: 'var(--text-ghost)', marginLeft: '0.5rem', letterSpacing: '0.02em' }}>offline</span>
         </p>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, margin: 0 }}>
-          {name}’s twin is offline right now — check back soon.
+          {name}’s PLM is offline right now — check back soon.
         </p>
       </div>
     );
@@ -151,7 +151,7 @@ export default function AskThisMind({
   // So an anonymous visitor always signs in first; a ?invite= code rides through
   // the login (in `next`) and binds to their account on their first ask.
   const needsLogin = inviteGated && !signedIn;
-  const signInUrl = `${SERVER_URL}/auth/github?intent=library&next=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`;
+  const signInUrl = `${SERVER_URL}/auth/github?intent=library&next=${typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : ''}`;
 
   if (needsLogin) {
     return (
@@ -191,7 +191,7 @@ export default function AskThisMind({
           body.error
             || (res.status === 401 || res.status === 403
               ? 'that invite code didn’t work — check it and try again.'
-              : 'the twin could not answer just now.'),
+              : 'the PLM could not answer just now.'),
         );
         return;
       }
@@ -201,7 +201,7 @@ export default function AskThisMind({
       setAnsweredVariant(v);
       setDisclaimer(body.disclaimer || restingDisclaimerFor(name, v));
     } catch {
-      setError('could not reach the twin.');
+      setError('could not reach the PLM.');
     } finally {
       setLoading(false);
     }
@@ -228,7 +228,7 @@ export default function AskThisMind({
     <div style={{ borderTop: '1px solid var(--border-light)', marginTop: '1.6rem', paddingTop: '1.1rem' }}>
       <p style={sectionLabelStyle}>
         ask this mind
-        <span style={{ color: 'var(--accent)', marginLeft: '0.5rem', letterSpacing: '0.02em' }}>twin</span>
+        <span style={{ color: 'var(--accent)', marginLeft: '0.5rem', letterSpacing: '0.02em' }}>PLM</span>
       </p>
 
       {!answer && (

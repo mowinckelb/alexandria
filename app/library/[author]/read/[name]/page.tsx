@@ -14,8 +14,13 @@ import { SERVER_URL } from '../../../../lib/config';
  * (left, collapsed by default). Read a work, then interrogate the mind about it.
  */
 
+const SMALL_WORDS = new Set(['of', 'the', 'a', 'an', 'and', 'or', 'for', 'to', 'in', 'on', 'at', 'by', 'with']);
+const TITLE_OVERRIDE: Record<string, string> = { mowinckels: 'mowinckels' };
 function displayName(name: string): string {
-  return name.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  if (TITLE_OVERRIDE[name]) return TITLE_OVERRIDE[name];
+  return name.split('-')
+    .map((w, i) => (i > 0 && SMALL_WORDS.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
 }
 
 type Msg = { role: 'you' | 'twin'; text: string };
@@ -52,7 +57,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
 
   const nice = useMemo(() => displayName(name), [name]);
   const who = authorName || author;
-  const signInUrl = `${SERVER_URL}/auth/github?intent=library&next=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`;
+  const signInUrl = `${SERVER_URL}/auth/github?intent=library&next=${typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : ''}`;
 
   // Load author meta + the piece content (gated).
   useEffect(() => {
@@ -61,13 +66,16 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
     (async () => {
       setStatus('loading');
       try {
-        const [dirRes, fileRes] = await Promise.all([
+        const [dirRes, sessRes, fileRes] = await Promise.all([
           fetch(`${SERVER_URL}/library/${encodeURIComponent(author)}`).then((r) => r.json()).catch(() => ({})),
+          // Signed-in state needs the cookie → same-origin session proxy, not the
+          // credential-less directory (which always reads signed_out cross-origin).
+          fetch('/api/library/session', { credentials: 'include' }).then((r) => r.json()).catch(() => ({})),
           fetch(`/api/library/${encodeURIComponent(author)}/file/${encodeURIComponent(name)}`, { credentials: 'include' }),
         ]);
         if (!live) return;
         setAuthorName(dirRes?.author?.display_name || '');
-        setSignedIn(dirRes?.twin?.signed_in === true);
+        setSignedIn(sessRes?.signed_in === true);
         const f = (dirRes?.files || []).find((x: { name: string }) => x.name === name);
         if (f?.visibility) setVisibility(f.visibility);
 
@@ -119,10 +127,10 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
         }),
       });
       const b = await res.json().catch(() => ({}));
-      const answer = (res.ok && b.answer) ? b.answer : (b.error || 'the twin could not answer just now.');
+      const answer = (res.ok && b.answer) ? b.answer : (b.error || 'the PLM could not answer just now.');
       setHistory((h) => [...h, { role: 'twin', text: answer }]);
     } catch {
-      setHistory((h) => [...h, { role: 'twin', text: 'could not reach the twin.' }]);
+      setHistory((h) => [...h, { role: 'twin', text: 'could not reach the PLM.' }]);
     } finally {
       setAsking(false);
     }
@@ -143,7 +151,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
       <ThemeToggle />
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-eb-garamond)', background: 'var(--bg-primary)' }}>
         {/* top bar */}
-        <header style={{ flex: 'none', display: 'flex', alignItems: 'baseline', gap: '1rem', padding: '1rem 1.4rem', borderBottom: '1px solid var(--border-light)' }}>
+        <header style={{ flex: 'none', display: 'flex', alignItems: 'baseline', gap: '1rem', padding: '1rem 3.6rem 1rem 1.4rem', borderBottom: '1px solid var(--border-light)' }}>
           <Link href={`/library/${encodeURIComponent(author)}`} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }} className="hover:opacity-60">← library</Link>
           <span style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{nice}</span>
           <span style={{ ...label }}>{visibility}</span>
@@ -182,7 +190,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
               <div ref={threadRef} style={{ flex: 1, overflow: 'auto', padding: '1.4rem' }}>
                 {history.length === 0 && (
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                    ask {who}’s twin about this piece.
+                    ask {who}’s PLM about this piece.
                     {!signedIn && <> <a href={signInUrl} style={{ color: 'var(--accent)', textDecoration: 'none', borderBottom: '1px solid var(--accent)' }} className="hover:opacity-60">sign in</a> for the deeper version.</>}
                   </p>
                 )}
