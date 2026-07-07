@@ -130,39 +130,39 @@ It’s worth being precise about what this is *not*. Every platform is adding a 
 
 And it builds you the way a gym does: the growth comes from the strain. Most AI does the opposite — it agrees, it flatters, it hands you the answer you already liked, which feels good and changes nothing. This pushes back: it finds the hole in your reasoning and asks the question you were dodging. That friction isn’t a flaw in the tool, it’s the mechanism — a mind only sharpens against resistance, and one that hears nothing but *yes* stays exactly as dull as it started.
 
-## the record.
+## the folder.
 
 Put your mind into words, and the words have to live somewhere. Follow that simple need and the right shape falls out on its own.
 
 It can’t live inside one AI’s memory, because then it isn’t yours — you can’t read it, move it, or take it to the next tool, and you’re locked to whichever company holds it. It can’t be locked in a format only a machine reads, because you need to open it, check it, and change your mind in it yourself. What you want is the plainest, most durable form there is: **plain text you own and keep — that you can read and edit, and that any AI can read and write to as well.** A written record of how you think — your views, your taste, your contradictions, the reasons behind them — kept current as you change.
 
-The half that’s easy to miss is the writing. The AI doesn’t just *read* it to know you better; it *writes* to it too — so your thinking develops on the page itself, in words you can see and correct, instead of inside a machine where you can’t reach it. The record and the developing are the same act.
+The half that’s easy to miss is the writing. The AI doesn’t just *read* it to know you better; it *writes* to it too — so your thinking develops on the page itself, in words you can see and correct, instead of inside a machine where you can’t reach it. The writing and the developing are the same act.
 
 We call it your mind.md — but it isn’t one document. It’s a place of your own: a growing folder of plain-text files that together hold your whole mind — your settled views, the questions you’re still working out, the raw material you’ve saved, the projects you’re in, the things you’ve made. Each has its place, and every piece is plain text you can open and read. It begins as almost nothing and fills in as there’s more of you to hold. The name is a concept, not a single file: mind for what’s inside, and .md because it’s all plain text, the kind anything can open.
 
 And the fact that it’s *yours* isn’t a detail. It’s what makes a tool like this safe to use at all, and it runs three ways.
 
-It’s yours so you can’t be locked in. It’s plain text you keep, not a record held on someone’s server. You stay because it’s useful, not because leaving is hard. Delete it and it’s as if it never happened. A tool that touches your actual mind is only safe to use if you can walk away from it completely.
+It’s yours so you can’t be locked in. It’s plain text you keep, not something held on someone’s server. You stay because it’s useful, not because leaving is hard. Delete it and it’s as if it never happened. A tool that touches your actual mind is only safe to use if you can walk away from it completely.
 
-It’s yours so no single AI can quietly shape you. Because it’s plain and portable, you can run several different AIs over the same record, and where they pull you in different directions, you can see it. One model’s slant is invisible. Three models’ slants, side by side, show you where you’re being nudged.
+It’s yours so no single AI can quietly shape you. Because it’s plain and portable, you can run several different AIs over the same mind.md, and where they pull you in different directions, you can see it. One model’s slant is invisible. Three models’ slants, side by side, show you where you’re being nudged.
 
 And it’s yours because it’s the one part worth owning. The models will keep changing — a better one keeps arriving, and you’ll switch to it the way you switch phones. All of that is rented, and renting it is exactly the right move. But the record of how you think isn’t something a model can hand you; no amount of intelligence reconstructs the inside of your head. Ten years of sleep data is noise. Ten years of how your thinking actually evolved is the most valuable record you’ll ever own. **Rent the intelligence. Own the part that’s you.**
 
 ## the system.
 
-A record like that has a problem: it goes stale. You change every day — you read, you argue, you change your mind — and one you have to sit down and update by hand will always lag behind the real you, then get abandoned, the way every journal and notes app eventually does.
+A written mind has one problem: it goes stale. You change every day — you read, you argue, you change your mind — and one you have to sit down and update by hand will always lag behind the real you, then get abandoned, the way every journal and notes app eventually does.
 
-But notice what’s already in your hands. The same AI you think with can tend the record of your thinking. It listens as you work, asks the right questions, writes down what’s new, and prunes what’s gone stale — so the record stays alive without you ever filing it. And it catches what would otherwise slip away — the piece you read and meant to keep, the thought that arrived on a walk and was gone by evening. So much of what could grow you is lost for no reason but that there was nowhere to hold it. Here, there is.
+But notice what’s already in your hands. The same AI you think with can tend your mind.md. It listens as you work, asks the right questions, writes down what’s new, and prunes what’s gone stale — so it stays alive without you ever filing it. And it catches what would otherwise slip away — the piece you read and meant to keep, the thought that arrived on a walk and was gone by evening. So much of what could grow you is lost for no reason but that there was nowhere to hold it. Here, there is.
 
-That second piece — the part that tends the record — we call your alexandria.md. Like mind.md, it’s a concept and a folder, not one file and not a rigid system. It’s just the instructions for how your AI draws you out, what it writes down, and what it keeps current — mostly plain text, but you can put whatever you want in it and shape it however suits you. Nothing about it is fixed. Your mind.md is the record of your mind; your alexandria.md is what keeps it true. Same principle, two parts.
+That second piece — the part that tends it — we call your alexandria.md. Like mind.md, it’s a concept and a folder, not one file and not a rigid system. It’s just the instructions for how your AI draws you out, what it writes down, and what it keeps current — mostly plain text, but you can put whatever you want in it and shape it however suits you. Nothing about it is fixed. Your mind.md is your mind in words; your alexandria.md is what keeps it true. Same principle, two parts.
 
 It belongs to you the same way your mind.md does, and for one more reason: you can change how it works. It starts as a shared default that suits almost anyone, and as you use it you bend it to fit you — and because it’s plain and open, it stays yours even as it becomes specific to you. You don’t get locked into Alexandria any more than you get locked into a model. All of it is built to be walked away from, which is the only reason it’s safe to let this far in.
 
-This is the loop it all turns on: **you use the technology to build the record the technology then uses to develop you.** The AI helps you write down how you think; that written record makes the AI far better at developing how you think; which gives it more to write down; which makes it better still. It’s a wheel that, once pushed, speeds up on its own.
+This is the loop it all turns on: **you use the AI to put your mind into words, and it uses those words to develop you.** The same tool works both ways — it helps you get your thinking onto the page, then reads what’s there to sharpen your thinking. And the two feed each other: the more you write down, the better it develops you; the more it develops you, the more there is to write down. It’s a wheel that, once pushed, speeds up on its own.
 
-And because it compounds, what matters most is *when you start*. Earlier is worth more than anything else you can get right; every later gain rides on the record you already have. There’s no shortcut to a year of your own thinking written down — but it pays you from the very first session, not only at the end.
+And because it compounds, what matters most is *when you start*. Earlier is worth more than anything else you can get right; every later gain rides on what you’ve already written down. There’s no shortcut to a year of your own thinking written down — but it pays you from the very first session, not only at the end.
 
-And the change isn’t waiting for you. Every month, more of the thinking gets handed to the machine — so the earlier you start, the more of yourself you carry through it: a system already shaped to you, a record already deep, instead of a blank page opened too late. Because none of it is thrown away, you can look back and watch your own mind move — what you thought a year ago, and how you came to think otherwise. That trail only exists if you began. Start small, start rough, start now.
+And the change isn’t waiting for you. Every month, more of the thinking gets handed to the machine — so the earlier you start, the more of yourself you carry through it: a system already shaped to you, a mind.md already deep, instead of a blank page opened too late. Because none of it is thrown away, you can look back and watch your own mind move — what you thought a year ago, and how you came to think otherwise. That trail only exists if you began. Start small, start rough, start now.
 
 # build it together.
 
@@ -174,7 +174,7 @@ Everything so far is about one person. But the moment there are many — each wi
 
 A single mind, written down, develops its owner. A thousand minds, written down and opened to each other, become more than a thousand private records. They become a place. You can learn from how someone else actually reasons, not just what they concluded. You can find the people who think in ways that sharpen yours. Your own thinking, offered into the open, reaches further than it ever could trapped in your head. One scholar is worth something; a university is worth far more. The value of a mind goes up when it sits beside other minds, and the extra belongs to everyone in it.
 
-That’s the second half of Alexandria: not just a gym for one mind, but a **library of human minds** — every record readable by people and by AI alike, so the thinking compounds across people the way it already compounds within a person.
+That’s the second half of Alexandria: not just a gym for one mind, but a **library of human minds** — each one readable by people and by AI alike, so the thinking compounds across people the way it already compounds within a person.
 
 What sits on the shelf is worth being precise about, because it isn’t a profile. A profile is what a stranger could assemble about you from the outside — a summary, a list of facts, the surface again. What the library holds is closer to a biography: the deep, patient record a biographer builds by sitting with someone for a long time — except here the subject builds it themselves, and it never stops growing. That’s why the people in the library are called its **Authors**, and why a record there reaches a depth no profile does. The biography used to be the rarest form there was, written only for the famous and the powerful. A library of minds hands that form to everyone, alive and still being written.
 
@@ -182,9 +182,9 @@ And that’s why every mind here is genuine, and none can be faked. You can copy
 
 It doesn’t have to be vast to be worth having. A library was always a place where a few write and many read, and it sat at the centre of civilisation regardless. Most people will read more than they write — that’s the natural shape of a library, not a shortfall. A few hundred minds, open and deep, is already a place worth being in.
 
-This is also why there has to be a company. You can build your own record and your own system alone — you don’t need us for that, and that part stays free and yours. But nobody builds a library alone; it only exists when many people are connected, and a shared place is what a person can’t make alone.
+This is also why there has to be a company. You can build your own mind.md and alexandria.md alone — you don’t need us for that, and that part stays free and yours. But nobody builds a library alone; it only exists when many people are connected, and a shared place is what a person can’t make alone.
 
-And what you share is yours to shape, entirely. Your mind.md and alexandria.md live with you and stand on their own, working with or without the library, so developing yourself never depends on giving anything up. When you do add to the library you don’t hand over the record; you publish a version you shape from it — what you make, what you’re building, and as much of how you think as you choose to show — and you can take back anything you’ve shared. The library stays open to any reader, because an open library is the only kind that grows. On each piece you publish, you choose how wide it opens.
+And what you share is yours to shape, entirely. Your mind.md and alexandria.md live with you and stand on their own, working with or without the library, so developing yourself never depends on giving anything up. When you do add to the library you don’t hand it over; you publish a version you shape from it — what you make, what you’re building, and as much of how you think as you choose to show — and you can take back anything you’ve shared. The library stays open to any reader, because an open library is the only kind that grows. On each piece you publish, you choose how wide it opens.
 
 ## the republic.
 
@@ -198,7 +198,7 @@ And there’s a reason it can be built now and never could before. The practice 
 
 ## the missing piece.
 
-Everything so far has been about you — your mind, your record, your place in the library. Take the two facts underneath all of it and run them across everyone at once, and the whole of what’s coming snaps into focus.
+Everything so far has been about you — your mind, your words, your place in the library. Take the two facts underneath all of it and run them across everyone at once, and the whole of what’s coming snaps into focus.
 
 Grant the optimists everything they promise. Intelligence, free. The work done by machines that never tire. Robots for the hands, energy too cheap to meter, disease falling away one illness at a time. Assume it all goes right — the material problem of being alive, finally solved. That is the future nearly everyone is pointed at, and it may well arrive.
 
@@ -222,9 +222,9 @@ That total — every individual developed, times a culture that values them, sum
 
 And it counts at every scale. The mind whose record is read by millions matters; so does the one read only by that person’s children, long after. The point was never fame. It was that the thinking was real, that it was theirs, and that it outlasted them. Both minds count in full.
 
-Hear that word *value* correctly, because it was never only money. Money is the floor — the part that proves the case to a sceptic, the argument that got us in the door. The ceiling is the part that matters: a developed mind is a freer, more awake, more alive way of being a person. Getting paid is just proof the world hasn’t stopped rewarding it. For that side of it — the human one, not the logic — read the letter.
+Hear that word *value* correctly, because it was never only money. Money is the floor — the part that proves the case to a sceptic, the argument that got us in the door. The ceiling is the part that matters: a developed mind is a freer, more awake, more alive way of being a person. Getting paid is just proof the world hasn’t stopped rewarding it. For the human side of it — felt, not argued — read the letter.
 
-And notice the shape of what just happened. We started with one question — when a machine can do everything, what’s left for a person? — and took it one step at a time. The record, the system, the library: none of it was chosen up front. Each piece was forced by the step before it. Follow the logic, and you end up here every time. That’s why Alexandria is what it is.
+And notice the shape of what just happened. We started with one question — when a machine can do everything, what’s left for a person? — and took it one step at a time. The folder, the system, the library: none of it was chosen up front. Each piece was forced by the step before it. Follow the logic, and you end up here every time. That’s why Alexandria is what it is.
 
 *Benjamin a. Mowinckel*
 
@@ -232,4 +232,4 @@ And notice the shape of what just happened. We started with one question — whe
 
 *You don’t need to accept all of it to begin. A few words, five minutes — free, and yours.*
 
-[start](/start) · [the letter](/docs/letter.pdf) · [the library](/library)
+[join the tribe](/join) · [read the letter](/docs/letter.pdf) · [browse the library](/library)
