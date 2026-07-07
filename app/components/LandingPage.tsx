@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import AskAlexandria from './AskAlexandria';
 
 interface Props {
   brandClassName?: string;
@@ -751,7 +752,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   <div className="cta-block">
                     {/* The ghost CTA: "follow along" is the watch-the-company
                         path (vs "join the tribe", the use-it path). It used to
-                        echo a numbered "2 the company - follow along" line;
+                        echo a numbered "2 the company — follow along" line;
                         those numbered ways were cut 2026-07-07 as they
                         duplicated the two buttons. "stay close" was lovelier
                         but opaque. */}
@@ -764,16 +765,24 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   </div>
                 </div>
 
-                {/* One faint line instead of the old 3-column directory
-                    (tried and rejected as noise — truth/website.md). The
-                    library is the collective made visible; questions is the
-                    objection-handler at the decision point. */}
+                {/* The PLM, turned on the company — an "ask Alexandria" box
+                    where the FAQ link used to be. Handles the reader's last
+                    objection AND is the demo (the letter says "a mind you can
+                    ask" — here one is). Grounded in the public artifacts only;
+                    engine-agnostic (POSTs /api/ask). See truth/website.md +
+                    plm.md § Website integration. */}
+                <AskAlexandria />
+
+                {/* One faint line — the collective made visible. Was three
+                    links (library · marketplace · questions); the FAQ link
+                    was removed 2026-07-07. The static objection-handler is
+                    being replaced by the PLM — an "ask Alexandria" surface
+                    grounded in the public artifacts, the product answering
+                    for itself. See truth/website.md § the PLM replaces the FAQ. */}
                 <p className="quiet-links">
                   <Link href="/library">library</Link>
                   <span className="quiet-sep" aria-hidden>&middot;</span>
                   <Link href="/marketplace">marketplace</Link>
-                  <span className="quiet-sep" aria-hidden>&middot;</span>
-                  <Link href="/questions">questions</Link>
                 </p>
               </div>
           </div>
@@ -2382,6 +2391,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .quiet-links a:hover { opacity: 0.62; }
         .quiet-sep { padding: 0 9px; user-select: none; }
+        /* The "ask Alexandria" composer owns all its own styling (styled-jsx in
+           AskAlexandria.tsx, riding the --theme-* vars). The host only sets the
+           mobile flex order of .ask-alx (in the media query below). */
         .cta-pair a.lr-cta {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           /* Matches button.install-cta exactly (font-size + padding) so the
@@ -2908,8 +2920,13 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                the CTAs. Adds to the bottom-inner 64px flex gap. */
             margin-top: 96px;
           }
-          .quiet-links {
+          .ask-alx {
             order: 7;
+            margin-top: 10px;
+            max-width: 100%;
+          }
+          .quiet-links {
+            order: 8;
             margin-top: 0;
           }
 

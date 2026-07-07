@@ -2,6 +2,14 @@ export const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'https://api.ale
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alexandria-library.com';
 export const FETCH_TIMEOUT_MS = 8000;
 
+// The author whose PUBLIC twin backs the homepage "ask Alexandria" box. The box
+// routes through the existing device-sidecar twin (Worker relays only — never
+// Worker-side inference; the mind stays on the device, per plm.md § SETTLED
+// structural security model). Anonymous → public tier → public shadow: no
+// substrate exposure, no new key, no new trust surface. Point this at a
+// dedicated company twin identity later if wanted — one env, no code change.
+export const ASK_AUTHOR = process.env.NEXT_PUBLIC_ASK_AUTHOR || 'mowinckelb';
+
 // Shared social/openGraph fields. Next.js metadata merging is **shallow**:
 // any page that sets `openGraph` at all replaces the parent layout's
 // openGraph entirely (siteName, locale, type all vanish; og:title and
