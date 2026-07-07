@@ -332,13 +332,14 @@ export default function AskThisMind({
               style={{
                 border: 'none',
                 borderRadius: '11px',
-                background: askDisabled ? 'var(--border-light)' : 'var(--accent)',
+                background: 'var(--accent)',
                 color: 'var(--bg-primary)',
                 fontFamily: 'inherit',
                 fontSize: '0.95rem',
                 padding: '0.72rem 1.25rem',
                 cursor: askDisabled ? 'default' : 'pointer',
-                transition: 'opacity 0.15s, background 0.15s',
+                opacity: askDisabled ? 0.5 : 1,
+                transition: 'opacity 0.15s',
                 whiteSpace: 'nowrap',
               }}
             >
