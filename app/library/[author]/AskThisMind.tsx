@@ -204,7 +204,6 @@ export default function AskThisMind({
   };
 
   const restingDisclaimer = restingDisclaimerFor(name, activeSummary.variant);
-  const thinkingLabel = waited >= 5 ? 'thinking — this can take a moment…' : 'thinking…';
 
   return (
     <div style={{ borderTop: '1px solid var(--border-light)', marginTop: '1.6rem', paddingTop: '1.1rem' }}>
@@ -275,38 +274,89 @@ export default function AskThisMind({
             )
           )}
 
+          {/* Starter prompts — click to fill (never auto-send), like the demo's chips. */}
+          {!question && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', margin: '0.2rem 0 1.1rem' }}>
+              {['what have you written about?', 'what do you believe most people get wrong?', 'what are you working on?'].map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setQuestion(c)}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  style={{
+                    border: '1px solid var(--border-light)', borderRadius: 999, padding: '0.36rem 0.8rem',
+                    fontSize: '0.86rem', background: 'transparent', color: 'var(--text-secondary)',
+                    fontFamily: 'inherit', cursor: 'pointer', transition: 'border-color .18s, color .18s',
+                  }}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* The composer — a real bordered box (textarea + send button), like the demo. */}
           <label htmlFor="twin-q" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>
             ask {name} a question
           </label>
-          <textarea
-            id="twin-q"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={onKeyDown}
-            disabled={loading}
-            rows={2}
-            placeholder={`ask ${name} anything…`}
-            style={{
-              width: '100%',
-              resize: 'none',
-              border: 'none',
-              borderBottom: '1px solid var(--border-light)',
-              background: 'transparent',
-              color: 'var(--text-primary)',
-              fontFamily: 'var(--font-eb-garamond)',
-              fontSize: '1rem',
-              lineHeight: 1.55,
-              outline: 'none',
-              padding: '0 0 0.55rem',
-            }}
-          />
+          <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-end' }}>
+            <textarea
+              id="twin-q"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={onKeyDown}
+              disabled={loading}
+              rows={2}
+              placeholder={`ask ${name} anything…`}
+              style={{
+                flex: 1,
+                resize: 'none',
+                border: '1px solid var(--border-light)',
+                borderRadius: '13px',
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-eb-garamond)',
+                fontSize: '1rem',
+                lineHeight: 1.55,
+                outline: 'none',
+                padding: '0.7rem 0.95rem',
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => void ask()}
+              disabled={askDisabled}
+              onMouseEnter={(e) => { if (!askDisabled) e.currentTarget.style.opacity = '0.85'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+              style={{
+                border: 'none',
+                borderRadius: '11px',
+                background: askDisabled ? 'var(--border-light)' : 'var(--accent)',
+                color: 'var(--bg-primary)',
+                fontFamily: 'inherit',
+                fontSize: '0.95rem',
+                padding: '0.72rem 1.25rem',
+                cursor: askDisabled ? 'default' : 'pointer',
+                transition: 'opacity 0.15s, background 0.15s',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {loading ? '…' : 'ask'}
+            </button>
+          </div>
+
+          {loading && waited >= 5 && (
+            <p style={{ color: 'var(--text-ghost)', fontSize: '0.78rem', margin: '0.6rem 0 0' }}>
+              thinking — this can take a moment…
+            </p>
+          )}
 
           {inviteGated && (
             invite.trim() && !showInviteInput ? (
-              // An invite is applied (typed or pre-filled from ?invite=). Show a
-              // quiet confirmation, never the raw code — a bare hex string reads
-              // as broken.
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.7rem 0 0' }}>
+              // An invite is applied (typed or pre-filled from ?invite=). Show a quiet
+              // confirmation, never the raw code — a bare hex string reads as broken.
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.85rem 0 0' }}>
                 <span style={{ color: 'var(--accent)' }}>✓</span> invite added
                 <button
                   type="button"
@@ -327,43 +377,19 @@ export default function AskThisMind({
                 aria-label="invite code"
                 style={{
                   width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid var(--border-light)',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: '11px',
                   background: 'transparent',
                   color: 'var(--text-primary)',
                   fontFamily: 'var(--font-eb-garamond)',
-                  fontSize: '0.92rem',
+                  fontSize: '0.9rem',
                   outline: 'none',
-                  padding: '0.7rem 0 0.5rem',
-                  margin: '0.6rem 0 0',
+                  padding: '0.6rem 0.9rem',
+                  margin: '0.85rem 0 0',
                 }}
               />
             )
           )}
-
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', margin: '0.9rem 0 0' }}>
-            <button
-              type="button"
-              onClick={() => void ask()}
-              disabled={askDisabled}
-              onMouseEnter={(e) => { if (!askDisabled) e.currentTarget.style.opacity = '0.6'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = askDisabled ? '0.45' : '1'; }}
-              style={{
-                fontSize: '0.95rem',
-                color: 'var(--text-primary)',
-                cursor: askDisabled ? 'default' : 'pointer',
-                opacity: askDisabled ? 0.45 : 1,
-                transition: 'opacity 0.15s',
-                border: 'none',
-                background: 'none',
-                padding: 0,
-                fontFamily: 'inherit',
-              }}
-            >
-              {loading ? thinkingLabel : 'ask'}
-            </button>
-            {!loading && <span style={{ color: 'var(--text-whisper)', fontSize: '0.78rem' }}>⌘↵</span>}
-          </div>
         </>
       )}
 
