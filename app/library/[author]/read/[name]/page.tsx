@@ -63,7 +63,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
       try {
         const [dirRes, fileRes] = await Promise.all([
           fetch(`${SERVER_URL}/library/${encodeURIComponent(author)}`).then((r) => r.json()).catch(() => ({})),
-          fetch(`${SERVER_URL}/library/${encodeURIComponent(author)}/file/${encodeURIComponent(name)}`, { credentials: 'include' }),
+          fetch(`/api/library/${encodeURIComponent(author)}/file/${encodeURIComponent(name)}`, { credentials: 'include' }),
         ]);
         if (!live) return;
         setAuthorName(dirRes?.author?.display_name || '');
