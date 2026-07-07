@@ -64,6 +64,13 @@ locally (substrate + the author's Anthropic key stay on device) and returns the 
 - Rewrite `twin_server.py` as an **outbound client**: connect out, authenticate with the
   author's own Alexandria API key (outbound — the easy direction), receive jobs, answer,
   return. No inbound listener.
+  - **Carry over the `/guide` route (added 2026-07-07).** `twin_server.py` now also serves
+    an isolated `POST /guide` — the public homepage "ask Alexandria" company FAQ (reads only
+    `alexandria_guide.md`, no substrate; Worker `POST /ask` relays to it). It's public-tier
+    ("public = plaintext, no gate" in the settled model), so it needs no crypto — but the
+    outbound rewrite must not drop it: keep the company guide answerable (as a company job
+    over the founder's outbound connection, or a tiny always-on company relay). Frontend
+    (`AskAlexandria.tsx` → `/api/ask`) and Worker `/ask` are architecture-agnostic and stay.
 - **Deletes entirely:** cloudflared, the public tunnel, Cloudflare Access, the inbound
   bearer, `validateSidecarUrl`/SSRF guard, `twinOnline` health-polling + 30s cache, URL
   drift, sidecar registration. "Online" becomes "is the connection open" — instant, certain.
