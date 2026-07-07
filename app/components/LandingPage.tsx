@@ -738,12 +738,21 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-close">
-                  But that file is just the way in. What you&rsquo;re really
-                  joining is a culture, not a system to download &mdash; connect
-                  with the others who{' '}<em>choose to keep thinking</em>. Take
-                  the founder&rsquo;s whole system to start, open-sourced and
-                  free, yours in five minutes. Fill it in, and you&rsquo;re one
-                  of them.
+                  And trying it costs you nothing &mdash; one file, the same
+                  idea as an agents.md, dropped into the AI you already use. It
+                  only adds; it changes nothing else. Don&rsquo;t like it?
+                  Delete it, and it&rsquo;s like it never happened.
+                </p>
+
+                <p className="statement-close">
+                  You don&rsquo;t have to buy the whole vision &mdash; just the
+                  smallest piece of it: that augmenting how you think could be
+                  worth something. If so, it&rsquo;s worth five minutes to find
+                  out.
+                </p>
+
+                <p className="statement-beat">
+                  <em>Low agency is the only friction left.</em>
                 </p>
 
                 <div className="cta-pair">
