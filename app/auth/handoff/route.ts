@@ -32,9 +32,11 @@ export async function GET(req: NextRequest): Promise<Response> {
   const next = sanitizeNext(req.nextUrl.searchParams.get('next'));
 
   // The script sets the cookie via a same-origin POST (off the redirect chain),
-  // then navigates to `next`. If the POST fails or JS is off, the meta-refresh
-  // still lands the viewer on `next` (signed-out — no worse than before).
-  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>alexandria.</title><meta http-equiv="refresh" content="3;url=${next
+  // then navigates to `next`. The meta-refresh is a pure JS-disabled fallback set
+  // long (10s) ON PURPOSE: a short fallback would race the POST and navigate away
+  // before the cookie lands on a slow network, dropping the viewer signed-out.
+  // With JS on, the fetch resolves and navigates first; the refresh never fires.
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>alexandria.</title><meta http-equiv="refresh" content="10;url=${next
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/"/g, '&quot;')}"></head><body style="font-family:'EB Garamond',Georgia,serif;background:#f5f0e8;color:#8a8078;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0"><p>signing you in&hellip;</p><script>(function(){var code=${JSON.stringify(
@@ -45,6 +47,11 @@ export async function GET(req: NextRequest): Promise<Response> {
 
   return new Response(html, {
     status: 200,
-    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      // The URL carries the one-time code; keep it out of any Referer header.
+      'Referrer-Policy': 'no-referrer',
+    },
   });
 }
