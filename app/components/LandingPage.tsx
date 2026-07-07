@@ -568,12 +568,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             <span className="nav-group">
               {/* Two reading documents, two registers: the whitepaper is
                   a LABEL (tracked uppercase, wax accent — a document
-                  category), the founder's letter is a HAND (italic,
+                  category), the letter is a HAND (italic,
                   underlined — a signature). Same differentiation the
                   demo link used to carry. */}
               <a href="/whitepaper" className="nav-label">whitepaper</a>
               <span className="nav-sep" aria-hidden>·</span>
-              <a href="/docs/letter.pdf" target="_blank" rel="noopener noreferrer">founder&rsquo;s letter</a>
+              <a href="/docs/letter.pdf" target="_blank" rel="noopener noreferrer">letter</a>
             </span>
           </div>
         </div>
