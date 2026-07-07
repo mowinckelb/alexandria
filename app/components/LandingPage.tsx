@@ -170,7 +170,7 @@ function HomeInstall() {
         join the tribe
       </Link>
       <span className="cta-sub install-cta-sub">
-        free, five minutes.
+        free, and yours forever.
       </span>
     </div>
   );
@@ -738,35 +738,23 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-close">
-                  A working first version is the hard part, so take the
-                  founder&rsquo;s &mdash; his whole system, open-sourced, free.
-                  Treat it like a good agents.md &mdash; grab it, and in five
-                  minutes it&rsquo;s yours to reshape into any answer you
-                  like.
-                </p>
-
-                <p className="statement-beat">
-                  <em>Not a system to download &mdash;{' '}
-                  <span className="no-orphan">a culture to join.</span></em>
-                </p>
-
-                <p className="statement-close statement-ways">
-                  <span className="way-num">1</span>{' '}
-                  <em className="way-label">the product</em>{' '}&mdash; the
-                  founder&rsquo;s system, but make it your own.
-                  <br />
-                  <span className="way-num">2</span>{' '}
-                  <em className="way-label">the company</em>{' '}&mdash; follow
-                  along as we build it.
+                  But that file is just the way in. What you&rsquo;re really
+                  joining is a culture, not a system to download &mdash; connect
+                  with the others who{' '}<em>choose to keep thinking</em>. Take
+                  the founder&rsquo;s whole system to start, open-sourced and
+                  free, yours in five minutes. Fill it in, and you&rsquo;re one
+                  of them.
                 </p>
 
                 <div className="cta-pair">
                   <HomeInstall />
                   <div className="cta-block">
-                    {/* Label echoes line 2 verbatim ("follow along as we
-                        build it") — the scanner reads the numbered line,
-                        sees the same words on the button, zero friction.
-                        "stay close" was lovelier but opaque. */}
+                    {/* The ghost CTA: "follow along" is the watch-the-company
+                        path (vs "join the tribe", the use-it path). It used to
+                        echo a numbered "2 the company - follow along" line;
+                        those numbered ways were cut 2026-07-07 as they
+                        duplicated the two buttons. "stay close" was lovelier
+                        but opaque. */}
                     <Link href="/follow" className="lr-cta lr-cta-ghost">
                       follow along
                     </Link>
@@ -775,11 +763,6 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     </span>
                   </div>
                 </div>
-
-                {/* The letter's true last line. */}
-                <p className="low-agency">
-                  <em>Low agency is the only friction left.</em>
-                </p>
 
                 {/* One faint line instead of the old 3-column directory
                     (tried and rejected as noise — truth/website.md). The
