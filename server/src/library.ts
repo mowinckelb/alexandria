@@ -848,8 +848,13 @@ export function registerLibraryRoutes(app: Hono): void {
     // public shadow. One public twin, right depth, no toggle (plm.md).
     const grantValid = !!p.accessor && await hasGrant(p.authorId, p.accessor.github_id);
     const isPaying = p.accessor?.subscription_status === 'active';
-    const deep = grantValid || isPaying;
-    const queryTier: TwinVisibility = deep ? 'invite' : 'public';
+    // LEAST PRIVILEGE (audit F4): the intimate invite/friends shadow loads ONLY for
+    // someone the author PERSONALLY invited (a live grant). A paying-but-uninvited
+    // querier gets the 'paid' shadow; everyone else the 'public' shadow. Depth is no
+    // longer a binary that collapsed every deep querier onto the most intimate tier —
+    // so "they pay" can never surface friends.md; that requires a real invite.
+    const queryTier: TwinVisibility = grantValid ? 'invite' : isPaying ? 'paid' : 'public';
+    const deep = grantValid || isPaying; // gates only the works tool (each work is separately visibility-gated)
 
     const system = cfg.system || `You are ${p.displayName}. Speak as yourself.`;
     // Living page: when the deep twin has the works tool on, hand it the Author's
