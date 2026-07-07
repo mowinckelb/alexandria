@@ -451,12 +451,21 @@ export function validateSidecarUrl(raw: string): string | null {
   let u: URL;
   try { u = new URL(raw); } catch { return 'sidecar url must be a valid URL'; }
   if (u.protocol !== 'https:') return 'sidecar url must be https';
-  const host = u.hostname.toLowerCase();
+  // Strip IPv6 brackets ([::1] → ::1) so literal v6 addresses are checked too.
+  const host = u.hostname.toLowerCase().replace(/^\[|\]$/g, '');
   const privateHost = host === 'localhost'
-    || host === '127.0.0.1' || host === '::1' || host.endsWith('.local')
+    || host === '127.0.0.1' || host === '::1' || host === '::' || host === '0.0.0.0'
+    || host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.localhost')
+    // IPv4 private / loopback / link-local / this-network
     || /^10\./.test(host) || /^192\.168\./.test(host)
     || /^172\.(1[6-9]|2\d|3[01])\./.test(host)
-    || /^169\.254\./.test(host) || /^0\./.test(host);
+    || /^127\./.test(host) || /^169\.254\./.test(host) || /^0\./.test(host)
+    // IPv6 loopback / unique-local (fc00::/7) / link-local (fe80::/10) /
+    // IPv4-mapped (::ffff:a.b.c.d — catch the mapped-loopback/private forms)
+    || /^f[cd][0-9a-f]{2}:/.test(host) || /^fe[89ab][0-9a-f]:/.test(host)
+    || /^::ffff:(0*a\.|0*7f\.|0*c0\.0*a8\.|0*a9\.0*fe\.)/.test(host)
+    || host.startsWith('::ffff:127.') || host.startsWith('::ffff:10.')
+    || host.startsWith('::ffff:192.168.') || host.startsWith('::ffff:169.254.');
   if (privateHost) return 'sidecar url must be a public host (not localhost/private)';
   return null;
 }

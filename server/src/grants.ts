@@ -48,22 +48,45 @@ export async function hasGrant(authorId: string, accountGithubId: string | numbe
   return !!row?.id;
 }
 
-/** Grant (or re-grant) an account. Idempotent; un-revokes a previously revoked
- *  grant. `codeId`/`label` record provenance (which code bound it, or a note). */
+export type GrantState = 'live' | 'revoked' | 'none';
+
+/** The grant status for an account on an author, three-valued so callers can
+ *  distinguish a `revoked` grant from `none`. This is what makes revocation
+ *  STRUCTURAL: an owner-revoked account returns `revoked`, and the invite
+ *  resolvers refuse to let a still-valid code resurrect it — code-reuse can no
+ *  longer undo a revoke (audit B2). Only an explicit owner re-grant clears it. */
+export async function grantState(authorId: string, accountGithubId: string | number | null): Promise<GrantState> {
+  if (accountGithubId == null) return 'none';
+  await ensureGrantSchema();
+  const row = await getDB().prepare(
+    `SELECT revoked_at FROM access_grants WHERE author_id = ? AND account_github_id = ? LIMIT 1`,
+  ).bind(authorId, String(accountGithubId)).first<{ revoked_at: string | null }>().catch(() => null);
+  if (!row) return 'none';
+  return row.revoked_at ? 'revoked' : 'live';
+}
+
+/** Grant an account access. Idempotent. Provenance via `codeId`/`label`.
+ *  `reactivate` decides what happens to a REVOKED grant on conflict:
+ *    • absent/false (code-binding path): DO NOTHING — a revoked grant stays
+ *      revoked, so re-entering a still-valid code can't resurrect it (audit B2).
+ *      A fresh (state=`none`) bind still inserts normally.
+ *    • true (owner path only): un-revoke — the owner is deliberately re-granting. */
 export async function grantAccess(
   authorId: string,
   accountGithubId: string | number,
-  opts?: { codeId?: string; label?: string },
+  opts?: { codeId?: string; label?: string; reactivate?: boolean },
 ): Promise<void> {
   await ensureGrantSchema();
   const now = new Date().toISOString();
+  const onConflict = opts?.reactivate
+    ? `DO UPDATE SET revoked_at = NULL,
+                     code_id = COALESCE(excluded.code_id, access_grants.code_id),
+                     label   = COALESCE(excluded.label, access_grants.label)`
+    : `DO NOTHING`;
   await getDB().prepare(
     `INSERT INTO access_grants (id, author_id, account_github_id, code_id, label, created_at, revoked_at)
      VALUES (?, ?, ?, ?, ?, ?, NULL)
-     ON CONFLICT(author_id, account_github_id)
-       DO UPDATE SET revoked_at = NULL,
-                     code_id = COALESCE(excluded.code_id, access_grants.code_id),
-                     label   = COALESCE(excluded.label, access_grants.label)`,
+     ON CONFLICT(author_id, account_github_id) ${onConflict}`,
   ).bind(generateId(), authorId, String(accountGithubId), opts?.codeId ?? null, opts?.label ?? null, now)
     .run().catch(() => {});
 }

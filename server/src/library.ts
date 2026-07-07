@@ -32,7 +32,7 @@ import {
 } from './file-access.js';
 import { getAuditHead, getAuthorAuditEntries } from './audit.js';
 import { generateToken, encrypt, decrypt } from './crypto.js';
-import { hasGrant, grantAccess, listGrants, revokeGrant } from './grants.js';
+import { hasGrant, grantState, grantAccess, listGrants, revokeGrant } from './grants.js';
 import {
   resolveTwinVariants,
   twinPublicSummary,
@@ -588,9 +588,14 @@ export function registerLibraryRoutes(app: Hono): void {
     let inviteValid = false;
     let inviteCodeId: string | null = null;
     // Account grant first (no code needed once bound); else a valid code, which
-    // binds to the account on use so it's never re-entered.
-    if (accessor && await hasGrant(authorId, accessor.github_id)) {
+    // binds to the account on use so it's never re-entered. A grant the owner
+    // REVOKED is a hard stop for THAT account — a still-valid code cannot
+    // resurrect it (audit B2). To cut everyone off, the owner revokes the code.
+    const gState = accessor ? await grantState(authorId, accessor.github_id) : 'none';
+    if (gState === 'live') {
       inviteValid = true;
+    } else if (gState === 'revoked') {
+      inviteValid = false;
     } else if (inviteCode) {
       const accessRow = await getDB().prepare(
         'SELECT id FROM access_codes WHERE author_id = ? AND code = ? AND revoked_at IS NULL LIMIT 1'
@@ -694,21 +699,50 @@ export function registerLibraryRoutes(app: Hono): void {
     }
   }
 
-  // Per-AUTHOR daily ceiling — the IP limiter above is defeated by IP rotation
-  // (a proxy pool → unbounded Anthropic/Tinker spend). This cap is IP-independent,
-  // so it bounds total cost-of-goods per author per day regardless of source.
-  // Returns true when the request should be BLOCKED. Fail closed on KV error.
-  async function checkTwinDailyCap(authorId: string, limit = 500): Promise<boolean> {
+  // Per-AUTHOR + GLOBAL daily ceilings — the IP limiter above is defeated by IP
+  // rotation (a proxy pool → unbounded Anthropic/Tinker spend). These caps are
+  // IP-independent, so they bound cost-of-goods per author AND across the whole
+  // platform per day regardless of source.
+  //
+  // CRITICAL (audit S1): the check is READ-ONLY and the count is only bumped
+  // AFTER a billable inference succeeds. If checking also incremented (the old
+  // behaviour), an attacker could exhaust an author's daily cap with requests
+  // that never pass the visibility gate and never cost a cent — a free DoS on
+  // the author's twin. Now only answered, billable queries consume the budget.
+  const TWIN_DAILY_CAP_PER_AUTHOR = 500;
+  const TWIN_DAILY_CAP_GLOBAL = 5000; // platform-wide cost backstop across all authors
+  const GLOBAL_CAP_KEY = 'rate:twin:daily:__global__';
+
+  // Read-only: is a daily ceiling already reached? Fail CLOSED (block) on KV
+  // error — a metered/cost surface must never open when its guard is blind.
+  async function twinDailyCapReached(authorId: string): Promise<boolean> {
     try {
       const kv = getKV();
-      const key = `rate:twin:daily:${authorId}`;
-      const raw = await kv.get(key);
-      const count = raw ? parseInt(raw, 10) : 0;
-      if (count >= limit) return true;
-      await kv.put(key, String(count + 1), { expirationTtl: 86400 });
+      const [authorRaw, globalRaw] = await Promise.all([
+        kv.get(`rate:twin:daily:${authorId}`),
+        kv.get(GLOBAL_CAP_KEY),
+      ]);
+      if ((authorRaw ? parseInt(authorRaw, 10) : 0) >= TWIN_DAILY_CAP_PER_AUTHOR) return true;
+      if ((globalRaw ? parseInt(globalRaw, 10) : 0) >= TWIN_DAILY_CAP_GLOBAL) return true;
       return false;
     } catch {
       return true; // FAIL CLOSED
+    }
+  }
+
+  // Increment both counters — called ONLY after a billable inference succeeds.
+  async function bumpTwinDaily(authorId: string): Promise<void> {
+    try {
+      const kv = getKV();
+      const authorKey = `rate:twin:daily:${authorId}`;
+      const [authorRaw, globalRaw] = await Promise.all([kv.get(authorKey), kv.get(GLOBAL_CAP_KEY)]);
+      await Promise.all([
+        kv.put(authorKey, String((authorRaw ? parseInt(authorRaw, 10) : 0) + 1), { expirationTtl: 86400 }),
+        kv.put(GLOBAL_CAP_KEY, String((globalRaw ? parseInt(globalRaw, 10) : 0) + 1), { expirationTtl: 86400 }),
+      ]);
+    } catch {
+      // A missed increment can only UNDER-count (never opens a bigger hole than
+      // one query); the fail-closed read guard is the real ceiling. Swallow.
     }
   }
 
@@ -730,10 +764,15 @@ export function registerLibraryRoutes(app: Hono): void {
   // (no account yet); once they log in, the code binds. This one resolver backs
   // both the twin and the file gate.
   async function resolveInviteAccess(authorId: string, accessor: Account | null, code: string): Promise<boolean> {
-    if (accessor && await hasGrant(authorId, accessor.github_id)) return true;
+    if (accessor) {
+      const state = await grantState(authorId, accessor.github_id);
+      if (state === 'live') return true;
+      // Owner revoked THIS account — a still-valid code cannot resurrect it (B2).
+      if (state === 'revoked') return false;
+    }
     const codeId = await lookupCode(authorId, code);
     if (!codeId) return false;
-    if (accessor) await grantAccess(authorId, accessor.github_id, { codeId });
+    if (accessor) await grantAccess(authorId, accessor.github_id, { codeId }); // first bind (state 'none')
     return true;
   }
 
@@ -799,11 +838,17 @@ export function registerLibraryRoutes(app: Hono): void {
       return { ok: false, status: decision.status, body: { ...decision.body, variant: cfg.variant } };
     }
 
-    // DEPTH is bound to the QUERIER, not the twin's config: a paid subscriber or
-    // an invited (comped) account gets the deep shadow; everyone else gets the
-    // free public shadow. So one public twin answers everyone, at the right depth
-    // — no toggling, no sign-in wall (plm.md § free/paid/invite twin).
-    const deep = p.inviteValid || subscriberValid;
+    // DEPTH is bound to the QUERIER and is STRUCTURAL, not membership-based
+    // (audit B1/S3). The deep shadow (invite/friends.md) is only served to
+    // someone who genuinely earned it: an ACCOUNT holding a live grant for THIS
+    // author, or an account that is actually PAYING ('active', not free/trial/
+    // beta). An anonymous caller — even one bearing a valid, shareable code —
+    // never reaches deep: `p.accessor` is null, so a leaked code is a thin-depth
+    // bearer at most, never a key to the deep substrate. Everyone else gets the
+    // public shadow. One public twin, right depth, no toggle (plm.md).
+    const grantValid = !!p.accessor && await hasGrant(p.authorId, p.accessor.github_id);
+    const isPaying = p.accessor?.subscription_status === 'active';
+    const deep = grantValid || isPaying;
     const queryTier: TwinVisibility = deep ? 'invite' : 'public';
 
     const system = cfg.system || `You are ${p.displayName}. Speak as yourself.`;
@@ -827,6 +872,10 @@ export function registerLibraryRoutes(app: Hono): void {
       logEvent('library_twin_ask', { author: p.authorId, surface: p.surface, variant: cfg.variant, status: String(result.status), reason: result.reason });
       return { ok: false, status: result.status, body: { error: result.error, reason: result.reason, variant: cfg.variant } };
     }
+
+    // Billable success — NOW consume the daily budget (audit S1/S2). Gate-failed
+    // and errored queries above never reach here, so they cost the author nothing.
+    await bumpTwinDaily(p.authorId);
 
     // Internal-credits ledger (plm.md § payment): each answered query is a debit
     // on the querier's tier allowance and a credit to the queried Author. The
@@ -873,7 +922,7 @@ export function registerLibraryRoutes(app: Hono): void {
     if (await checkTwinRateLimit(authorId, ip)) {
       return c.json({ error: 'Too many questions — give the twin a minute.' }, 429);
     }
-    if (await checkTwinDailyCap(authorId)) {
+    if (await twinDailyCapReached(authorId)) {
       return c.json({ error: 'This twin has answered its limit for today — try again tomorrow.' }, 429);
     }
 
@@ -940,8 +989,8 @@ export function registerLibraryRoutes(app: Hono): void {
     if (await checkTwinRateLimit(authorId, `key:${accessor.github_login}`, 30, 60)) {
       return c.json({ error: 'Rate limit exceeded — slow down.' }, 429);
     }
-    // Same per-author daily ceiling as the web route (shared cost surface).
-    if (await checkTwinDailyCap(authorId)) {
+    // Same per-author + global daily ceilings as the web route (shared cost surface).
+    if (await twinDailyCapReached(authorId)) {
       return c.json({ error: 'This twin has reached its daily limit — try again tomorrow.' }, 429);
     }
 
@@ -1592,7 +1641,9 @@ export function registerLibraryRoutes(app: Hono): void {
     if (!invitee?.github_id) return c.json({ error: `No Alexandria account for "${login}" — they need to sign in once first.` }, 404);
 
     const label = typeof body.label === 'string' && body.label.trim() ? body.label.trim().slice(0, 80) : login;
-    await grantAccess(authorId, invitee.github_id, { label });
+    // Owner path → reactivate: an explicit owner grant is the ONE way to clear a
+    // prior revoke (code-reuse can't — audit B2).
+    await grantAccess(authorId, invitee.github_id, { label, reactivate: true });
     logEvent('twin_grant_added', { author: authorId, invitee: login });
     return c.json({ ok: true, login, github_id: invitee.github_id, label });
   });
