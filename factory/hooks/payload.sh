@@ -35,7 +35,7 @@ if [ "$MODE" = "pull" ]; then
   pull_module="$2"
   pull_dir="$3"
   { [ -z "$pull_module" ] || [ -z "$pull_dir" ]; } && { echo "usage: payload.sh pull <module> <alex_dir>"; exit 1; }
-  ptmp=$(mktemp 2>/dev/null) || { echo "pull: mktemp failed"; exit 1; }
+  ptmp=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null) || { echo "pull: mktemp failed"; exit 1; }
   if curl -s --max-time 10 "$CANON_GITHUB/$pull_module.md" -o "$ptmp" 2>/dev/null && [ -s "$ptmp" ]; then
     pexp=$(awk -v p="factory/canon/$pull_module.md" '$2==p {print $1}' "$pull_dir/system/.canon_manifest" 2>/dev/null)
     if command -v shasum >/dev/null 2>&1; then
@@ -110,7 +110,7 @@ if [ "$MODE" = "session-start" ]; then
   [ -f "$ALEX_DIR/system/hooks/auto-update" ] || AUTO_UPDATE=false
   for module in foundation axioms methodology editor mercury publisher library filter bookshelf plm twin; do
     local_path="$ALEX_DIR/system/canon/$module.md"
-    fresh_tmp=$(mktemp 2>/dev/null)
+    fresh_tmp=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null)
     if [ "$AUTO_UPDATE" = true ] && [ -n "$fresh_tmp" ] && curl -s --max-time 5 "$CANON_GITHUB/$module.md" -o "$fresh_tmp" 2>/dev/null \
          && [ -s "$fresh_tmp" ] && [ "$(wc -c < "$fresh_tmp")" -gt 100 ]; then
       # Integrity gate — the fetched module must match the sha256 in the offline-signed
@@ -333,7 +333,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
       # local file is stored (printf '%s' "$var" strips trailing newlines,
       # which would false-positive every file that ends with one).
       local factory_tmp
-      factory_tmp=$(mktemp 2>/dev/null) || return
+      factory_tmp=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null) || return
       if ! curl -sf --max-time 3 "https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/$factory_path" -o "$factory_tmp" 2>/dev/null; then
         rm -f "$factory_tmp"
         return
@@ -358,8 +358,8 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
     # Codex case — block embedded between markers in a shared instructions.md.
     # Extract just the Alexandria section, compare to factory/skills/codex.md.
     if [ -f "$HOME/.codex/instructions.md" ] && grep -q "<!-- alexandria:start -->" "$HOME/.codex/instructions.md"; then
-      codex_local_tmp=$(mktemp 2>/dev/null)
-      codex_factory_tmp=$(mktemp 2>/dev/null)
+      codex_local_tmp=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null)
+      codex_factory_tmp=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null)
       if [ -n "$codex_local_tmp" ] && [ -n "$codex_factory_tmp" ]; then
         sed -n '/<!-- alexandria:start -->/,/<!-- alexandria:end -->/p' "$HOME/.codex/instructions.md" > "$codex_local_tmp"
         if curl -sf --max-time 3 "https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/skills/codex.md" -o "$codex_factory_tmp" 2>/dev/null; then
