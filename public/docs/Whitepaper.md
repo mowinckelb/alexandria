@@ -136,7 +136,7 @@ It can’t live inside one AI’s memory, because then it isn’t yours — you 
 
 The half that’s easy to miss is the writing. The AI doesn’t just *read* the file to know you better; it *writes* to it too — so your thinking develops on the page itself, in words you can see and correct, instead of inside a machine where you can’t reach it. The record and the developing are the same act.
 
-We call it your mind.md — *mind*, because that’s what’s in it; *.md* because it’s just a plain text file, the kind anything can open. One file to start. It grows into more as there’s more of you to hold, but it never stops being plain text you own.
+We call it your mind.md — mind, because that’s what’s in it; and .md because it’s just a plain text file, the kind anything can open. One file to start. It grows into more as there’s more of you to hold, but it never stops being plain text you own.
 
 And the fact that it’s *yours* isn’t a detail. It’s what makes a tool like this safe to use at all, and it runs three ways.
 
