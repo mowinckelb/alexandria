@@ -146,10 +146,10 @@ export default function AskThisMind({
   // This viewer must supply an invite to use the active variant.
   const inviteGated = !!activeSummary.needsInvite && !activeSummary.accessible;
   const askDisabled = loading || !question.trim() || (inviteGated && !invite.trim());
-  // Not signed in + invite-gated + NO code in hand → the way in is one click.
-  // If they arrived with a code link, let them ask right away (the code works
-  // anonymously and binds to their account if they later sign in).
-  const needsLogin = inviteGated && !signedIn && !invite.trim();
+  // Invite twins REQUIRE sign-in (the gate rejects anonymous even with a code).
+  // So an anonymous visitor always signs in first; a ?invite= code rides through
+  // the login (in `next`) and binds to their account on their first ask.
+  const needsLogin = inviteGated && !signedIn;
   const signInUrl = `/auth/github?intent=library&next=${typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : ''}`;
 
   if (needsLogin) {
@@ -160,14 +160,16 @@ export default function AskThisMind({
           <span style={{ color: 'var(--accent)', marginLeft: '0.5rem', letterSpacing: '0.02em' }}>twin</span>
         </p>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 1rem' }}>
-          {name}’s twin is open to people they’ve invited. sign in to continue — if you’re on the list, you’re in.
+          {invite.trim()
+            ? `you’ve got an invite to ${name}’s twin — sign in once and it’s yours for good.`
+            : `${name}’s twin is open to people they’ve invited. sign in to continue — if you’re on the list, you’re in.`}
         </p>
         <a
           href={signInUrl}
           style={{ display: 'inline-block', borderRadius: '11px', background: 'var(--accent)', color: 'var(--bg-primary)',
             fontFamily: 'inherit', fontSize: '0.95rem', padding: '0.6rem 1.25rem', textDecoration: 'none' }}
         >
-          sign in to ask
+          {invite.trim() ? 'sign in to use your invite' : 'sign in to ask'}
         </a>
       </div>
     );
