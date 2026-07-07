@@ -1038,7 +1038,7 @@ export function registerLibraryRoutes(app: Hono): void {
       ? await findByApiKey(accessorKey)
       : sessionToken ? await findByLibrarySessionToken(sessionToken) : null;
     if (!accessor) return c.json({ error: 'Authentication required' }, 401);
-    if (accessor.github_login !== authorId) return c.json({ error: 'Only the author can configure their twin' }, 403);
+    if (!(await isHandleOwner(accessor, authorId))) return c.json({ error: 'Only the author can configure their twin' }, 403);
 
     const body = await c.req.json().catch(() => ({})) as Record<string, unknown>;
 
@@ -1538,7 +1538,7 @@ export function registerLibraryRoutes(app: Hono): void {
       ? await findByApiKey(accessorKey)
       : sessionToken ? await findByLibrarySessionToken(sessionToken) : null;
     if (!accessor) return c.json({ error: 'Authentication required' }, 401);
-    if (accessor.github_login !== authorId) return c.json({ error: 'Access log is private' }, 403);
+    if (!(await isHandleOwner(accessor, authorId))) return c.json({ error: 'Access log is private' }, 403);
 
     const [entries, head] = await Promise.all([
       getAuthorAuditEntries(authorId, 200),
@@ -1570,6 +1570,19 @@ export function registerLibraryRoutes(app: Hono): void {
   // for that author_id AND revoked_at IS NULL. Revocation is soft — kept in
   // the row so the audit chain can resolve historic accessor='invite' entries.
 
+  // Ownership = the IMMUTABLE github_id that first claimed this library handle
+  // (the sticky login binding), never a github_login STRING match. A github_login
+  // equality check is defeated by handle recycling: an attacker who grabs a freed
+  // username signs in with accessor.github_login === authorId and passes. Resolve
+  // the sticky owner via getAccountByLogin (returns the id that owns the handle,
+  // regardless of who currently carries the name) and compare numeric ids.
+  async function isHandleOwner(accessor: Account | null, authorId: string): Promise<boolean> {
+    if (!accessor?.github_id) return false;
+    const owner = await getAccountByLogin(authorId);
+    const ownerId = owner?.account?.github_id;
+    return ownerId != null && String(ownerId) === String(accessor.github_id);
+  }
+
   async function resolveOwnerOnly(c: Context, authorId: string): Promise<Account | { error: Response }> {
     const accessorKey = extractApiKey(c);
     const sessionToken = extractLibrarySessionToken(c);
@@ -1577,7 +1590,7 @@ export function registerLibraryRoutes(app: Hono): void {
       ? await findByApiKey(accessorKey)
       : sessionToken ? await findByLibrarySessionToken(sessionToken) : null;
     if (!accessor) return { error: c.json({ error: 'Authentication required' }, 401) };
-    if (accessor.github_login !== authorId) return { error: c.json({ error: 'Only the file owner can manage access codes' }, 403) };
+    if (!(await isHandleOwner(accessor, authorId))) return { error: c.json({ error: 'Only the file owner can manage access codes' }, 403) };
     return accessor;
   }
 
@@ -1703,7 +1716,7 @@ export function registerLibraryRoutes(app: Hono): void {
     const accessorKey = extractApiKey(c);
     if (!accessorKey) return c.json({ error: 'Authentication required' }, 401);
     const accessor = await findByApiKey(accessorKey);
-    if (!accessor || accessor.github_login !== authorId) return c.json({ error: 'Stats are private' }, 403);
+    if (!accessor || !(await isHandleOwner(accessor, authorId))) return c.json({ error: 'Stats are private' }, 403);
 
     const db = getDB();
 

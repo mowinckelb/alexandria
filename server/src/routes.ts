@@ -7,7 +7,7 @@ import { countActiveKin, createCheckoutSession, createConnectOnboardingLink, cre
 import { authErrorHtml, callbackPageHtml } from './templates.js';
 import { getDB, getR2 } from './db.js';
 import { deleteAllProtocolR2 } from './file-access.js';
-import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex } from './kv.js';
+import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex, getLoginIndex } from './kv.js';
 import { hashApiKey, generateToken } from './crypto.js';
 import { ACTIVE_AUTHOR_STATUSES, Account, AccountStore, extractApiKey, extractLibrarySessionToken, findByApiKey, findByLibrarySessionToken, requireAuth } from './auth.js';
 import { assignAuthorNumber, generateApiKey, getAccounts, getAccountByLogin, requireAdmin, updateAccountBilling } from './accounts.js';
@@ -474,7 +474,15 @@ export function registerRoutes(app: Hono) {
 
       // Company Library profile. This mirrors GitHub account metadata for
       // discovery; protocol file content still arrives only through /file.
-      try {
+      // GUARD (handle-recycle): the authors row is keyed by login, so only write
+      // it for a login THIS github_id owns (the sticky binding just set by
+      // saveAccount). A recycled-handle account whose login is still bound to the
+      // original owner must not upsert — else it could bump/fill fields on the
+      // real owner's public profile row.
+      const loginOwnerKey = await getLoginIndex(user.login);
+      if (loginOwnerKey && loginOwnerKey !== key) {
+        logEvent('authors_upsert_skipped_recycled_login', { login: user.login });
+      } else try {
         const now = new Date().toISOString();
         const githubUrl = user.html_url || `https://github.com/${user.login}`;
         const website = user.blog || githubUrl;

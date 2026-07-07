@@ -51,11 +51,27 @@ export async function loadAccount(githubKey: string): Promise<Record<string, unk
 
 const LOGIN_INDEX_PREFIX = 'login:';
 
-/** Set login lookup index: github_login (lowercased) → github_id key. */
+/** Set login lookup index: github_login (lowercased) → github_id key.
+ *
+ * FIRST-CLAIM-WINS (sticky): once a login is bound to a github_id, it is NEVER
+ * silently rebound to a different one. GitHub usernames are recyclable — a user
+ * can rename or delete, freeing the handle for anyone to grab, while the numeric
+ * github_id is permanent. Without stickiness, an attacker who claims a freed
+ * handle would have this index repointed to THEIR account on sign-in, inheriting
+ * the original owner's library, access-code secrets, twin config, and earnings
+ * (account takeover). Sticky binding makes the login an immutable alias for the
+ * one github_id that first claimed it; it is released only when THAT account is
+ * deleted (see deleteAccount). A legit rename keeps the old binding AND adds a
+ * new one for the new handle — the owner's resources stay reachable at the
+ * original library handle. */
 export async function setLoginIndex(login: string, githubKey: string): Promise<void> {
   if (!login) return;
   const kv = getKV();
-  await kv.put(LOGIN_INDEX_PREFIX + login.toLowerCase(), githubKey);
+  const key = LOGIN_INDEX_PREFIX + login.toLowerCase();
+  const existing = await kv.get(key);
+  if (existing && existing !== githubKey) return; // claimed by another id → never rebind
+  if (existing === githubKey) return;             // already ours → no-op write avoided
+  await kv.put(key, githubKey);
 }
 
 /** Save a single account by github_id key. Maintains login index. */
@@ -121,7 +137,14 @@ export async function deleteAccount(githubKey: string, apiKeyHash: string): Prom
   const login = existing?.github_login as string | undefined;
   await kv.delete(`account:${githubKey}`);
   await kv.delete(`auth:${apiKeyHash}`);
-  if (login) await deleteLoginIndex(login);
+  // Release the login binding ONLY if it currently points at THIS account — the
+  // sticky index means `login:x` may belong to a different id (e.g. this is a
+  // recycled-handle account that never owned the binding); deleting it then
+  // would wrongly free the real owner's handle.
+  if (login) {
+    const idx = await getLoginIndex(login);
+    if (idx === githubKey) await deleteLoginIndex(login);
+  }
 }
 
 /** List all accounts (for admin/cron — iterates KV keys). Batches reads per page. */

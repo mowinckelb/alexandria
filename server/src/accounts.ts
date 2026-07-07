@@ -24,10 +24,13 @@ export async function getAccountByLogin(login: string): Promise<{ storeKey: stri
   const indexedKey = await getLoginIndex(lower);
   if (indexedKey) {
     const account = await loadAccount(indexedKey) as Account | null;
-    if (account && (account.github_login || '').toLowerCase() === lower) {
-      return { storeKey: indexedKey, account };
-    }
-    // Index points to a missing or renamed account — clean up.
+    // Trust the STICKY binding: return the bound owner even if their current
+    // github_login now differs (a legit rename) — the login is a permanent alias
+    // for the id that first claimed it. Do NOT delete+rescan on a login mismatch;
+    // that was the rebind vector — a recycled handle would rescan to the attacker's
+    // account and repoint the index to them (takeover). Only clean up when the
+    // bound account is genuinely gone.
+    if (account) return { storeKey: indexedKey, account };
     await deleteLoginIndex(lower);
   }
 
