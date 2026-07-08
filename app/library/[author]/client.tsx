@@ -6,12 +6,16 @@ import Link from 'next/link';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { FETCH_TIMEOUT_MS, SERVER_URL, librarySignInUrlHere } from '../../lib/config';
 import { safeUrl } from '../../lib/url';
-import { type TwinVariantSummary } from './AskThisMind';
+import { type TwinVariantSummary } from './types';
 
 interface ProtocolFile {
   name: string;
   text: string | null;
   title?: string | null;
+  // Always-public teaser line; used as the subtitle when set. Gated files
+  // (invite/authors) have their `text` blurb suppressed server-side, so this is
+  // the only subtitle source for them.
+  subtitle?: string | null;
   visibility: string;
   category?: string;
   updated_at: string;
@@ -215,7 +219,9 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
 
   // Entry row — title left, tier right, on one baseline, with a bottom hairline.
   const fileRow = (file: ProtocolFile) => {
-    const rawPreview = normalizePreviewText(file.text) || '';
+    // Explicit always-public teaser wins; else fall back to the first line of
+    // the (public-only) text blurb. Gated files rely entirely on the teaser.
+    const rawPreview = (file.subtitle && file.subtitle.trim()) || normalizePreviewText(file.text) || '';
     const firstLine = rawPreview.split('\n')[0].trim();
     const preview = firstLine.length > 110 ? `${firstLine.slice(0, 110).trimEnd()}…` : firstLine;
     const rowStyle: CSSProperties = {
@@ -329,31 +335,18 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
 
         <section>
           {data.twin?.enabled && (() => {
-            // The context engine serves everyone (public floor) and friends (deep,
-            // invited) — same model, two tiers. The weights model is "personal".
-            const ctxOn = (data.twin.variants || []).some((v) => v.variant === 'context' && v.enabled);
-            const wtsOn = (data.twin.variants || []).some((v) => v.variant === 'weights' && v.enabled);
+            // One mind, one line. The PLM page carries the quick/deep toggle (and
+            // the invite gate for deep) — the bio just opens it, kept clean.
+            const anyOn = (data.twin.variants || []).some((v) => v.enabled);
+            if (!anyOn) return null;
             const online = data.twin.online === true;
-            const rows: { key: string; label: string; variant: string; tier: string; online: boolean }[] = [
-              ...(ctxOn ? [
-                { key: 'everyone', label: 'everyone', variant: 'context', tier: 'public', online },
-                { key: 'friends', label: 'friends', variant: 'context', tier: 'invite', online },
-              ] : []),
-              ...(wtsOn ? [{ key: 'personal', label: 'personal', variant: 'weights', tier: 'invite', online: false }] : []),
-            ];
-            if (!rows.length) return null;
             return (
-              <div>
-                <p style={sectionLabelStyle}>minds</p>
-                {rows.map((r) => (
-                  <Link key={r.key} href={`/library/${encodeURIComponent(authorId)}/plm?variant=${r.variant}&tier=${r.tier}`} className="hover:opacity-60"
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1.25rem', width: '100%',
-                      padding: '0.72rem 0', borderBottom: '1px solid var(--border-light)', textDecoration: 'none', color: 'inherit' }}>
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.98rem' }}>{r.label}</span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{r.online ? 'online' : 'offline'} · {r.tier}</span>
-                  </Link>
-                ))}
-              </div>
+              <Link href={`/library/${encodeURIComponent(authorId)}/plm`} className="hover:opacity-60"
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1.25rem', width: '100%',
+                  padding: '0.72rem 0', borderBottom: '1px solid var(--border-light)', textDecoration: 'none', color: 'inherit' }}>
+                <span style={{ color: 'var(--text-primary)', fontSize: '0.98rem' }}>personal language model</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{online ? 'online' : 'offline'}</span>
+              </Link>
             );
           })()}
           {grouped.length === 0 ? (

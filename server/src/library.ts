@@ -115,6 +115,20 @@ async function getFileCategories(authorId: string): Promise<Record<string, strin
   return {};
 }
 
+// Owner-authored public teaser line per file — the browse-list subtitle. Kept
+// separate from the file's `text` blurb ON PURPOSE: `text` is suppressed for
+// authors/invite files (audit M1), so gated pieces would otherwise show a bare
+// title. This map is always public (like `category`) and opt-in per file, so an
+// Author surfaces a one-line teaser for a gated piece without exposing its
+// private preview blurb. Keyed by author slug, mirroring file_categories.
+async function getFileSubtitles(authorId: string): Promise<Record<string, string>> {
+  try {
+    const raw = await getKV().get(`file_subtitles:${authorId}`);
+    if (raw) return JSON.parse(raw) as Record<string, string>;
+  } catch { /* ignore */ }
+  return {};
+}
+
 // ---------------------------------------------------------------------------
 // CORS-safe R2 response
 // ---------------------------------------------------------------------------
@@ -454,6 +468,7 @@ export function registerLibraryRoutes(app: Hono): void {
     // out in neat categories like the demo. Stored in a dedicated KV map the
     // owner sets; untagged files fall to 'shadows'.
     const fileCats = await getFileCategories(authorId);
+    const fileSubs = await getFileSubtitles(authorId);
     return c.json({
       author: directoryAuthor(account!, legacyAuthor, fallbackIndex),
       twin: twinOut,
@@ -466,6 +481,10 @@ export function registerLibraryRoutes(app: Hono): void {
         // private → suppress the preview text. Names stay (discovery + the
         // open page enforces content access). (audit M1)
         text: (file.visibility === 'public' || file.visibility === 'paid') ? file.text : null,
+        // Always-public teaser (opt-in per file). Lets a gated piece show a
+        // one-line subtitle in the browse list without exposing its private
+        // `text` blurb. Empty for files the Author hasn't set one on.
+        subtitle: fileSubs[file.name] || null,
         visibility: file.visibility,
         category: fileCats[file.name] || 'shadows',
         updated_at: file.updated_at,
@@ -1772,6 +1791,26 @@ export function registerLibraryRoutes(app: Hono): void {
     await getKV().put(`file_categories:${authorId}`, JSON.stringify(clean));
     logEvent('file_categories_set', { author: authorId, count: String(Object.keys(clean).length) });
     return c.json({ ok: true, categories: clean });
+  });
+
+  // Owner sets the always-public teaser line per file (the browse-list subtitle).
+  // Mirrors file-categories. A one-line, unstructured teaser — no schema; the
+  // model/author decides the copy. Blank string clears it. Capped to keep it a
+  // teaser, not a body dump. Always public (see getFileSubtitles rationale).
+  app.put('/library/:author/file-subtitles', async (c) => {
+    const authorId = c.req.param('author');
+    const owner = await resolveOwnerOnly(c, authorId);
+    if ('error' in owner) return owner.error;
+    const body = await c.req.json<{ subtitles?: Record<string, unknown> }>().catch(() => ({} as { subtitles?: Record<string, unknown> }));
+    const clean: Record<string, string> = {};
+    for (const [name, value] of Object.entries(body.subtitles || {})) {
+      if (typeof value !== 'string') continue;
+      const line = value.replace(/\s+/g, ' ').trim().slice(0, 200);
+      if (line) clean[name] = line;
+    }
+    await getKV().put(`file_subtitles:${authorId}`, JSON.stringify(clean));
+    logEvent('file_subtitles_set', { author: authorId, count: String(Object.keys(clean).length) });
+    return c.json({ ok: true, subtitles: clean });
   });
 
   app.get('/library/:author/grants', async (c) => {
