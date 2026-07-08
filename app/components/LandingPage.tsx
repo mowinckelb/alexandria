@@ -562,9 +562,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             <span className="nav-subtitle nav-subtitle-back" aria-hidden>mentes aeternae</span>
           </div>
           <div className="nav-links">
-            {/* The two depth documents — the demo now lives on the front
-                slide itself (the film frame), so the header carries only
-                the reading: whitepaper (the argument) + letter (the soul). */}
+            {/* Two groups, hairline-divided: the places (library ·
+                marketplace — the collective, first-class) and the
+                reading (whitepaper + letter). Restores the original
+                four-link grouped nav; the shelf register is the quiet
+                italic, differentiated from the letter's underlined
+                hand. Hidden on mobile — the colophon footer line
+                carries the places there. */}
+            <span className="nav-shelf">
+              <a href="/library" className="nav-shelf-link">library</a>
+              <span className="nav-shelf-sep" aria-hidden>·</span>
+              <a href="/marketplace" className="nav-shelf-link">marketplace</a>
+            </span>
             <span className="nav-group">
               {/* Two reading documents, two registers: the whitepaper is
                   a LABEL (tracked uppercase, wax accent — a document
@@ -763,12 +772,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   </div>
                 </div>
 
-                {/* One faint line — the collective made visible. Was three
-                    links (library · marketplace · questions); the FAQ link
-                    was removed 2026-07-07. The static objection-handler is
-                    being replaced by the PLM — an "ask Alexandria" surface
-                    grounded in the public artifacts, the product answering
-                    for itself. See truth/website.md § the PLM replaces the FAQ. */}
+                {/* The places line — mobile-only colophon footer (ordered
+                    after the wordmark block). On desktop these links live
+                    in the nav shelf group; the orphan line under the CTAs
+                    was cut 2026-07-08 (it floated over the watermark and
+                    read as an afterthought). */}
                 <p className="quiet-links">
                   <Link href="/library">library</Link>
                   <span className="quiet-sep" aria-hidden>&middot;</span>
@@ -2361,9 +2369,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           letter-spacing: 0.01em;
           color: var(--theme-fg-muted);
         }
-        /* One faint link line — replaces the 3-column footer directory
-           (rejected as noise, truth/website.md § tried-and-rejected). */
+        /* One faint link line — mobile-only colophon footer. Desktop
+           carries library · marketplace in the nav shelf group instead
+           (2026-07-08); the mobile block below re-displays this. */
         .quiet-links {
+          display: none;
           margin: 18px 0 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 12.5px;
@@ -2796,7 +2806,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .nav-brand {
             font-size: 22px;
           }
-          /* Mobile shows the same single letter link inline as desktop. */
+          /* Mobile shows the reading group only; the places (library ·
+             marketplace) live in the colophon footer line instead —
+             four links + brand don't fit a phone header. */
+          .nav-shelf {
+            display: none;
+          }
           .nav-links {
             display: flex;
             font-size: 13px;
@@ -2908,6 +2923,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             margin-top: 96px;
           }
           .quiet-links {
+            display: block;
             order: 7;
             margin-top: 0;
           }
