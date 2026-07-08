@@ -1003,10 +1003,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           align-items: center;
           gap: clamp(20px, 2.2vw, 40px);
         }
-        /* Places (library · marketplace) — upright roman, the nav's third
-           register: roman = the places you go, wax label = the document
-           category, italic = the signed hand. Was italic, which read as
-           the letter's twin (founder flagged it, 2026-07-08). */
+        /* Places (library · marketplace) — small-caps, the engraved
+           register: building names carved over doors. Third voice in the
+           nav next to the wax label (whitepaper) and the signed hand
+           (letter). Was italic (the letter's twin), then plain roman
+           ("a little bit boring") — founder, 2026-07-08. */
         .nav-shelf {
           display: inline-flex;
           align-items: center;
@@ -1020,11 +1021,16 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .nav-links .nav-shelf-link {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: normal;
-          font-weight: 400;
-          font-size: 14.5px;
-          letter-spacing: 0.05em;
+          font-weight: 500;
+          font-size: 15px;
+          /* all-small-caps synthesizes on the Georgia fallback too, so the
+             swap to EB Garamond doesn't reflow from lowercase (the FOUC
+             that pushed the whitepaper label to plain uppercase). */
+          font-variant-caps: all-small-caps;
+          font-feature-settings: "smcp" 1, "kern" 1;
+          letter-spacing: 0.14em;
           text-decoration: none;
-          color: rgba(26, 19, 24, 0.5);
+          color: rgba(26, 19, 24, 0.55);
           transition: color 180ms ease;
         }
         .nav-links .nav-shelf-link:hover {
