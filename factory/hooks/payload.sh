@@ -520,6 +520,20 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
           return null;
         }
 
+        // Explicit display title: a one-line <name>.title sidecar. Absent → the
+        // server falls back to the prettified filename. (.title isn't a publishable
+        // extension, so it never becomes a file of its own.)
+        function deriveTitle(absPath) {
+          const sidecar = absPath.replace(/\.[^.]+$/, ".title");
+          try {
+            if (fs.existsSync(sidecar)) {
+              const t = fs.readFileSync(sidecar, "utf8").split("\n")[0].trim();
+              if (t) return t.slice(0, 200);
+            }
+          } catch {}
+          return null;
+        }
+
         async function putOne(name, meta) {
           const buf = fs.readFileSync(meta.abs);
           const isText = meta.contentType.startsWith("text/");
@@ -527,6 +541,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
             visibility: meta.tier,
             content_type: meta.contentType,
             text: deriveText(meta.abs, meta.contentType),
+            title: deriveTitle(meta.abs),
           };
           if (isText) body.content = buf.toString("utf8");
           else body.content_b64 = buf.toString("base64");
