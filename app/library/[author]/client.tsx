@@ -335,7 +335,9 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1.25rem', width: '100%',
                     padding: '0.72rem 0', borderBottom: '1px solid var(--border-light)', textDecoration: 'none', color: 'inherit' }}>
                   <span style={{ color: 'var(--text-primary)', fontSize: '0.98rem' }}>{v.variant === 'weights' ? 'trained model' : 'personal language model'}</span>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{v.visibility === 'public' ? 'public' : 'invite'}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+                    {(v.variant !== 'weights' && data.twin?.online) ? 'online' : 'offline'} · {v.visibility === 'public' ? 'public' : 'invite'}
+                  </span>
                 </Link>
               ))}
             </div>
