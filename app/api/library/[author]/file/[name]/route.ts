@@ -27,6 +27,27 @@ export async function GET(
     { headers },
   );
 
+  // ?format=text — return the piece as plain text for the PLM's focus. PDFs are
+  // extracted server-side (browser-independent, so it works in every browser).
+  if (req.nextUrl.searchParams.get('format') === 'text' && upstream.ok) {
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    let text = '';
+    if (buf.subarray(0, 5).toString('latin1').startsWith('%PDF')) {
+      try {
+        const { PDFParse } = await import('pdf-parse');
+        const parser = new PDFParse({ data: new Uint8Array(buf) });
+        const r = await parser.getText();
+        text = (r.text || '').trim();
+      } catch { text = ''; }
+    } else {
+      text = buf.toString('utf-8');
+    }
+    return new Response(text, {
+      status: 200,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' },
+    });
+  }
+
   return new Response(upstream.body, {
     status: upstream.status,
     headers: {

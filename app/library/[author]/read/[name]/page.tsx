@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ThemeToggle } from '../../../../components/ThemeToggle';
 import PromptBox from '../../../../components/PromptBox';
+import ActionButton from '../../../../components/ActionButton';
 import { librarySignInUrlHere } from '../../../../lib/config';
 
 /**
@@ -99,17 +100,8 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
             setStatus('ok');
             extractRef.current = (async () => {
               try {
-                const pdfjs = await import('pdfjs-dist');
-                pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
-                const pdf = await pdfjs.getDocument({ data: new Uint8Array(buf.slice(0)) }).promise;
-                let text = '';
-                const pages = Math.min(pdf.numPages, 40);
-                for (let p = 1; p <= pages && text.length < 120000; p++) {
-                  const page = await pdf.getPage(p);
-                  const tc = await page.getTextContent();
-                  text += tc.items.map((it) => (it as { str?: string }).str ?? '').join(' ') + '\n\n';
-                }
-                if (text.trim()) { pdfTextRef.current = text.trim(); if (live) setContent(text.trim()); }
+                const tr = await fetch(`/api/library/${encodeURIComponent(author)}/file/${encodeURIComponent(name)}?format=text`, { credentials: 'include' });
+                if (tr.ok) { const t = (await tr.text()).trim(); if (t) { pdfTextRef.current = t; if (live) setContent(t); } }
               } catch { /* title-scoped focus fallback */ }
             })();
             return;
@@ -247,7 +239,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
             <div style={{ flex: 'none', display: 'flex', alignItems: 'center', padding: '0.7rem 1rem 0.4rem' }}>
               <button type="button" onClick={() => setMidOpen(false)} aria-label="collapse chat" title="collapse" style={iconBtn} className="hover:opacity-60">{LinesIcon}</button>
               {(active?.messages.length ?? 0) > 0 && (
-                <button type="button" onClick={copyConvo} aria-label="copy conversation" title="copy conversation" style={{ ...iconBtn, marginLeft: 'auto' }} className="hover:opacity-60">{CopyIcon}</button>
+                <ActionButton icon={CopyIcon} onAction={copyConvo} title="copy conversation" style={{ ...iconBtn, marginLeft: 'auto' }} className="hover:opacity-60" />
               )}
             </div>
             <div ref={threadRef} style={{ flex: 1, overflow: 'auto', padding: '0.4rem 1.4rem 1.4rem' }}>
@@ -258,7 +250,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
                     : (
                       <div style={{ borderLeft: '2px solid var(--accent)', paddingLeft: '0.9rem' }}>
                         <div style={{ color: 'var(--text-secondary)', fontSize: '0.98rem', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>{m.text}</div>
-                        <button type="button" onClick={() => copyText(m.text)} aria-label="copy response" title="copy" style={{ ...iconBtn, marginTop: '0.4rem', padding: 0 }} className="hover:opacity-60">{CopyIcon}</button>
+                        <ActionButton icon={CopyIcon} onAction={() => copyText(m.text)} title="copy" style={{ ...iconBtn, marginTop: '0.4rem', padding: 0 }} className="hover:opacity-60" />
                       </div>
                     )}
                 </div>
@@ -277,8 +269,8 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
               <span style={{ ...label, marginRight: 'auto' }}>{nice}</span>
               {status === 'ok' && (
                 <>
-                  <button type="button" onClick={copyArtifact} aria-label="copy text" title="copy text" style={iconBtn} className="hover:opacity-60">{CopyIcon}</button>
-                  <button type="button" onClick={downloadArtifact} aria-label="download" title="download" style={iconBtn} className="hover:opacity-60">{DownloadIcon}</button>
+                  <ActionButton icon={CopyIcon} onAction={copyArtifact} title="copy text" style={iconBtn} className="hover:opacity-60" />
+                  <ActionButton icon={DownloadIcon} onAction={downloadArtifact} title="download" style={iconBtn} className="hover:opacity-60" />
                 </>
               )}
               <button type="button" onClick={() => setRightOpen(false)} aria-label="collapse the piece" title="collapse" style={iconBtn} className="hover:opacity-60">{PaneRightIcon}</button>

@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import PromptBox from '../../../components/PromptBox';
+import ActionButton from '../../../components/ActionButton';
 
 /**
  * The mind — a chat with an Author's personal language model. Three panes, each
@@ -120,17 +121,8 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
         setOpen({ name: fileName, nice, content: '', pdfUrl: url, loading: false });
         openExtractRef.current = (async () => {
           try {
-            const pdfjs = await import('pdfjs-dist');
-            pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
-            const pdf = await pdfjs.getDocument({ data: new Uint8Array(buf.slice(0)) }).promise;
-            let text = '';
-            const pages = Math.min(pdf.numPages, 40);
-            for (let p = 1; p <= pages && text.length < 120000; p++) {
-              const page = await pdf.getPage(p);
-              const tc = await page.getTextContent();
-              text += tc.items.map((it) => (it as { str?: string }).str ?? '').join(' ') + '\n\n';
-            }
-            if (text.trim()) { openTextRef.current = text.trim(); setOpen((o) => (o && o.name === fileName ? { ...o, content: text.trim() } : o)); }
+            const tr = await fetch(`/api/library/${encodeURIComponent(author)}/file/${encodeURIComponent(fileName)}?format=text`, { credentials: 'include' });
+            if (tr.ok) { const t = (await tr.text()).trim(); if (t) { openTextRef.current = t; setOpen((o) => (o && o.name === fileName ? { ...o, content: t } : o)); } }
           } catch { /* title-scoped focus fallback */ }
         })();
       } else {
@@ -262,7 +254,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                 </div>
               )}
               {(active?.messages.length ?? 0) > 0 && (
-                <button type="button" onClick={copyConvo} aria-label="copy conversation" title="copy conversation" style={{ ...iconBtn, marginLeft: usable.length > 1 ? '0.4rem' : 'auto' }} className="hover:opacity-60">{CopyIcon}</button>
+                <ActionButton icon={CopyIcon} onAction={copyConvo} title="copy conversation" style={{ ...iconBtn, marginLeft: usable.length > 1 ? '0.4rem' : 'auto' }} className="hover:opacity-60" />
               )}
             </div>
             <div ref={threadRef} style={{ flex: 1, overflow: 'auto', padding: '0.4rem 1.4rem 1.4rem' }}>
@@ -273,7 +265,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                     : (
                       <div style={{ borderLeft: '2px solid var(--accent)', paddingLeft: '0.9rem' }}>
                         <div style={{ color: 'var(--text-secondary)', fontSize: '0.98rem', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>{m.text}</div>
-                        <button type="button" onClick={() => copyText(m.text)} aria-label="copy response" title="copy" style={{ ...iconBtn, marginTop: '0.4rem', marginRight: '0.5rem', padding: 0 }} className="hover:opacity-60">{CopyIcon}</button>
+                        <ActionButton icon={CopyIcon} onAction={() => copyText(m.text)} title="copy" style={{ ...iconBtn, marginTop: '0.4rem', marginRight: '0.5rem', padding: 0 }} className="hover:opacity-60" />
                         {referenced(m.text).map((f) => (
                           <button key={f.name} type="button" onClick={() => void openPiece(f.name)} className="hover:opacity-70"
                             style={{ display: 'inline-flex', alignItems: 'center', marginTop: '0.6rem', marginRight: '0.4rem', border: '1px solid var(--border-light)',
@@ -300,8 +292,8 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
               <span style={{ ...(open ? { color: 'var(--text-primary)', fontSize: '0.98rem' } : label) }}>{open ? open.nice : `${who}’s pieces`}</span>
               {open && (
                 <>
-                  <button type="button" onClick={copyPiece} aria-label="copy text" title="copy text" style={{ ...iconBtn, marginLeft: 'auto' }} className="hover:opacity-60">{CopyIcon}</button>
-                  <button type="button" onClick={downloadPiece} aria-label="download" title="download" style={iconBtn} className="hover:opacity-60">{DownloadIcon}</button>
+                  <ActionButton icon={CopyIcon} onAction={copyPiece} title="copy text" style={{ ...iconBtn, marginLeft: 'auto' }} className="hover:opacity-60" />
+                  <ActionButton icon={DownloadIcon} onAction={downloadPiece} title="download" style={iconBtn} className="hover:opacity-60" />
                 </>
               )}
               <button type="button" onClick={() => setRightOpen(false)} aria-label="collapse the piece pane" title="collapse" style={{ ...iconBtn, ...(open ? {} : { marginLeft: 'auto' }) }} className="hover:opacity-60">{PaneRightIcon}</button>
