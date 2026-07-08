@@ -1,22 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent, ReactNode } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ThemeToggle } from '../../../../components/ThemeToggle';
+import PromptBox from '../../../../components/PromptBox';
 import { librarySignInUrlHere } from '../../../../lib/config';
 
 /**
- * The reader workspace — a slim icon activity bar on the far left (the VS Code /
- * Claude-app pattern), with the panels it toggles stacked next to it:
- *   history · ask · notes  →  then the artifact (the star), dominant on the right.
- *
- * Every piece opens with only the artifact + the rail. Each icon opens/closes
- * its panel independently (active icon carries an accent bar). Notes lives on
- * the left with the others, not off on the right. Chats are in-memory only;
- * close the tab and they're gone.
+ * The reader workspace — the artifact is the star. A single pane toggle opens
+ * the two side panels together (history + chat); collapsed, they sit as thin
+ * slivers on the left so you can see there's something to expand. No notes,
+ * no titles on the panels. Chats are in-memory only; close the tab, they're gone.
  */
 
 const SMALL_WORDS = new Set(['of', 'the', 'a', 'an', 'and', 'or', 'for', 'to', 'in', 'on', 'at', 'by', 'with']);
@@ -38,13 +34,6 @@ function convoTitle(c: Convo): string {
   return first.length > 34 ? `${first.slice(0, 34)}…` : first;
 }
 
-// Generic line icons for the activity bar.
-const ICON: Record<'history' | 'ask' | 'notes', ReactNode> = {
-  history: <><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3 1.8" /></>,
-  ask: <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />,
-  notes: <><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></>,
-};
-
 export default function ReaderPage({ params }: { params: Promise<{ author: string; name: string }> }) {
   const [author, setAuthor] = useState('');
   const [name, setName] = useState('');
@@ -58,10 +47,8 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
   const [status, setStatus] = useState<'loading' | 'ok' | 'signin' | 'pay' | 'error'>('loading');
   const [checkoutUrl, setCheckoutUrl] = useState('');
 
-  // panels — each toggled from its activity-bar icon; all closed on landing
-  const [logOpen, setLogOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(false);
+  // One toggle opens both side panels (history + chat); collapsed → slivers.
+  const [panesOpen, setPanesOpen] = useState(false);
   const [tab, setTab] = useState<'piece' | 'ask'>('piece'); // mobile
 
   // conversations — in-memory only, this session
@@ -72,12 +59,6 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
   const [question, setQuestion] = useState('');
   const [asking, setAsking] = useState(false);
   const threadRef = useRef<HTMLDivElement>(null);
-
-  // notes (per piece, local)
-  const notesKey = author && name ? `alx:notes:${author}:${name}` : '';
-  const [notes, setNotes] = useState('');
-  useEffect(() => { if (notesKey) { try { setNotes(localStorage.getItem(notesKey) || ''); } catch { /* */ } } }, [notesKey]);
-  const saveNotes = (v: string) => { setNotes(v); try { if (notesKey) localStorage.setItem(notesKey, v); } catch { /* */ } };
 
   const nice = useMemo(() => displayName(name), [name]);
   const who = authorName || author;
@@ -109,10 +90,27 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
           const blob = await fileRes.blob();
           const head = await blob.slice(0, 5).text();
           if (head.startsWith('%PDF')) {
-            setPdfUrl(URL.createObjectURL(new Blob([blob], { type: 'application/pdf' })));
-          } else {
-            setContent(await blob.text());
+            const buf = await blob.arrayBuffer();
+            setPdfUrl(URL.createObjectURL(new Blob([buf], { type: 'application/pdf' })));
+            setStatus('ok');
+            // Extract the PDF's text so the PLM receives the actual document, not
+            // just its title. Same-origin worker (public/) — no CDN, no CSP issue.
+            try {
+              const pdfjs = await import('pdfjs-dist');
+              pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+              const pdf = await pdfjs.getDocument({ data: new Uint8Array(buf.slice(0)) }).promise;
+              let text = '';
+              const pages = Math.min(pdf.numPages, 40);
+              for (let p = 1; p <= pages && text.length < 120000; p++) {
+                const page = await pdf.getPage(p);
+                const tc = await page.getTextContent();
+                text += tc.items.map((it) => (it as { str?: string }).str ?? '').join(' ') + '\n\n';
+              }
+              if (live && text.trim()) setContent(text.trim());
+            } catch { /* leave content empty → focus falls back to a title-scoped note */ }
+            return;
           }
+          setContent(await blob.text());
           setStatus('ok');
         } else if (fileRes.status === 401) {
           setStatus('signin');
@@ -137,21 +135,20 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
     setConvos((cs) => [{ id, messages: [] }, ...cs]);
     setActiveId(id);
     setQuestion('');
-    setChatOpen(true);
+    setPanesOpen(true);
   };
   const openChat = (id: string) => {
     setActiveId(id);
-    setChatOpen(true);
     if (typeof window !== 'undefined' && window.innerWidth <= 900) setTab('ask');
   };
 
-  const ask = async (q?: string) => {
-    const text = (q ?? question).trim();
+  const ask = async () => {
+    const text = question.trim();
     if (!text || asking) return;
     const targetId = activeId;
     setAsking(true);
     setQuestion('');
-    setChatOpen(true);
+    setPanesOpen(true);
     setConvos((cs) => cs.map((c) => (c.id === targetId ? { ...c, messages: [...c.messages, { role: 'you', text }] } : c)));
     if (typeof window !== 'undefined' && window.innerWidth <= 900) setTab('ask');
     try {
@@ -164,11 +161,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          question: text,
-          variant: 'context',
-          focus: { name: nice, content: focusText },
-        }),
+        body: JSON.stringify({ question: text, variant: 'context', focus: { name: nice, content: focusText } }),
       });
       const b = await res.json().catch(() => ({}));
       const answer = (res.ok && b.answer) ? b.answer : (b.error || 'the PLM could not answer just now.');
@@ -180,28 +173,25 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
     }
   };
 
-  // Enter sends; Shift+Enter is a newline (standard chat behaviour).
-  const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void ask(); }
-  };
-
   const label = { color: 'var(--text-ghost)', fontSize: '0.72rem', letterSpacing: '0.08em' } as const;
-
-  const actIcon = (kind: 'history' | 'ask' | 'notes', open: boolean, toggle: () => void) => (
-    <button type="button" className={`actbar-icon${open ? ' active' : ''}`} onClick={toggle} aria-label={kind} aria-pressed={open} title={kind}>
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICON[kind]}</svg>
-    </button>
-  );
 
   return (
     <>
       <ThemeToggle />
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-eb-garamond)', background: 'var(--bg-primary)' }}>
-        {/* top bar — identity + navigation only */}
-        <header style={{ flex: 'none', display: 'flex', alignItems: 'baseline', gap: '1rem', padding: '1rem 3.6rem 1rem 1.4rem', borderBottom: '1px solid var(--border-light)' }}>
-          <Link href={`/library/${encodeURIComponent(author)}`} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }} className="hover:opacity-60">← library</Link>
+        {/* top bar */}
+        <header style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: '0.9rem', padding: '0.85rem 3.6rem 0.85rem 1.2rem', borderBottom: '1px solid var(--border-light)' }}>
+          <Link href={`/library/${encodeURIComponent(author)}`} aria-label="back to the library" title="library"
+            style={{ color: 'var(--text-muted)', display: 'flex', textDecoration: 'none' }} className="hover:opacity-60">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+          </Link>
           <span style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{nice}</span>
           <span style={{ ...label }}>{visibility}</span>
+          <button type="button" className="panes-toggle" onClick={() => setPanesOpen((v) => !v)} aria-label="toggle panels" aria-pressed={panesOpen} title="panels"
+            style={{ marginLeft: 'auto', display: 'flex', border: 'none', background: 'none', cursor: 'pointer', padding: '0.2rem',
+              color: panesOpen ? 'var(--text-primary)' : 'var(--text-ghost)', transition: 'color 0.15s' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="9" y1="4" x2="9" y2="20" /></svg>
+          </button>
         </header>
 
         {/* mobile tabs */}
@@ -216,22 +206,16 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
           ))}
         </div>
 
-        <main style={{ flex: 1, display: 'flex', minHeight: 0 }}
-          data-tab={tab} data-log={logOpen ? 'open' : 'closed'} data-chat={chatOpen ? 'open' : 'closed'} data-notes={notesOpen ? 'open' : 'closed'}>
+        <main style={{ flex: 1, display: 'flex', minHeight: 0 }} data-tab={tab} data-panes={panesOpen ? 'open' : 'closed'}>
+          {/* collapsed slivers — thin, clickable, so you can see the panels are there */}
+          <button type="button" className="reader-sliver sliver-history" onClick={() => setPanesOpen(true)} aria-label="expand panels" title="expand" />
+          <button type="button" className="reader-sliver sliver-chat" onClick={() => setPanesOpen(true)} aria-label="expand panels" title="expand" />
 
-          {/* activity bar — icons only, always present */}
-          <nav className="reader-actbar">
-            {actIcon('history', logOpen, () => setLogOpen((v) => !v))}
-            {actIcon('ask', chatOpen, () => setChatOpen((v) => !v))}
-            {actIcon('notes', notesOpen, () => setNotesOpen((v) => !v))}
-          </nav>
-
-          {/* history panel */}
+          {/* history (left) — no title, just the conversations + new */}
           <aside className="reader-log" style={{ flex: 'none', width: '240px', flexDirection: 'column', borderRight: '1px solid var(--border-light)', minHeight: 0 }}>
-            <div style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '1rem 1rem 0.7rem' }}>
-              <span style={{ ...label }}>history</span>
+            <div style={{ flex: 'none', display: 'flex', justifyContent: 'flex-end', padding: '0.85rem 0.9rem 0.5rem' }}>
               <button type="button" onClick={newChat} aria-label="new conversation" title="new conversation"
-                style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1.15rem', lineHeight: 1, padding: 0 }} className="hover:opacity-60">＋</button>
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1.2rem', lineHeight: 1, padding: 0 }} className="hover:opacity-60">＋</button>
             </div>
             <div style={{ flex: 1, overflow: 'auto', padding: '0.2rem 0.6rem 1rem' }}>
               {convos.map((c) => (
@@ -246,12 +230,9 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
             </div>
           </aside>
 
-          {/* the live conversation */}
+          {/* the chat (middle) — no title, just the thread + composer */}
           <section className="reader-chat" style={{ flex: 'none', width: '34%', minWidth: '340px', flexDirection: 'column', borderRight: '1px solid var(--border-light)', minHeight: 0 }}>
-            <div style={{ flex: 'none', padding: '1rem 1.2rem 0.6rem' }}>
-              <span style={{ ...label }}>ask</span>
-            </div>
-            <div ref={threadRef} style={{ flex: 1, overflow: 'auto', padding: '0.4rem 1.4rem 1.4rem' }}>
+            <div ref={threadRef} style={{ flex: 1, overflow: 'auto', padding: '1.4rem' }}>
               {active && active.messages.length === 0 && (
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6 }}>
                   ask {who}’s PLM about this piece.
@@ -267,25 +248,10 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
               ))}
               {asking && <p style={{ color: 'var(--text-ghost)', fontSize: '0.85rem' }}>thinking…</p>}
             </div>
-            <div style={{ flex: 'none', display: 'flex', gap: '0.5rem', alignItems: 'flex-end', padding: '0.9rem 1.2rem', borderTop: '1px solid var(--border-light)' }}>
-              <textarea value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={onKey} rows={2} placeholder="ask about this piece…"
-                style={{ flex: 1, resize: 'none', border: '1px solid var(--border-light)', borderRadius: '12px', background: 'var(--bg-secondary)', outline: 'none',
-                  fontFamily: 'var(--font-eb-garamond)', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--text-primary)', padding: '0.6rem 0.85rem' }} />
-              <button type="button" onClick={() => void ask()} disabled={asking || !question.trim()}
-                style={{ border: 'none', borderRadius: '10px', background: 'var(--accent)', color: 'var(--bg-primary)', fontFamily: 'inherit', fontSize: '0.9rem',
-                  padding: '0.65rem 1.1rem', cursor: asking || !question.trim() ? 'default' : 'pointer', opacity: asking || !question.trim() ? 0.5 : 1 }}>ask</button>
+            <div style={{ flex: 'none', padding: '0.9rem 1.2rem', borderTop: '1px solid var(--border-light)' }}>
+              <PromptBox value={question} onChange={setQuestion} onSubmit={() => void ask()} loading={asking} placeholder="ask about this piece…" />
             </div>
           </section>
-
-          {/* notes — a left panel now, not off on the right */}
-          <aside className="reader-notes" style={{ flex: 'none', width: '280px', flexDirection: 'column', borderRight: '1px solid var(--border-light)', minHeight: 0 }}>
-            <div style={{ flex: 'none', padding: '1rem 1.2rem 0.6rem' }}>
-              <span style={{ ...label }}>notes</span>
-            </div>
-            <textarea value={notes} onChange={(e) => saveNotes(e.target.value)} placeholder="your notes on this piece…"
-              style={{ flex: 1, resize: 'none', border: 'none', background: 'transparent', outline: 'none', padding: '0.4rem 1.2rem 1.2rem',
-                fontFamily: 'var(--font-eb-garamond)', fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--text-secondary)' }} />
-          </aside>
 
           {/* the piece (dominant) */}
           <article className="reader-piece" style={{ flex: 1, overflow: pdfUrl ? 'hidden' : 'auto', padding: pdfUrl ? 0 : '2.6rem clamp(1.4rem, 5vw, 4rem)', minWidth: 0 }}>
@@ -324,29 +290,25 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
         .reader-prose hr { border: none; border-top: 1px solid var(--border-light); margin: 2.2rem 0; }
         .reader-prose code { background: var(--bg-secondary); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.9em; }
 
-        /* activity bar — the icon rail */
-        .reader-actbar { flex: none; width: 48px; display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
-          padding: 0.55rem 0; border-right: 1px solid var(--border-light); }
-        .actbar-icon { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-          border: none; background: none; cursor: pointer; color: var(--text-ghost); border-radius: 9px;
-          transition: color 0.15s, background 0.15s; }
-        .actbar-icon:hover { color: var(--text-secondary); background: var(--bg-secondary); }
-        .actbar-icon.active { color: var(--text-primary); }
-        .actbar-icon.active::before { content: ''; position: absolute; left: -4px; top: 9px; bottom: 9px; width: 2px; border-radius: 2px; background: var(--accent); }
+        /* collapsed slivers — thin visible strips hinting the panels */
+        .reader-sliver { flex: none; width: 12px; border: none; border-right: 1px solid var(--border-light);
+          background: var(--bg-secondary); cursor: pointer; padding: 0; transition: background 0.15s; }
+        .reader-sliver:hover { background: var(--border-light); }
 
-        /* desktop — panels shown by their own state; artifact always leads */
+        /* desktop — one toggle opens both panels; collapsed → slivers */
         @media (min-width: 901px) {
           .reader-tabs { display: none !important; }
-          .reader-log, .reader-chat, .reader-notes { display: none; }
-          main[data-log="open"] .reader-log { display: flex; }
-          main[data-chat="open"] .reader-chat { display: flex; }
-          main[data-notes="open"] .reader-notes { display: flex; }
+          .reader-sliver { display: none; }
+          .reader-log, .reader-chat { display: none; }
+          main[data-panes="closed"] .reader-sliver { display: block; }
+          main[data-panes="open"] .reader-log { display: flex; }
+          main[data-panes="open"] .reader-chat { display: flex; }
         }
 
-        /* mobile — read / ask tabs; the rail + side panels fold away */
+        /* mobile — read / ask tabs; rail + panels fold away */
         @media (max-width: 900px) {
+          .panes-toggle, .reader-sliver, .reader-log { display: none !important; }
           .reader-tabs { display: flex !important; }
-          .reader-actbar, .reader-log, .reader-notes { display: none !important; }
           .reader-chat, .reader-piece { display: none !important; width: 100% !important; flex: 1 !important; }
           main[data-tab="piece"] .reader-piece { display: block !important; }
           main[data-tab="ask"] .reader-chat { display: flex !important; }
