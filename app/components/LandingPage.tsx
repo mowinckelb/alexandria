@@ -721,34 +721,23 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     a paragraph: the post-install block makes the join ask
                     at peak conviction, so the page doesn't pre-explain. */}
                 <p className="statement-epigraph">
-                  This is humanity&rsquo;s greatest challenge
-                  &mdash; and perhaps our last. Soon, AI will do
-                  most of the thinking. Most minds will atrophy
-                  quietly; a few will compound through every model
-                  that comes.
+                  Soon, AI will do most of the thinking. Most minds
+                  will atrophy quietly; a few will compound through
+                  every model that comes. Alexandria is for those few.
                 </p>
 
                 <p className="statement-close">
-                  Alexandria is for those few. AI can&rsquo;t read your mind,
-                  but it can read words &mdash; put your thoughts into words,
-                  and it can think{' '}<em>with</em>{' '}you, not for you.
-                  Adding an <em>&ldquo;alexandria.md&rdquo;</em>{' '}to your AI
-                  makes that automatic &mdash; a thought partner, channelling
-                  its intelligence to improve yours, not replace it.
+                  AI can&rsquo;t read your mind, but it can read words. Put
+                  your thoughts into words, and it can think{' '}<em>with</em>
+                  {' '}you, not for you &mdash; an{' '}
+                  <em>&ldquo;alexandria.md&rdquo;</em>{' '}makes that automatic.
                 </p>
 
                 <p className="statement-close">
-                  And trying it costs you nothing &mdash; one file, the same
-                  idea as an agents.md, dropped into the AI you already use. It
-                  only adds; it changes nothing else. Don&rsquo;t like it?
-                  Delete it, and it&rsquo;s like it never happened.
-                </p>
-
-                <p className="statement-close">
-                  You don&rsquo;t have to buy the whole vision &mdash; just the
-                  smallest piece of it: that augmenting how you think could be
-                  worth something. If so, it&rsquo;s worth five minutes to find
-                  out.
+                  You don&rsquo;t have to buy the vision, only the smallest
+                  piece of it: that augmenting how you think could be worth
+                  something. That costs five minutes and nothing else. Delete
+                  the file, and it&rsquo;s like it never happened.
                 </p>
 
                 <p className="statement-beat">
@@ -758,14 +747,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 <div className="cta-pair">
                   <HomeInstall />
                   <div className="cta-block">
-                    {/* The ghost CTA: "follow along" is the watch-the-company
-                        path (vs "join the tribe", the use-it path). It used to
-                        echo a numbered "2 the company — follow along" line;
-                        those numbered ways were cut 2026-07-07 as they
-                        duplicated the two buttons. "stay close" was lovelier
-                        but opaque. */}
+                    {/* The ghost CTA: "stay close" is the watch-the-company
+                        path (vs "join the tribe", the use-it path). It was
+                        "follow along" 2026-07-01→07-08, echoing a numbered
+                        "2 the company — follow along" line; those numbered
+                        ways were cut 2026-07-07, so the original returned —
+                        the sub-line below carries the clarity it lacks
+                        alone (founder, 2026-07-08). */}
                     <Link href="/follow" className="lr-cta lr-cta-ghost">
-                      follow along
+                      stay close
                     </Link>
                     <span className="cta-sub">
                       friends, family, the curious
