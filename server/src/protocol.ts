@@ -191,6 +191,26 @@ export function registerProtocol(app: Hono) {
       content_type: contentType,
     });
 
+    // Auto-carry the file's teaser blurb into the always-public subtitle map,
+    // so a gated (invite/authors) file — whose `text` blurb the audit-M1 gate
+    // suppresses in the browse list — still shows a one-line subtitle without
+    // exposing the rest of the blurb. First line only (not the whole blurb) so
+    // the measured-teaser posture holds. Sync only when the blurb itself
+    // changed (not on every body edit / reconciliation re-PUT), so a manual
+    // override via PUT /file-subtitles survives unrelated content edits.
+    // Non-fatal: the browse list falls back to the text first-line for public
+    // files, so a KV hiccup never blocks a publish.
+    if (text !== null && text !== (existing?.text ?? null) && auth.account.github_login) {
+      const teaser = text.split('\n')[0].trim().slice(0, 200);
+      const subKey = `file_subtitles:${auth.account.github_login}`;
+      try {
+        const raw = await getKV().get(subKey);
+        const map = raw ? JSON.parse(raw) as Record<string, string> : {};
+        if (teaser) map[name] = teaser; else delete map[name];
+        await getKV().put(subKey, JSON.stringify(map));
+      } catch { /* non-fatal — see note above */ }
+    }
+
     return c.json({ ok: true, ...(payoutsRequired ? { payouts_required: true } : {}) });
   });
 
