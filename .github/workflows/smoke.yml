@@ -145,24 +145,50 @@ jobs:
           # Source of truth = git. Add or remove a factory file and smoke
           # covers it automatically — no hand list to drift. Caught a real
           # gap on first run: hand list had 14 files, the tree has 30.
+          #
+          # raw.githubusercontent.com rate-limits (HTTP 429) when we fetch all
+          # ~30 files in a tight loop — worse when Smoke runs back-to-back
+          # (schedule + workflow_run + a manual dispatch can overlap). A 429 or
+          # a transient 5xx is not a real regression, so retry with backoff
+          # before failing. Without this the test emails spurious failures.
+          fetch_status() {  # echo final HTTP status, retrying transient 429/5xx
+            local url="$1" code
+            for attempt in 1 2 3 4 5; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+              case "$code" in
+                429|5??) sleep $((attempt * 3));;  # transient — back off, retry
+                *) echo "$code"; return;;
+              esac
+            done
+            echo "$code"
+          }
+          fetch_body() {  # print body, retrying on any transient curl -sf failure
+            local url="$1" body
+            for attempt in 1 2 3 4 5; do
+              if body=$(curl -sf "$url"); then printf '%s' "$body"; return 0; fi
+              sleep $((attempt * 3))
+            done
+            return 1
+          }
           FILES=$(git ls-files factory | sed 's|^factory/||' | sort)
           [ -z "$FILES" ] && { echo "::error::no factory files tracked — checkout broken?"; exit 1; }
           COUNT=0
           for file in $FILES; do
-            status=$(curl -s -o /dev/null -w '%{http_code}' "$FACTORY/$file")
+            status=$(fetch_status "$FACTORY/$file")
             if [ "$status" != "200" ]; then
-              echo "::error::Factory file $file returned $status"
+              echo "::error::Factory file $file returned $status (after retries)"
               exit 1
             fi
             COUNT=$((COUNT+1))
           done
           # Anchor content checks — these two carry the bash + canon contract
-          curl -sf "$FACTORY/setup.sh" | head -1 | grep -q "bash" || { echo "::error::setup.sh not valid bash"; exit 1; }
-          curl -sf "$FACTORY/canon/methodology.md" | wc -c | xargs test 1000 -lt || { echo "::error::methodology.md too small"; exit 1; }
+          fetch_body "$FACTORY/setup.sh" | head -1 | grep -q "bash" || { echo "::error::setup.sh not valid bash"; exit 1; }
+          fetch_body "$FACTORY/canon/methodology.md" | wc -c | xargs test 1000 -lt || { echo "::error::methodology.md too small"; exit 1; }
           # Bash scripts must parse — beta users running `curl … | bash` will see
           # any syntax error at install time. Catch it here instead.
           for sh in setup.sh scripts/publish-fork.sh hooks/shim.sh hooks/payload.sh; do
-            curl -sf "$FACTORY/$sh" | bash -n - || { echo "::error::$sh has bash syntax errors"; exit 1; }
+            body=$(fetch_body "$FACTORY/$sh") || { echo "::error::$sh unreachable on raw after retries"; exit 1; }
+            printf '%s' "$body" | bash -n - || { echo "::error::$sh has bash syntax errors"; exit 1; }
           done
           echo "✓ factory ($COUNT files, derived from git, content verified)"
 
