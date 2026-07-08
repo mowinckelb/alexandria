@@ -310,12 +310,15 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
         <section>
           {data.twin?.enabled && (
             <div>
-              <p style={sectionLabelStyle}>personal language model</p>
+              <p style={sectionLabelStyle}>mind</p>
               <Link href={`/library/${encodeURIComponent(authorId)}/plm`} className="hover:opacity-60"
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1.25rem', width: '100%',
                   padding: '0.72rem 0', borderBottom: '1px solid var(--border-light)', textDecoration: 'none', color: 'inherit' }}>
-                <span style={{ color: 'var(--text-primary)', fontSize: '0.98rem' }}>chat with {author.display_name || author.id}’s mind</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{data.twin.online === false ? 'offline' : 'open'}</span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ color: 'var(--text-primary)', fontSize: '0.98rem' }}>chat with {author.display_name || author.id}’s mind</span>
+                  <span style={{ display: 'block', color: 'var(--text-ghost)', fontSize: '0.82rem', lineHeight: 1.45, marginTop: '0.2rem' }}>a model of everything they’ve published — ask it anything, and it can pull up their pieces.</span>
+                </span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', flex: 'none', whiteSpace: 'nowrap' }}>{data.twin.online === false ? 'offline' : 'open'}</span>
               </Link>
             </div>
           )}
