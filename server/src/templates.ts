@@ -3,6 +3,8 @@
  * Callback page HTML for OAuth signup flow.
  */
 
+import { randomBytes } from 'crypto';
+
 function getWebsiteUrl() { return process.env.WEBSITE_URL || 'https://alexandria-library.com'; }
 
 function escapeHtml(value: string): string {
@@ -243,4 +245,36 @@ document.addEventListener('click', function(e) {
 </script>
 </body>
 </html>`;
+}
+
+// ---------------------------------------------------------------------------
+// Welcome handoff — serve the founding-member page FIRST-PARTY on the website.
+// ---------------------------------------------------------------------------
+
+// The founding-member page (above) is rendered by the Worker on the api
+// subdomain, so a session cookie set alongside it lands at the tail of the
+// cross-site OAuth redirect and Safari drops it (WebKit #196375). To keep the
+// page but set the cookie where every browser honours it, we hand the whole
+// thing to the website: this stores the rendered page + the session token under
+// a one-time code and returns a /welcome URL. The website peeks the page, serves
+// it first-party, and its script POSTs the code to /api/auth/session — the exact
+// same-origin cookie set that already works for library sign-in. Single-use,
+// short TTL; the api-key only ever sits in KV briefly, never in a browser URL.
+type WelcomeKV = { put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void> };
+
+export async function welcomeHandoffUrl(
+  kv: WelcomeKV,
+  sessionToken: string,
+  apiKey: string,
+  githubLogin: string,
+  viaToken: boolean,
+  authorNumber: number,
+): Promise<string> {
+  const html = await callbackPageHtml(apiKey, githubLogin, viaToken, authorNumber);
+  const code = randomBytes(24).toString('hex');
+  // handoff:<code> → session token, consumed by /api/auth/session (sets the cookie).
+  // welcome:<code> → the rendered page, consumed by the website /welcome peek.
+  await kv.put(`handoff:${code}`, sessionToken, { expirationTtl: 300 });
+  await kv.put(`welcome:${code}`, html, { expirationTtl: 300 });
+  return `${getWebsiteUrl()}/welcome?code=${code}`;
 }

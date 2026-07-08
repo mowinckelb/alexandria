@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto';
 import type { Hono } from 'hono';
 import { logEvent } from './analytics.js';
 import { countActiveKin, createCheckoutSession, createConnectOnboardingLink, createPortalSession, ensurePayoutsReady, getOrCreateConnectAccount, getStripe, recalculateKinPricing, resolveActiveSubscription } from './billing.js';
-import { authErrorHtml, callbackPageHtml } from './templates.js';
+import { authErrorHtml, callbackPageHtml, welcomeHandoffUrl } from './templates.js';
 import { getDB, getR2 } from './db.js';
 import { deleteAllProtocolR2 } from './file-access.js';
 import { loadAccounts, loadAccount, saveAccount, setAuthIndex, deleteAccount, getKV, setEmailTokenIndex, getEmailTokenIndex, getAuthIndex, getLoginIndex } from './kv.js';
@@ -600,7 +600,7 @@ export function registerRoutes(app: Hono) {
           return c.redirect(handoffUrl(stateData.next));
         }
         const number = await assignAuthorNumber(user.login);
-        return c.html(await callbackPageHtml(apiKey, user.login, false, number ?? 0));
+        return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0));
       }
 
       // New join → Stripe Checkout ($10/mo, first month free via 30-day trial,
@@ -631,7 +631,7 @@ export function registerRoutes(app: Hono) {
         return c.redirect(handoffUrl(stateData.next));
       }
       const number = await assignAuthorNumber(user.login);
-      return c.html(await callbackPageHtml(apiKey, user.login, false, number ?? 0));
+      return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0));
     } catch (err: any) {
       console.error('GitHub callback error:', err);
       return c.html(authErrorHtml('something broke signing you in. please try again.'), 500);
@@ -653,6 +653,21 @@ export function registerRoutes(app: Hono) {
     if (!token) return c.json({ error: 'invalid or expired code' }, 400);
     await kv.delete(`handoff:${code}`);
     return c.json({ token });
+  });
+
+  // Welcome page peek. The signup/billing flows stash the rendered founding-member
+  // page under a one-time code (welcomeHandoffUrl) and redirect to the website
+  // /welcome, which calls this SERVER-SIDE to fetch the HTML, serve it first-party,
+  // and set the session cookie via /api/auth/session — so the post-signup cookie
+  // sticks in Safari too. Deleted on first read (the api key lives in this HTML).
+  app.get('/auth/welcome/peek', async (c) => {
+    const code = c.req.query('code') || '';
+    if (!code) return c.json({ error: 'missing code' }, 400);
+    const kv = getKV();
+    const html = await kv.get(`welcome:${code}`);
+    if (!html) return c.json({ error: 'invalid or expired code' }, 400);
+    await kv.delete(`welcome:${code}`);
+    return c.json({ html });
   });
 
   // --- Account management (redirects to Stripe portal) ---
@@ -1235,8 +1250,12 @@ export function registerRoutes(app: Hono) {
     const { api_key, github_login } = JSON.parse(stored) as { api_key: string; github_login: string };
     logEvent('install_token_redeemed', { author: github_login });
     const number = await assignAuthorNumber(github_login);
-    const html = await callbackPageHtml(api_key, github_login, true, number ?? 0);
-    return c.html(html);
+    // Mint a browser session so the founding-member page lands them signed-in,
+    // and route it through the welcome handoff so the cookie sticks (Safari).
+    const kv = getKV();
+    const sessionToken = randomBytes(24).toString('hex');
+    await kv.put(`library:session:${sessionToken}`, JSON.stringify({ github_login }), { expirationTtl: 30 * 24 * 60 * 60 });
+    return c.redirect(await welcomeHandoffUrl(kv, sessionToken, api_key, github_login, true, number ?? 0));
   });
 
   // Public preview — renders the onboarding callback HTML with hardcoded dummy

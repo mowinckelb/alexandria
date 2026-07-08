@@ -9,7 +9,8 @@
 import Stripe from 'stripe';
 import type { Hono } from 'hono';
 import { logEvent } from './analytics.js';
-import { callbackPageHtml } from './templates.js';
+import { welcomeHandoffUrl } from './templates.js';
+import { randomBytes } from 'crypto';
 import { requireAuth, ACTIVE_AUTHOR_STATUSES, type Account } from './auth.js';
 import { loadAccounts, getKV } from './kv.js';
 import { assignAuthorNumber, getAccountByLogin, updateAccountBilling } from './accounts.js';
@@ -1028,7 +1029,12 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
       const apiKey = (await kv.get(stashKey)) || '';
       if (apiKey) await kv.delete(stashKey);
       const number = await assignAuthorNumber(login);
-      return c.html(await callbackPageHtml(apiKey, login, false, number ?? 0));
+      // Mint a browser session and route the founding-member page through the
+      // welcome handoff so the post-payment cookie is set first-party (Safari
+      // drops one set on the api subdomain mid-redirect — WebKit #196375).
+      const sessionToken = randomBytes(24).toString('hex');
+      await kv.put(`library:session:${sessionToken}`, JSON.stringify({ github_login: login }), { expirationTtl: 30 * 24 * 60 * 60 });
+      return c.redirect(await welcomeHandoffUrl(kv, sessionToken, apiKey, login, false, number ?? 0));
     } catch (err) {
       console.error('Billing success page error:', err);
       return c.redirect(`${WEBSITE_URL}/signup`);
