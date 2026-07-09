@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { SERVER_URL, pageMetadata } from '../lib/config';
+import JoinInterest from './JoinInterest';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,13 +9,21 @@ export const metadata = pageMetadata({
   path: '/join',
   title: 'join alexandria.',
   description:
-    'become a founding member of the collective — the library of minds, the people, the place you are seen. the tool is free; this is the other half.',
+    'the tool is free and always will be; the collective is the half still being built. become a founding member.',
 });
 
 // The founding-member JOIN — the paid half of the two things. The tool (the run)
 // is free and keyless; this is the collective (the Strava): the library, the
 // marketplace, the tribe. Signing in with GitHub starts the trial ($10/mo, first
 // month free, free with 3 kin, or email-to-waive) and assigns your number.
+//
+// The pitch is the FOUNDING BET, honestly told (founder verdict 2026-07-09):
+// at this stage the network value is thin by construction, so the page never
+// sells the library/marketplace as arrived value — it sells being early in
+// the thing being built. No roster pitch from the outside (who's in is
+// visible once you're in, never the sell). A "no" has its own path: the
+// JoinInterest email capture below the deal — every decline leaves a
+// contactable address (the reach the collective gets recruited from).
 //
 // Composition mirrors /start: one flush-left editorial column, an accent
 // eyebrow ("the collective") as the spine's anchor — the paid half, twinned
@@ -62,14 +71,17 @@ export default async function JoinPage({
 
         <h1 className="primer-h1">become a founding member.</h1>
 
-        {/* The concrete goods (monologue routing, 2026-07-09): publish your
-            mind and work · trade methods · be seen. Easy register — nouns a
-            distracted reader holds in one pass. */}
+        {/* The founding bet, honestly told (founder verdict 2026-07-09): the
+            collective is early and small, and the copy says so — you are not
+            buying a finished network, you are founding one. Prose is
+            proper-grammar per the settled Taste boundary (2026-07-01);
+            lowercase stays on the marks (title, button, eyebrow). */}
         <p className="primer-lede">
-          the tool is free and always will be. joining the collective is the
-          part you pay for &mdash; publishing your mind and your work to the
-          shared library, trading methods in the marketplace, and being seen
-          among the people building theirs beside you.
+          The tool is free and always will be. The collective is the half
+          still being built &mdash; the library of minds, the marketplace of
+          methods, the people building theirs beside you. It is early, and
+          that is the point: you aren&rsquo;t buying a finished thing, you are
+          founding it.
         </p>
 
         <a className="join-btn" href={joinUrl}>
@@ -77,15 +89,18 @@ export default async function JoinPage({
         </a>
 
         <p className="join-deal">
-          <span className="join-free">first month free</span>, then $10/month
+          <span className="join-free">First month free</span>, then $10/month
           &mdash; or <span className="join-free">free for good</span>{' '}when
-          three friends join through you. if that&rsquo;s a stretch, just email and
-          it&rsquo;s waived. you&rsquo;re joining the collective, never paying to
-          use the tool.
+          three friends join through you. If that&rsquo;s a stretch, just{' '}
+          <a href="mailto:mowinckel.b@gmail.com?subject=waive%20it">email</a>{' '}
+          and it&rsquo;s waived. You&rsquo;re joining the collective, never
+          paying to use the tool.
         </p>
 
+        <JoinInterest refCode={ref || undefined} />
+
         <p className="join-secondary">
-          here for the free tool? you don&rsquo;t need this &mdash;{' '}
+          Here for the free tool? You don&rsquo;t need this &mdash;{' '}
           <Link href="/start">install it in one line</Link>.
         </p>
 
@@ -180,6 +195,51 @@ export default async function JoinPage({
           font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
         }
         .join-free { color: var(--text-secondary, rgba(26, 19, 24, 0.82)); }
+        .join-deal a {
+          color: var(--text-secondary, rgba(26, 19, 24, 0.82));
+          text-decoration: underline; text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
+          text-underline-offset: 3px; text-decoration-thickness: 1px;
+          transition: color 200ms, text-decoration-color 200ms;
+        }
+        .join-deal a:hover { color: var(--text-primary); text-decoration-color: var(--text-primary); }
+
+        /* Decline path — quiet by design: the escape hatch must not compete
+           with the join button. Input/button heights matched; 16px input font
+           so iOS Safari doesn't zoom on focus. */
+        .join-interest { margin: 36px 0 0; max-width: 450px; width: 100%; }
+        .join-interest-lede {
+          margin: 0 0 12px; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 14px; line-height: 1.7; letter-spacing: 0.01em;
+          color: var(--text-muted, rgba(26, 19, 24, 0.55));
+        }
+        .join-interest-row { display: flex; gap: 8px; }
+        .join-interest-row input {
+          flex: 1; min-width: 0; height: 40px; padding: 0 12px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 16px;
+          color: var(--text-primary); background: transparent;
+          border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.3)); border-radius: 8px;
+          outline: none; transition: border-color 200ms;
+        }
+        .join-interest-row input::placeholder { color: var(--text-muted, rgba(26, 19, 24, 0.45)); }
+        .join-interest-row input:focus { border-color: var(--text-secondary, rgba(26, 19, 24, 0.6)); }
+        .join-interest-row button {
+          height: 40px; padding: 0 16px; flex-shrink: 0;
+          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 14px;
+          letter-spacing: 0.01em; color: var(--text-secondary, rgba(26, 19, 24, 0.82));
+          background: transparent; border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.3));
+          border-radius: 8px; cursor: pointer; transition: border-color 200ms, color 200ms;
+        }
+        .join-interest-row button:hover { color: var(--text-primary); border-color: var(--text-secondary, rgba(26, 19, 24, 0.6)); }
+        .join-interest-row button:disabled { opacity: 0.5; cursor: default; }
+        .join-interest-done {
+          margin: 36px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 14px; line-height: 1.7; font-style: italic;
+          color: var(--text-secondary, rgba(26, 19, 24, 0.82));
+        }
+        .join-interest-hint {
+          margin: 8px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 13px; color: var(--text-muted, rgba(26, 19, 24, 0.55));
+        }
 
         .join-secondary {
           margin: 28px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;

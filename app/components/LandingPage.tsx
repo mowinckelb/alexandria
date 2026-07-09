@@ -546,7 +546,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       </p>
       <p>
         <span className="beat-title">The collective</span>
-        <em className="em-strong">Five friends and your subscription
+        <em className="em-strong">Three friends and your membership
         is free.</em>{' '}Share files with friends you choose &mdash;
         both ways, revocable any time. AI stops guessing about the
         people in your life.{' '}
