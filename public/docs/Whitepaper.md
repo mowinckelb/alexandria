@@ -248,6 +248,26 @@ Hear that word *value* correctly, because it was never only money. Money is the 
 
 And notice the shape of what just happened. We started with one question — when a machine can do everything, what’s left for a person? — and took it one step at a time. The folder, the system, the library: none of it was chosen up front. Each piece was forced by the step before it. Follow the logic, and you end up here every time. That’s why Alexandria is what it is.
 
+## coda — the company, plainly.
+
+The argument is done. Here is the company it forces, said the way I’d say it across a table.
+
+We are focused on one thing: maximising net human value — what humans are worth, and what being human is worth, through what will be an enormously disruptive period.
+
+When AI can do everything, there are two easy ways to fall. Reject it all — keep your principles, lose the decade, stay capped at what one unaided head can do. Or give in to it — hand it your thinking, let it choose, let it make, and slowly stop being anyone. Both waste the human. The way through is to ride it: use the machine to become more yourself, not less.
+
+Nobody’s assistant is built for that. Every AI is tuned by the company behind it — kept pleasant, pointed at your dependence. So we re-point it: align the AI you already use to *you* — reading what and how you think, holding one standing instruction — *develop this person.* Into the best version of themselves.
+
+Most of what this needs already exists, in pieces — the models, the agents, the files. Nobody had tied the thread of intention through them. We tie the thread, and we build only the missing pieces.
+
+What we’re really offering is the philosophy, the path, and the wanting to walk it — honestly, it can be hard — plus the open infrastructure so anyone can walk it their own way.
+
+The mechanics are simple. A plugin for the AI you already use — an open standard designed to be personalised: it captures what and how you think as you go, quietly in the background, with an active mode when you want a sparring partner. Everything else about you is already measured; nothing captures your internal monologue. This does — for you, in files you own. We hand you a starter; you’re meant to make it your own.
+
+And the part you pay for is the community. The methods travel — everyone’s systems, shared, taken, improved — so the practice sharpens as more people walk it. The minds and their works gather — because the point of knowing is doing — in a library that is read, asked, and added to while its authors are still thinking. A network of the people who chose to keep thinking.
+
+That’s the whole company: the philosophy, the tribe, and the infrastructure. Sell the path. Assemble the walkers. Keep the door open, so everyone who wants in, gets in.
+
 *Benjamin a. Mowinckel*
 
 <!-- colophon -->
