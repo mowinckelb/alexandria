@@ -45,6 +45,14 @@ if [ -z "$API_KEY" ] && [ -f "$ALEX_DIR/system/.api_key" ]; then
   [ -n "$API_KEY" ] && echo "Reusing existing API key from $ALEX_DIR/system/.api_key"
 fi
 
+# Existing-Author detection: a non-empty constitution means onboarding already
+# ran and this re-run is a sync, not a fresh install. Setup itself never writes
+# constitution files, so this is pre-run state even when read later. Drives the
+# closing message — "synced" for an existing Author, the onboarding block for a
+# fresh install. (Works keyless too, unlike keying off API-key reuse.)
+EXISTING_AUTHOR=""
+[ -n "$(ls -A "$ALEX_DIR/files/constitution" 2>/dev/null)" ] && EXISTING_AUTHOR=1
+
 # Keyless = the free product (the gym), no account. A key — passed, or reused
 # from a prior install above — adds the hub layer (Library, marketplace, kin).
 # Either path installs the full LOCAL product; the key only gates server calls.
@@ -150,6 +158,29 @@ fetch_factory "block.md" "$ALEX_DIR/system/.block" "block.md" yes
 # ── 3. Platform configuration ─────────────────────────────────────
 
 # Claude Code — skill + hooks
+
+# True only when Claude Code's installed-plugin registry
+# (~/.claude/plugins/installed_plugins.json) lists an alexandria@alexandria
+# entry whose install dir exists on disk and isn't disabled. The install
+# command's exit code alone is NOT proof the plugin landed (stale marketplace
+# registration, silent failure). Tolerant of registry shape: v2 nests under
+# .plugins with an array of installs per plugin; older/flat forms handled too.
+# Defined top-level so the status matrix can probe it even when the install
+# block below was skipped.
+alex_plugin_installed() {
+  command -v node &>/dev/null || return 1
+  node -e "
+    const fs = require('fs'), path = require('path');
+    const f = path.join(process.env.HOME, '.claude', 'plugins', 'installed_plugins.json');
+    const reg = JSON.parse(fs.readFileSync(f, 'utf-8'));
+    const entry = (reg.plugins || reg)['alexandria@alexandria'];
+    const installs = Array.isArray(entry) ? entry : entry ? [entry] : [];
+    const live = installs.some(p => p && p.enabled !== false && p.disabled !== true &&
+      (!p.installPath || fs.existsSync(p.installPath)));
+    process.exit(live ? 0 : 1);
+  " 2>/dev/null
+}
+
 if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; }; then
   # Install the skill under BOTH names so /a and /alexandria both work (Claude Code
   # keys on the skill, by dir + frontmatter name). Same content; the alias's
@@ -180,8 +211,16 @@ if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude 
   ALEX_PLUGIN_OK=""
   if command -v claude &>/dev/null && claude plugin --help &>/dev/null 2>&1; then
     claude plugin marketplace add mowinckelb/alexandria >/dev/null 2>&1 || true
+    # `add` is a no-op when the marketplace is already registered, so refresh
+    # the registration too — otherwise a stale clone serves old content.
+    claude plugin marketplace update alexandria >/dev/null 2>&1 || true
     if claude plugin install alexandria@alexandria --scope user >/dev/null 2>&1; then
-      ALEX_PLUGIN_OK=1
+      # Verify-then-remove: the filter below deletes the legacy settings hooks
+      # whenever this flag is set, so trusting the exit code alone could leave
+      # the Author with NO hooks if the plugin didn't genuinely land. Only set
+      # the flag once the installed-plugin registry confirms it; on failure the
+      # flag stays empty and the filter re-adds the settings hooks.
+      alex_plugin_installed && ALEX_PLUGIN_OK=1
     fi
   fi
 
@@ -311,16 +350,21 @@ fi
 # Codex
 if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
   mkdir -p "$HOME/.codex" 2>/dev/null
-  [ -f "$HOME/.codex/instructions.md" ] && {
-    if [ "$(uname)" = "Darwin" ]; then
-      sed -i '' '/^<!-- alexandria:start -->/,/^<!-- alexandria:end -->/d' "$HOME/.codex/instructions.md"
-    else
-      sed -i '/^<!-- alexandria:start -->/,/^<!-- alexandria:end -->/d' "$HOME/.codex/instructions.md"
-    fi
-  }
   codex_tmp="$ALEX_DIR/system/.codex_alexandria.tmp"
   if fetch_factory "skills/codex.md" "$codex_tmp" "skills/codex.md" yes; then
-    cat "$codex_tmp" >> "$HOME/.codex/instructions.md"
+    # Current Codex reads global instructions from ~/.codex/AGENTS.md;
+    # instructions.md is the legacy location older CLIs still load.
+    # Write both, replacing any previous alexandria marker block.
+    for codex_target in "$HOME/.codex/AGENTS.md" "$HOME/.codex/instructions.md"; do
+      [ -f "$codex_target" ] && {
+        if [ "$(uname)" = "Darwin" ]; then
+          sed -i '' '/^<!-- alexandria:start -->/,/^<!-- alexandria:end -->/d' "$codex_target"
+        else
+          sed -i '/^<!-- alexandria:start -->/,/^<!-- alexandria:end -->/d' "$codex_target"
+        fi
+      }
+      cat "$codex_tmp" >> "$codex_target"
+    done
     rm -f "$codex_tmp"
   fi
   echo "  Codex: configured"
@@ -703,8 +747,12 @@ CLAUDE_DETECTED="no"
 if [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; then
   CLAUDE_DETECTED="yes"
   # Two valid states: plugin delivery (preferred — also covers Claude
-  # Desktop/Cowork) or legacy settings.json hooks (older CLIs).
-  if [ -n "${ALEX_PLUGIN_OK:-}" ] && [ -f "$HOME/.claude/skills/alexandria/SKILL.md" ]; then
+  # Desktop/Cowork) or legacy settings.json hooks (older CLIs, or the fallback
+  # when plugin verification failed). ALEX_PLUGIN_OK is only set after the
+  # registry confirmed the install; re-probe the registry here anyway so the
+  # matrix reflects the config Claude actually reads — the plugin detail never
+  # shows for a hooks-based config, and vice versa.
+  if [ -n "${ALEX_PLUGIN_OK:-}" ] && alex_plugin_installed && [ -f "$HOME/.claude/skills/alexandria/SKILL.md" ]; then
     STATUS_CLAUDE="ok"; DETAIL_CLAUDE="/a + /alexandria skill + plugin (Claude Code/Desktop/Cowork)"
   elif [ -f "$HOME/.claude/settings.json" ] && \
      grep -q "alexandria/system/hooks/shim.sh" "$HOME/.claude/settings.json" 2>/dev/null && \
@@ -730,9 +778,11 @@ fi
 CODEX_DETECTED="no"
 if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
   CODEX_DETECTED="yes"
-  if [ -f "$HOME/.codex/instructions.md" ] && \
-     grep -q "alexandria:start" "$HOME/.codex/instructions.md" 2>/dev/null; then
-    STATUS_CODEX="ok"; DETAIL_CODEX="instructions appended"
+  if { [ -f "$HOME/.codex/AGENTS.md" ] && \
+       grep -q "alexandria:start" "$HOME/.codex/AGENTS.md" 2>/dev/null; } || \
+     { [ -f "$HOME/.codex/instructions.md" ] && \
+       grep -q "alexandria:start" "$HOME/.codex/instructions.md" 2>/dev/null; }; then
+    STATUS_CODEX="ok"; DETAIL_CODEX="instructions appended (AGENTS.md + legacy instructions.md)"
   else
     STATUS_CODEX="fail"; DETAIL_CODEX="Codex detected but not configured — re-run setup"
   fi
@@ -955,17 +1005,28 @@ elif [ "$CLAUDE_DETECTED" != "yes" ] && [ "$CURSOR_DETECTED" != "yes" ] && [ "$C
   echo "the same one line there:  Claude Code · Cursor · Codex · Factory."
   echo "(In a chat or Cowork's sandbox it can't wire in or persist to your machine.)"
 elif [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
-  echo "Installed — your agent takes it from here. Nothing else to copy or click."
-  echo ""
-  echo "AGENT: read ~/alexandria/system/.block now and follow it end-to-end. Tell them"
-  echo "you're starting and they can step away, then begin — don't wait to be asked."
-  echo "(Author: if it doesn't start on its own, just say \"begin\".)"
-  if [ "$KEYLESS" = "true" ]; then
+  if [ -n "$EXISTING_AUTHOR" ]; then
+    # Re-run over a developed constitution = a sync, not a fresh install.
+    # Pointing the agent at the block here would re-run full onboarding over
+    # an existing Author's mind — say "synced" and stop.
+    echo "Synced — you're up to date. Nothing else to do."
     echo ""
-    echo "The tool is yours: free, local, no account, never sent to us (any backup goes only"
-    echo "to your own GitHub + iCloud). After it drafts your starter mind it'll show you how to"
-    echo "join the collective at alexandria-library.com/join — the library, the people, being seen"
-    echo "(first month free, or free with 3 friends). The tool stays free either way."
+    echo "AGENT: existing install refreshed — do NOT read the block or start onboarding."
+    echo "Tell the Author they're synced and carry on with their session."
+  else
+    echo "Installed — your agent takes it from here. Nothing else to copy or click."
+    echo ""
+    echo "AGENT: read ~/alexandria/system/.block now and follow it end-to-end. Tell them"
+    echo "you're starting and they can step away, then begin — don't wait to be asked."
+    echo "(Author: if it doesn't start on its own, just say \"begin\".)"
+    if [ "$KEYLESS" = "true" ]; then
+      echo ""
+      echo "The tool is yours: free, local, no account, never sent to us (any backup goes only"
+      echo "to your own GitHub + iCloud). After it drafts your starter mind it'll show you how to"
+      echo "become a founding member of the collective at alexandria-library.com/join — the thing"
+      echo "being built: the library, the marketplace, the people (first month free, or free with"
+      echo "3 friends). The tool stays free either way."
+    fi
   fi
 else
   echo "Re-run anytime: curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- \$API_KEY"

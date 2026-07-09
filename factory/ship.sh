@@ -95,6 +95,16 @@ while IFS= read -r f; do
     echo "⚠️  $f looks executable but is unsigned — add to SIGNED_FILES (or UNSIGNED_OK if it's an install-once root)" >&2
 done < <(cd "$REPO_ROOT" && find factory -type f \( -name '*.sh' -o -name '*.py' \) | sort)
 
+# Shim drift gate: the plugin bundles its own copy of the shim
+# (factory/plugin/scripts/shim.sh). If it drifts from factory/hooks/shim.sh the
+# two delivery paths bootstrap different code — refuse to ship until synced.
+if ! cmp -s factory/hooks/shim.sh factory/plugin/scripts/shim.sh; then
+  echo "error: factory/plugin/scripts/shim.sh differs from factory/hooks/shim.sh" >&2
+  echo "The plugin ships a byte-identical copy of the shim. Sync them first:" >&2
+  echo "  cp factory/hooks/shim.sh factory/plugin/scripts/shim.sh" >&2
+  exit 1
+fi
+
 # Build manifest: one line per file, "sha256  relative/path".
 # Stable order (literal list above) so the manifest is reproducible.
 {
