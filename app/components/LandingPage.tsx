@@ -306,6 +306,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   // users never download the 923KB MP4 — they get the still PNG and
   // nothing else. Tracks live changes to the OS preference.
   const [showBreeze, setShowBreeze] = useState(false);
+  // Mobile (<900px) gets the SQUARE scene assets (see the mobile
+  // .top-slide CSS): its own poster + breeze video, matching the CSS
+  // background swap. null during SSR — video mounts client-side only.
+  const [mobileScene, setMobileScene] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
   const middleRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -316,7 +320,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
     const sync = () => setShowBreeze(!rm.matches);
     sync();
     rm.addEventListener('change', sync);
-    return () => rm.removeEventListener('change', sync);
+    const mq = window.matchMedia('(max-width: 899px)');
+    const syncScene = () => setMobileScene(mq.matches);
+    syncScene();
+    mq.addEventListener('change', syncScene);
+    return () => {
+      rm.removeEventListener('change', sync);
+      mq.removeEventListener('change', syncScene);
+    };
   }, []);
 
   useEffect(() => {
@@ -353,7 +364,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       v.removeEventListener('canplay', reveal);
       v.removeEventListener('loadeddata', reveal);
     };
-  }, [showBreeze]);
+    // mobileScene remounts the <video> (key), so re-wire on flip too.
+  }, [showBreeze, mobileScene]);
 
   // Peel mechanic — top slide translates up as user scrolls; revealing bottom.
   // Disabled on mobile: slides flow naturally, no peel, no fixed positioning.
@@ -632,9 +644,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             mask is gone with the old renderer). */}
         {showBreeze && (
           <video
+            key={mobileScene ? 'm' : 'd'}
             ref={videoRef}
             className="breeze-video"
-            poster="/pharos-arch-wide.png"
+            poster={mobileScene ? '/pharos-arch-mobile.png' : '/pharos-arch-wide.png'}
             autoPlay
             loop
             muted
@@ -642,13 +655,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             preload="metadata"
             aria-hidden
           >
-            {/* WebM (67KB, VP9) first — Android Chrome and most
-                modern browsers pick it. Safari falls through to the
-                H.264 MP4 (913KB). preload="metadata" so cellular
-                users don't eat the full download until the canplay
-                event drives the fade-in. */}
-            <source src="/pharos-scene.webm" type="video/webm" />
-            <source src="/pharos-scene.mp4" type="video/mp4" />
+            {/* WebM (VP9) first — Android Chrome and most modern
+                browsers pick it. Safari falls through to the H.264
+                MP4. preload="metadata" so cellular users don't eat
+                the full download until the canplay event drives the
+                fade-in. Mobile gets the square scene (key remounts
+                the element if the breakpoint flips). */}
+            <source src={mobileScene ? '/pharos-scene-mobile.webm' : '/pharos-scene.webm'} type="video/webm" />
+            <source src={mobileScene ? '/pharos-scene-mobile.mp4' : '/pharos-scene.mp4'} type="video/mp4" />
           </video>
         )}
         {/* Stage canvas — pixel-locked 1440×900 frame uniformly scaled to
@@ -2751,10 +2765,13 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           }
           .top-slide {
             padding: 152px clamp(20px, 5vw, 64px) 96px;
-            /* Portrait viewport crops the wide image more aggressively
-               on the sides; centre-anchored cropping keeps the niche
-               in the visual middle. The desktop 62% offset pulled the
-               niche off-frame to the left here. */
+            /* Mobile gets its OWN scene asset — the desktop 16:9 wall
+               cropped to portrait made the window wider than the phone
+               screen ("too big", founder 2026-07-08). The square asset
+               is the same frame outpainted (wall continues above, floor
+               and foliage below), so cover on portrait shows the window
+               at ~59% of screen width with room to breathe. */
+            background-image: url(/pharos-arch-mobile.png);
             background-position: center center;
             /* Portrait crop fills the viewport with the dark niche +
                painting (less cream wall visible than at desktop), so
@@ -2975,25 +2992,29 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             margin-top: 0;
           }
 
-          /* Film plate on mobile — the arch centres in the portrait crop
-             (bg-position center center overrides the desktop 75%), so the
-             cover x-math doesn't apply; centre it and hang it under the
-             arch's foot (~66svh). */
+          /* Film plate on mobile — geometry for the SQUARE mobile asset
+             (pharos-arch-mobile.png, bg center/center cover). Measured
+             fractions of the 1:1 canvas: window centre x 0.514, y 0.4815;
+             window 0.273w × 0.205h; ledge line 0.619; caption anchor
+             0.645. Wall units for a square image under cover: both
+             dimensions = max(100vw, 100svh). */
           .film-invite {
-            left: 50%;
-            top: 74svh;
+            --wall-w: max(100vw, 100svh);
+            --wall-h: max(100vw, 100svh);
+            left: calc(50vw + 0.014 * var(--wall-w));
+            top: calc(50svh + 0.145 * var(--wall-h));
             transform: translate(-50%, -50%);
           }
           .film-invite-btn {
             font-size: 13.5px;
           }
-          /* Window hit-area on mobile — bg is center/center so the window
-             centre sits at ~47svh; offsets are from the plate's 74svh
-             anchor. Tap-to-play; the hover cue is already display:none. */
+          /* Window hit-area on mobile — offsets from the plate's anchor
+             in the same wall units. Tap-to-play; the hover cue is
+             already display:none. */
           .film-window-hit {
-            top: calc(50% - 27svh);
-            width: min(48.5svh, 94vw);
-            height: 36.4svh;
+            top: calc(50% - 0.1635 * var(--wall-h));
+            width: calc(0.273 * var(--wall-w));
+            height: calc(0.205 * var(--wall-h));
           }
 
           /* Statement — drop the absolute roman numerals (they hang in
