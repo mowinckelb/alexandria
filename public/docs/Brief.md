@@ -163,7 +163,7 @@ Returns are the long call option. Legacy is the more certain payoff.
 ---
 
 **Benjamin a. Mowinckel**
-mowinckel.b@gmail.com · alexandria-library.com
+benmowinckel@gmail.com · alexandria-library.com
 
 | | |
 |---|---|

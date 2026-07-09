@@ -92,7 +92,7 @@ export default async function JoinPage({
           <span className="join-free">First month free</span>, then $10/month
           &mdash; or <span className="join-free">free for good</span>{' '}when
           three friends join through you. If that&rsquo;s a stretch, just{' '}
-          <a href="mailto:mowinckel.b@gmail.com?subject=waive%20it">email</a>{' '}
+          <a href="mailto:benmowinckel@gmail.com?subject=waive%20it">email</a>{' '}
           and it&rsquo;s waived. You&rsquo;re joining the collective, never
           paying to use the tool.
         </p>

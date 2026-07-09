@@ -70,7 +70,7 @@ export default function Terms() {
 
       <section style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: 400 }}>Contact</h2>
-        <p>Benjamin Mowinckel — <a href="mailto:mowinckel.b@gmail.com" style={{ color: 'var(--text-primary)' }}>mowinckel.b@gmail.com</a></p>
+        <p>Benjamin Mowinckel — <a href="mailto:benmowinckel@gmail.com" style={{ color: 'var(--text-primary)' }}>benmowinckel@gmail.com</a></p>
       </section>
     </main>
   );

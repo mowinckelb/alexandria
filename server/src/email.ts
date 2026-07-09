@@ -1,6 +1,6 @@
 /** Email primitives — Resend API (hybrid dependency, API-controllable, free 100/day). */
 
-export const FOUNDER_EMAIL = process.env.FOUNDER_EMAIL || 'mowinckel.b@gmail.com';
+export const FOUNDER_EMAIL = process.env.FOUNDER_EMAIL || 'benmowinckel@gmail.com';
 const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
 const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
 const SHORTCUT_URL = 'https://www.icloud.com/shortcuts/0ea1bb7333fd43a9881e9c7b9938a337';

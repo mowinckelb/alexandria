@@ -72,4 +72,4 @@ A structured record of who each user is — whatever they choose to put in it: w
 
 *The firm whose name attaches goes on the page about how humans preserved thinking through the AI transition.* **America protects the right to think. Alexandria protects the ability.** *Set the angels free.*
 
-**Benjamin a. Mowinckel** · mowinckel.b@gmail.com · alexandria-library.com · a.
+**Benjamin a. Mowinckel** · benmowinckel@gmail.com · alexandria-library.com · a.

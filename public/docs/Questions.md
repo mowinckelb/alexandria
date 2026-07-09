@@ -1,6 +1,6 @@
 # questions.
 
-*plain answers. the [letter](/docs/letter.pdf) and the [whitepaper](/whitepaper) are the longer reads. if yours isn't here, [email me](mailto:mowinckel.b@gmail.com).*
+*plain answers. the [letter](/docs/letter.pdf) and the [whitepaper](/whitepaper) are the longer reads. if yours isn't here, [email me](mailto:benmowinckel@gmail.com).*
 
 ## what is alexandria.
 

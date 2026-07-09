@@ -54,7 +54,7 @@ fallthrough = false
 [vars]
 BETA_MODE = "false"
 SERVER_URL = "https://api.alexandria-library.com"
-FOUNDER_EMAIL = "mowinckel.b@gmail.com"
+FOUNDER_EMAIL = "benmowinckel@gmail.com"
 ADMIN_GITHUB_LOGIN = "mowinckelb"
 WEBSITE_URL = "https://alexandria-library.com"
 LIBRARY_CUT_PERCENT = "50"
