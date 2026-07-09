@@ -170,7 +170,7 @@ export default function ReaderShell({
       const answer = await askFn(text);
       setConvos((cs) => cs.map((c) => (c.id === targetId ? { ...c, messages: [...c.messages, { role: 'twin', text: answer }] } : c)));
     } catch {
-      setConvos((cs) => cs.map((c) => (c.id === targetId ? { ...c, messages: [...c.messages, { role: 'twin', text: 'could not reach the PLM.' }] } : c)));
+      setConvos((cs) => cs.map((c) => (c.id === targetId ? { ...c, messages: [...c.messages, { role: 'twin', text: 'could not reach the mind.' }] } : c)));
     } finally {
       setAsking(false);
     }
@@ -181,7 +181,7 @@ export default function ReaderShell({
 
   const copyText = (t: string) => { try { void navigator.clipboard?.writeText(t); } catch { /* */ } };
   const copyArtifact = () => copyText(artifactText || '');
-  const copyConvo = () => copyText((active?.messages || []).map((m) => `${m.role === 'you' ? 'You' : (who || 'PLM')}: ${m.text}`).join('\n\n'));
+  const copyConvo = () => copyText((active?.messages || []).map((m) => `${m.role === 'you' ? 'You' : (who || 'the mind')}: ${m.text}`).join('\n\n'));
   const downloadArtifact = () => {
     if (!downloadBlob) return;
     const url = URL.createObjectURL(downloadBlob);
