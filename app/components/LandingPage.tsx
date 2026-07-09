@@ -2847,20 +2847,25 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .bottom-slide {
             padding: 60px clamp(20px, 5vw, 64px) 36px;
           }
-          /* Watermark — absolute in the hero, NOT fixed (founder's phone
-             screenshots 2026-07-01: fixed made the glyph float over the
-             letter mid-scroll and straddle the slide seam — "bleeding
-             over"). Anchored to the bottom of the first viewport, it
-             lives in the wall scene and scrolls away with it. */
+          /* Watermark — FIXED again, like desktop (founder 2026-07-08:
+             "it's not a watermark, it doesn't persist… needs to be fixed
+             when you scroll" — supersedes the 2026-07-01 absolute-in-hero
+             call, which answered the glyph "bleeding over" the letter;
+             the mitigation now is placement + faintness, not scrolling
+             away). Desktop orientation: right of centre, lifted off the
+             bottom edge. */
           .watermark {
-            position: absolute;
-            top: calc(100svh - 40px);
-            bottom: auto;
-            left: 40%;
-            transform: translate(-50%, -100%);
-            font-size: clamp(160px, 44vw, 260px);
-            color: #1a1318;
-            opacity: 0.05;
+            position: fixed;
+            bottom: 16%;
+            left: 66%;
+            transform: translateX(-50%);
+            font-size: clamp(150px, 40vw, 240px);
+            /* Desktop's tyrian, one notch stronger — the mobile glyph is
+               ~half desktop's size, and at a flat 5% it vanished into the
+               letter's text (the "doesn't persist" report was partly
+               this: it persisted but couldn't be seen). */
+            color: rgba(58, 15, 61, 0.07);
+            opacity: 1;
           }
 
           .nav {
