@@ -62,10 +62,14 @@ export default async function JoinPage({
 
         <h1 className="primer-h1">become a founding member.</h1>
 
+        {/* The concrete goods (monologue routing, 2026-07-09): publish your
+            mind and work · trade methods · be seen. Easy register — nouns a
+            distracted reader holds in one pass. */}
         <p className="primer-lede">
-          the tool is free and always will be. joining the collective is the part
-          you pay for &mdash; a place in the shared library, the people building
-          it alongside you, and being seen among them.
+          the tool is free and always will be. joining the collective is the
+          part you pay for &mdash; publishing your mind and your work to the
+          shared library, trading methods in the marketplace, and being seen
+          among the people building theirs beside you.
         </p>
 
         <a className="join-btn" href={joinUrl}>
