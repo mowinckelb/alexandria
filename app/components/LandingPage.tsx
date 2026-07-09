@@ -647,7 +647,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             key={mobileScene ? 'm' : 'd'}
             ref={videoRef}
             className="breeze-video"
-            poster={mobileScene ? '/sea-arch-mobile.png' : '/sea-arch-wide.png'}
+            poster={mobileScene ? '/sea-arch-mobile.jpg' : '/sea-arch-wide.jpg'}
             autoPlay
             loop
             muted
@@ -1273,14 +1273,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              image's edge cream so any uncovered area at extreme
              aspect ratios still reads as the same wall. */
           background-color: #d8ccb6;
-          /* SEA scene (2026-07-08) — the fresco niche re-authored as an
-             open window onto open water: light-blue sea meeting a pale
-             sky, sunlight glistening on the surface. You stand inside
-             the library, looking out. (The Pharos lighthouse variant was
-             tried and cut same day — founder: "maybe we just have water…
-             really elegant light blue water and sky." Creation-of-Adam
-             was cut earlier per the image anti-reflex, design.md.) */
-          background-image: url(/sea-arch-wide.png);
+          /* SEA scene (2026-07-09) — the fresco niche as an open window
+             onto open water. Third pass on the water: v1 saturated blue
+             read fake ("too blue, looks artificial"), v2 whisper-faint
+             read as beige fog ("pretty mid… not elegant"). This one is
+             a real sea — visible hazy horizon, luminous azure with a
+             natural depth gradient, sun glitter — bound to the cream
+             wall by shared warm light rather than by draining the
+             colour. (Pharos lighthouse and Creation-of-Adam were cut
+             earlier — image anti-reflex, design.md.) Poster is JPEG
+             now: same frame-zero-of-the-video pipeline, ~10x lighter
+             than the PNG for first paint. */
+          background-image: url(/sea-arch-wide.jpg);
           /* Desktop landscape viewports crop the wide image evenly;
              75% pulls the niche from right-of-centre to visual middle
              and brings the tree shadow into view on the left. Mobile
@@ -2799,7 +2803,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                is the same frame outpainted (wall continues above, floor
                and foliage below), so cover on portrait shows the window
                at ~59% of screen width with room to breathe. */
-            background-image: url(/sea-arch-mobile.png);
+            background-image: url(/sea-arch-mobile.jpg);
             background-position: center center;
             /* No filter — the brightness(1.06) lift compensated for the
                old dark Adam niche; on the already-bright sea scene it
@@ -3021,7 +3025,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           }
 
           /* Film plate on mobile — geometry for the SQUARE mobile asset
-             (sea-arch-mobile.png, bg center/center cover). Measured
+             (sea-arch-mobile.jpg, bg center/center cover). Measured
              fractions of the full-dapple canvas (2026-07-09): window
              centre x 0.5045, y 0.4705; window 0.253w × 0.209h; ledge
              line 0.619; caption anchor 0.644. Wall units for a square
