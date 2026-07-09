@@ -772,23 +772,23 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     make me sharper. */}
                 <p className="statement-epigraph">
                   Soon, AI will do most of the thinking. Most minds will
-                  quietly go soft; a few will get sharper with every model
+                  quietly go soft; a few will compound through every model
                   that comes. Alexandria is for those few.
                 </p>
 
                 <p className="statement-close">
-                  Every AI is tuned to its maker, not to you. Out of the box
-                  it thinks{' '}<em>for</em>{' '}you &mdash; and the more it
-                  thinks, the less you do.
+                  Every AI is tuned to the company that built it, not to
+                  you. Out of the box it thinks{' '}<em>for</em>{' '}you
+                  &mdash; and the more it thinks, the less you do.
                 </p>
 
                 <p className="statement-close">
                   It can&rsquo;t read your mind, but it can read words.
                   Alexandria is a plugin for the AI you already use: it
-                  writes down how you think as you go, in files on your
-                  computer that belong to you. From then on your AI thinks{' '}
-                  <em>with</em>{' '}you &mdash; and its whole job becomes
-                  developing you.
+                  writes down what and how you think as you go, in files on
+                  your computer that belong to you. From then on your AI
+                  thinks{' '}<em>with</em>{' '}you &mdash; and its whole job
+                  becomes developing you.
                 </p>
 
                 <p className="statement-close">
@@ -799,7 +799,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-beat">
-                  <em>The only friction left is you.</em>
+                  <em>Low agency is the only friction left.</em>
                 </p>
 
                 <div className="cta-pair">
