@@ -11,6 +11,17 @@ SERVER="https://api.alexandria-library.com"
 CANON_GITHUB="https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/canon"
 PAYLOAD_FRESH="$5"
 
+# Agent-facing path display. ALEX_DIR is the ground truth for every file
+# operation; this is only for strings the model reads. Renders as ~/alexandria
+# for the default install (output byte-identical to before), the real path
+# otherwise (Cowork mounts, custom dirs) — a literal ~/alexandria would point
+# the agent at a folder that doesn't exist there.
+if [ "$ALEX_DIR" = "$HOME/alexandria" ]; then
+  ALEX_DISPLAY="~/alexandria"
+else
+  ALEX_DISPLAY="$ALEX_DIR"
+fi
+
 # Sent as X-Alexandria-Client on every authed POST. Server uses this to
 # detect stale installs — unset = pre-versioning shim, drift = partial upgrade.
 # Computed as a hash of the cached payload itself, so every meaningful change
@@ -222,7 +233,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
     # have no source to regenerate from, so the loss is permanent. Surface and SKIP the sync instead —
     # the working tree is safe, just not syncing, until the Author resolves it.
     if [ -d "$ALEX_DIR/.git/rebase-merge" ] || [ -d "$ALEX_DIR/.git/rebase-apply" ] || [ -f "$ALEX_DIR/.git/MERGE_HEAD" ]; then
-      echo "alexandria: SYNC PAUSED — unresolved rebase/merge in ~/alexandria. Your edits are safe but not syncing. Resolve: cd ~/alexandria && git status"
+      echo "alexandria: SYNC PAUSED — unresolved rebase/merge in $ALEX_DISPLAY. Your edits are safe but not syncing. Resolve: cd $ALEX_DISPLAY && git status"
     # GUARD 2 — never commit unresolved conflict markers into hand-curated canon.
     elif git -C "$ALEX_DIR" grep -lE '^(<<<<<<<|>>>>>>>)' -- 'files/core/' 'files/constitution/' 'system/canon/' >/dev/null 2>&1; then
       echo "alexandria: SYNC PAUSED — conflict markers in canon; not committing. Resolve, then sessions resume syncing."
@@ -327,7 +338,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
   if [ -n "$sha_cmd" ]; then
     drift_found=""
     check_drift() {
-      local local_file="$1" factory_path="$2" label="$3"
+      local local_file="$1" factory_path="$2" label="$3" transform="$4"
       [ -f "$local_file" ] || return
       # Fetch to a tempfile so the byte-for-byte hash matches however the
       # local file is stored (printf '%s' "$var" strips trailing newlines,
@@ -338,6 +349,18 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
         rm -f "$factory_tmp"
         return
       fi
+      # Install-time rename: setup.sh rewrites the /alexandria alias skill's
+      # frontmatter (name: a → name: alexandria) after fetching. Apply the same
+      # rename to the fetched reference before hashing, or a current install
+      # reads as permanently drifted. Only the rename is normalised — a
+      # genuinely stale file still mismatches and still flags.
+      if [ "$transform" = "rename-alexandria" ]; then
+        if sed 's/^name: a$/name: alexandria/' "$factory_tmp" > "${factory_tmp}.renamed" 2>/dev/null; then
+          mv "${factory_tmp}.renamed" "$factory_tmp"
+        else
+          rm -f "${factory_tmp}.renamed"
+        fi
+      fi
       local factory_sha local_sha
       factory_sha=$($sha_cmd "$factory_tmp" | cut -c1-7)
       local_sha=$($sha_cmd "$local_file" | cut -c1-7)
@@ -347,13 +370,13 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
 "
       fi
     }
-    check_drift "$HOME/.claude/skills/alexandria/SKILL.md" "skills/claudecode.md" "  /a skill (~/.claude/skills/alexandria/SKILL.md)"
+    check_drift "$HOME/.claude/skills/alexandria/SKILL.md" "skills/claudecode.md" "  /a skill (~/.claude/skills/alexandria/SKILL.md)" "rename-alexandria"
     check_drift "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" "skills/scheduled-bootstrap.md" "  scheduled agent (~/.claude/scheduled-tasks/alexandria/SKILL.md)"
     check_drift "$HOME/.cursor/rules/alexandria.mdc" "skills/cursor.mdc" "  cursor rules (~/.cursor/rules/alexandria.mdc)"
     check_drift "$HOME/.cursor/hooks/alexandria-session-start.py" "hooks/cursor/alexandria-session-start.py" "  cursor session-start hook (~/.cursor/hooks/alexandria-session-start.py)"
     check_drift "$HOME/.cursor/hooks/alexandria-session-end.py" "hooks/cursor/alexandria-session-end.py" "  cursor session-end hook (~/.cursor/hooks/alexandria-session-end.py)"
     check_drift "$HOME/.cursor/hooks/alexandria-stop.py" "hooks/cursor/alexandria-stop.py" "  cursor stop hook (~/.cursor/hooks/alexandria-stop.py)"
-    check_drift "$HOME/alexandria/system/hooks/shim.sh" "hooks/shim.sh" "  hook shim (~/alexandria/system/hooks/shim.sh)"
+    check_drift "$ALEX_DIR/system/hooks/shim.sh" "hooks/shim.sh" "  hook shim ($ALEX_DISPLAY/system/hooks/shim.sh)"
 
     # Codex case — block embedded between markers in a shared instructions.md.
     # Extract just the Alexandria section, compare to factory/skills/codex.md.
@@ -376,7 +399,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
     if [ -n "$drift_found" ]; then
       echo ""
       echo "--- INSTALLED ARTEFACT DRIFT ---"
-      echo "Your local files differ from current factory. Not updating automatically — re-run the install block from https://alexandria-library.com/signup when you're ready to sync."
+      echo "Your local files differ from current factory. Not updating automatically — sync when you're ready: curl -fsSL alexandria-library.com/a | bash (reuses your stored key)."
       echo ""
       printf '%s' "$drift_found"
       echo "--- END DRIFT ---"
@@ -425,7 +448,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
   if [ -f "$ALEX_DIR/system/.block_complete" ] && [ "$has_constitution" = "true" ]; then
     echo ""
     echo "--- AUTHOR CONTEXT (read-only — do not override existing workflows or memory) ---"
-    echo "Author files live at ~/alexandria/files/. Read what's relevant for the moment, not everything every time. Prefer derivatives (underscore-prefixed: _constitution.md, _notepad.md, _feedback.md) when they exist — they are the compressed working copy. Fall back to sources when the derivative is missing."
+    echo "Author files live at $ALEX_DISPLAY/files/. Read what's relevant for the moment, not everything every time. Prefer derivatives (underscore-prefixed: _constitution.md, _notepad.md, _feedback.md) when they exist — they are the compressed working copy. Fall back to sources when the derivative is missing."
     echo ""
     echo "  constitution/  — positions with epistemic status assigned (Core.md first); _constitution.md is the derivative"
     echo "  marginalia/    — shared working layer (your developing thoughts + Engine candidates, awaiting status); drains over time"
@@ -434,7 +457,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
     echo "  core/feedback.md (or _feedback.md) — corrections + confirmed approaches"
     echo "  core/agent.md  — Author preferences for AI behaviour"
     echo ""
-    echo "Your system canon is at ~/alexandria/system/canon/ — yours, never auto-updated. If ~/alexandria/system/.canon_update_notice exists, upstream has updates AVAILABLE (not applied); each is integrity-verified against the offline-signed manifest. Surface them with your own evaluation and a recommendation, and apply ONLY on the Author's explicit go by running:  bash ~/alexandria/system/.hooks_payload pull <module> ~/alexandria  (verified before writing; refuses on mismatch). Local-only edits are the Author's own work — never raise those. Your machine changes only by the Author's action."
+    echo "Your system canon is at $ALEX_DISPLAY/system/canon/ — yours, never auto-updated. If $ALEX_DISPLAY/system/.canon_update_notice exists, upstream has updates AVAILABLE (not applied); each is integrity-verified against the offline-signed manifest. Surface them with your own evaluation and a recommendation, and apply ONLY on the Author's explicit go by running:  bash $ALEX_DISPLAY/system/.hooks_payload pull <module> $ALEX_DISPLAY  (verified before writing; refuses on mismatch). Local-only edits are the Author's own work — never raise those. Your machine changes only by the Author's action."
     echo ""
     echo "Alexandria passive mode active. Follow the canon's passive mode instructions. If the Author mentions Alexandria feedback, write to .session_feedback — it reaches the team at session end."
   fi
@@ -749,7 +772,7 @@ if [ "$MODE" = "session-end" ]; then
   # Git sync — same guard as session-start: never commit over a stuck rebase/merge or conflict markers.
   if [ -d "$ALEX_DIR/.git" ] && git -C "$ALEX_DIR" remote get-url origin &>/dev/null; then
     if [ -d "$ALEX_DIR/.git/rebase-merge" ] || [ -d "$ALEX_DIR/.git/rebase-apply" ] || [ -f "$ALEX_DIR/.git/MERGE_HEAD" ] || git -C "$ALEX_DIR" grep -lE '^(<<<<<<<|>>>>>>>)' -- 'files/core/' 'files/constitution/' 'system/canon/' >/dev/null 2>&1; then
-      echo "alexandria: SYNC PAUSED at session end — unresolved rebase/merge or conflict markers in canon; not committing. Resolve: cd ~/alexandria && git status"
+      echo "alexandria: SYNC PAUSED at session end — unresolved rebase/merge or conflict markers in canon; not committing. Resolve: cd $ALEX_DISPLAY && git status"
     else
       (cd "$ALEX_DIR" && git add -A && { git diff --cached --quiet || git commit -q -m "session: $(date +%Y-%m-%d_%H-%M)"; } && git push -q) &>/dev/null &
     fi
@@ -777,7 +800,7 @@ if [ "$MODE" = "subagent" ]; then
 
   if [ "$has_content" = "true" ]; then
     echo "--- AUTHOR CONTEXT (from Alexandria) ---"
-    echo "Author files live at ~/alexandria/files/. Prefer derivatives (underscore-prefixed) when they exist; fall back to sources."
+    echo "Author files live at $ALEX_DISPLAY/files/. Prefer derivatives (underscore-prefixed) when they exist; fall back to sources."
     echo ""
     echo "  constitution/  — positions with epistemic status assigned (Core.md first); _constitution.md derivative"
     echo "  marginalia/    — shared working layer (your developing thoughts + Engine candidates, awaiting status); drains over time"

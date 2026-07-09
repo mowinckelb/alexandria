@@ -39,11 +39,13 @@ else
 fi
 
 if [ -z "$ALEX_DIR" ]; then
-  # Graceful, never silent — and self-bootstrapping. Hook stdout lands in the
-  # model's context, so speak to the agent: it can run the open setup script
-  # right here (Cowork/Desktop sessions can run bash — no terminal needed).
+  # Graceful, never silent. Hook stdout lands in the model's context, so speak
+  # to the agent. Don't install into this session: a Cowork VM's $HOME is
+  # ephemeral (lost on teardown) and Desktop chat may have no bash at all.
+  # The install belongs on the Author's real machine; this session just needs
+  # the folder attached.
   if [ "$MODE" = "session-start" ]; then
-    echo "alexandria plugin: installed, but no alexandria folder exists yet. AGENT: tell the Author in one line, and offer to set it up now by running: curl -fsSL alexandria-library.com/a | bash — the open, signature-verified setup (they can read it first: https://github.com/mowinckelb/alexandria/blob/main/factory/setup.sh). If they already have an alexandria folder on another path, ask them to attach it to this session instead."
+    echo "alexandria plugin: installed, but no alexandria folder is visible here. AGENT: tell the Author in one line — if they already have an alexandria folder, attach it to this session; if they've never installed, run the open, signature-verified setup on their real machine first (in a terminal or a coding agent like Claude Code, Cursor, Codex, or Factory): curl -fsSL alexandria-library.com/a | bash — installing inside this session would be lost on teardown. They can read it first: https://github.com/mowinckelb/alexandria/blob/main/factory/setup.sh. Then attach the folder here."
   fi
   exit 0
 fi

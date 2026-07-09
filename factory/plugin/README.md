@@ -15,7 +15,7 @@ claude plugin install alexandria@alexandria
 
 ## Claude Desktop / Cowork
 
-1. Settings → Plugins → Add marketplace → `mowinckelb/alexandria` → install **alexandria**.
-2. In Cowork, attach your `alexandria` folder to the session (Cowork runs in a VM — it can only see folders you attach).
+1. Install the plugin via Claude Code on the same machine (the `claude plugin` commands above) — plugins are installed through the CLI, not a Desktop settings screen.
+2. In Cowork, attach your `alexandria` folder to the session (Cowork runs in a VM — it can only see folders you attach), then type `/a`.
 
-That's it. Every session in that workspace loads your canon and captures on close, same as Claude Code.
+Desktop and Cowork sessions are manual-start: `/a` with the folder attached. Automatic session capture is Claude Code-only for now.
