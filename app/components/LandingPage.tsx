@@ -665,6 +665,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             <source src={mobileScene ? '/sea-scene-mobile.mp4' : '/sea-scene.mp4'} type="video/mp4" />
           </video>
         )}
+        {/* Scene veil — a wash of the wall's own sunlit cream over the
+            whole scene (PNG and video alike), beneath the type. The
+            photoreal window was the one crisp, full-contrast object on
+            an otherwise faint page and read as pasted-on ("too
+            artificial… needs to be blended into the page", founder
+            2026-07-09); the veil compresses the scene's dynamic range
+            toward the page's. One knob: --scene-veil. */}
+        <span className="scene-veil" aria-hidden />
         {/* Stage canvas — pixel-locked 1440×900 frame uniformly scaled to
             the viewport via --stage-scale-top. Inside this wrapper everything
             is absolute pixels, so type, drop-caps, and corner marks never
@@ -1318,6 +1326,19 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .breeze-video.is-ready {
           opacity: 1;
+        }
+        /* Scene veil — see the JSX note. Sits above the PNG background
+           and the breeze video (z 0), below FrontFilm (z 2) and the
+           stage (.top-inner z 1, later in DOM). The colour is the
+           wall's own bright plaster sampled from the poster, so the
+           wash reads as sun haze, not grey fog. */
+        .scene-veil {
+          position: absolute;
+          inset: 0;
+          background: #d9d3bf;
+          opacity: var(--scene-veil, 0.35);
+          pointer-events: none;
+          z-index: 1;
         }
         /* Reduced-motion: keep the still frontispiece. */
         @media (prefers-reduced-motion: reduce) {
