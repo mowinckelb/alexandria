@@ -1280,15 +1280,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              structure; v3 restored a real sea (hazy horizon, depth
              gradient, sun glitter) but its blue was still crisp against
              the cream page; a CSS veil over v3 was rejected ("make the
-             actual colors more muted"). v4 faded the pigment (-0.75
-             desat); founder: "better. much more haze tho" — so v5 is
-             full atmosphere, baked into poster and loop alike:
-             blues/cyans cut to a ghost (huesaturation -0.95 c+b
-             strength 16), shadow lift 0.12, optical soften (gblur
-             1.2), a 38% wash of the wall's cream (0xdcd6c2) over the
-             frame. The sea reads through luminance — horizon, ripples,
-             glitter — a silver whisper in the page's own milk. The
-             fallback ladder lives in git. The lesson pair: fog fails
+             actual colors more muted"). v4 faded the pigment; v5 added
+             full atmosphere; v6 (founder: "even more… edges just
+             blended in… almost like the memory of the ocean") is the
+             memory itself, baked into poster and loop alike: chroma
+             cut to nothing (huesaturation -0.98 c+b + global 0.8),
+             shadow lift 0.15, gblur 2.0, a bloom pass (screen-blend of
+             a sigma-25 blur at 35%) so the window's light bleeds over
+             its own edges, and a 45% wash of the wall's cream
+             (0xdcd6c2). Floor found and held: one notch further (M2,
+             in git history) dissolves the window entirely and the page
+             loses its focal object — the apparition must stay findable.
+             The fallback ladder lives in git. The lesson pair: fog fails
              (no structure), crisp blue fails (full chroma); haze over
              structure is the register. (Pharos lighthouse and
              Creation-of-Adam were cut earlier — image anti-reflex,
