@@ -45,6 +45,10 @@ SIGNED_FILES=(
   factory/scripts/capture_resolver.py
   factory/systems/capture-pipeline.md
   factory/migrate.sh
+  factory/plugin/hooks/hooks.json
+  factory/plugin/scripts/plugin-shim.sh
+  factory/plugin/scripts/shim.sh
+  factory/plugin/skills/a/SKILL.md
 )
 
 # ── Coverage enforcement (permanent fix: no executable/steering file ships unsigned) ──

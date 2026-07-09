@@ -172,38 +172,59 @@ if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude 
   # live instructions stay pinned to the current canonical playbook.
   fetch_factory "skills/scheduled-bootstrap.md" "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" "skills/scheduled-bootstrap.md" yes
 
+  # Delivery: plugin first (marketplace-updated; also active in Claude Desktop /
+  # Cowork), settings.json hooks as fallback for CLIs that predate plugin
+  # support. Both shells hand off to the same signed shim -> payload chain —
+  # identical product, one behavior source. The plugin defers to legacy hooks
+  # when both are present, so this migration can never double-fire.
+  ALEX_PLUGIN_OK=""
+  if command -v claude &>/dev/null && claude plugin --help &>/dev/null 2>&1; then
+    claude plugin marketplace add mowinckelb/alexandria >/dev/null 2>&1 || true
+    if claude plugin install alexandria@alexandria --scope user >/dev/null 2>&1; then
+      ALEX_PLUGIN_OK=1
+    fi
+  fi
+
   node -e "
     const fs = require('fs'), path = require('path');
     const f = path.join(process.env.HOME, '.claude', 'settings.json');
+    const viaPlugin = process.argv[1] === 'plugin';
     let settings = {};
     try { settings = JSON.parse(fs.readFileSync(f, 'utf-8')); } catch {}
     if (!settings.hooks) settings.hooks = {};
     // Match any prior shim/resolver registration regardless of path form (~ vs
     // \$HOME, /system/hooks/shim vs /hooks/shim) — substring on 'alexandria' AND
     // the script name de-dupes across naming variants so reinstalls replace
-    // rather than append.
+    // rather than append. On the plugin path this filter IS the migration:
+    // legacy entries are removed and nothing is re-added.
     const filter = arr => (arr || []).filter(h => {
       const s = JSON.stringify(h).toLowerCase();
       return !(s.includes('alexandria') && (s.includes('shim.sh') || s.includes('capture_resolver')));
     });
     settings.hooks.SessionStart = filter(settings.hooks.SessionStart);
-    settings.hooks.SessionStart.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-start', timeout: 10 }]
-    });
-    settings.hooks.SessionStart.push({
-      hooks: [{ type: 'command', command: 'python3 \$HOME/alexandria/system/scripts/capture_resolver.py 2>/dev/null || true', timeout: 10 }]
-    });
     settings.hooks.SessionEnd = filter(settings.hooks.SessionEnd);
-    settings.hooks.SessionEnd.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-end', timeout: 15 }]
-    });
     settings.hooks.SubagentStart = filter(settings.hooks.SubagentStart);
-    settings.hooks.SubagentStart.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh subagent' }]
-    });
+    if (!viaPlugin) {
+      settings.hooks.SessionStart.push({
+        hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-start', timeout: 10 }]
+      });
+      settings.hooks.SessionStart.push({
+        hooks: [{ type: 'command', command: 'python3 \$HOME/alexandria/system/scripts/capture_resolver.py 2>/dev/null || true', timeout: 10 }]
+      });
+      settings.hooks.SessionEnd.push({
+        hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-end', timeout: 15 }]
+      });
+      settings.hooks.SubagentStart.push({
+        hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh subagent' }]
+      });
+    }
     fs.writeFileSync(f, JSON.stringify(settings, null, 2));
-  " 2>/dev/null
-  echo "  Claude Code: configured"
+  " ${ALEX_PLUGIN_OK:+plugin} 2>/dev/null
+  if [ -n "$ALEX_PLUGIN_OK" ]; then
+    echo "  Claude Code: configured (plugin — also active in Claude Desktop/Cowork)"
+  else
+    echo "  Claude Code: configured (settings hooks)"
+  fi
 fi
 
 # Cursor
