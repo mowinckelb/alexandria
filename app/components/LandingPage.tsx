@@ -670,9 +670,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         </div>
       </div>
 
-      {/* Persistent fresco removed — replaced by .adam-centerpiece inside
-          .top-inner so the Adam visual flows in the layout (no overlap
-          with text), like Fleet's animated centerpiece. */}
+      {/* Persistent fresco removed — the scene (wall + arch window) is
+          the .top-slide background; nothing extra flows in the layout. */}
 
       {/* Persistent watermark — sits across both slides like the nav. */}
       <span className="watermark" aria-hidden>
@@ -1526,11 +1525,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           margin: -8px 0;
         }
         /* Bubble removed — the manifesto sits directly on the cream paper
-           with the Adam fresco visible behind. The fresco's radial
-           vignette already focuses above the text area, so the prose
-           rests in clean cream. The vertical margin rule on .stage-top
-           provides the manuscript anchor; the slide reads as one
-           continuous folio rather than a card on a page. */
+           of the wall scene, so the prose rests in clean cream. The
+           vertical margin rule on .stage-top provides the manuscript
+           anchor; the slide reads as one continuous folio rather than a
+           card on a page. */
 
         /* H1 — title-page composition.
            Three registers, deliberately distinct so each line is
@@ -3052,54 +3050,6 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
         }
 
-        /* ?adam=1 — Creation-of-Adam fresco as an atmospheric layer.
-           Goal: a wall with history, not a hero image. The figures bake
-           INTO the cream paper via multiply blend rather than sitting on
-           top. Sepia + low saturation collapse the original chroma toward
-           the cream warmth so the fresco harmonises rather than competes.
-           A radial vignette mask focuses the gesture (the hands) and
-           fades to invisible at the edges, pulling the eye to the iconic
-           moment and letting the rest decay into atmosphere. Vertically
-           shifted up so the hands sit ABOVE the H1 — a blessing reaching
-           down toward the words, not a body lying behind them. */
-        .adam-bg {
-          position: fixed;
-          inset: 0;
-          background-image: url(/adam.webp);
-          background-position: 50% 30%;
-          background-size: cover;
-          background-repeat: no-repeat;
-          /* Centerpiece, not watermark — the fresco IS the visual hero,
-             like Fleet's world cluster. Opacity tracks the peel: 0.48 on
-             front (visible enough to read as the focal gesture), fades to
-             0.05 on back so the bottom-slide content reads cleanly. */
-          opacity: calc(0.48 - var(--peel-progress, 0) * 0.43);
-          filter: sepia(0.35) saturate(0.7) contrast(1) brightness(1.02);
-          pointer-events: none;
-          z-index: 22;
-          /* Narrow horizontal band at upper portion. Top fades out so the
-             nav sits on clean cream (no figures behind the letter link).
-             Mid is bright so the hands' meeting reads as the focal gesture.
-             Lower fades out so the manifesto + closer sit on clean cream
-             (no anatomy behind the conversion line). The vignette is the
-             editorial decision: the iconic moment, nothing else. */
-          -webkit-mask-image: radial-gradient(ellipse 72% 30% at 50% 32%, #000 0%, rgba(0,0,0,0.95) 42%, rgba(0,0,0,0) 100%);
-          mask-image: radial-gradient(ellipse 72% 30% at 50% 32%, #000 0%, rgba(0,0,0,0.95) 42%, rgba(0,0,0,0) 100%);
-        }
-        @media (max-width: 899px) {
-          /* Mobile: shift the slice to favour Adam — his body fills the
-             left half of the viewport, his arm reaches across to the
-             right where the meeting fingertips appear. The reach IS the
-             gesture; God is implied off-screen. Same upper-band vignette
-             as desktop so the manifesto sits on clean cream below. */
-          .adam-bg {
-            background-position: 28% 50%;
-            background-size: cover;
-            opacity: calc(0.22 - var(--peel-progress, 0) * 0.18);
-            -webkit-mask-image: radial-gradient(ellipse 100% 28% at 55% 30%, #000 0%, rgba(0,0,0,0.9) 45%, rgba(0,0,0,0) 100%);
-            mask-image: radial-gradient(ellipse 100% 28% at 55% 30%, #000 0%, rgba(0,0,0,0.9) 45%, rgba(0,0,0,0) 100%);
-          }
-        }
       `}</style>
     </div>
   );

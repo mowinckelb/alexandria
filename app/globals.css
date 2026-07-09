@@ -1477,7 +1477,7 @@ html.app-shell input:focus {
    discrete state change rather than animating.
 
    The breeze video is paused via JS (LandingPage.tsx); CSS already
-   hides it via @media (prefers-reduced-motion: reduce) on .adam-video. */
+   hides it via @media (prefers-reduced-motion: reduce) on .breeze-video. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
