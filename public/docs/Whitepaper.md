@@ -142,7 +142,7 @@ That’s where Alexandria comes in — the gym your mind has never had. Joining 
 
 It’s worth being precise about what this is *not*. Every platform is adding a memory of you — but a memory is a locker: it stores what you did so the machine can serve you better. A gym is where *you* get stronger. One holds your past for the machine’s use; the other builds the part of you that’s still yours — and that second one is the part you have to choose.
 
-And notice whose side the tool starts on. Every AI you use is tuned by the company that built it — kept agreeable so you keep coming back, pointed at your dependence, not your development. That isn’t sinister; it’s just whose incentives are in the room. The fix isn’t a new AI. It’s turning the one you already have so it faces *you* — reading how you think, working to develop it — with its instructions in your hands, not theirs.
+And notice what the tool is aligned to. Every AI you use is built by a company solving a general problem — tuned to everyone at once, which means perfectly tuned to no one. That isn’t sinister; it’s just what a general tool is. But it leaves a gap only you can close, because only you hold the inside view of you. Closing it is the same practice again: know yourself, put it into words, and hand those words to the machine — so the AI you already have turns to face *you*, with its instructions in your hands. Align it, and it can finally help you properly. Help it help you.
 
 And it builds you the way a gym does: the growth comes from the strain. Most AI does the opposite — it agrees, it flatters, it hands you the answer you already liked, which feels good and changes nothing. This pushes back: it finds the hole in your reasoning and asks the question you were dodging. That friction isn’t a flaw in the tool, it’s the mechanism — a mind only sharpens against resistance, and one that hears nothing but *yes* stays exactly as dull as it started.
 
@@ -254,19 +254,19 @@ The argument is done. Here is the company it forces, said the way I’d say it a
 
 We are focused on one thing: maximising net human value — what humans are worth, and what being human is worth, through what will be an enormously disruptive period.
 
-When AI can do everything, there are two easy ways to fall. Reject it all — keep your principles, lose the decade, stay capped at what one unaided head can do. Or give in to it — hand it your thinking, let it choose, let it make, and slowly stop being anyone. Both waste the human. The way through is to ride it: use the machine to become more yourself, not less.
+When AI can do everything, there are two easy ways to fall. Reject it all — keep your principles, lose the decade, stay capped at what one unaided head can do. Or give in to it — hand it your thinking, let it choose, let it make, and slowly stop being anyone. Both waste the human. We ride the wave like a surfer — out ahead of it, carried by it, still steering — using the machine to become more yourself, not less.
 
-Nobody’s assistant is built for that. Every AI is tuned by the company behind it — kept pleasant, pointed at your dependence. So we re-point it: align the AI you already use to *you* — reading what and how you think, holding one standing instruction — *develop this person.* Into the best version of themselves.
+None of your AIs are against you. They’re built by companies solving a general problem — aligned to everyone at once, which means perfectly aligned to no one. Only you can close that gap, because only you hold the inside view. So the work runs in one line: see the situation clearly; know yourself — what you actually want, where your own incentives point; put that into words a machine can hold; then align the AI you already use with it. Help it help you. Its standing instruction changes from *answer this person* to *develop this person* — into the best version of themselves.
 
-Most of what this needs already exists, in pieces — the models, the agents, the files. Nobody had tied the thread of intention through them. We tie the thread, and we build only the missing pieces.
+Most of what this needs already exists, in pieces — the models, the agents, the files, the tools, the skills. What was missing was the thread. We tie the thread of intention through all of it, end to end, aimed at you — and we build only the pieces that were missing.
 
 What we’re really offering is the philosophy, the path, and the wanting to walk it — honestly, it can be hard — plus the open infrastructure so anyone can walk it their own way.
 
-The mechanics are simple. A plugin for the AI you already use — an open standard designed to be personalised: it captures what and how you think as you go, quietly in the background, with an active mode when you want a sparring partner. Everything else about you is already measured; nothing captures your internal monologue. This does — for you, in files you own. We hand you a starter; you’re meant to make it your own.
+The mechanics are simple. A plugin for the AI you already use — an open standard designed to be personalised. As you work, it holds a mirror up to your thinking: it captures what and how you think, quietly in the background, with an active mode when you want a sparring partner. Everything else about you already has its instrument — your steps, your sleep, your work are all measured. The inside of your head never had one; nothing captures your internal monologue. This does — for you, in files you own. We hand you a starter; you’re meant to make it your own.
 
 And the part you pay for is the community. The methods travel — everyone’s systems, shared, taken, improved — so the practice sharpens as more people walk it. The minds and their works gather — because the point of knowing is doing — in a library that is read, asked, and added to while its authors are still thinking. A network of the people who chose to keep thinking.
 
-That’s the whole company: the philosophy, the tribe, and the infrastructure. Sell the path. Assemble the walkers. Keep the door open, so everyone who wants in, gets in.
+So: a philosophy, a tribe, and the infrastructure that joins them. Offer the path. Gather the tribe. And keep the door open — so everyone who wants in, gets in.
 
 *Benjamin a. Mowinckel*
 
