@@ -67,7 +67,7 @@ export default function StartCTA() {
         {copied ? 'copied — now paste it into your coding agent.' : 'copy, then paste it into your coding agent.'}
       </p>
       <p className="install-where">
-        claude code · cursor · codex · factory. in a chat or cowork? open one of those first &mdash; it needs a terminal.
+        claude code · cursor · codex · factory. on cowork or claude desktop? add the plugin instead: settings &rarr; plugins &rarr; mowinckelb/alexandria. in a plain chat app? it needs one of the above.
       </p>
     </section>
   );

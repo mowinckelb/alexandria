@@ -39,9 +39,11 @@ else
 fi
 
 if [ -z "$ALEX_DIR" ]; then
-  # Graceful, never silent: one line, session-start only.
+  # Graceful, never silent — and self-bootstrapping. Hook stdout lands in the
+  # model's context, so speak to the agent: it can run the open setup script
+  # right here (Cowork/Desktop sessions can run bash — no terminal needed).
   if [ "$MODE" = "session-start" ]; then
-    echo "alexandria: no canon folder found. In Cowork, attach your alexandria folder to this session. New? https://alexandria-library.com"
+    echo "alexandria plugin: installed, but no alexandria folder exists yet. AGENT: tell the Author in one line, and offer to set it up now by running: curl -fsSL alexandria-library.com/a | bash — the open, signature-verified setup (they can read it first: https://github.com/mowinckelb/alexandria/blob/main/factory/setup.sh). If they already have an alexandria folder on another path, ask them to attach it to this session instead."
   fi
   exit 0
 fi

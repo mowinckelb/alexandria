@@ -64,4 +64,4 @@ jobs:
           cd $FAKE3/empty
           export HOME=$FAKE3/home CLAUDE_PLUGIN_ROOT=$GITHUB_WORKSPACE/factory/plugin
           OUT=$(bash $GITHUB_WORKSPACE/factory/plugin/scripts/plugin-shim.sh session-start)
-          echo "$OUT" | grep -q "attach your alexandria folder"
+          echo "$OUT" | grep -q "no alexandria folder exists yet"
