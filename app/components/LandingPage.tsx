@@ -761,17 +761,21 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     filenames). The collective is deliberately one beat, not
                     a paragraph: the post-install block makes the join ask
                     at peak conviction, so the page doesn't pre-explain. */}
+                {/* Third pass, 2026-07-09 — the EASY register (founder axiom:
+                    easy = short simple / medium = long simple or short
+                    complex / hard = long complex; letter is hard, whitepaper
+                    is medium, the website MUST be easy — zero cognitive
+                    effort to 80/20 the company). Staircase: fork, diagnosis,
+                    the concrete what, offer, dare. The 80/20 a zero-context
+                    reader must leave holding: a plugin for the AI I already
+                    use; learns how I think; files I own; free; makes my AI
+                    make me sharper. */}
                 <p className="statement-epigraph">
-                  Soon, AI will do most of the thinking. Most minds
-                  will atrophy quietly; a few will compound through
-                  every model that comes. Alexandria is for those few.
+                  Soon, AI will do most of the thinking. Most minds will
+                  quietly go soft; a few will get sharper with every model
+                  that comes. Alexandria is for those few.
                 </p>
 
-                {/* Recomposed 2026-07-09 (spine, second pass): the block is
-                    a staircase — fork (above), diagnosis (whose side the AI
-                    is on), the flip (words -> with you -> develops you),
-                    offer, dare. Allegiance precedes mechanism because it is
-                    the question the mechanism answers. */}
                 <p className="statement-close">
                   Every AI is tuned to its maker, not to you. Out of the box
                   it thinks{' '}<em>for</em>{' '}you &mdash; and the more it
@@ -779,21 +783,23 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-close">
-                  It can&rsquo;t read your mind, but it can read words. Put
-                  your thoughts into words and it can think{' '}<em>with</em>
-                  {' '}you &mdash; its whole job becomes developing you. An{' '}
-                  <em>&ldquo;alexandria.md&rdquo;</em>{' '}makes that automatic.
+                  It can&rsquo;t read your mind, but it can read words.
+                  Alexandria is a plugin for the AI you already use: it
+                  writes down how you think as you go, in files on your
+                  computer that belong to you. From then on your AI thinks{' '}
+                  <em>with</em>{' '}you &mdash; and its whole job becomes
+                  developing you.
                 </p>
 
                 <p className="statement-close">
                   You don&rsquo;t have to buy the vision, only the smallest
-                  piece of it: that augmenting how you think could be worth
-                  something. That costs five minutes and nothing else. Delete
-                  the file, and it&rsquo;s like it never happened.
+                  piece of it: that a sharper you could be worth something.
+                  It&rsquo;s free, it takes five minutes, and it only adds.
+                  Delete the folder, and it&rsquo;s like it never happened.
                 </p>
 
                 <p className="statement-beat">
-                  <em>Low agency is the only friction left.</em>
+                  <em>The only friction left is you.</em>
                 </p>
 
                 <div className="cta-pair">
