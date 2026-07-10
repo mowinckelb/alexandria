@@ -764,38 +764,44 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     filenames). The collective is deliberately one beat, not
                     a paragraph: the post-install block makes the join ask
                     at peak conviction, so the page doesn't pre-explain. */}
-                {/* Fourth pass, 2026-07-09 evening — the CONVERSION cut.
-                    Founder verdict on the third pass: too long, a little
-                    boring, and the tuned-for-everyone diagnosis added that
-                    morning made it worse — cut whole (its payload, the
-                    with/for flip, survives inside the what-paragraph).
-                    "Low agency is the only friction left" cut too: decode-
-                    required (plain over clever, Taste.md) and the founder
-                    no longer stands behind it. Field data drove all of it:
-                    visitors interested in the company weren't pressing
-                    either button, and some couldn't parse "stay close".
-                    The page's job is to convert — staircase is now
-                    fork → what → offer → dare, the dare says press, and
-                    the corridor dead-ends at the buttons. The 80/20 is
-                    unchanged: a layer on the AI I already use; learns how
-                    I think; files I own; free; develops me. */}
+                {/* Fifth pass, 2026-07-10 — the founder's arc, verbatim
+                    riff distilled (supersedes the fourth-pass conversion
+                    cut, which kept the old soon-AI epigraph). His
+                    staircase: outsourcing is already happening → stakes
+                    are personal ("in a couple years you won't even be
+                    able to think for yourself… change something today")
+                    → the move is aligning your AI to you via your own
+                    instruction file ("you call that an alexandria.md")
+                    → develop-you-instead-of-replace-you IS the concept,
+                    and Alexandria is "a collection of everyone who
+                    agrees" → 90% of the infrastructure exists, we provide
+                    the last 10, and the founder's system is free to
+                    start → dare (unchanged, his words). The old
+                    for-those-few epigraph (founder's own, 2026-06) is in
+                    git + website.md if the elite fork is ever wanted
+                    back. */}
                 <p className="statement-epigraph">
-                  Soon, AI will do most of the thinking. Most minds will
-                  quietly go soft; a few will compound through every model
-                  that comes. Alexandria is for those few.
+                  People are already outsourcing their thinking. Stay on
+                  this road and in a few years you won&rsquo;t be able to
+                  think for yourself. If you don&rsquo;t want that, change
+                  something today.
                 </p>
 
                 <p className="statement-close">
-                  It&rsquo;s a layer on the AI you already use. It writes
-                  down what and how you think as you go &mdash; in files on
-                  your own computer, yours to keep. From then on your AI
-                  thinks{' '}<em>with</em>{' '}you, not{' '}<em>for</em>{' '}
-                  you &mdash; and its whole job becomes developing you.
+                  The change: write down what and how you think, in a file
+                  on your own computer &mdash; your{' '}
+                  <em>alexandria.md</em>{' '}&mdash; and every AI you use
+                  reads it. From then on it{' '}<em>develops</em>{' '}you
+                  instead of{' '}<em>replacing</em>{' '}you. Alexandria is
+                  the idea, and everyone who agrees.
                 </p>
 
                 <p className="statement-close">
-                  It&rsquo;s free. It takes five minutes. Delete the folder,
-                  and it&rsquo;s like it never happened.
+                  Ninety percent of what this takes already exists; we
+                  provide the last ten. To get you started, the
+                  founder&rsquo;s system is free &mdash; five minutes,
+                  fully private, fully yours. Delete the folder and
+                  it&rsquo;s like it never happened.
                 </p>
 
                 <p className="statement-beat">
@@ -817,8 +823,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     <Link href="/follow" className="lr-cta lr-cta-ghost">
                       keep me posted
                     </Link>
+                    {/* Sub carries what you get, in the founder's first
+                        person ("I'll send stuff, post all the updates and
+                        behind the scenes things" — 2026-07-10 riff). */}
                     <span className="cta-sub">
-                      ten seconds &mdash; just your email
+                      just your email &mdash; updates, behind the scenes
                     </span>
                   </div>
                 </div>
