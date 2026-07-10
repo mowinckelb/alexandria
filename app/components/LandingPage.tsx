@@ -1280,9 +1280,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              production, but the water slightly more blue. That's it."
              Shipped recipe = the v6 "memory" chain with ONLY the
              blue-cut relaxed, applied to poster + loop from the
-             ungraded source: huesaturation -0.45 on c+b strength 16
-             (v6 was -0.98, v8 -0.60; "a touch more blue" twice —
-             the delta IS the blue), global
+             ungraded source: huesaturation -0.15 on c+b strength 16
+             (the blue knob; ladder to date -0.98 → -0.60 → -0.45 →
+             -0.15, each founder "touch" ≈ 0.15), global
              eq saturation 0.8, shadow lift 0.15, gblur 2.0, sigma-25
              bloom screen-blended at 35% (edges melt under their own
              light), 45% wash of the wall's cream (0xdcd6c2). The c+b
