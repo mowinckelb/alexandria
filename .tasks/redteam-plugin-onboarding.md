@@ -1,3 +1,15 @@
+# SUPERSEDED 2026-07-09 evening — THE PLUGIN IS RETIRED
+
+Founder decision after hands-on Cowork testing: the marketplace plugin added nothing the single `curl … | bash` doesn't already do (Claude Code + Desktop code tab are covered by setup.sh's `~/.claude/settings.json` hooks; Cursor/Codex/Factory wired directly), and it could not make Cowork passive (Cowork = own account-synced registry, per-session folder grants, no session hooks — Anthropic sandbox, unfixable by us). So it was pure complexity — every plugin bug below lived in that machinery.
+
+**Now:** one curl wires everything; plugin parked at `factory/_parked-plugin/` (inert, documented, reactivatable if Anthropic ever fires hooks in Cowork). Commits `f3e9c61` (mechanism: park + setup.sh pure-hooks + uninstall migration + ship.sh/CI) and the docs/site scrub. Canon a3 updated (4th correction). User-zero migrated + verified: plugin uninstalled, settings hooks fire, fresh session loads AUTHOR CONTEXT, zero drift.
+
+**Fire (founder, needs signing passphrase):** `cd ~/alexandria-inc/public/code && git pull --rebase --autostash origin main && bash factory/ship.sh "retire plugin: one curl delivery"` (re-signs manifest without the 4 plugin entries — signing CI red until this runs), then `cd server && npx wrangler deploy`, then push the private repo a3 commit. Workflow rename (plugin.yml→signing.yml) may need `gh auth refresh -s workflow` if push 403s.
+
+The red-team history below is retained for the record — most of its plugin-specific fixes are now moot (the code is parked), but the SERVER security fixes (install-token single-use, feedback rate limits) and the onboarding-copy/verification findings remain live and shipped.
+
+---
+
 # Red-team sweep: plugin + onboarding (2026-07-09)
 
 **Status:** first wave SHIPPED + DEPLOYED + verified live (ship `b9d2d9c`, Worker `81c6d6d5`, Stranger green 3 OSes, plugin chain live-probed on user zero). /optimise second pass added two commits, `2f0e6f7` (plugin-shim defer fix, SIGNED SET) + `34ec04f` (setup registry-truth) — **awaiting one more founder `bash factory/ship.sh` fire** (never push.sh: 2f0e6f7 touches a signed file; CI signing gate red until re-signed). Architecture ref: `../CLAUDE.md`.
