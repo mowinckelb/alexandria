@@ -1280,20 +1280,26 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              structure; v3 restored a real sea (hazy horizon, depth
              gradient, sun glitter) but its blue was still crisp against
              the cream page; a CSS veil over v3 was rejected ("make the
-             actual colors more muted"). v4 faded the pigment; v5 added
-             full atmosphere; v6 (founder: "even more… edges just
-             blended in… almost like the memory of the ocean") is the
-             memory itself, baked into poster and loop alike: chroma
-             cut to nothing (huesaturation -0.98 c+b + global 0.8),
-             shadow lift 0.15, gblur 2.0, a bloom pass (screen-blend of
-             a sigma-25 blur at 35%) so the window's light bleeds over
-             its own edges, and a 45% wash of the wall's cream
-             (0xdcd6c2). Floor found and held: one notch further (M2,
-             in git history) dissolves the window entirely and the page
-             loses its focal object — the apparition must stay findable.
-             The fallback ladder lives in git. The lesson pair: fog fails
-             (no structure), crisp blue fails (full chroma); haze over
-             structure is the register. (Pharos lighthouse and
+             actual colors more muted"). v4-v6 muted global colour in
+             steps and were all still "pasted on top"; v7 is the settled
+             treatment, calibrated against the old Adam fresco the
+             founder named as the reference ("the faint haziness of the
+             Michelangelo image… but for the ocean"). Measured Adam
+             physics: all content within ~6% luminance of the wall, in
+             the wall's own sepia hue (H~35 S~0.10-0.14), niche edges
+             eaten by glow. Recipe (offline, baked into poster + loop
+             from the ungraded source): window zone only (feathered
+             elliptical mask; wall + leaf shadows stay original) →
+             grayscale → luminance compressed into the wall band
+             (curves 0/0.62 0.3/0.73 0.6/0.83 1/0.95 desktop; mobile
+             slightly darker floor, tighter feather, lighter blur) →
+             sepia remap (colorchannelmixer 0.99/0.955/0.875) → gblur
+             1.2 + sigma-30 bloom at 22% so the frame's light bleeds
+             over its own edges. The sea is IN the plaster now — a
+             fresco of the ocean, not a view — which is what finally
+             kills the pasted-on read. The lesson pair: fog fails (no
+             structure), crisp blue fails (full chroma); legible
+             structure in the wall's own pigment is the register. (Pharos lighthouse and
              Creation-of-Adam were cut earlier — image anti-reflex,
              design.md.) Poster is JPEG: frame zero of the loop, ~10x
              lighter than PNG for first paint. */
