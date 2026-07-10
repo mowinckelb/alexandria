@@ -92,7 +92,7 @@ If the offline key is ever compromised or suspected compromised, the maintainer 
 
 This is intentionally manual — automated key-rotation infrastructure would itself become a new attack surface.
 
-## Plugin delivery (Claude Code / Claude Desktop / Cowork)
+## Plugin delivery (Claude Code / Claude Desktop)
 
 The `alexandria` plugin (`factory/plugin/`, served from this repo's marketplace manifest at `.claude-plugin/marketplace.json`) is a delivery shell, not a second product. Its hook entries call `plugin-shim.sh`, which locates the Author's alexandria folder and hands off to the same `shim.sh` → signature-verified `payload.sh` chain documented above. All evolving behavior remains inside the signed payload.
 

@@ -11,7 +11,7 @@
     {
       "name": "alexandria",
       "source": "./factory/plugin",
-      "description": "An AGENTS.md for your mind \u2014 your AI reads it, writes to it, and develops you with it. Files you own; works across Claude Code, Claude Desktop, and Cowork.",
+      "description": "An AGENTS.md for your mind \u2014 your AI reads it, writes to it, and develops you with it. Files you own; works across Claude Code and Claude Desktop.",
       "author": {
         "name": "Benjamin a. Mowinckel",
         "url": "https://alexandria-library.com"

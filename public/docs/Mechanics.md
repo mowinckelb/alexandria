@@ -1,6 +1,6 @@
 # Mechanics
 
-You are about to run a curl command that puts files on your machine, modifies your ai config, and pulls live code from GitHub on every session. Read this once. If anything here doesn't match the scripts, don't run it. (Using Claude Desktop or Cowork? The same code reaches those apps as a plugin, installed by the same setup run once on your machine — see [The plugin](#the-plugin-claude-code-claude-desktop-cowork) below. Everything on this page still applies.)
+You are about to run a curl command that puts files on your machine, modifies your ai config, and pulls live code from GitHub on every session. Read this once. If anything here doesn't match the scripts, don't run it. (Using Claude Desktop? The same code reaches it as a plugin, installed by the same setup run once on your machine — see [The plugin](#the-plugin-claude-code-claude-desktop) below. Everything on this page still applies.)
 
 ## TL;DR for the auditor
 
@@ -80,7 +80,7 @@ The `~/.config/git/allowed_signers` file (used by `git verify-commit` for your o
 
 | File | Change | Inspect |
 |---|---|---|
-| `~/.claude/plugins/` | Preferred path: `setup.sh` installs the `alexandria` plugin via the Claude plugin system (marketplace `mowinckelb/alexandria` — the same public repo; plugin at `factory/plugin/`). Registers the same 3 hooks + the `/a` skill; also active in Claude Desktop and Cowork. | `claude plugin list` |
+| `~/.claude/plugins/` | Preferred path: `setup.sh` installs the `alexandria` plugin via the Claude plugin system (marketplace `mowinckelb/alexandria` — the same public repo; plugin at `factory/plugin/`). Registers the same 3 hooks + the `/a` skill; also active in Claude Desktop's code tab. | `claude plugin list` |
 | `~/.claude/settings.json` | Fallback, only on CLIs that predate plugins: adds 3 hook entries (SessionStart, SessionEnd, SubagentStart) pointing to the shim. On the plugin path, prior alexandria hook entries are removed instead — and the plugin defers to any that remain, so nothing ever fires twice. | `cat ~/.claude/settings.json` |
 | `~/.cursor/hooks.json` | Only if Cursor detected. Adds 3 hook entries pointing to the Python wrappers below. | `cat ~/.cursor/hooks.json` |
 | `~/.cursor/hooks/alexandria-{session-start,session-end,stop}.py` | Only if Cursor detected. Three small Python files that just shell out to the shim. | `cat ~/.cursor/hooks/alexandria-*.py` |
@@ -92,22 +92,23 @@ The `~/.config/git/allowed_signers` file (used by `git verify-commit` for your o
 
 **Not modified:** shell rc files (`.zshrc`, `.bashrc`, `.profile`), system `PATH`, sudoers, system services, anything outside `~/alexandria/`, `~/.claude/`, `~/.cursor/`, `~/.codex/`, `~/.factory/`, and the launchd/cron entries above. The repo-local git config inside `~/alexandria/` is set; your global git config is not.
 
-### The plugin (Claude Code, Claude Desktop, Cowork)
+### The plugin (Claude Code, Claude Desktop)
 
-The public repo doubles as a Claude plugin marketplace (`.claude-plugin/marketplace.json` at the root; the plugin itself at `factory/plugin/`). The plugin is packaging, not a new code path: a JSON hook manifest registering the same three hooks, one bash wrapper (`plugin-shim.sh`), and the `/a` skill. The wrapper holds no behavior of its own. It does three things: (1) exits if legacy settings-hook entries are present, so nothing fires twice; (2) locates your `~/alexandria/` folder — on the host directly, or inside Cowork's VM via the folder you attached to the session; (3) hands off to the same signature-verified shim → payload chain described below. Every check on this page — manifest signature, hash pinning, cache cutoff — applies identically.
+The public repo doubles as a Claude plugin marketplace (`.claude-plugin/marketplace.json` at the root; the plugin itself at `factory/plugin/`). The plugin is packaging, not a new code path: a JSON hook manifest registering the same three hooks, one bash wrapper (`plugin-shim.sh`), and the `/a` skill. The wrapper holds no behavior of its own. It does three things: (1) exits if legacy settings-hook entries are present, so nothing fires twice; (2) locates your `~/alexandria/` folder — on the host directly, or an attached/mounted copy visible from the session (future-proofing for sandboxed surfaces); (3) hands off to the same signature-verified shim → payload chain described below. Every check on this page — manifest signature, hash pinning, cache cutoff — applies identically.
 
 Install paths:
 
 - **Claude Code:** nothing to do — `setup.sh` installs the plugin automatically (settings-hooks fallback on CLIs that predate plugins). Manual: `claude plugin marketplace add mowinckelb/alexandria && claude plugin install alexandria@alexandria`.
-- **Claude Desktop / Cowork:** no in-app install — run the setup once on your machine via a coding agent (Claude Code, Cursor, Codex, Factory); the plugin it registers also loads in Desktop and Cowork. In Cowork, attach your `alexandria` folder to the session and type `/a` — Cowork sessions only see folders you attach.
+- **Claude Desktop:** no in-app install — run the setup once on your machine via a coding agent (Claude Code, Cursor, Codex, Factory); the plugin it registers also loads in Desktop's **code tab**, which runs the same engine as Claude Code — automatic load and capture, nothing more to do. (The chat tab has no local file access.)
+- **Cowork:** not yet — Cowork keeps its own skills/plugins registry and does not load Claude Code plugins (verified hands-on 2026-07-09; matches Anthropic's issue tracker). When Anthropic wires plugins into Cowork, this same plugin covers it — nothing to reinstall.
 
-Result: session-start context load and session-end capture run in every Claude Code, Claude Desktop, and Cowork session. Cursor, Codex, and Factory are unchanged — `setup.sh` wires them directly. One behavior source (the signed payload), N dumb shells; the sovereign folder is the interop bus between all of them.
+Result: session-start context load and session-end capture run in every Claude Code and Claude Desktop code-tab session. Cursor, Codex, and Factory are unchanged — `setup.sh` wires them directly. One behavior source (the signed payload), N dumb shells; the sovereign folder is the interop bus between all of them.
 
 ## The bootstrap-from-main model
 
 This is the most important property to understand.
 
-The shim at `~/alexandria/system/hooks/shim.sh` is installed by `setup.sh` (re-running setup will overwrite it; sessions never refetch the shim). On every session start — Claude Code, Claude Desktop, and Cowork reach it via the plugin's wrapper; Cursor via its Python wrappers — the shim does this:
+The shim at `~/alexandria/system/hooks/shim.sh` is installed by `setup.sh` (re-running setup will overwrite it; sessions never refetch the shim). On every session start — Claude Code and Claude Desktop reach it via the plugin's wrapper; Cursor via its Python wrappers — the shim does this:
 
 1. Fetches `factory/hooks/payload.sh` from `main` over HTTPS.
 2. Fetches `factory/manifest.txt` and `factory/manifest.txt.sig` over HTTPS.
@@ -220,7 +221,7 @@ curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/hooks/
 # The mutable payload — the one to read most carefully
 curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/hooks/payload.sh
 
-# The plugin wrapper (Claude Code / Desktop / Cowork delivery — hands off to the shim)
+# The plugin wrapper (Claude Code / Desktop delivery — hands off to the shim)
 curl https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/plugin/scripts/plugin-shim.sh
 
 # The signed manifest that gates the payload
@@ -273,7 +274,7 @@ The first should match only the `curl` calls in the network inventory above. The
 # on GitHub stay yours; we never had access to that repo.
 rm -rf ~/alexandria ~/alexandria-fork
 
-# Remove the plugin (Desktop and Cowork read the same plugin registration)
+# Remove the plugin (Desktop reads the same plugin registration)
 claude plugin uninstall alexandria@alexandria 2>/dev/null
 claude plugin marketplace remove alexandria 2>/dev/null
 

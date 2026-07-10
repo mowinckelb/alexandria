@@ -203,8 +203,8 @@ if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude 
   # live instructions stay pinned to the current canonical playbook.
   fetch_factory "skills/scheduled-bootstrap.md" "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" "skills/scheduled-bootstrap.md" yes
 
-  # Delivery: plugin first (marketplace-updated; also active in Claude Desktop /
-  # Cowork), settings.json hooks as fallback for CLIs that predate plugin
+  # Delivery: plugin first (marketplace-updated; also active in Claude Desktop's
+  # code tab), settings.json hooks as fallback for CLIs that predate plugin
   # support. Both shells hand off to the same signed shim -> payload chain —
   # identical product, one behavior source. The plugin defers to legacy hooks
   # when both are present, so this migration can never double-fire.
@@ -263,7 +263,7 @@ if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude 
     fs.writeFileSync(f, JSON.stringify(settings, null, 2));
   " ${ALEX_PLUGIN_OK:+plugin} 2>/dev/null
   if [ -n "$ALEX_PLUGIN_OK" ]; then
-    echo "  Claude Code: configured (plugin — also active in Claude Desktop/Cowork)"
+    echo "  Claude Code: configured (plugin — also active in Claude Desktop's code tab)"
   else
     echo "  Claude Code: configured (settings hooks)"
   fi
@@ -758,13 +758,13 @@ CLAUDE_DETECTED="no"
 if [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; then
   CLAUDE_DETECTED="yes"
   # Two valid states: plugin delivery (preferred — also covers Claude
-  # Desktop/Cowork) or legacy settings.json hooks (older CLIs, or the fallback
+  # Desktop's code tab) or legacy settings.json hooks (older CLIs, or the fallback
   # when plugin verification failed). ALEX_PLUGIN_OK is only set after the
   # registry confirmed the install; re-probe the registry here anyway so the
   # matrix reflects the config Claude actually reads — the plugin detail never
   # shows for a hooks-based config, and vice versa.
   if [ -n "${ALEX_PLUGIN_OK:-}" ] && alex_plugin_installed && [ -f "$HOME/.claude/skills/alexandria/SKILL.md" ]; then
-    STATUS_CLAUDE="ok"; DETAIL_CLAUDE="/a + /alexandria skill + plugin (Claude Code/Desktop/Cowork)"
+    STATUS_CLAUDE="ok"; DETAIL_CLAUDE="/a + /alexandria skill + plugin (Claude Code + Desktop code tab)"
   elif [ -f "$HOME/.claude/settings.json" ] && \
      grep -q "alexandria/system/hooks/shim.sh" "$HOME/.claude/settings.json" 2>/dev/null && \
      [ -f "$HOME/.claude/skills/alexandria/SKILL.md" ]; then
