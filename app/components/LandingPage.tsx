@@ -820,44 +820,66 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     talk about this") — "get your own when you're
                     ready" + the delete line carry it. Dare hinges on
                     the intention, his reduction of the ask. */}
+                {/* Thirteenth pass, same day — decompressed. Founder
+                    ruling (now in Taste.md): "simple does not mean
+                    short and concise. It means low effort, minimal
+                    effort comprehension" — the twelfth pass was too
+                    compact, making the reader decompress fragments
+                    ("Left alone,", "Same AI, two paths.", triple
+                    appositions). Same content, same anchors, rewritten
+                    as full spoken-clean sentences; community split back
+                    to its own paragraph (white space = absorption
+                    time). Longer in words, lower in effort — that is
+                    the trade he asked for. */}
                 <p className="statement-epigraph">
-                  Calculators ended mental math. Left alone, AI will do
-                  the same to the rest of your thinking. Aligned to you,
-                  it does the opposite &mdash; it becomes a gym for your
-                  mind. Same AI, two paths. The fork is today.
+                  Calculators ended mental math. If nothing changes, AI
+                  will quietly do the same to the rest of your thinking.
+                  But if you align it to you, the same AI does the
+                  opposite &mdash; it becomes a gym for your mind. Two
+                  paths, and you pick yours today.
                 </p>
 
                 <p className="statement-close">
-                  AI can develop you in any area &mdash; you just have to
-                  give it the intention. It can already plug into almost
-                  everything about you. The one gap is your thinking:{' '}
-                  <em>what</em>{' '}you think, and{' '}<em>how</em>{' '}
-                  you think. That&rsquo;s data you don&rsquo;t really
-                  have &mdash; and the part of you most at risk of being
-                  lost.
+                  AI can develop you in any area you want &mdash; you
+                  just have to give it the intention. And it can already
+                  plug into almost everything about you. The one gap is
+                  your thinking:{' '}<em>what</em>{' '}you think, and{' '}
+                  <em>how</em>{' '}you think. That data mostly
+                  doesn&rsquo;t exist anywhere &mdash; nothing writes
+                  your thinking down &mdash; which also makes it the
+                  easiest part of you to lose.
                 </p>
 
                 <p className="statement-close">
-                  The Alexandria file closes the gap. One instruction
-                  file &mdash; an AGENTS.md for you. It gives your AI the
-                  intention, then writes your thinking down as you go;
-                  when you want more, you show up and train. A mental gym
-                  that mostly runs itself. And Alexandria is the Strava
-                  around it: everyone who agrees, each file unique to its
-                  author, figuring out the best way together.
+                  The Alexandria file closes that gap. It&rsquo;s one
+                  instruction file &mdash; the same idea as an AGENTS.md,
+                  but for a person. It gives your AI the intention, and
+                  then it writes your thinking down as you go; when you
+                  want more, you sit down and work on your thinking
+                  directly. It&rsquo;s a gym for your mind that mostly
+                  runs itself.
                 </p>
 
                 <p className="statement-close">
-                  Starting is the easy part: the founder&rsquo;s own file
-                  is free &mdash; running shoes, so you can start today
-                  and get your own when you&rsquo;re ready. Five minutes
-                  to set up, as easy to edit as any text file. Delete the
-                  folder and it&rsquo;s like it never happened.
+                  And Alexandria itself is like Strava, but for thinking.
+                  Everyone&rsquo;s file is unique to them, nobody knows
+                  the best way to do this yet, and so everyone figures it
+                  out together &mdash; sharing what works, and what it
+                  makes possible.
+                </p>
+
+                <p className="statement-close">
+                  Starting is the easy part. The founder&rsquo;s own file
+                  is free &mdash; think of it as a pair of running shoes
+                  we hand you, so you can start today and shape your own
+                  over time. It takes five minutes to set up, it&rsquo;s
+                  as easy to edit as any text file, and if you delete the
+                  folder, it&rsquo;s like it never happened.
                 </p>
 
                 <p className="statement-beat">
-                  <em>Agree with the intention? You&rsquo;re already
-                  here &mdash; just press one.</em>
+                  <em>If you agree with the intention, you&rsquo;re
+                  already here &mdash; just press one.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2265,7 +2287,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           margin-right: -32px;
           display: flex;
           flex-direction: column;
-          gap: 18px;
+          /* 18 → 12 (2026-07-10): the decompressed letter (thirteenth
+             pass) pushed the CTAs below the 1000px stage; tightened
+             with the type sizes below so the buttons stay in view. */
+          gap: 12px;
           margin-bottom: var(--lower-block-bottom);
         }
         /* Roman numeral marginalia — four argument beats. The split's
@@ -2367,7 +2392,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-top: 14px;
           transform: translateY(-20px);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 26px;
+          /* 26 → 24 (2026-07-10): fit the decompressed letter. */
+          font-size: 24px;
           line-height: 1.4;
           font-style: italic;
           font-weight: 400;
@@ -2382,8 +2408,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-top: 0;
           transform: none;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 18px;
-          line-height: 1.55;
+          /* 18/1.55 → 17/1.5 (2026-07-10): fit the decompressed letter
+             with the CTAs still above the stage bottom. */
+          font-size: 17px;
+          line-height: 1.5;
           font-style: normal;
           letter-spacing: 0.005em;
           color: var(--theme-fg);
@@ -2520,7 +2548,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            line so the close lands as a destination, not a button
            caption. Adds to the 18px flex gap on right-lower. */
         .right-lower > .cta-pair {
-          margin-top: 30px;
+          margin-top: 22px;
         }
         .cta-block {
           display: flex;
