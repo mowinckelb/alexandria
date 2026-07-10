@@ -790,22 +790,38 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   today.
                 </p>
 
+                {/* Seventh pass, 2026-07-10 — the conviction chain
+                    ("ruthlessly optimize for the conversion… be clear
+                    what the value delta is and what the cost is… the
+                    correct level — covering the company, not one narrow
+                    feature — so they're not surprised by what they
+                    download"). Fixes over the sixth pass: benefit now
+                    lands mid-P1 instead of last; "figure out your own
+                    incentives" cut — it made the start sound like
+                    homework when the download actually hands you a
+                    working system (fair-reflection rule); the cost story
+                    consolidated in P2 (free, five minutes, delete-the-
+                    folder); "who you are and who you're trying to
+                    become" carries incentives/best-version in plain
+                    words. Value delta held implicitly: epigraph = the
+                    don't-side, P1's flip = the do-side, P2 = cost ≈
+                    zero. */}
                 <p className="statement-close">
-                  The change is alignment. Figure out your own incentives
-                  &mdash; what the best version of you looks like &mdash;
-                  and write them into a file every AI you use reads. Call
-                  it your{' '}<em>alexandria.md</em>: an AGENTS.md, but
-                  for personal alignment. From then on your AI{' '}
-                  <em>develops</em>{' '}you, instead of{' '}
-                  <em>replacing</em>{' '}you.
+                  The change: align your AI with you. One file &mdash;
+                  your{' '}<em>alexandria.md</em>, the AGENTS.md of
+                  personal alignment &mdash; holds who you are and who
+                  you&rsquo;re trying to become, and every AI you use
+                  reads it. From then on your AI{' '}<em>develops</em>{' '}
+                  you, instead of{' '}<em>replacing</em>{' '}you.
                 </p>
 
                 <p className="statement-close">
                   Alexandria is that concept, and everyone who agrees.
                   Ninety percent of it already exists; we provide the last
-                  ten. To get you started, the founder&rsquo;s system is
-                  free &mdash; begin with it, make it your own over time,
-                  delete it whenever.
+                  ten &mdash; and to get you started, the founder&rsquo;s
+                  own system, free. Five minutes, and you make it your own
+                  from there. Delete the folder and it&rsquo;s like it
+                  never happened.
                 </p>
 
                 <p className="statement-beat">
