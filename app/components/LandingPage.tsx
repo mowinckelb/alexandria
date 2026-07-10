@@ -831,12 +831,27 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     to its own paragraph (white space = absorption
                     time). Longer in words, lower in effort — that is
                     the trade he asked for. */}
+                {/* Fourteenth pass, same day — the third option. His
+                    corrections: the calculator loss must be PERSONAL
+                    ("it ended your own ability… you lost the ability");
+                    the threat is seductive, not sinister ("it gets the
+                    right answer. It'll be really good. That's why you
+                    let it do it"); and the pitch is the 2×2 escape —
+                    reject AI = no negative but no positive; succumb =
+                    both; Alexandria = "have the positive and not incur
+                    the negative". Close: one decision, made as easy as
+                    possible ("that's the entire product") — carried by
+                    the dare, minus the banned "that's the entire ___"
+                    tic. Gym/align language ceded the epigraph to this
+                    frame; gym lives on in the file paragraph. */}
                 <p className="statement-epigraph">
-                  Calculators ended mental math. If nothing changes, AI
-                  will quietly do the same to the rest of your thinking.
-                  But if you align it to you, the same AI does the
-                  opposite &mdash; it becomes a gym for your mind. Two
-                  paths, and you pick yours today.
+                  Calculators didn&rsquo;t just do the math &mdash; they
+                  took your ability to do it yourself. AI will do the
+                  same to your thinking, because it&rsquo;s really
+                  good &mdash; so you&rsquo;ll let it. Reject it, and you
+                  miss the upside. Hand everything over, and it takes
+                  your thinking with it. Alexandria is for keeping both:
+                  all the upside, none of the loss.
                 </p>
 
                 <p className="statement-close">
@@ -878,8 +893,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-beat">
-                  <em>If you agree with the intention, you&rsquo;re
-                  already here &mdash; just press one.</em>
+                  <em>One decision is all that&rsquo;s left &mdash;
+                  we&rsquo;ve made it as easy as we could. You&rsquo;re
+                  already here: just press one.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2290,7 +2306,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* 18 → 12 (2026-07-10): the decompressed letter (thirteenth
              pass) pushed the CTAs below the 1000px stage; tightened
              with the type sizes below so the buttons stay in view. */
-          gap: 12px;
+          gap: 10px;
           margin-bottom: var(--lower-block-bottom);
         }
         /* Roman numeral marginalia — four argument beats. The split's
@@ -2433,7 +2449,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            the numbered ways. Italic, a half-step up, room around it. */
         .statement-beat .no-orphan { white-space: nowrap; }
         .statement-beat {
-          margin: 4px 0;
+          margin: 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 20px;
           font-style: italic;
@@ -2548,7 +2564,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            line so the close lands as a destination, not a button
            caption. Adds to the 18px flex gap on right-lower. */
         .right-lower > .cta-pair {
-          margin-top: 22px;
+          margin-top: 14px;
         }
         .cta-block {
           display: flex;
