@@ -766,103 +766,49 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     filenames). The collective is deliberately one beat, not
                     a paragraph: the post-install block makes the join ask
                     at peak conviction, so the page doesn't pre-explain. */}
-                {/* Tenth pass, 2026-07-10 — full pass history lives in
-                    website.md § the 2026-07-09/10 conversion passes;
-                    per-pass comments were collapsed to this one.
-                    Standing rulings that bind this block: EASY register
-                    (zero cognitive effort); sell the CONCEPT, never
-                    software — "Alexandria file", no ".md", no AGENTS.md
-                    on this surface; "your thinking — what you think and
-                    how you think" is the settled phrase for the thought
-                    space; no attacking the other path; corridor dead-
-                    ends at the buttons. This pass: the fork goes
-                    POSITIVE — two paths stated flat (no people-labels,
-                    no "if you're not one of them"), calculator precedent
-                    makes the atrophy claim land instead of asserted, and
-                    P1 becomes his chain: aligning = just personal
-                    context → almost all already connectable → the one
-                    unreached place is your thinking → add the final
-                    piece + hand it the intention → everything aligned,
-                    everything automatic. The mental gym was his spec for
-                    how obvious the value must feel, not page copy. */}
-                {/* Eleventh pass, same day — idiot-proof ("so clear and
-                    so simple that anyone reading it at a normal
-                    digestion pace just reads it, and it's like: oh,
-                    that makes sense, I'll try it"). Calculator cut —
-                    his own escalation replaced it ("people are
-                    outsourcing more and more… what happens if you just
-                    never stop? And it goes all the way") — zero
-                    analogy-mapping required. Every sentence shortened
-                    to one thought; "chain" metaphor and double
-                    appositives removed; "personal context" the handle
-                    gave way to "your AI just needs to know you" (same
-                    meaning, no jargon). Dare closes the interest→press
-                    gap with his logic, non-attacking: agree + easy +
-                    already here → just press ("it makes no sense to
-                    agree with all of it… and then not do it when
-                    you're already here. Just press it."). */}
-                {/* Twelfth pass, same day — the anchors come aboard
-                    ("maybe we even mention Strava. Maybe we mention
-                    AGENTS.md. Maybe we mention calculators… rich
-                    reference points so they can anchor the mindset
-                    instead of it just being pure floating"). One anchor
-                    per beat, sentences still one-thought: calculators
-                    (epigraph, the felt precedent), gym (epigraph + the
-                    mostly-runs-itself line — passive capture + active
-                    sessions, honest), AGENTS.md (the file), Strava (the
-                    community — converges the page onto a4's locked
-                    "Strava for thought" + mental-gym stack), running
-                    shoes (the free starter, his metaphor). Honesty
-                    call: his "ten seconds to add" stayed OFF — install
-                    is five minutes and the fair-reflection rule wins;
-                    removal really is instant (delete the folder). The
-                    product/company decoupling stays implicit ("we don't
-                    talk about this") — "get your own when you're
-                    ready" + the delete line carry it. Dare hinges on
-                    the intention, his reduction of the ask. */}
-                {/* Thirteenth pass, same day — decompressed. Founder
-                    ruling (now in Taste.md): "simple does not mean
-                    short and concise. It means low effort, minimal
-                    effort comprehension" — the twelfth pass was too
-                    compact, making the reader decompress fragments
-                    ("Left alone,", "Same AI, two paths.", triple
-                    appositions). Same content, same anchors, rewritten
-                    as full spoken-clean sentences; community split back
-                    to its own paragraph (white space = absorption
-                    time). Longer in words, lower in effort — that is
-                    the trade he asked for. */}
-                {/* Fourteenth pass, same day — the third option. His
-                    corrections: the calculator loss must be PERSONAL
-                    ("it ended your own ability… you lost the ability");
-                    the threat is seductive, not sinister ("it gets the
-                    right answer. It'll be really good. That's why you
-                    let it do it"); and the pitch is the 2×2 escape —
-                    reject AI = no negative but no positive; succumb =
-                    both; Alexandria = "have the positive and not incur
-                    the negative". Close: one decision, made as easy as
-                    possible ("that's the entire product") — carried by
-                    the dare, minus the banned "that's the entire ___"
-                    tic. Gym/align language ceded the epigraph to this
-                    frame; gym lives on in the file paragraph. */}
+                {/* Fifteenth pass, 2026-07-10 — full pass history lives
+                    in website.md (§ the 2026-07-09/10 conversion
+                    passes); per-pass comments collapse to this one.
+                    Standing rulings that bind this block: simple =
+                    LOW-EFFORT comprehension, not brevity (Taste.md —
+                    compression is a difficulty); hold the reader's hand,
+                    stay on message, no side-beats; sell the CONCEPT —
+                    "Alexandria file"; anchors aboard (calculators, gym,
+                    AGENTS.md, Strava, running shoes — one per beat);
+                    never attack the reader or the other path; five
+                    minutes stays (fair reflection) over "ten seconds";
+                    corridor dead-ends at the buttons. This pass: the
+                    fourteenth epigraph was "too compressed" — it now
+                    carries ONLY the calculator story; the seduction +
+                    three options walk slowly in body type; "easiest
+                    part of you to lose" and "what it makes possible"
+                    trimmed as off-message. Fold-check after every copy
+                    change: .see/measure.mjs — cta bottom must stay
+                    under 900. */}
                 <p className="statement-epigraph">
-                  Calculators didn&rsquo;t just do the math &mdash; they
-                  took your ability to do it yourself. AI will do the
-                  same to your thinking, because it&rsquo;s really
-                  good &mdash; so you&rsquo;ll let it. Reject it, and you
-                  miss the upside. Hand everything over, and it takes
-                  your thinking with it. Alexandria is for keeping both:
-                  all the upside, none of the loss.
+                  When calculators arrived, we let them do the
+                  math &mdash; and we lost the ability to do it
+                  ourselves. AI is about to do the same to your thinking.
                 </p>
 
                 <p className="statement-close">
-                  AI can develop you in any area you want &mdash; you
-                  just have to give it the intention. And it can already
-                  plug into almost everything about you. The one gap is
-                  your thinking:{' '}<em>what</em>{' '}you think, and{' '}
-                  <em>how</em>{' '}you think. That data mostly
-                  doesn&rsquo;t exist anywhere &mdash; nothing writes
-                  your thinking down &mdash; which also makes it the
-                  easiest part of you to lose.
+                  And it will happen for the simplest reason: AI is
+                  really good, so you&rsquo;ll let it. That leaves a
+                  choice. Reject AI, and you give up everything it
+                  offers. Let it do all your thinking, and you slowly
+                  lose the ability to think for yourself. Alexandria is
+                  the third option: use AI fully, and have it{' '}
+                  <em>develop</em>{' '}your thinking instead of{' '}
+                  <em>replacing</em>{' '}it.
+                </p>
+
+                <p className="statement-close">
+                  To do that, your AI needs the intention, and it needs
+                  to know you. Knowing you is nearly solved &mdash; it
+                  can already plug into almost everything about you. The
+                  one gap is your thinking:{' '}<em>what</em>{' '}you
+                  think, and{' '}<em>how</em>{' '}you think. Nothing
+                  writes that down anywhere.
                 </p>
 
                 <p className="statement-close">
@@ -877,10 +823,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
                 <p className="statement-close">
                   And Alexandria itself is like Strava, but for thinking.
-                  Everyone&rsquo;s file is unique to them, nobody knows
-                  the best way to do this yet, and so everyone figures it
-                  out together &mdash; sharing what works, and what it
-                  makes possible.
+                  Everyone&rsquo;s file is unique to them, and nobody
+                  knows the best way to do this yet &mdash; so everyone
+                  figures it out together, sharing what works.
                 </p>
 
                 <p className="statement-close">
