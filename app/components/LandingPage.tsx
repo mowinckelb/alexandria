@@ -793,6 +793,25 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   thinking.
                 </p>
 
+                {/* THE LETTER BOX (2026-07-10, founder-directed): the
+                    body scrolls inside a fixed window — "a clean amount
+                    of text on the screen at one time but also infinite
+                    text available." This dissolves the fold crisis for
+                    good: the dare + CTAs pin below the box, always
+                    visible, and the pre-crisis typography comes back
+                    (18px close, 680 column). Sections are roman-
+                    numeral plates (echoing the dict block's I./II.) so
+                    the reader knows where they are and how much is
+                    left; the thin theme-colored scrollbar carries
+                    progress; the bottom fade signals more. Epigraph
+                    stays outside as the always-visible hook. No
+                    overscroll-behavior: at the box's end the scroll
+                    chains to the page naturally. Mobile keeps the
+                    flowing letter (no box). */}
+                <div className="letter-window">
+                <div className="letter-scroll">
+                <p className="letter-sec">i &middot; the wave</p>
+
                 <p className="statement-close">
                   Most people won&rsquo;t mind, honestly &mdash; AI is
                   that good, and it only gets better. It&rsquo;s a wave,
@@ -804,6 +823,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   you with it, instead of{' '}<em>replacing</em>{' '}
                   you. Alexandria is that third option.
                 </p>
+
+                <p className="letter-sec">ii &middot; the gap</p>
 
                 <p className="statement-close">
                   To do that, your AI needs the intention, and it needs
@@ -817,6 +838,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   your thoughts into words, and it can think{' '}
                   <em>with</em>{' '}you, not{' '}<em>for</em>{' '}you.
                 </p>
+
+                <p className="letter-sec">iii &middot; the folder</p>
 
                 <p className="statement-close">
                   So the gap is closed by an Alexandria folder &mdash;
@@ -844,6 +867,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   changed person.
                 </p>
 
+                <p className="letter-sec">iv &middot; the tribe</p>
+
                 <p className="statement-close">
                   And Alexandria itself is like Strava, but for the
                   mind: runners share one belief &mdash; that health
@@ -864,6 +889,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   yours to reshape into your own. His shoes, until you
                   have yours. We just want you to run.
                 </p>
+                </div>
+                </div>
 
                 <p className="statement-beat">
                   <em>A free sample, right in front of you. Take
@@ -2171,13 +2198,13 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* Was 126px (ornament-top alignment); pulled up 2026-07-10 to
              keep the CTAs above the fold as the letter grew — the fold
              wins over the ornament nicety until the shortening pass. */
-          margin-top: 48px;
+          margin-top: 96px;
           /* Squeeze the column — narrower text width pushes the left
              edge inward (right edge unchanged because right-lower is
-             flex-end aligned). 680 → 740 → 764 (2026-07-10): widened to
-             fit the grown letter; fewer wrapped lines beats smaller
-             type. */
-          width: 764px;
+             flex-end aligned). Restored to 680 (letter-box pass) — the
+             crisis widening (740, 764) is undone; the box scrolls
+             instead. */
+          width: 680px;
         }
 
         /* ─── BOTTOM SLIDE ─── */
@@ -2283,7 +2310,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* 18 → 12 (2026-07-10): the decompressed letter (thirteenth
              pass) pushed the CTAs below the 1000px stage; tightened
              with the type sizes below so the buttons stay in view. */
-          gap: 6px;
+          gap: 14px;
           margin-bottom: var(--lower-block-bottom);
         }
         /* Roman numeral marginalia — four argument beats. The split's
@@ -2385,8 +2412,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-top: 6px;
           transform: translateY(-20px);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          /* 26 → 24 → 22 (2026-07-10): fit the growing letter. */
-          font-size: 22px;
+          /* Restored to 24 (letter-box pass) — the epigraph is the
+             always-visible hook above the scroll window. */
+          font-size: 24px;
           line-height: 1.4;
           font-style: italic;
           font-weight: 400;
@@ -2401,11 +2429,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-top: 0;
           transform: none;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          /* 18/1.55 → … → 16/1.44 (2026-07-10): fit the growing letter
-             with the CTAs still above the stage bottom. The shortening
-             pass (founder-deferred) buys this back. */
-          font-size: 16px;
-          line-height: 1.44;
+          /* Restored to 18/1.55 (2026-07-10, letter-box pass): the
+             scroll window decouples letter length from the fold, so
+             the crisis-era shrinks (17 → 16.5 → 16) are undone. */
+          font-size: 18px;
+          line-height: 1.55;
           font-style: normal;
           letter-spacing: 0.005em;
           color: var(--theme-fg);
@@ -2542,7 +2570,69 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            line so the close lands as a destination, not a button
            caption. Adds to the 18px flex gap on right-lower. */
         .right-lower > .cta-pair {
-          margin-top: 14px;
+          margin-top: 12px;
+        }
+
+        /* ─── THE LETTER BOX ─── */
+        /* The letter's body scrolls inside a fixed window; the epigraph
+           above and the dare + CTAs below stay pinned. The fade at the
+           bottom signals more text; it matches the rotating theme via
+           var(--theme-bg). The thin scrollbar is the progress read. */
+        .letter-window {
+          position: relative;
+        }
+        .letter-window::after {
+          content: '';
+          position: absolute;
+          left: 0;
+          right: 14px;
+          bottom: 0;
+          height: 54px;
+          background: linear-gradient(
+            to bottom,
+            transparent,
+            var(--theme-bg) 88%
+          );
+          pointer-events: none;
+        }
+        .letter-scroll {
+          height: 495px;
+          overflow-y: auto;
+          padding-right: 16px;
+          padding-bottom: 44px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          scrollbar-width: thin;
+          scrollbar-color: var(--theme-border-soft) transparent;
+        }
+        .letter-scroll::-webkit-scrollbar {
+          width: 4px;
+        }
+        .letter-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .letter-scroll::-webkit-scrollbar-thumb {
+          background: var(--theme-border-soft);
+          border-radius: 2px;
+        }
+        .letter-scroll::-webkit-scrollbar-thumb:hover {
+          background: var(--theme-fg-muted);
+        }
+        /* Section plates — roman numerals in the museum register,
+           echoing the dictionary block's I. / II. Skimmers leave with
+           the four-beat structure: wave → gap → folder → tribe. */
+        .letter-sec {
+          margin: 8px 0 -4px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-size: 12px;
+          letter-spacing: 0.16em;
+          color: var(--theme-fg-faint);
+          user-select: none;
+        }
+        .letter-sec:first-child {
+          margin-top: 0;
         }
         .cta-block {
           display: flex;
@@ -3090,13 +3180,17 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             order: 3;
           }
           .statement-close,
-          .statement-beat {
+          .statement-beat,
+          .letter-sec {
             order: 4;
             /* The letter's blocks are one thought — pull them back
                against the 64px flat flex gap (desktop uses 18px). The
                founder's phone screenshots read the 64px gaps as
                "spacing all off". Net ≈ 26px inside the letter. */
             margin-top: -38px;
+          }
+          .letter-sec {
+            margin-bottom: -44px;
           }
           .cta-pair {
             order: 5;
@@ -3173,6 +3267,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           }
           .statement-close::before {
             left: 0;
+          }
+          /* Mobile keeps the flowing letter — no scroll window (a
+             nested scroller inside the page scroll is a trap on
+             touch). The wrappers flatten via display: contents so the
+             paragraphs stay direct flex children of bottom-inner and
+             keep their order rules (the mobile column is ordered
+             per-child; an unflattened wrapper defaults to order 0 and
+             jumps above the ornament — that bug shipped for ~a minute
+             on 2026-07-10). Fade dies with the wrapper's box. */
+          .letter-window,
+          .letter-scroll {
+            display: contents;
           }
           .cta-pair {
             padding-left: 0;
