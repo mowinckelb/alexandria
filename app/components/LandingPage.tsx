@@ -172,10 +172,11 @@ function HomeInstall() {
       <Link href="/start" className="install-cta">
         try it free
       </Link>
-      {/* His riff attaches the two fear-killers to the try moment:
-          "just try it for free. It's fully private. It's fully open." */}
+      {/* The agency sell at the button (his free-sample note): the
+          fear-killers moved into the letter (fully private, fully
+          sovereign); the sub now sells zero cost + reversibility. */}
       <span className="cta-sub">
-        fully private, fully open
+        free &mdash; put it back anytime
       </span>
     </div>
   );
@@ -793,38 +794,52 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-close">
-                  It will happen because AI is really good &mdash; so
-                  you&rsquo;ll let it. And that leaves a choice: reject
-                  AI and give up everything it offers, or let it think
-                  for you and slowly lose the ability to think for
-                  yourself. Alexandria is the third option: use AI
-                  fully, and have it{' '}<em>develop</em>{' '}your mind
-                  instead of{' '}<em>replacing</em>{' '}it.
+                  Most people won&rsquo;t mind, honestly &mdash; AI is
+                  that good, and it only gets better. That&rsquo;s the
+                  trajectory: let it take over, bit by bit. But there is
+                  a choice. Refuse AI, and you just fall behind.
+                  Surrender to it, and the thinking stops being yours.
+                  Or ride it &mdash; use AI fully, and have it{' '}
+                  <em>develop</em>{' '}your mind instead of{' '}
+                  <em>replacing</em>{' '}it. Alexandria is that third
+                  option.
                 </p>
 
                 <p className="statement-close">
                   To do that, your AI needs the intention, and it needs
-                  to know you. It can already plug into almost
-                  everything about you &mdash; the one gap is your inner
-                  monologue:{' '}<em>what</em>{' '}you think, and{' '}
-                  <em>how</em>{' '}you think. Nothing writes that down,
-                  and AI can&rsquo;t read your mind. But it can read
-                  words. Put your thoughts into words, and AI can
-                  think{' '}<em>with</em>{' '}you, not{' '}<em>for</em>
-                  {' '}you.
+                  to know you. Almost everything about you is already
+                  connectable &mdash; other companies do that part well.
+                  The one gap is your inner monologue:{' '}
+                  <em>what</em>{' '}you think, and{' '}<em>how</em>{' '}
+                  you think. Nothing writes that down, and nobody can
+                  write it down for you &mdash; it has to come from you.
+                  AI can&rsquo;t read your mind. But it can read words:
+                  put your thoughts into words, and it can think{' '}
+                  <em>with</em>{' '}you, not{' '}<em>for</em>{' '}you.
                 </p>
 
                 <p className="statement-close">
-                  So that gap is closed by an Alexandria folder &mdash;
-                  like an AGENTS.md, but for personal alignment. Most
-                  people&rsquo;s context is scattered across a hundred
-                  apps; this is one place, a single ground truth of who
-                  you are and how you think, that any AI or service you
-                  choose can plug into, read, and write to. Fully
-                  private, fully sovereign &mdash; yours to organise,
-                  gate, even sell, or delete. And the AI writes your
-                  thinking down automatically as you go: a gym for your
-                  mind that mostly runs itself.
+                  So the gap is closed by an Alexandria folder &mdash;
+                  like an AGENTS.md, but for personal alignment. It
+                  becomes the one place that holds you: a single ground
+                  truth any AI or service can plug into, read, and write
+                  to. It replaces nothing &mdash; it just makes sure
+                  everything is also here. Dump in old journals, meeting
+                  notes, videos you watched; the intelligence sorts it.
+                  Fully private, fully sovereign &mdash; yours to
+                  organise, gate, even sell, or delete.
+                </p>
+
+                <p className="statement-close">
+                  Most of it runs passively: your AI writes your
+                  thinking down as you go, and reads it back
+                  everywhere &mdash; so every app treats you like
+                  someone it knows, not a stranger. Then the active
+                  sessions: it brings questions, teases things out,
+                  helps you process and resolve &mdash; then pushes you
+                  to go act on it. The product is the changed person.
+                  It&rsquo;s a gym for your mind, and the results show
+                  in you.
                 </p>
 
                 <p className="statement-close">
@@ -833,19 +848,17 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   matters &mdash; while each runs their own way, own
                   shoes, own routes, own pace. Here it&rsquo;s the same
                   for thinking. You connect with the others, learn from
-                  each other, and share what works, so everyone gets
-                  better.
+                  each other, and share what works &mdash; the library
+                  is built for exactly that.
                 </p>
 
                 <p className="statement-close">
-                  The company&rsquo;s job is to sell this vision,
-                  connect the people who share it, and make starting as
-                  easy as possible. Everyone is welcome; not everyone
-                  will come. So the founder&rsquo;s own folder is a
-                  gift &mdash; free, open, five minutes to lace up, with
-                  new shoes arriving monthly for as long as you want
-                  them. We honestly don&rsquo;t care whose shoes you run
-                  in. We just want you to run.
+                  The company&rsquo;s job: sell this vision, connect the
+                  people who share it, and make starting easy. Everyone
+                  is welcome; not everyone will come. The founder&rsquo;s
+                  own folder is a gift &mdash; free, open, five minutes
+                  to lace up, new shoes monthly. We don&rsquo;t care
+                  whose shoes you run in. We just want you to run.
                 </p>
 
                 <p className="statement-beat">
@@ -876,7 +889,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                         friends and family should immediately know that
                         they are to press that button." */}
                     <span className="cta-sub">
-                      friends, family, the curious &mdash; press this one
+                      like the company? press this one now
                     </span>
                   </div>
                 </div>
@@ -2154,12 +2167,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* Was 126px (ornament-top alignment); pulled up 2026-07-10 to
              keep the CTAs above the fold as the letter grew — the fold
              wins over the ornament nicety until the shortening pass. */
-          margin-top: 76px;
+          margin-top: 60px;
           /* Squeeze the column — narrower text width pushes the left
              edge inward (right edge unchanged because right-lower is
-             flex-end aligned). The closer + CTAs reflow to more lines
-             but stay anchored to the right gutter. */
-          width: 680px;
+             flex-end aligned). 680 → 740 (2026-07-10): widened to fit
+             the grown letter; fewer wrapped lines beats smaller type. */
+          width: 740px;
         }
 
         /* ─── BOTTOM SLIDE ─── */
@@ -2265,7 +2278,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* 18 → 12 (2026-07-10): the decompressed letter (thirteenth
              pass) pushed the CTAs below the 1000px stage; tightened
              with the type sizes below so the buttons stay in view. */
-          gap: 8px;
+          gap: 7px;
           margin-bottom: var(--lower-block-bottom);
         }
         /* Roman numeral marginalia — four argument beats. The split's
