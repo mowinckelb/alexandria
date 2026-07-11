@@ -176,7 +176,7 @@ function HomeInstall() {
           fear-killers moved into the letter (fully private, fully
           sovereign); the sub now sells zero cost + reversibility. */}
       <span className="cta-sub">
-        free &mdash; put it back anytime
+        free &mdash; five minutes in, one delete out
       </span>
     </div>
   );
@@ -302,6 +302,9 @@ function FrontFilm() {
 
 export default function LandingPage({ brandClassName = '' }: Props) {
   const [themeIdx, setThemeIdx] = useState(0);
+  // Letter-box scroll cue — visible until the reader has scrolled the
+  // box a little; then it has done its job and fades.
+  const [letterCue, setLetterCue] = useState(true);
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
   // Default (no param) keeps the existing CSS-built window. Read on
   // mount so the data-attribute picks up the correct CSS branch.
@@ -809,7 +812,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     chains to the page naturally. Mobile keeps the
                     flowing letter (no box). */}
                 <div className="letter-window">
-                <div className="letter-scroll">
+                <div
+                  className="letter-scroll"
+                  onScroll={(e) => setLetterCue(e.currentTarget.scrollTop < 24)}
+                >
                 <p className="letter-sec">i &middot; the wave</p>
 
                 <p className="statement-close">
@@ -817,66 +823,88 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   that good, and it only gets better. It&rsquo;s a wave,
                   and it&rsquo;s still growing. Refuse it, and
                   you&rsquo;re left standing on the beach. Surrender,
-                  and it pulls you under. Or surf it: use AI fully and
-                  scale alongside it &mdash; an infinite intelligence
-                  that{' '}<em>develops</em>{' '}your mind and brings
-                  you with it, instead of{' '}<em>replacing</em>{' '}
-                  you. Alexandria is that third option.
+                  and it pulls you under. Or choose the third option:
+                  surf it. Use AI fully, scale alongside it &mdash; an
+                  infinite intelligence that{' '}<em>develops</em>{' '}
+                  your mind and brings you with it, instead of{' '}
+                  <em>replacing</em>{' '}you. That choice is what
+                  defines an Alexandrian.
                 </p>
 
                 <p className="letter-sec">ii &middot; the gap</p>
 
                 <p className="statement-close">
-                  To do that, your AI needs the intention, and it needs
-                  to know you. Almost everything about you is already
-                  connectable &mdash; other companies do that part well.
-                  The one gap is your inner monologue:{' '}
-                  <em>what</em>{' '}you think, and{' '}<em>how</em>{' '}
-                  you think. Nothing has access to it, almost nothing is
-                  even trying &mdash; and nobody can open it but you. AI
-                  can&rsquo;t read your mind. But it can read words: put
-                  your thoughts into words, and it can think{' '}
-                  <em>with</em>{' '}you, not{' '}<em>for</em>{' '}you.
+                  To surf it, your AI has to know where you want to
+                  go &mdash; and who you are. Almost everything about
+                  you is already connectable &mdash; other companies do
+                  that part well. The one gap is your inner monologue:
+                  {' '}<em>what</em>{' '}you think, and{' '}
+                  <em>how</em>{' '}you think. Nothing has access to it,
+                  and nothing seems to be trying &mdash; because nobody
+                  can open it but you. AI can&rsquo;t read your mind.
+                  But it can read words: put your thoughts into words,
+                  and it can think{' '}<em>with</em>{' '}you, not{' '}
+                  <em>for</em>{' '}you.
                 </p>
 
                 <p className="letter-sec">iii &middot; the folder</p>
 
                 <p className="statement-close">
-                  So the gap is closed by an Alexandria folder &mdash;
-                  like an AGENTS.md, but for personal alignment. It
-                  becomes the one place that holds you: a single ground
-                  truth any AI or service can plug into, read, and write
-                  to. It replaces nothing &mdash; it connects what can
-                  be connected, and you dump in the rest: old journals,
-                  voice memos, half-finished notes; the intelligence
-                  sorts it. Fully private, fully sovereign &mdash; yours
-                  to organise, gate, even sell, or delete, and never
-                  locked in: move it wherever serves you.
+                  Our solution is the Alexandria folder: an open
+                  standard &mdash; like an AGENTS.md, but for personal
+                  alignment. It becomes the one place that holds you, a
+                  single ground truth any AI or service can plug into,
+                  read, and write to. It replaces nothing &mdash; it
+                  connects what can be connected, and you dump in the
+                  rest: old journals, voice memos, half-finished notes;
+                  the intelligence sorts it. Fully private, fully
+                  sovereign &mdash; yours to organise, gate, even sell,
+                  or delete.
                 </p>
 
                 <p className="statement-close">
-                  Most of it is passive: the AI writes your thinking
-                  down as you go, and uses all of it to answer you
-                  better &mdash; a helper who knows you well, not a
-                  stranger. The rest is active: a biographer who sits
-                  with you over months, teases it out, and sends you off
-                  to act on it. The difference is a Wikipedia page
-                  versus a biography &mdash; one is written from your
-                  outputs, the other from your inputs and process too.
-                  It&rsquo;s a gym for your mind, and the product is the
-                  changed person.
+                  It also sets you free. Your personalisation now lives
+                  with you, not inside any one AI company &mdash; so you
+                  can switch models any time and take everything with
+                  you. You own your data. And it&rsquo;s your own AI
+                  doing all of it, on your own computer; it has nothing
+                  to do with us. We just handed you the idea. We never
+                  see a word.
                 </p>
 
-                <p className="letter-sec">iv &middot; the tribe</p>
+                <p className="letter-sec">iv &middot; the gym</p>
+
+                <p className="statement-close">
+                  Most of it is automatic: as you work, your AI analyses
+                  what you say, extracts the signal &mdash; the ideas,
+                  the decisions, the way you think &mdash; and keeps it.
+                  Knowing you like that makes it better at helping you
+                  everywhere, the way any personalisation does. It only
+                  adds.
+                </p>
+
+                <p className="statement-close">
+                  The deeper half takes your participation. A Wikipedia
+                  page is written from a person&rsquo;s outputs; a
+                  biography is richer because the biographer sits with
+                  the person for months, asks, and gets let in. The
+                  active sessions are that: a biographer for your
+                  mind &mdash; and a personal trainer for it. We provide
+                  the gym and the weights; you do the lifting. Because
+                  what matters isn&rsquo;t how fancy the gym is &mdash;
+                  it&rsquo;s the athlete who walks out. The product is
+                  the changed person.
+                </p>
+
+                <p className="letter-sec">v &middot; the tribe</p>
 
                 <p className="statement-close">
                   And Alexandria itself is like Strava, but for the
-                  mind: runners share one belief &mdash; that health
-                  matters &mdash; while each runs their own way, own
-                  shoes, own routes, own pace. Here it&rsquo;s the same
-                  for thinking. You connect with the others, learn from
-                  each other, and show what you&rsquo;ve built &mdash;
-                  that&rsquo;s the library.
+                  mind. Runners share one belief &mdash; that health
+                  matters &mdash; and everyone still runs their own way:
+                  their own shoes, their own routes, their own pace.
+                  Same here. You connect with the others, learn from
+                  each other, and show what you&rsquo;ve built.
                 </p>
 
                 <p className="statement-close">
@@ -890,12 +918,26 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   have yours. We just want you to run.
                 </p>
                 </div>
+                {/* Scroll cue — quiet plate riding the fade; gone once
+                    the reader has started scrolling. */}
+                <span
+                  className={`letter-more${letterCue ? '' : ' is-gone'}`}
+                  aria-hidden
+                >
+                  scroll&nbsp;&darr;
+                </span>
                 </div>
 
+                {/* The three-readers close (founder: "spell it out and
+                    attack it so they are forced to make that decision…
+                    those are the only options lol") — every reader maps
+                    to a button or an honest exit; no fourth option. */}
                 <p className="statement-beat">
-                  <em>A free sample, right in front of you. Take
-                  it &mdash; if it&rsquo;s not for you, put it back like
-                  it never happened.</em>
+                  <em>Only three readers get this far. You don&rsquo;t
+                  want this &mdash; fair. You want it, but don&rsquo;t
+                  run a coding agent yet &mdash; that&rsquo;s the right
+                  button. Or you want it, and it&rsquo;s one press
+                  away. There&rsquo;s no fourth option.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -920,7 +962,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                         friends and family should immediately know that
                         they are to press that button." */}
                     <span className="cta-sub">
-                      rooting for us? this is your button
+                      rooting for us? make it official
                     </span>
                   </div>
                 </div>
@@ -2457,7 +2499,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .statement-beat {
           margin: 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 20px;
+          /* 20 → 18 (2026-07-10): the beat grew into the three-readers
+             close; a size down keeps the pinned zone honest. */
+          font-size: 18px;
+          line-height: 1.45;
           font-style: italic;
           letter-spacing: 0.005em;
           color: var(--theme-fg);
@@ -2587,19 +2632,19 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           left: 0;
           right: 14px;
           bottom: 0;
-          height: 54px;
+          height: 72px;
           background: linear-gradient(
             to bottom,
             transparent,
-            var(--theme-bg) 88%
+            var(--theme-bg) 62%
           );
           pointer-events: none;
         }
         .letter-scroll {
-          height: 495px;
+          height: 465px;
           overflow-y: auto;
           padding-right: 16px;
-          padding-bottom: 44px;
+          padding-bottom: 60px;
           display: flex;
           flex-direction: column;
           gap: 14px;
@@ -2633,6 +2678,34 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .letter-sec:first-child {
           margin-top: 0;
+        }
+        /* Scroll cue — sits on the fade, museum-quiet, with a slow
+           breathing bob. Disappears once the reader has scrolled. */
+        .letter-more {
+          position: absolute;
+          right: 22px;
+          bottom: 4px;
+          z-index: 1;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-size: 12.5px;
+          letter-spacing: 0.14em;
+          color: var(--theme-fg-muted);
+          pointer-events: none;
+          user-select: none;
+          animation: letterMoreBob 2.4s ease-in-out infinite;
+          transition: opacity 400ms ease;
+        }
+        .letter-more.is-gone {
+          opacity: 0;
+          animation: none;
+        }
+        @keyframes letterMoreBob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(3px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .letter-more { animation: none; }
         }
         .cta-block {
           display: flex;
@@ -3279,6 +3352,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .letter-window,
           .letter-scroll {
             display: contents;
+          }
+          .letter-more {
+            display: none;
           }
           .cta-pair {
             padding-left: 0;
