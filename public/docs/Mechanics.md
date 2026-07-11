@@ -102,6 +102,16 @@ One curl wires every surface — nothing to install per-agent, no plugin, no mar
 
 Result: session-start context load and session-end capture run in every Claude Code, Claude Desktop code-tab, and Cursor session; Codex and Factory load the same behavior via their instruction files. One behavior source (the signed payload), N dumb shells; the sovereign folder is the interop bus between all of them.
 
+### Cowork and the Claude app (a different, opt-in path)
+
+Cowork runs your agent in a sealed Apple-Virtualization VM: it can't run the hooks or load the `/a` skill on its own, and it can only see a folder when you explicitly attach it that session (no external script can auto-mount it — the share is created inside the Claude app's own process). So Cowork isn't wired by the curl. It's still usable, opt-in, in three parts:
+
+1. **Capture (automatic).** An optional launchd agent (`com.alexandria.session-capture`, enabled separately) reads the transcripts Cowork writes to your disk and mirrors the dialogue into `~/alexandria/files/vault/sessions/` — no attach needed, riding the one direction the VM shares out.
+2. **Awareness (one-time paste).** `setup.sh` writes `~/alexandria/system/.claude-instructions.md`; paste it into **Claude Settings → Profile → "Instructions for Claude"**. Every Cowork/chat session then knows who you are and prompts you to attach the folder + run `/a` when it would help.
+3. **Full read/write (prompted).** Attach `~/alexandria` in a desktop Cowork session and type `/a` — it loads your constitution and works from your real files. Mobile and plain chat can't attach a folder, so there they point you to your desktop.
+
+Nothing here routes your files through a server; it's the same sovereign folder, reached the only way a sealed VM allows.
+
 ## The bootstrap-from-main model
 
 This is the most important property to understand.

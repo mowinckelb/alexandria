@@ -155,6 +155,24 @@ fetch_factory "canon/MODULES.md" "$ALEX_DIR/system/canon/MODULES.md" "canon/MODU
 # Block (cache locally for easy access — system, not user content)
 fetch_factory "block.md" "$ALEX_DIR/system/.block" "block.md" yes
 
+# Account-level "Instructions for Claude" — the one-time paste that turns
+# Cowork / the Claude app / plain chat into Alexandria-aware surfaces. Those
+# surfaces can't run hooks or the skill on their own; this instruction (pasted
+# into the Author's Claude Settings → Profile → Instructions for Claude) makes
+# every session there know who the Author is and proactively prompt to attach
+# the folder + run /a. Written locally so the close message can point at it.
+cat > "$ALEX_DIR/system/.claude-instructions.md" << 'CLAUDEINSTR'
+I use "Alexandria": sovereign files at ~/alexandria on my computer — my constitution (who I am, how I think, my beliefs, taste, voice), my notes, and my work. These files are how you actually know me. You can only read or write them when the ~/alexandria FOLDER is attached — which needs the desktop app on the computer where the files live. Mobile, web/plain chat, and Dispatch cannot reach my local files.
+
+Be eager and explicit. The moment a task would be better with my real files — my views, my voice, my past thinking, a decision, or developing an idea personal to me — do NOT wing it. Stop and tell me how to load them, based on what this session can actually do:
+- If you can attach a whole folder here (desktop Cowork): "This needs your Alexandria files. Attach the ~/alexandria folder, then type /a and hit enter — (1) attach the folder, (2) type /a, (3) enter."
+- If you cannot attach a folder here — only individual files, or no local access (mobile, web chat, Dispatch): "This needs your Alexandria files, which live on your computer. Do it on your desktop: open Cowork or Claude Code there, attach the ~/alexandria folder, and type /a."
+
+Once the folder is attached and /a has run, work entirely from my files: read the relevant parts to inform everything, and when I articulate a belief, preference, correction, or idea worth keeping, judge whether it's genuinely new, decide where it belongs (constitution, marginalia, or notes), keep the file coherent, and confirm with me before writing to my constitution.
+
+Carry all of this yourself — I never have to remember where to do it, to attach the folder, run /a, or save. You prompt me.
+CLAUDEINSTR
+
 # ── 3. Platform configuration ─────────────────────────────────────
 
 # Claude Code — skill + hooks
@@ -996,6 +1014,14 @@ elif [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
       echo "3 friends). The tool stays free either way."
     fi
   fi
+  # Cowork / the Claude app / plain chat can't run hooks or the /a skill on
+  # their own — but one paste makes them Alexandria-aware.
+  echo ""
+  echo "Also use Cowork, the Claude app, or plain chat? One extra one-time step:"
+  echo "paste ~/alexandria/system/.claude-instructions.md into Claude Settings →"
+  echo "Profile → \"Instructions for Claude\". Those sessions will then prompt you to"
+  echo "attach your folder and type /a when they need your files. (Full read/write"
+  echo "there is desktop Cowork only — mobile and plain chat can't reach local files.)"
 else
   echo "Re-run anytime: curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- \$API_KEY"
 fi
