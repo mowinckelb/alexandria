@@ -808,39 +808,43 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   can already plug into almost everything about you. The
                   one gap is your thinking:{' '}<em>what</em>{' '}you
                   think, and{' '}<em>how</em>{' '}you think. Nothing
-                  writes that down anywhere.
+                  writes that down, and AI can&rsquo;t read your mind.
+                  But it can read words.
                 </p>
 
                 <p className="statement-close">
-                  The Alexandria file closes that gap. It&rsquo;s one
-                  instruction file &mdash; the same idea as an AGENTS.md,
+                  So that gap is closed by an Alexandria file &mdash; one
+                  file of instructions, the same concept as an AGENTS.md,
                   but for a person. It gives your AI the intention, and
-                  then it writes your thinking down as you go; when you
-                  want more, you sit down and work on your thinking
-                  directly. It&rsquo;s a gym for your mind that mostly
-                  runs itself.
+                  from then on the AI writes your thinking down
+                  automatically as you go, building a mirror of it that
+                  every AI you use can read. It&rsquo;s a gym for your
+                  mind that mostly runs itself.
                 </p>
 
                 <p className="statement-close">
-                  And Alexandria itself is like Strava, but for thinking.
-                  Everyone&rsquo;s file is unique to them, and nobody
-                  knows the best way to do this yet &mdash; so everyone
-                  figures it out together, sharing what works.
+                  And Alexandria itself is like Strava, but for the mind.
+                  Runners share one belief &mdash; that physical health
+                  matters &mdash; and each still runs their own way: own
+                  shoes, own routes, own pace. Same here, for thinking:
+                  you buy into the shared philosophy, connect with the
+                  others who do, and do it entirely your own way.
                 </p>
 
                 <p className="statement-close">
-                  Starting is the easy part. The founder&rsquo;s own file
-                  is free &mdash; think of it as a pair of running shoes
-                  we hand you, so you can start today and shape your own
-                  over time. It takes five minutes to set up, it&rsquo;s
-                  as easy to edit as any text file, and if you delete the
-                  folder, it&rsquo;s like it never happened.
+                  The company&rsquo;s job is just to make starting
+                  easy &mdash; for as many people as possible. So the
+                  founder&rsquo;s own file is a gift: free and open, a
+                  pair of running shoes so you can start today. Five
+                  minutes to set up, and then it&rsquo;s completely
+                  yours &mdash; plain text you can edit down to the last
+                  word, nothing to do with us. Delete the folder, and
+                  it&rsquo;s like it never happened.
                 </p>
 
                 <p className="statement-beat">
-                  <em>One decision is all that&rsquo;s left &mdash;
-                  we&rsquo;ve made it as easy as we could. You&rsquo;re
-                  already here: just press one.</em>
+                  <em>One decision left. You&rsquo;re already
+                  here &mdash; just press one.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2350,7 +2354,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           position: relative;
           margin: 0;
           padding-left: 0;
-          padding-top: 14px;
+          padding-top: 6px;
           transform: translateY(-20px);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           /* 26 → 24 (2026-07-10): fit the decompressed letter. */
@@ -2421,7 +2425,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            reads as a museum plate — sets the genre as a letter, not
            a marketing block. */
         .statement-salutation {
-          margin: 0 0 4px;
+          margin: 0;
           padding: 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 13px;
