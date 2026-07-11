@@ -792,13 +792,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-close">
-                  And it will happen for the simplest reason: AI is
-                  really good, so you&rsquo;ll let it. That leaves a
-                  choice. Reject AI, and you give up everything it
+                  It will happen because AI is really good &mdash; so
+                  you&rsquo;ll let it. That leaves a choice. Reject AI, and you give up everything it
                   offers. Let it do all your thinking, and you slowly
                   lose the ability to think for yourself. Alexandria is
                   the third option: use AI fully, and have it{' '}
-                  <em>develop</em>{' '}your thinking instead of{' '}
+                  <em>develop</em>{' '}your mind instead of{' '}
                   <em>replacing</em>{' '}it.
                 </p>
 
@@ -813,13 +812,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </p>
 
                 <p className="statement-close">
-                  So that gap is closed by an Alexandria file &mdash; one
-                  file of instructions, the same concept as an AGENTS.md,
-                  but for a person. It gives your AI the intention, and
-                  from then on the AI writes your thinking down
-                  automatically as you go, building a mirror of it that
-                  every AI you use can read. It&rsquo;s a gym for your
-                  mind that mostly runs itself.
+                  So that gap is closed by an Alexandria folder &mdash;
+                  the same concept as an AGENTS.md, but for a person.
+                  It&rsquo;s one private place on your computer, fully
+                  yours, holding your personal context; every AI or tool
+                  you use can plug in, read it, and write to it. It gives
+                  your AI the intention, and from then on the AI writes
+                  your thinking down automatically as you go. It&rsquo;s
+                  a gym for your mind that mostly runs itself.
                 </p>
 
                 <p className="statement-close">
@@ -834,17 +834,17 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 <p className="statement-close">
                   The company&rsquo;s job is just to make starting
                   easy &mdash; for as many people as possible. So the
-                  founder&rsquo;s own file is a gift: free and open, a
+                  founder&rsquo;s own folder is a gift: free and open, a
                   pair of running shoes so you can start today. Five
-                  minutes to set up, and then it&rsquo;s completely
-                  yours &mdash; plain text you can edit down to the last
-                  word, nothing to do with us. Delete the folder, and
-                  it&rsquo;s like it never happened.
+                  minutes to set up, and then they&rsquo;re entirely
+                  yours, nothing to do with us &mdash; run in them daily,
+                  rebuild them word by word, or burn them. Delete the
+                  folder, and it&rsquo;s like it never happened.
                 </p>
 
                 <p className="statement-beat">
                   <em>One decision left. You&rsquo;re already
-                  here &mdash; just press one.</em>
+                  here &mdash; press the button.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -865,7 +865,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                         person ("I'll send stuff, post all the updates and
                         behind the scenes things" — 2026-07-10 riff). */}
                     <span className="cta-sub">
-                      just your email &mdash; updates, behind the scenes
+                      letters from the founder &mdash; just your email
                     </span>
                   </div>
                 </div>
@@ -2140,11 +2140,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            huge wordmark fills bottom-left alone. 120px matches the
            ornament's padding-top so the two columns share a top edge. */
         .right-col .right-lower {
-          /* Match ornament-wrap's padding-top (120px) + offset the
-             statement-close's own -20px translateY + 14px padding-top
-             so the visible top of the text aligns with the visible top
-             of square ornaments (e.g. other-stone, alabaster). */
-          margin-top: 126px;
+          /* Was 126px (ornament-top alignment); pulled up 2026-07-10 to
+             keep the CTAs above the fold as the letter grew — the fold
+             wins over the ornament nicety until the shortening pass. */
+          margin-top: 104px;
           /* Squeeze the column — narrower text width pushes the left
              edge inward (right edge unchanged because right-lower is
              flex-end aligned). The closer + CTAs reflow to more lines
@@ -2373,10 +2372,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-top: 0;
           transform: none;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          /* 18/1.55 → 17/1.5 (2026-07-10): fit the decompressed letter
-             with the CTAs still above the stage bottom. */
-          font-size: 17px;
-          line-height: 1.5;
+          /* 18/1.55 → 17/1.5 → 16.5/1.47 (2026-07-10): fit the growing
+             letter with the CTAs still above the stage bottom. The
+             shortening pass (founder-deferred) buys this back. */
+          font-size: 16.5px;
+          line-height: 1.47;
           font-style: normal;
           letter-spacing: 0.005em;
           color: var(--theme-fg);
