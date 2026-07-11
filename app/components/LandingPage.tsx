@@ -787,64 +787,71 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     under 900. */}
                 <p className="statement-epigraph">
                   When calculators arrived, we let them do the
-                  math &mdash; and we lost the ability to do it
-                  ourselves. AI is about to do the same to your thinking.
+                  math &mdash; and most of us lost the ability to do it
+                  in our heads. AI is about to do the same to your
+                  thinking.
                 </p>
 
                 <p className="statement-close">
                   It will happen because AI is really good &mdash; so
-                  you&rsquo;ll let it. That leaves a choice. Reject AI, and you give up everything it
-                  offers. Let it do all your thinking, and you slowly
-                  lose the ability to think for yourself. Alexandria is
-                  the third option: use AI fully, and have it{' '}
-                  <em>develop</em>{' '}your mind instead of{' '}
-                  <em>replacing</em>{' '}it.
+                  you&rsquo;ll let it. And that leaves a choice: reject
+                  AI and give up everything it offers, or let it think
+                  for you and slowly lose the ability to think for
+                  yourself. Alexandria is the third option: use AI
+                  fully, and have it{' '}<em>develop</em>{' '}your mind
+                  instead of{' '}<em>replacing</em>{' '}it.
                 </p>
 
                 <p className="statement-close">
                   To do that, your AI needs the intention, and it needs
-                  to know you. Knowing you is nearly solved &mdash; it
-                  can already plug into almost everything about you. The
-                  one gap is your thinking:{' '}<em>what</em>{' '}you
-                  think, and{' '}<em>how</em>{' '}you think. Nothing
-                  writes that down, and AI can&rsquo;t read your mind.
-                  But it can read words.
+                  to know you. It can already plug into almost
+                  everything about you &mdash; the one gap is your inner
+                  monologue:{' '}<em>what</em>{' '}you think, and{' '}
+                  <em>how</em>{' '}you think. Nothing writes that down,
+                  and AI can&rsquo;t read your mind. But it can read
+                  words. Put your thoughts into words, and AI can
+                  think{' '}<em>with</em>{' '}you, not{' '}<em>for</em>
+                  {' '}you.
                 </p>
 
                 <p className="statement-close">
                   So that gap is closed by an Alexandria folder &mdash;
-                  the same concept as an AGENTS.md, but for a person.
-                  It&rsquo;s one private place on your computer, fully
-                  yours, holding your personal context; every AI or tool
-                  you use can plug in, read it, and write to it. It gives
-                  your AI the intention, and from then on the AI writes
-                  your thinking down automatically as you go. It&rsquo;s
-                  a gym for your mind that mostly runs itself.
+                  like an AGENTS.md, but for personal alignment. Most
+                  people&rsquo;s context is scattered across a hundred
+                  apps; this is one place, a single ground truth of who
+                  you are and how you think, that any AI or service you
+                  choose can plug into, read, and write to. Fully
+                  private, fully sovereign &mdash; yours to organise,
+                  gate, even sell, or delete. And the AI writes your
+                  thinking down automatically as you go: a gym for your
+                  mind that mostly runs itself.
                 </p>
 
                 <p className="statement-close">
-                  And Alexandria itself is like Strava, but for the mind.
-                  Runners share one belief &mdash; that physical health
-                  matters &mdash; and each still runs their own way: own
-                  shoes, own routes, own pace. Same here, for thinking:
-                  you buy into the shared philosophy, connect with the
-                  others who do, and do it entirely your own way.
+                  And Alexandria itself is like Strava, but for the
+                  mind: runners share one belief &mdash; that health
+                  matters &mdash; while each runs their own way, own
+                  shoes, own routes, own pace. Here it&rsquo;s the same
+                  for thinking. You connect with the others, learn from
+                  each other, and share what works, so everyone gets
+                  better.
                 </p>
 
                 <p className="statement-close">
-                  The company&rsquo;s job is just to make starting
-                  easy &mdash; for as many people as possible. So the
-                  founder&rsquo;s own folder is a gift: free and open, a
-                  pair of running shoes so you can start today. Five
-                  minutes to set up, and then they&rsquo;re entirely
-                  yours, nothing to do with us &mdash; run in them daily,
-                  rebuild them word by word, or burn them. Delete the
-                  folder, and it&rsquo;s like it never happened.
+                  The company&rsquo;s job is to sell this vision,
+                  connect the people who share it, and make starting as
+                  easy as possible. Everyone is welcome; not everyone
+                  will come. So the founder&rsquo;s own folder is a
+                  gift &mdash; free, open, five minutes to lace up, with
+                  new shoes arriving monthly for as long as you want
+                  them. We honestly don&rsquo;t care whose shoes you run
+                  in. We just want you to run.
                 </p>
 
                 <p className="statement-beat">
-                  <em>One decision left. You&rsquo;re already
-                  here &mdash; press the button.</em>
+                  <em>It&rsquo;s a free sample, right in front of you.
+                  Take it &mdash; and if it&rsquo;s not for you, put it
+                  back like it never happened.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -864,8 +871,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     {/* Sub carries what you get, in the founder's first
                         person ("I'll send stuff, post all the updates and
                         behind the scenes things" — 2026-07-10 riff). */}
+                    {/* Command register, per the founder: too-passive
+                        kills this button — "every single one of my
+                        friends and family should immediately know that
+                        they are to press that button." */}
                     <span className="cta-sub">
-                      letters from the founder &mdash; just your email
+                      friends, family, the curious &mdash; press this one
                     </span>
                   </div>
                 </div>
@@ -2143,7 +2154,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* Was 126px (ornament-top alignment); pulled up 2026-07-10 to
              keep the CTAs above the fold as the letter grew — the fold
              wins over the ornament nicety until the shortening pass. */
-          margin-top: 104px;
+          margin-top: 76px;
           /* Squeeze the column — narrower text width pushes the left
              edge inward (right edge unchanged because right-lower is
              flex-end aligned). The closer + CTAs reflow to more lines
@@ -2254,7 +2265,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* 18 → 12 (2026-07-10): the decompressed letter (thirteenth
              pass) pushed the CTAs below the 1000px stage; tightened
              with the type sizes below so the buttons stay in view. */
-          gap: 10px;
+          gap: 8px;
           margin-bottom: var(--lower-block-bottom);
         }
         /* Roman numeral marginalia — four argument beats. The split's
@@ -2356,8 +2367,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-top: 6px;
           transform: translateY(-20px);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          /* 26 → 24 (2026-07-10): fit the decompressed letter. */
-          font-size: 24px;
+          /* 26 → 24 → 22 (2026-07-10): fit the growing letter. */
+          font-size: 22px;
           line-height: 1.4;
           font-style: italic;
           font-weight: 400;
@@ -2372,11 +2383,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-top: 0;
           transform: none;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          /* 18/1.55 → 17/1.5 → 16.5/1.47 (2026-07-10): fit the growing
-             letter with the CTAs still above the stage bottom. The
-             shortening pass (founder-deferred) buys this back. */
-          font-size: 16.5px;
-          line-height: 1.47;
+          /* 18/1.55 → … → 16/1.44 (2026-07-10): fit the growing letter
+             with the CTAs still above the stage bottom. The shortening
+             pass (founder-deferred) buys this back. */
+          font-size: 16px;
+          line-height: 1.44;
           font-style: normal;
           letter-spacing: 0.005em;
           color: var(--theme-fg);
