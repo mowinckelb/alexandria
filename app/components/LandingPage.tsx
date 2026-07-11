@@ -795,14 +795,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
                 <p className="statement-close">
                   Most people won&rsquo;t mind, honestly &mdash; AI is
-                  that good, and it only gets better. That&rsquo;s the
-                  trajectory: let it take over, bit by bit. But there is
-                  a choice. Refuse AI, and you just fall behind.
-                  Surrender to it, and the thinking stops being yours.
-                  Or ride it &mdash; use AI fully, and have it{' '}
-                  <em>develop</em>{' '}your mind instead of{' '}
-                  <em>replacing</em>{' '}it. Alexandria is that third
-                  option.
+                  that good, and it only gets better. It&rsquo;s a wave,
+                  and it&rsquo;s still growing. Refuse it, and
+                  you&rsquo;re left standing on the beach. Surrender,
+                  and it pulls you under. Or surf it: use AI fully and
+                  scale alongside it &mdash; an infinite intelligence
+                  that{' '}<em>develops</em>{' '}your mind and brings
+                  you with it, instead of{' '}<em>replacing</em>{' '}
+                  you. Alexandria is that third option.
                 </p>
 
                 <p className="statement-close">
@@ -811,10 +811,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   connectable &mdash; other companies do that part well.
                   The one gap is your inner monologue:{' '}
                   <em>what</em>{' '}you think, and{' '}<em>how</em>{' '}
-                  you think. Nothing writes that down, and nobody can
-                  write it down for you &mdash; it has to come from you.
-                  AI can&rsquo;t read your mind. But it can read words:
-                  put your thoughts into words, and it can think{' '}
+                  you think. Nothing has access to it, almost nothing is
+                  even trying &mdash; and nobody can open it but you. AI
+                  can&rsquo;t read your mind. But it can read words: put
+                  your thoughts into words, and it can think{' '}
                   <em>with</em>{' '}you, not{' '}<em>for</em>{' '}you.
                 </p>
 
@@ -823,23 +823,25 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   like an AGENTS.md, but for personal alignment. It
                   becomes the one place that holds you: a single ground
                   truth any AI or service can plug into, read, and write
-                  to. It replaces nothing &mdash; it just makes sure
-                  everything is also here. Dump in old journals, meeting
-                  notes, videos you watched; the intelligence sorts it.
-                  Fully private, fully sovereign &mdash; yours to
-                  organise, gate, even sell, or delete.
+                  to. It replaces nothing &mdash; it connects what can
+                  be connected, and you dump in the rest: old journals,
+                  voice memos, half-finished notes; the intelligence
+                  sorts it. Fully private, fully sovereign &mdash; yours
+                  to organise, gate, even sell, or delete, and never
+                  locked in: move it wherever serves you.
                 </p>
 
                 <p className="statement-close">
-                  Most of it runs passively: your AI writes your
-                  thinking down as you go, and reads it back
-                  everywhere &mdash; so every app treats you like
-                  someone it knows, not a stranger. Then the active
-                  sessions: it brings questions, teases things out,
-                  helps you process and resolve &mdash; then pushes you
-                  to go act on it. The product is the changed person.
-                  It&rsquo;s a gym for your mind, and the results show
-                  in you.
+                  Most of it is passive: the AI writes your thinking
+                  down as you go, and uses all of it to answer you
+                  better &mdash; a helper who knows you well, not a
+                  stranger. The rest is active: a biographer who sits
+                  with you over months, teases it out, and sends you off
+                  to act on it. The difference is a Wikipedia page
+                  versus a biography &mdash; one is written from your
+                  outputs, the other from your inputs and process too.
+                  It&rsquo;s a gym for your mind, and the product is the
+                  changed person.
                 </p>
 
                 <p className="statement-close">
@@ -848,23 +850,25 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   matters &mdash; while each runs their own way, own
                   shoes, own routes, own pace. Here it&rsquo;s the same
                   for thinking. You connect with the others, learn from
-                  each other, and share what works &mdash; the library
-                  is built for exactly that.
+                  each other, and show what you&rsquo;ve built &mdash;
+                  that&rsquo;s the library.
                 </p>
 
                 <p className="statement-close">
                   The company&rsquo;s job: sell this vision, connect the
                   people who share it, and make starting easy. Everyone
-                  is welcome; not everyone will come. The founder&rsquo;s
-                  own folder is a gift &mdash; free, open, five minutes
-                  to lace up, new shoes monthly. We don&rsquo;t care
-                  whose shoes you run in. We just want you to run.
+                  is welcome; not everyone will come. Starting is one
+                  command: it installs a copy of the founder&rsquo;s own
+                  folder &mdash; his instructions, his methods, working
+                  from the first minute &mdash; free, updated monthly,
+                  yours to reshape into your own. His shoes, until you
+                  have yours. We just want you to run.
                 </p>
 
                 <p className="statement-beat">
-                  <em>It&rsquo;s a free sample, right in front of you.
-                  Take it &mdash; and if it&rsquo;s not for you, put it
-                  back like it never happened.</em>
+                  <em>A free sample, right in front of you. Take
+                  it &mdash; if it&rsquo;s not for you, put it back like
+                  it never happened.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -889,7 +893,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                         friends and family should immediately know that
                         they are to press that button." */}
                     <span className="cta-sub">
-                      like the company? press this one now
+                      rooting for us? this is your button
                     </span>
                   </div>
                 </div>
@@ -2167,12 +2171,13 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* Was 126px (ornament-top alignment); pulled up 2026-07-10 to
              keep the CTAs above the fold as the letter grew — the fold
              wins over the ornament nicety until the shortening pass. */
-          margin-top: 60px;
+          margin-top: 48px;
           /* Squeeze the column — narrower text width pushes the left
              edge inward (right edge unchanged because right-lower is
-             flex-end aligned). 680 → 740 (2026-07-10): widened to fit
-             the grown letter; fewer wrapped lines beats smaller type. */
-          width: 740px;
+             flex-end aligned). 680 → 740 → 764 (2026-07-10): widened to
+             fit the grown letter; fewer wrapped lines beats smaller
+             type. */
+          width: 764px;
         }
 
         /* ─── BOTTOM SLIDE ─── */
@@ -2278,7 +2283,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* 18 → 12 (2026-07-10): the decompressed letter (thirteenth
              pass) pushed the CTAs below the 1000px stage; tightened
              with the type sizes below so the buttons stay in view. */
-          gap: 7px;
+          gap: 6px;
           margin-bottom: var(--lower-block-bottom);
         }
         /* Roman numeral marginalia — four argument beats. The split's
