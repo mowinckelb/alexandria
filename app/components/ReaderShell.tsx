@@ -35,6 +35,8 @@ const LinesIcon = <svg width="19" height="19" {...svgProps}><line x1="4" y1="7" 
 const PaneRightIcon = <svg width="19" height="19" {...svgProps}><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="15" y1="4" x2="15" y2="20" /></svg>;
 const CopyIcon = <svg width="17" height="17" {...svgProps}><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>;
 const DownloadIcon = <svg width="17" height="17" {...svgProps}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg>;
+const ExpandIcon = <svg width="17" height="17" {...svgProps}><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M16 3h3a2 2 0 0 1 2 2v3" /><path d="M21 16v3a2 2 0 0 1-2 2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /></svg>;
+const CompressIcon = <svg width="17" height="17" {...svgProps}><path d="M8 3v3a2 2 0 0 1-2 2H3" /><path d="M21 8h-3a2 2 0 0 1-2-2V3" /><path d="M3 16h3a2 2 0 0 1 2 2v3" /><path d="M16 21v-3a2 2 0 0 1 2-2h3" /></svg>;
 
 /**
  * PdfView — renders a PDF as fit-to-width canvas pages stacked vertically, so it
@@ -123,6 +125,31 @@ export default function ReaderShell({
   const [midOpen, setMidOpen] = useState(false);     // chat
   const [rightOpen, setRightOpen] = useState(true);  // the piece
   const [tab, setTab] = useState<'piece' | 'ask'>('piece'); // mobile
+  const [expanded, setExpanded] = useState(false);   // full-screen the piece
+
+  // Full-screen the doc: CSS immersive (fills the viewport, works on every
+  // device incl. iOS which has no element Fullscreen API) + true browser
+  // fullscreen on desktop as a bonus. The request must run in the click's
+  // user-gesture, so it lives in the handler, not an effect.
+  const toggleExpand = () => {
+    const next = !expanded;
+    setExpanded(next);
+    try {
+      const el = document.documentElement;
+      if (next) el.requestFullscreen?.().catch(() => {});
+      else if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    } catch { /* iOS Safari / denied: the CSS immersive layer still applies */ }
+  };
+  // Keep the two in sync: ESC or leaving native fullscreen (F11/OS chrome)
+  // drops us out of the immersive layer too.
+  useEffect(() => {
+    if (!expanded) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setExpanded(false); };
+    const onFs = () => { if (!document.fullscreenElement) setExpanded(false); };
+    window.addEventListener('keydown', onKey);
+    document.addEventListener('fullscreenchange', onFs);
+    return () => { window.removeEventListener('keydown', onKey); document.removeEventListener('fullscreenchange', onFs); };
+  }, [expanded]);
 
   const idRef = useRef(2);
   const [convos, setConvos] = useState<Convo[]>([{ id: '1', messages: [] }]);
@@ -212,7 +239,7 @@ export default function ReaderShell({
           ))}
         </div>
 
-        <main style={{ flex: 1, display: 'flex', minHeight: 0 }} data-tab={tab}
+        <main style={{ flex: 1, display: 'flex', minHeight: 0 }} data-tab={tab} data-expanded={expanded ? 'true' : 'false'}
           data-left={leftOpen ? 'open' : 'closed'} data-mid={midOpen ? 'open' : 'closed'} data-right={rightOpen ? 'open' : 'closed'}>
 
           {/* history — slot 1 */}
@@ -266,12 +293,13 @@ export default function ReaderShell({
           {/* the piece — slot 3 */}
           <button type="button" className="reader-strip strip-right" style={{ order: 3 }} onClick={() => setRightOpen(true)} aria-label="open the piece" title="piece">{PaneRightIcon}</button>
           <article className="reader-pane pane-piece" style={{ order: 3, flex: '1 1 0', minWidth: 0, flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.7rem 1rem 0.4rem', borderBottom: '1px solid var(--border-light)' }}>
+            <div className="piece-head" style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.7rem 1rem 0.4rem', borderBottom: '1px solid var(--border-light)' }}>
               <span style={{ ...label, marginRight: 'auto' }}>{name}</span>
               {status === 'ok' && (
                 <>
                   <ActionButton icon={CopyIcon} onAction={copyArtifact} title="copy text" style={iconBtn} className="hover:opacity-60" />
                   {downloadBlob && <ActionButton icon={DownloadIcon} onAction={downloadArtifact} title="download" style={iconBtn} className="hover:opacity-60" />}
+                  <button type="button" onClick={toggleExpand} aria-label={expanded ? 'exit full screen' : 'full screen'} title={expanded ? 'exit full screen' : 'full screen'} style={iconBtn} className="hover:opacity-60">{expanded ? CompressIcon : ExpandIcon}</button>
                 </>
               )}
               <button type="button" onClick={() => setRightOpen(false)} aria-label="collapse the piece" title="collapse" style={iconBtn} className="piece-collapse hover:opacity-60">{PaneRightIcon}</button>
@@ -334,6 +362,19 @@ export default function ReaderShell({
           main[data-tab="piece"] .pane-piece { display: flex !important; }
           main[data-tab="ask"] .pane-chat { display: flex !important; }
         }
+
+        /* Full screen — the piece fills the whole viewport on every device; the
+           other panes, strips, and tabs drop out. Wins both media queries. */
+        main[data-expanded="true"] .pane-piece {
+          display: flex !important; position: fixed !important;
+          top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important;
+          min-width: 0 !important; z-index: 120; background: var(--bg-primary);
+        }
+        main[data-expanded="true"] .reader-strip,
+        main[data-expanded="true"] .pane-history,
+        main[data-expanded="true"] .pane-chat,
+        main[data-expanded="true"] .piece-collapse { display: none !important; }
+        main[data-expanded="true"] .piece-head { padding-right: 3.4rem; }
       `}</style>
     </>
   );
