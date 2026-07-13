@@ -907,13 +907,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     away concludes about them. Not an attack; a mirror.
                     Coding-tool exception routes to keep me posted. */}
                 <p className="statement-beat">
-                  <em>You&rsquo;re deciding either way &mdash; closing
-                  this tab is a decision too. It&rsquo;s free, takes five
-                  minutes, and deletes without a trace, so nothing outside
-                  you is in the way. All that&rsquo;s left is the question
-                  itself: is your own mind worth five minutes? (No coding
-                  tool yet? Keep me posted.) Click, or don&rsquo;t &mdash;
-                  but whichever you choose is your answer.</em>
+                  <em>Doing nothing is also a decision. It&rsquo;s free,
+                  five minutes, and deletes clean &mdash; so the only
+                  thing in your way is you. Click or don&rsquo;t; either
+                  way, you&rsquo;ve answered whether your mind is worth
+                  it.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2601,8 +2599,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         /* The hook lives on the front slide; here the whole argument
            (i–v) scrolls in one fixed-height box, section plates in the
            museum register, with the outro + close + CTAs pinned below. */
+        /* Section plates — the museum register (echoing the dict block).
+           In the manuscript flow they get air above (separating sections)
+           and sit tight to the prose below. */
         .letter-sec {
-          margin: 8px 0 -4px;
+          margin: 21px 0 6px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-size: 12px;
@@ -2610,8 +2611,21 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           color: var(--theme-fg-faint);
           user-select: none;
         }
-        .letter-sec:first-child {
+        .letter-scroll .letter-sec:first-child {
           margin-top: 0;
+        }
+        /* Manuscript flow — book typography instead of stacked blocks
+           (founder: "they look flat… block one, block two… make it more
+           elegant, smooth, less flat"). The paragraph opening a section
+           sits flush under its plate; a continuation paragraph runs on
+           with a first-line indent and no gap, so the prose reads as a
+           letter rather than two boxes. */
+        .letter-scroll .statement-close {
+          margin: 0;
+          text-indent: 0;
+        }
+        .letter-scroll .statement-close + .statement-close {
+          text-indent: 1.7em;
         }
         /* The scroll box — only section i shows at rest (founder,
            2026-07-12); the fade + scrollbar + "keep reading" cue make
@@ -2654,9 +2668,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           overflow-y: auto;
           padding-right: 18px;
           padding-bottom: 34px;
-          display: flex;
-          flex-direction: column;
-          gap: 13px;
+          display: block;
           scrollbar-width: thin;
           scrollbar-color: var(--theme-border-soft) transparent;
           -webkit-mask-image: linear-gradient(
@@ -2694,11 +2706,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           letter-spacing: 0.01em;
           color: var(--theme-fg-muted);
         }
-        /* Emphasis in the quiet note pops to full ink (italic stays
-           reserved for the close beat below). */
+        /* Emphasis in the quiet note pops to full ink by colour alone —
+           no bold weight (founder: the bold "ruined the spacing"). */
         .letter-outro em {
           font-style: normal;
-          font-weight: 500;
           color: var(--theme-fg);
         }
         /* ─── FRONT-SLIDE OPENING ─── */
