@@ -2641,7 +2641,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .letter-more {
           position: absolute;
           right: 18px;
-          bottom: 20px;
+          /* Sits in the whitespace between section i's last line and the
+             ii heading (~52px up), so it's on clean space, not over the
+             ghost text (founder). */
+          bottom: 44px;
           z-index: 2;
           padding: 2px 9px 3px;
           background: var(--theme-bg);
