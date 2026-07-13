@@ -701,7 +701,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           <p className="front-epigraph-line">
             When calculators arrived, we let them do the math &mdash; and
             got worse at doing it ourselves. Thinking is no different: the
-            more you let AI do it for you, the weaker the muscle gets.
+            more you let ai do it for you, the weaker the muscle gets.
           </p>
         </div>
         <div className="top-inner" />
@@ -904,13 +904,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     necessarily in one — each with its concrete action; the
                     tag collapses the "maybe later" escape into branch one
                     so there is no drift. Firm, never insulting. */}
-                {/* The close (2026-07-12): concise, forcing. No list —
-                    one line that isolates the decision and closes the
-                    escape (putting it off = an unspoken no). */}
+                {/* The close (2026-07-12): concise, gently forcing, with
+                    a clear action for BOTH CTAs (try it / keep me posted).
+                    Softer than the "no you won't admit" line. */}
                 <p className="statement-beat">
-                  <em>So decide, now. If you agree, the button is one
-                  click away; if you don&rsquo;t, close the tab. Putting
-                  it off is just a no you won&rsquo;t admit.</em>
+                  <em>So it&rsquo;s yours to decide. If you agree, try
+                  it &mdash; that&rsquo;s one click. If you&rsquo;d rather
+                  follow along, leave your email. Either way, the moment
+                  to choose is now.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2660,7 +2661,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .letter-scroll {
           position: relative;
-          height: 322px;
+          /* 322 → 372 (2026-07-12): with the shorter close there was a
+             big void between the box and the closing group; a taller box
+             narrows it toward the wax seal's baseline on the left (a
+             cleaner horizon). Shows section i + a graceful peek of ii
+             under the fade. */
+          height: 372px;
           overflow-y: auto;
           padding-right: 18px;
           padding-bottom: 34px;
