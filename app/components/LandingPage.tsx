@@ -2228,18 +2228,19 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            huge wordmark fills bottom-left alone. 120px matches the
            ornament's padding-top so the two columns share a top edge. */
         .right-col .right-lower {
-          /* Was 126px (ornament-top alignment); pulled up 2026-07-10 to
-             keep the CTAs above the fold as the letter grew — the fold
-             wins over the ornament nicety until the shortening pass. */
-          /* 96 → 26 → 108 → 178 → 138 (2026-07-12): balances the column
-             (CTAs near the left wordmark's baseline) while leaving the
-             taller decision-tree close clear of the fold. */
-          margin-top: 138px;
+          /* 2026-07-12: the column now SPANS the slide (founder: "move
+             the 5 sections up, give the stuff under it room to breathe,
+             bottom-align the CTAs with the left wordmark"). The box sits
+             high (this margin-top), the column fills the height (flex 1),
+             and the closing group is pushed to the bottom via
+             margin-top:auto on the outro — so the CTAs land at the same
+             baseline as the left wordmark with generous air between. */
+          margin-top: 58px;
+          flex: 1;
+          min-height: 0;
           /* Squeeze the column — narrower text width pushes the left
              edge inward (right edge unchanged because right-lower is
-             flex-end aligned). Restored to 680 (letter-box pass) — the
-             crisis widening (740, 764) is undone; the box scrolls
-             instead. */
+             flex-end aligned). */
           width: 680px;
         }
 
@@ -2510,7 +2511,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            fourth. A hairline on the left gathers the branches as one
            quiet stanza. */
         .close-tree {
-          margin: 16px 0 0;
+          margin: 22px 0 0;
         }
         .close-tree-lead {
           margin: 0 0 13px;
@@ -2657,7 +2658,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            line so the close lands as a destination, not a button
            caption. Adds to the 18px flex gap on right-lower. */
         .right-lower > .cta-pair {
-          margin-top: 12px;
+          margin-top: 26px;
         }
 
         /* ─── THE LETTER (scroll box) ─── */
@@ -2759,8 +2760,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            a graceful final line — the two registers give the zone air
            and hierarchy. */
         .letter-outro {
-          margin-top: 20px;
-          padding-top: 22px;
+          /* margin-top:auto pushes the outro + tree + CTAs to the bottom
+             of the (now full-height) column, leaving the breathing gap
+             below the box; the rule marks the turn from argument to
+             invitation. */
+          margin-top: auto;
+          padding-top: 24px;
           border-top: 1px solid var(--theme-border-soft);
           font-size: 15.5px;
           line-height: 1.66;
