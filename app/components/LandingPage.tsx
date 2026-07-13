@@ -893,26 +893,24 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </div>
 
                 <p className="statement-close letter-outro">
-                  Our job is only to make starting easy, and to bring
-                  everyone doing it together. Everyone&rsquo;s welcome;
-                  not everyone will come. <em>One command</em> drops in a
-                  copy of the founder&rsquo;s own folder &mdash; his
-                  setup, working from minute one, <em>free</em>, refreshed
-                  monthly, yours to reshape. We just want you to start.
+                  To begin, one command sets up the founder&rsquo;s own
+                  folder on your computer &mdash; his system, working from
+                  the first minute, free, and yours to reshape into your
+                  own. Our part is only to make that easy, and to gather
+                  everyone who does it. Everyone is welcome; not everyone
+                  will come.
                 </p>
 
-                {/* The door close (rephrased 2026-07-12, agency frame):
-                    assert that inaction is itself a decision, strip every
-                    external excuse (free / 5 min / deletes clean), so the
-                    only thing left is the reader — and name what walking
-                    away concludes about them. Not an attack; a mirror.
-                    Coding-tool exception routes to keep me posted. */}
+                {/* The close (rephrased 2026-07-12, elegant not
+                    attacking): make the cost feel like nothing, then pose
+                    one quiet question and point to the single action. The
+                    reader decides for themselves; we never accuse. */}
                 <p className="statement-beat">
-                  <em>Doing nothing is also a decision. It&rsquo;s free,
-                  five minutes, and deletes clean &mdash; so the only
-                  thing in your way is you. Click or don&rsquo;t; either
-                  way, you&rsquo;ve answered whether your mind is worth
-                  it.</em>
+                  <em>Trying costs almost nothing &mdash; it is free,
+                  takes five minutes, and leaves no trace if you delete
+                  it. So it comes down to one quiet question: is a sharper
+                  mind worth it? If it is, the first step is a single
+                  click.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2475,14 +2473,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            the numbered ways. Italic, a half-step up, room around it. */
         .statement-beat .no-orphan { white-space: nowrap; }
         .statement-beat {
-          margin: 0;
+          /* The graceful final line — a touch larger and airier than the
+             body, italic, with room above so it lands as the close of a
+             letter rather than one more paragraph. */
+          margin: 16px 0 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          /* 20 → 18 (2026-07-10): the beat grew into the three-readers
-             close; a size down keeps the pinned zone honest. */
-          font-size: 18px;
-          line-height: 1.45;
+          font-size: 18.5px;
+          line-height: 1.58;
           font-style: italic;
-          letter-spacing: 0.005em;
+          letter-spacing: 0.006em;
           color: var(--theme-fg);
           hanging-punctuation: first last;
         }
@@ -2601,10 +2600,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            (i–v) scrolls in one fixed-height box, section plates in the
            museum register, with the outro + close + CTAs pinned below. */
         /* Section plates — the museum register (echoing the dict block).
-           In the manuscript flow they get air above (separating sections)
-           and sit tight to the prose below. */
+           Air above (separating sections), tight to the prose below. */
         .letter-sec {
-          margin: 21px 0 6px;
+          margin: 22px 0 7px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-size: 12px;
@@ -2615,18 +2613,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .letter-scroll .letter-sec:first-child {
           margin-top: 0;
         }
-        /* Manuscript flow — book typography instead of stacked blocks
-           (founder: "they look flat… block one, block two… make it more
-           elegant, smooth, less flat"). The paragraph opening a section
-           sits flush under its plate; a continuation paragraph runs on
-           with a first-line indent and no gap, so the prose reads as a
-           letter rather than two boxes. */
+        /* Clean paragraph flow — a modest gap between paragraphs, no
+           first-line indent (founder wasn't sure the indent looked good).
+           Readable, elegant, un-blocky. */
         .letter-scroll .statement-close {
-          margin: 0;
+          margin: 0 0 13px;
           text-indent: 0;
         }
-        .letter-scroll .statement-close + .statement-close {
-          text-indent: 1.7em;
+        .letter-scroll .statement-close:last-child {
+          margin-bottom: 0;
         }
         /* The scroll box — only section i shows at rest (founder,
            2026-07-12); the fade + scrollbar + "keep reading" cue make
@@ -2692,26 +2687,21 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .letter-scroll::-webkit-scrollbar-thumb:hover {
           background: var(--theme-fg-muted);
         }
-        /* The outro — the "how to start" landing. Set apart from the
-           five argument sections: a hairline rule above marks the end of
-           the argument, and the register shifts to a quieter, wider
-           italic note (distinct from the roman body inside the box and
-           from the bolder close beat below). */
+        /* THE CLOSING MOVEMENT — set apart from the argument box above
+           and given its own rhythm so it doesn't read as two more blocks
+           of text (founder). A hairline rule marks the turn from argument
+           to invitation; the outro is a quiet practical note, the close
+           a graceful final line — the two registers give the zone air
+           and hierarchy. */
         .letter-outro {
           margin-top: 20px;
           padding-top: 22px;
           border-top: 1px solid var(--theme-border-soft);
-          font-size: 16px;
-          line-height: 1.62;
+          font-size: 15.5px;
+          line-height: 1.66;
           font-style: normal;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.012em;
           color: var(--theme-fg-muted);
-        }
-        /* Emphasis in the quiet note pops to full ink by colour alone —
-           no bold weight (founder: the bold "ruined the spacing"). */
-        .letter-outro em {
-          font-style: normal;
-          color: var(--theme-fg);
         }
         /* ─── FRONT-SLIDE OPENING ─── */
         /* "to the reader" + the calculator hook, set on the LEFT of the
