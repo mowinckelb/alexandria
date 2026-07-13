@@ -302,10 +302,6 @@ function FrontFilm() {
 
 export default function LandingPage({ brandClassName = '' }: Props) {
   const [themeIdx, setThemeIdx] = useState(0);
-  // Letter progressive disclosure — sections ii–v stay collapsed until
-  // the reader chooses to read on (founder, 2026-07-12: hidden so they
-  // aren't intimidated, but one intuitive tap away).
-  const [expanded, setExpanded] = useState(false);
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
   // Default (no param) keeps the existing CSS-built window. Read on
   // mount so the data-attribute picks up the correct CSS branch.
@@ -690,6 +686,20 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         <FrontFilm />
         <div className="stage-top">
         <span className="alpha-mark">san francisco · mmxxvi</span>
+        {/* Front-slide opening (2026-07-12, founder-directed): the letter
+            begins on the hero — "to the reader" + the calculator hook —
+            set low and centred over the scene, quiet serif. It peels up
+            with the slide, handing off to the argument on the back
+            slide. Positioned in the pixel-locked stage so it scales
+            cleanly with the scene. */}
+        <div className="front-epigraph">
+          <p className="front-salutation"><em>to the reader.</em></p>
+          <p className="front-epigraph-line">
+            When calculators arrived, we let them do the math &mdash; and
+            lost the ability to do it in our heads. AI will do the same
+            to your thinking, all of it.
+          </p>
+        </div>
         <div className="top-inner" />
         </div>
       </div>
@@ -760,203 +770,126 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
           <div className="right-col">
               <div className="right-lower">
-                <p className="statement-salutation">
-                  <em>to the reader.</em>
-                </p>
-
-                {/* Letter convention (letter.pdf + whitepaper, founder's
-                    2026-07-01 ruling extended to the site): proper-grammar
-                    prose — AI, Alexandria, sentence capitals — lowercase
-                    only as brand mark (wordmark, titles, buttons, plates,
-                    filenames). The collective is deliberately one beat, not
-                    a paragraph: the post-install block makes the join ask
-                    at peak conviction, so the page doesn't pre-explain. */}
-                {/* Fifteenth pass, 2026-07-10 — full pass history lives
-                    in website.md (§ the 2026-07-09/10 conversion
-                    passes); per-pass comments collapse to this one.
-                    Standing rulings that bind this block: simple =
-                    LOW-EFFORT comprehension, not brevity (Taste.md —
-                    compression is a difficulty); hold the reader's hand,
-                    stay on message, no side-beats; sell the CONCEPT —
-                    "Alexandria file"; anchors aboard (calculators, gym,
-                    AGENTS.md, Strava, running shoes — one per beat);
-                    never attack the reader or the other path; five
-                    minutes stays (fair reflection) over "ten seconds";
-                    corridor dead-ends at the buttons. This pass: the
-                    fourteenth epigraph was "too compressed" — it now
-                    carries ONLY the calculator story; the seduction +
-                    three options walk slowly in body type; "easiest
-                    part of you to lose" and "what it makes possible"
-                    trimmed as off-message. Fold-check after every copy
-                    change: .see/measure.mjs — cta bottom must stay
-                    under 900. */}
-                <p className="statement-epigraph">
-                  When calculators arrived, we let them do the
-                  math &mdash; and most of us lost the ability to do it
-                  in our heads. AI is about to do the same to your
-                  thinking, all of it.
-                </p>
-
-                {/* PROGRESSIVE DISCLOSURE (2026-07-12, founder-directed):
-                    "opening two lines, then the first section, then
-                    elegantly hide the other sections… hidden in the
-                    sense that they don't get intimidated and read none
-                    of it — but easy and intuitive to read on." Default
-                    view = epigraph + section i (the cost) + the outro
-                    (how to start) + close + CTAs: a complete short pitch.
-                    Sections ii–v collapse into .letter-extra, revealed
-                    by the toggle (max-height + scroll when open, so the
-                    fixed stage never overflows and the CTAs stay pinned).
-                    The end — the outro and the close — is always shown,
-                    per "all the other sections hidden apart from the
-                    end." Mobile: the collapse still works; the open
-                    panel just flows (no fixed scroll). */}
+                {/* THE LETTER (2026-07-12 restructure, founder-directed):
+                    the hook — "to the reader" + the calculator opening —
+                    moved to the FRONT slide (.front-epigraph). Here the
+                    whole argument (i–v) scrolls elegantly in one box; the
+                    two closing sections (how to start + the door) stay
+                    pinned below with the CTAs. Copy consolidated this
+                    pass — same ideas and richness, fewer words. Section
+                    plates (roman numerals) echo the dictionary block. */}
+                <div className="letter-scroll" tabIndex={0} aria-label="the letter">
                 <p className="letter-sec">i &middot; the cost</p>
 
                 <p className="statement-close">
                   It creeps in. You ask AI to write the email, make the
                   plan, solve the problem &mdash; and it does, better
-                  than you would have. The answers are great, so you
-                  keep asking. But thinking is a muscle: stop using it
-                  and it fades. The calculator only took arithmetic;
-                  this takes the lot &mdash; every kind of thinking you
-                  do. Give it a few years and you won&rsquo;t just
-                  outsource your thinking, you&rsquo;ll lose the ability
-                  to do it at all. Most people won&rsquo;t notice until
-                  it&rsquo;s too late.
+                  than you would have. So you keep asking. But thinking
+                  is a muscle: stop using it and it fades. The calculator
+                  only took arithmetic; this takes the lot. Give it a few
+                  years and you won&rsquo;t just outsource your
+                  thinking &mdash; you&rsquo;ll lose the ability, and
+                  barely notice.
                 </p>
 
                 <p className="statement-close">
-                  So there are three doors. Through the first, you take
-                  the benefit and the cost: let AI do your thinking, and
-                  let your own mind go soft. Through the second, you
-                  refuse both: reject AI, and fall behind everyone who
-                  didn&rsquo;t. The third door is the benefit without
-                  the cost: use AI fully, and have it make you{' '}
-                  <em>sharper</em>{' '}instead of{' '}<em>emptier</em>.
-                  Alexandria is the third door.
+                  There are three doors. Take the benefit and the cost:
+                  let AI think for you, and let your mind go soft. Refuse
+                  both: reject AI, and fall behind. Or take the benefit
+                  without the cost &mdash; use AI fully, and have it make
+                  you{' '}<em>sharper</em>, not{' '}<em>emptier</em>.
+                  Alexandria is that third door.
                 </p>
 
-                <div
-                  className={`letter-extra${expanded ? ' is-open' : ''}`}
-                  aria-hidden={!expanded}
-                >
                 <p className="letter-sec">ii &middot; the missing piece</p>
 
                 <p className="statement-close">
-                  For AI to sharpen your mind, it has to actually know
-                  you. Most of what makes you{' '}<em>you</em>{' '}&mdash;
-                  your files, your messages, your history &mdash; it can
-                  already reach, and other apps connect all that well.
-                  But the most important part is missing: what goes on
-                  in your head. What you think, and how you think it.
-                  Nothing records that. No app can reach it, because
-                  it&rsquo;s inside you &mdash; only you can get it out.
-                  The opening is simple: AI can&rsquo;t read your mind,
-                  but it can read words. Put your thoughts into words,
-                  and it can think{' '}<em>with</em>{' '}you instead of
-                  {' '}<em>for</em>{' '}you.
+                  To sharpen your mind, AI has to know you. Most of what
+                  makes you{' '}<em>you</em>{' '}&mdash; your files,
+                  messages, history &mdash; it can already reach; other
+                  apps do that well. The missing part is what goes on in
+                  your head: what you think, and how. Nothing records
+                  that, and no app can &mdash; it&rsquo;s inside you, and
+                  only you can get it out. AI can&rsquo;t read your mind,
+                  only words. So put your thoughts into words, and it can
+                  think{' '}<em>with</em>{' '}you, not{' '}<em>for</em>
+                  {' '}you.
                 </p>
 
                 <p className="letter-sec">iii &middot; the folder</p>
 
                 <p className="statement-close">
-                  So here is the product, plainly: a folder on your
-                  computer. Inside it is a simple file that tells any AI
-                  who you are and how you think. (Coding tools already
-                  use a file like this &mdash; an AGENTS.md &mdash; to
-                  learn how a project works; this is the same idea, but
-                  for a person.) Point any AI at the folder and it
-                  treats you like someone it knows, not a stranger.
-                  Connect your other apps and data too, and it all
-                  gathers in this one place.
+                  So here it is, plainly: a folder on your computer.
+                  Inside is a file that tells any AI who you are and how
+                  you think. (Coding tools use one like it &mdash; an
+                  AGENTS.md &mdash; to learn a project; this is the same,
+                  but for a person.) Point any AI at it and you&rsquo;re
+                  someone it knows, not a stranger. Plug in your other
+                  apps and data too; it all gathers here.
                 </p>
 
                 <p className="statement-close">
-                  It stays on your machine, fully private and fully
-                  yours: organise it, hide parts, even sell access, or
-                  delete the whole thing in a second. And it frees you
-                  &mdash; your context lives with you now, not locked
-                  inside one AI company, so you can switch to any AI any
-                  time and take everything with you. It&rsquo;s your own
-                  AI doing the work, on your own computer. We never
-                  touch it. We just gave you the idea.
+                  It stays on your machine, fully yours &mdash; organise
+                  it, hide parts, even sell access, or delete it in a
+                  second. And it frees you: your context lives with you,
+                  not locked in one company, so you can switch AI any
+                  time and take everything. It&rsquo;s your own AI, on
+                  your own computer. We never see it. We just gave you
+                  the idea.
                 </p>
 
                 <p className="letter-sec">iv &middot; the gym</p>
 
                 <p className="statement-close">
-                  Most of it runs on its own. As you work with AI day to
-                  day, it quietly notes how you think &mdash; your ideas,
-                  your decisions, your patterns &mdash; and saves them to
-                  the folder. The more it knows you, the better it helps
-                  you, in every app. It only ever adds.
+                  Most of it runs on its own: as you work, your AI notes
+                  how you think &mdash; your ideas, decisions,
+                  patterns &mdash; and saves them. The more it knows you,
+                  the better it helps, everywhere. It only ever adds.
                 </p>
 
                 <p className="statement-close">
                   The deeper part you do on purpose. Now and then you sit
-                  with it like a coach: it asks you questions, draws out
-                  what you haven&rsquo;t put into words, helps you think
-                  things through, then sends you off to act. Picture a
-                  Wikipedia page next to a real biography &mdash; one is
-                  pieced together from the outside, the other comes from
+                  with it like a coach: it asks questions, draws out what
+                  you haven&rsquo;t put into words, helps you work through
+                  it, then sends you off to act. A Wikipedia page is
+                  pieced together from outside; a biography comes from
                   someone who sat with you for months and got let in.
-                  That richer version only happens if you show up. It is
-                  a gym for your mind: we hand you the equipment, you do
-                  the lifting. What matters isn&rsquo;t the gym &mdash;
-                  it&rsquo;s who walks out. The product is a sharper you.
+                  That version only happens if you show up. It&rsquo;s a
+                  gym for your mind: we give the equipment, you lift.
+                  What matters isn&rsquo;t the gym &mdash; it&rsquo;s who
+                  walks out.
                 </p>
 
                 <p className="letter-sec">v &middot; the tribe</p>
 
                 <p className="statement-close">
-                  Everyone doing this together is Alexandria &mdash; like
-                  Strava, but for the mind. We share one belief, that a
-                  sharper mind is worth the work, and each of us goes our
-                  own way. You connect with the others, learn from them,
-                  and share what you&rsquo;ve built.
+                  Everyone doing this is Alexandria &mdash; like Strava,
+                  but for the mind. One shared belief, that a sharper
+                  mind is worth the work; everyone their own way. You
+                  connect with the others, learn from them, and share
+                  what you build.
                 </p>
                 </div>
 
-                <button
-                  type="button"
-                  className="letter-toggle"
-                  onClick={() => setExpanded((v) => !v)}
-                  aria-expanded={expanded}
-                >
-                  {expanded ? 'show less' : 'read the whole story'}
-                  <span className="letter-toggle-arrow" aria-hidden>
-                    {expanded ? '↑' : '↓'}
-                  </span>
-                </button>
+                <p className="statement-close letter-outro">
+                  Our job is to make starting easy and bring these people
+                  together. Everyone&rsquo;s welcome; not everyone will
+                  come. One command drops in a copy of the
+                  founder&rsquo;s own folder &mdash; his setup, working
+                  from minute one, free, refreshed monthly, yours to
+                  reshape. We just want you to start.
+                </p>
 
-                {/* Outro shows in the collapsed view (the always-there
-                    "how to start" ending the founder wants); it hides
-                    while the deep-dive panel is open so the panel has
-                    room on the fixed stage — the pinned CTAs carry the
-                    action either way. */}
-                {!expanded && (
-                  <p className="statement-close letter-outro">
-                    Our job is to make starting easy and to bring everyone
-                    doing it together. Everyone is welcome; not everyone
-                    will come. Starting takes one command: it drops in a
-                    copy of the founder&rsquo;s own folder &mdash; his
-                    setup, ready to use from minute one &mdash; free,
-                    refreshed monthly, yours to reshape into your own. We
-                    just want you to start.
-                  </p>
-                )}
-
-                {/* The three-readers close (founder: "spell it out and
-                    attack it so they are forced to make that decision…
-                    those are the only options lol") — every reader maps
-                    to a button or an honest exit; no fourth option. */}
+                {/* The door close (rephrased 2026-07-12): callback to the
+                    third door + the three readers, ending on the quiet
+                    low-agency push — the only thing left is whether you
+                    take it. */}
                 <p className="statement-beat">
-                  <em>So which are you? If this isn&rsquo;t for you, no
-                  hard feelings. If it is but you don&rsquo;t use a
-                  coding tool yet, press keep me posted and start when
+                  <em>You&rsquo;re at the third door. If it&rsquo;s not
+                  for you, no hard feelings. If it is but you don&rsquo;t
+                  code yet, press keep me posted and start when
                   you&rsquo;re ready. And if it is &mdash; it&rsquo;s one
-                  click away.</em>
+                  click, and the rest is just whether you take it.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2639,12 +2572,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           margin-top: 12px;
         }
 
-        /* ─── PROGRESSIVE DISCLOSURE ─── */
-        /* Default view is a complete short pitch (epigraph + section i +
-           outro + close + CTAs). Sections ii–v live in .letter-extra,
-           collapsed to zero height until the reader taps the toggle;
-           when open it becomes a fixed-height scroll panel so the stage
-           never overflows and the CTAs stay pinned below. */
+        /* ─── THE LETTER (scroll box) ─── */
+        /* The hook lives on the front slide; here the whole argument
+           (i–v) scrolls in one fixed-height box, section plates in the
+           museum register, with the outro + close + CTAs pinned below. */
         .letter-sec {
           margin: 8px 0 -4px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -2654,86 +2585,80 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           color: var(--theme-fg-faint);
           user-select: none;
         }
-        .letter-extra {
+        .letter-sec:first-child {
+          margin-top: 0;
+        }
+        /* The scroll box — the whole argument (i–v) scrolls here; a
+           soft bottom mask fades the last line to signal there's more,
+           and the thin theme scrollbar reads as progress. The pinned
+           outro + close + CTAs live below, always visible. */
+        .letter-scroll {
+          position: relative;
+          height: 516px;
+          overflow-y: auto;
+          padding-right: 18px;
+          padding-bottom: 34px;
           display: flex;
           flex-direction: column;
-          gap: 14px;
-          max-height: 0;
-          overflow: hidden;
-          opacity: 0;
-          /* Eat the parent flex-gap while collapsed so the toggle sits
-             snug under section i (no double-gap around a 0-height box). */
-          margin: -7px 0;
-          transition:
-            max-height 560ms cubic-bezier(0.4, 0, 0.2, 1),
-            opacity 360ms ease,
-            margin 560ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .letter-extra.is-open {
-          max-height: 196px;
-          overflow-y: auto;
-          opacity: 1;
-          margin: 0;
-          padding-right: 16px;
+          gap: 13px;
           scrollbar-width: thin;
           scrollbar-color: var(--theme-border-soft) transparent;
+          -webkit-mask-image: linear-gradient(
+            to bottom, #000 0, #000 calc(100% - 42px), transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom, #000 0, #000 calc(100% - 42px), transparent 100%
+          );
         }
-        .letter-extra.is-open::-webkit-scrollbar {
+        .letter-scroll::-webkit-scrollbar {
           width: 4px;
         }
-        .letter-extra.is-open::-webkit-scrollbar-track {
+        .letter-scroll::-webkit-scrollbar-track {
           background: transparent;
         }
-        .letter-extra.is-open::-webkit-scrollbar-thumb {
+        .letter-scroll::-webkit-scrollbar-thumb {
           background: var(--theme-border-soft);
           border-radius: 2px;
         }
-        .letter-extra.is-open::-webkit-scrollbar-thumb:hover {
+        .letter-scroll::-webkit-scrollbar-thumb:hover {
           background: var(--theme-fg-muted);
         }
-        /* Section plates inside the reveal — the label sits close to its
-           own paragraph (below) and apart from the prior section. */
-        .letter-extra .letter-sec {
-          margin: 6px 0 -6px;
+        /* The outro sits a touch apart — the always-visible "how to
+           start", the landing after the argument. */
+        .letter-outro {
+          margin-top: 6px;
         }
-        .letter-extra .letter-sec:first-child {
-          margin-top: 0;
+        /* ─── FRONT-SLIDE OPENING ─── */
+        /* "to the reader" + the calculator hook over the hero, low and
+           centred, quiet ink; peels up with the slide. Anchored in the
+           pixel-locked stage-top so it scales with the scene. */
+        .front-epigraph {
+          position: absolute;
+          left: 50%;
+          top: 92px;
+          transform: translateX(-50%);
+          width: 648px;
+          text-align: center;
+          z-index: 3;
+          pointer-events: none;
         }
-        /* The toggle — an italic invitation, not a button chrome. Reads
-           as part of the letter's hand; the arrow carries the state. */
-        .letter-toggle {
-          align-self: flex-start;
-          margin: 0;
-          padding: 4px 0;
-          border: none;
-          background: none;
-          cursor: pointer;
+        .front-salutation {
+          margin: 0 0 13px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 15px;
-          letter-spacing: 0.01em;
-          color: var(--theme-fg-muted);
-          text-decoration: underline;
-          text-decoration-color: var(--theme-border-soft);
-          text-underline-offset: 4px;
-          text-decoration-thickness: 1px;
-          display: inline-flex;
-          align-items: baseline;
-          gap: 6px;
-          transition: color 180ms ease, text-decoration-color 180ms ease;
+          font-size: 13px;
+          letter-spacing: 0.18em;
+          color: rgba(26, 19, 24, 0.5);
+          text-transform: lowercase;
+          user-select: none;
         }
-        .letter-toggle:hover {
-          color: var(--theme-fg);
-          text-decoration-color: var(--theme-fg-muted);
-        }
-        .letter-toggle-arrow {
-          font-style: normal;
-          font-size: 12px;
-        }
-        /* The outro sits a touch apart — it is the always-visible "how
-           to start", the landing after the argument. */
-        .letter-outro {
-          margin-top: 2px;
+        .front-epigraph-line {
+          margin: 0;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 21px;
+          line-height: 1.5;
+          letter-spacing: 0.004em;
+          color: rgba(26, 19, 24, 0.84);
         }
         .cta-block {
           display: flex;
@@ -3229,6 +3154,23 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             left: 20px;
             font-size: 10.5px;
           }
+          /* Front-slide opening on mobile — over the square scene, lower
+             third, sized to the viewport (the desktop 648px block would
+             overflow). stage-top is display:contents here, so this
+             anchors to .top-slide. */
+          .front-epigraph {
+            top: 116px;
+            width: 84vw;
+            max-width: 440px;
+          }
+          .front-salutation {
+            font-size: 11px;
+            margin-bottom: 10px;
+          }
+          .front-epigraph-line {
+            font-size: 16.5px;
+            line-height: 1.52;
+          }
 
           /* Mobile spacing — the two-slide peel format is gone here;
              everything flows naturally. Give every block more
@@ -3369,20 +3311,16 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .statement-close::before {
             left: 0;
           }
-          /* Mobile keeps the FULL flowing letter — no collapse (page
-             scroll on mobile isn't a fixed-stage commitment, so the
-             intimidation the desktop reveal guards against doesn't
-             apply the same way). .letter-extra flattens via
-             display: contents so ii–v become direct flex children of
-             bottom-inner and inherit the per-child order rules (an
-             unflattened wrapper defaults to order 0 and jumps above the
-             ornament — that bug shipped for ~a minute on 2026-07-10).
-             The toggle is hidden; everything reads top to bottom. */
-          .letter-extra {
+          /* Mobile keeps the FULL flowing letter — no scroll box (page
+             scroll on mobile isn't a fixed-stage commitment). The scroll
+             box flattens via display: contents so its sections become
+             direct flex children of bottom-inner and inherit the
+             per-child order rules (an unflattened wrapper defaults to
+             order 0 and jumps above the ornament — that bug shipped for
+             ~a minute on 2026-07-10). Height/mask/scroll all drop with
+             the box. */
+          .letter-scroll {
             display: contents;
-          }
-          .letter-toggle {
-            display: none;
           }
           .cta-pair {
             padding-left: 0;
