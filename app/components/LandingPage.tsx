@@ -700,8 +700,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           <p className="front-salutation"><em>to the reader.</em></p>
           <p className="front-epigraph-line">
             When calculators arrived, we let them do the math &mdash; and
-            lost the ability to do it in our heads. AI will do the same
-            to your thinking, all of it.
+            lost the ability to do it ourselves. Let AI do your thinking,
+            and you&rsquo;ll lose that too &mdash; all of it.
           </p>
         </div>
         <div className="top-inner" />
@@ -892,24 +892,28 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </div>
 
                 <p className="statement-close letter-outro">
-                  Our job is to make starting easy and bring these people
-                  together. Everyone&rsquo;s welcome; not everyone will
-                  come. One command drops in a copy of the
-                  founder&rsquo;s own folder &mdash; his setup, working
-                  from minute one, free, refreshed monthly, yours to
-                  reshape. We just want you to start.
+                  Our job is only to make starting easy, and to bring
+                  everyone doing it together. Everyone&rsquo;s welcome;
+                  not everyone will come. <em>One command</em> drops in a
+                  copy of the founder&rsquo;s own folder &mdash; his
+                  setup, working from minute one, <em>free</em>, refreshed
+                  monthly, yours to reshape. We just want you to start.
                 </p>
 
-                {/* The door close (rephrased 2026-07-12): callback to the
-                    third door + the three readers, ending on the quiet
-                    low-agency push — the only thing left is whether you
-                    take it. */}
+                {/* The door close (rephrased 2026-07-12, agency frame):
+                    assert that inaction is itself a decision, strip every
+                    external excuse (free / 5 min / deletes clean), so the
+                    only thing left is the reader — and name what walking
+                    away concludes about them. Not an attack; a mirror.
+                    Coding-tool exception routes to keep me posted. */}
                 <p className="statement-beat">
-                  <em>You&rsquo;re at the third door. If it&rsquo;s not
-                  for you, no hard feelings. If it is but you don&rsquo;t
-                  code yet, press keep me posted and start when
-                  you&rsquo;re ready. And if it is &mdash; it&rsquo;s one
-                  click, and the rest is just whether you take it.</em>
+                  <em>You&rsquo;re deciding either way &mdash; closing
+                  this tab is a decision too. It&rsquo;s free, takes five
+                  minutes, and deletes without a trace, so nothing outside
+                  you is in the way. All that&rsquo;s left is the question
+                  itself: is your own mind worth five minutes? (No coding
+                  tool yet? Keep me posted.) Click, or don&rsquo;t &mdash;
+                  but whichever you choose is your answer.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2675,10 +2679,27 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .letter-scroll::-webkit-scrollbar-thumb:hover {
           background: var(--theme-fg-muted);
         }
-        /* The outro sits a touch apart — the always-visible "how to
-           start", the landing after the argument. */
+        /* The outro — the "how to start" landing. Set apart from the
+           five argument sections: a hairline rule above marks the end of
+           the argument, and the register shifts to a quieter, wider
+           italic note (distinct from the roman body inside the box and
+           from the bolder close beat below). */
         .letter-outro {
-          margin-top: 6px;
+          margin-top: 20px;
+          padding-top: 22px;
+          border-top: 1px solid var(--theme-border-soft);
+          font-size: 16px;
+          line-height: 1.62;
+          font-style: normal;
+          letter-spacing: 0.01em;
+          color: var(--theme-fg-muted);
+        }
+        /* Emphasis in the quiet note pops to full ink (italic stays
+           reserved for the close beat below). */
+        .letter-outro em {
+          font-style: normal;
+          font-weight: 500;
+          color: var(--theme-fg);
         }
         /* ─── FRONT-SLIDE OPENING ─── */
         /* "to the reader" + the calculator hook, set on the LEFT of the
