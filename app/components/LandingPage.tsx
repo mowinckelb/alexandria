@@ -701,7 +701,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           <p className="front-epigraph-line">
             When calculators arrived, we let them do the math &mdash; and
             lost the ability to do it ourselves. Let AI do your thinking,
-            and you&rsquo;ll lose that too &mdash; all of it.
+            and this time you&rsquo;ll lose all of it.
           </p>
         </div>
         <div className="top-inner" />
@@ -893,24 +893,26 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 </div>
 
                 <p className="statement-close letter-outro">
-                  To begin, one command sets up the founder&rsquo;s own
+                  To start, one command installs the founder&rsquo;s own
                   folder on your computer &mdash; his system, working from
-                  the first minute, free, and yours to reshape into your
-                  own. Our part is only to make that easy, and to gather
-                  everyone who does it. Everyone is welcome; not everyone
-                  will come.
+                  the first minute. It is free and open, private to you,
+                  yours to change however you like, and gone without a
+                  trace the moment you delete it.
                 </p>
 
-                {/* The close (rephrased 2026-07-12, elegant not
-                    attacking): make the cost feel like nothing, then pose
-                    one quiet question and point to the single action. The
-                    reader decides for themselves; we never accuse. */}
+                {/* The close (2026-07-12): isolate the ONE decision.
+                    Everything practical is handled (outro), so the only
+                    real question is whether you agree with the idea —
+                    then each of the three readers is routed cleanly to an
+                    action (agree → try it; agree-but-not-set-up → keep me
+                    posted; disagree → released warmly). Founder's
+                    "isolate the one decision" (Taste.md); never attacking. */}
                 <p className="statement-beat">
-                  <em>Trying costs almost nothing &mdash; it is free,
-                  takes five minutes, and leaves no trace if you delete
-                  it. So it comes down to one quiet question: is a sharper
-                  mind worth it? If it is, the first step is a single
-                  click.</em>
+                  <em>So the practical side is all taken care of &mdash;
+                  which leaves one real question: do you agree with the
+                  idea? If you do, it is one click away. If you like it but
+                  aren&rsquo;t set up for it yet, leave your email. And if
+                  it isn&rsquo;t for you, that is completely fair.</em>
                 </p>
 
                 <div className="cta-pair">
