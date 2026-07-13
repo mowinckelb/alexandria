@@ -700,8 +700,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           <p className="front-salutation"><em>to the reader.</em></p>
           <p className="front-epigraph-line">
             When calculators arrived, we let them do the math &mdash; and
-            lost the ability to do it ourselves. Let AI do your thinking,
-            and this time you&rsquo;ll lose all of it.
+            lost the ability to do it ourselves. Hand AI your thinking,
+            and this time it isn&rsquo;t one skill you lose. It&rsquo;s
+            all of them.
           </p>
         </div>
         <div className="top-inner" />
@@ -900,19 +901,22 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   trace the moment you delete it.
                 </p>
 
-                {/* The close (2026-07-12): isolate the ONE decision.
-                    Everything practical is handled (outro), so the only
-                    real question is whether you agree with the idea —
-                    then each of the three readers is routed cleanly to an
-                    action (agree → try it; agree-but-not-set-up → keep me
-                    posted; disagree → released warmly). Founder's
-                    "isolate the one decision" (Taste.md); never attacking. */}
+                {/* The close (2026-07-12): reset the frame and FORCE the
+                    decision. Everything practical is handled (outro), so
+                    the only variable is agreement with the idea. Present
+                    the EXHAUSTIVE set — three kinds of reader, no fourth —
+                    so each reader must place themselves and OWN it. Ends
+                    on the forcing note (agree + able → only the click is
+                    left), not a soft "no worries" release. Founder: "force
+                    them into one of the exhaustive decisions, and they own
+                    it." Firm, never insulting. */}
                 <p className="statement-beat">
-                  <em>So the practical side is all taken care of &mdash;
-                  which leaves one real question: do you agree with the
-                  idea? If you do, it is one click away. If you like it but
-                  aren&rsquo;t set up for it yet, leave your email. And if
-                  it isn&rsquo;t for you, that is completely fair.</em>
+                  <em>So the practical side is all handled &mdash; which
+                  leaves only the idea itself. On that, there are three
+                  kinds of reader. If you don&rsquo;t agree, you&rsquo;ve
+                  made your choice. If you agree but can&rsquo;t start
+                  today, leave your email. And if you agree and you can,
+                  the only thing left is the click. There is no fourth.</em>
                 </p>
 
                 <div className="cta-pair">
