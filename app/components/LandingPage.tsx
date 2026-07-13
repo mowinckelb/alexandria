@@ -302,9 +302,10 @@ function FrontFilm() {
 
 export default function LandingPage({ brandClassName = '' }: Props) {
   const [themeIdx, setThemeIdx] = useState(0);
-  // Letter-box scroll cue — visible until the reader has scrolled the
-  // box a little; then it has done its job and fades.
-  const [letterCue, setLetterCue] = useState(true);
+  // Letter progressive disclosure — sections ii–v stay collapsed until
+  // the reader chooses to read on (founder, 2026-07-12: hidden so they
+  // aren't intimidated, but one intuitive tap away).
+  const [expanded, setExpanded] = useState(false);
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
   // Default (no param) keeps the existing CSS-built window. Read on
   // mount so the data-attribute picks up the correct CSS branch.
@@ -796,26 +797,20 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   thinking, all of it.
                 </p>
 
-                {/* THE LETTER BOX (2026-07-10, founder-directed): the
-                    body scrolls inside a fixed window — "a clean amount
-                    of text on the screen at one time but also infinite
-                    text available." This dissolves the fold crisis for
-                    good: the dare + CTAs pin below the box, always
-                    visible, and the pre-crisis typography comes back
-                    (18px close, 680 column). Sections are roman-
-                    numeral plates (echoing the dict block's I./II.) so
-                    the reader knows where they are and how much is
-                    left; the thin theme-colored scrollbar carries
-                    progress; the bottom fade signals more. Epigraph
-                    stays outside as the always-visible hook. No
-                    overscroll-behavior: at the box's end the scroll
-                    chains to the page naturally. Mobile keeps the
-                    flowing letter (no box). */}
-                <div className="letter-window">
-                <div
-                  className="letter-scroll"
-                  onScroll={(e) => setLetterCue(e.currentTarget.scrollTop < 24)}
-                >
+                {/* PROGRESSIVE DISCLOSURE (2026-07-12, founder-directed):
+                    "opening two lines, then the first section, then
+                    elegantly hide the other sections… hidden in the
+                    sense that they don't get intimidated and read none
+                    of it — but easy and intuitive to read on." Default
+                    view = epigraph + section i (the cost) + the outro
+                    (how to start) + close + CTAs: a complete short pitch.
+                    Sections ii–v collapse into .letter-extra, revealed
+                    by the toggle (max-height + scroll when open, so the
+                    fixed stage never overflows and the CTAs stay pinned).
+                    The end — the outro and the close — is always shown,
+                    per "all the other sections hidden apart from the
+                    end." Mobile: the collapse still works; the open
+                    panel just flows (no fixed scroll). */}
                 <p className="letter-sec">i &middot; the cost</p>
 
                 <p className="statement-close">
@@ -842,6 +837,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   Alexandria is the third door.
                 </p>
 
+                <div
+                  className={`letter-extra${expanded ? ' is-open' : ''}`}
+                  aria-hidden={!expanded}
+                >
                 <p className="letter-sec">ii &middot; the missing piece</p>
 
                 <p className="statement-close">
@@ -917,38 +916,47 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   own way. You connect with the others, learn from them,
                   and share what you&rsquo;ve built.
                 </p>
+                </div>
 
-                <p className="statement-close">
-                  Our job is to make starting easy and to bring these
-                  people together. Everyone is welcome; not everyone will
-                  come. Starting takes one command: it drops in a copy of
-                  the founder&rsquo;s own folder &mdash; his setup, ready
-                  to use from minute one &mdash; free, refreshed monthly,
-                  yours to reshape into your own. Borrow his until
-                  you&rsquo;ve made yours. We just want you to start.
-                </p>
-                </div>
-                {/* Scroll cue — quiet plate riding the fade; gone once
-                    the reader has started scrolling. */}
-                <span
-                  className={`letter-more${letterCue ? '' : ' is-gone'}`}
-                  aria-hidden
+                <button
+                  type="button"
+                  className="letter-toggle"
+                  onClick={() => setExpanded((v) => !v)}
+                  aria-expanded={expanded}
                 >
-                  scroll&nbsp;&darr;
-                </span>
-                </div>
+                  {expanded ? 'show less' : 'read the whole story'}
+                  <span className="letter-toggle-arrow" aria-hidden>
+                    {expanded ? '↑' : '↓'}
+                  </span>
+                </button>
+
+                {/* Outro shows in the collapsed view (the always-there
+                    "how to start" ending the founder wants); it hides
+                    while the deep-dive panel is open so the panel has
+                    room on the fixed stage — the pinned CTAs carry the
+                    action either way. */}
+                {!expanded && (
+                  <p className="statement-close letter-outro">
+                    Our job is to make starting easy and to bring everyone
+                    doing it together. Everyone is welcome; not everyone
+                    will come. Starting takes one command: it drops in a
+                    copy of the founder&rsquo;s own folder &mdash; his
+                    setup, ready to use from minute one &mdash; free,
+                    refreshed monthly, yours to reshape into your own. We
+                    just want you to start.
+                  </p>
+                )}
 
                 {/* The three-readers close (founder: "spell it out and
                     attack it so they are forced to make that decision…
                     those are the only options lol") — every reader maps
                     to a button or an honest exit; no fourth option. */}
                 <p className="statement-beat">
-                  <em>Only three kinds of reader get this far. You
-                  don&rsquo;t want this &mdash; fair enough. You want it
-                  but don&rsquo;t use a coding tool yet &mdash; press
-                  keep me posted, and start when you&rsquo;re ready. Or
-                  you want it, and it&rsquo;s one click away. There is no
-                  fourth.</em>
+                  <em>So which are you? If this isn&rsquo;t for you, no
+                  hard feelings. If it is but you don&rsquo;t use a
+                  coding tool yet, press keep me posted and start when
+                  you&rsquo;re ready. And if it is &mdash; it&rsquo;s one
+                  click away.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2251,7 +2259,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* Was 126px (ornament-top alignment); pulled up 2026-07-10 to
              keep the CTAs above the fold as the letter grew — the fold
              wins over the ornament nicety until the shortening pass. */
-          margin-top: 96px;
+          /* 96 → 26 (2026-07-12, disclosure pass): buys vertical room
+             so the open reveal panel + pinned CTAs fit the fixed stage.
+             Loses exact ornament-top alignment; the fold wins. */
+          margin-top: 26px;
           /* Squeeze the column — narrower text width pushes the left
              edge inward (right edge unchanged because right-lower is
              flex-end aligned). Restored to 680 (letter-box pass) — the
@@ -2360,10 +2371,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           margin-right: -32px;
           display: flex;
           flex-direction: column;
-          /* 18 → 12 (2026-07-10): the decompressed letter (thirteenth
-             pass) pushed the CTAs below the 1000px stage; tightened
-             with the type sizes below so the buttons stay in view. */
-          gap: 14px;
+          /* 14 → 11 (2026-07-12): tighter column spacing helps the open
+             reveal panel + CTAs fit the fixed stage. */
+          gap: 11px;
           margin-bottom: var(--lower-block-bottom);
         }
         /* Roman numeral marginalia — four argument beats. The split's
@@ -2629,55 +2639,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           margin-top: 12px;
         }
 
-        /* ─── THE LETTER BOX ─── */
-        /* The letter's body scrolls inside a fixed window; the epigraph
-           above and the dare + CTAs below stay pinned. The fade at the
-           bottom signals more text; it matches the rotating theme via
-           var(--theme-bg). The thin scrollbar is the progress read. */
-        .letter-window {
-          position: relative;
-        }
-        .letter-window::after {
-          content: '';
-          position: absolute;
-          left: 0;
-          right: 14px;
-          bottom: 0;
-          height: 72px;
-          background: linear-gradient(
-            to bottom,
-            transparent,
-            var(--theme-bg) 62%
-          );
-          pointer-events: none;
-        }
-        .letter-scroll {
-          height: 465px;
-          overflow-y: auto;
-          padding-right: 16px;
-          padding-bottom: 60px;
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          scrollbar-width: thin;
-          scrollbar-color: var(--theme-border-soft) transparent;
-        }
-        .letter-scroll::-webkit-scrollbar {
-          width: 4px;
-        }
-        .letter-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .letter-scroll::-webkit-scrollbar-thumb {
-          background: var(--theme-border-soft);
-          border-radius: 2px;
-        }
-        .letter-scroll::-webkit-scrollbar-thumb:hover {
-          background: var(--theme-fg-muted);
-        }
-        /* Section plates — roman numerals in the museum register,
-           echoing the dictionary block's I. / II. Skimmers leave with
-           the four-beat structure: wave → gap → folder → tribe. */
+        /* ─── PROGRESSIVE DISCLOSURE ─── */
+        /* Default view is a complete short pitch (epigraph + section i +
+           outro + close + CTAs). Sections ii–v live in .letter-extra,
+           collapsed to zero height until the reader taps the toggle;
+           when open it becomes a fixed-height scroll panel so the stage
+           never overflows and the CTAs stay pinned below. */
         .letter-sec {
           margin: 8px 0 -4px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -2687,36 +2654,86 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           color: var(--theme-fg-faint);
           user-select: none;
         }
-        .letter-sec:first-child {
+        .letter-extra {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          max-height: 0;
+          overflow: hidden;
+          opacity: 0;
+          /* Eat the parent flex-gap while collapsed so the toggle sits
+             snug under section i (no double-gap around a 0-height box). */
+          margin: -7px 0;
+          transition:
+            max-height 560ms cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 360ms ease,
+            margin 560ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .letter-extra.is-open {
+          max-height: 196px;
+          overflow-y: auto;
+          opacity: 1;
+          margin: 0;
+          padding-right: 16px;
+          scrollbar-width: thin;
+          scrollbar-color: var(--theme-border-soft) transparent;
+        }
+        .letter-extra.is-open::-webkit-scrollbar {
+          width: 4px;
+        }
+        .letter-extra.is-open::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .letter-extra.is-open::-webkit-scrollbar-thumb {
+          background: var(--theme-border-soft);
+          border-radius: 2px;
+        }
+        .letter-extra.is-open::-webkit-scrollbar-thumb:hover {
+          background: var(--theme-fg-muted);
+        }
+        /* Section plates inside the reveal — the label sits close to its
+           own paragraph (below) and apart from the prior section. */
+        .letter-extra .letter-sec {
+          margin: 6px 0 -6px;
+        }
+        .letter-extra .letter-sec:first-child {
           margin-top: 0;
         }
-        /* Scroll cue — sits on the fade, museum-quiet, with a slow
-           breathing bob. Disappears once the reader has scrolled. */
-        .letter-more {
-          position: absolute;
-          right: 22px;
-          bottom: 4px;
-          z-index: 1;
+        /* The toggle — an italic invitation, not a button chrome. Reads
+           as part of the letter's hand; the arrow carries the state. */
+        .letter-toggle {
+          align-self: flex-start;
+          margin: 0;
+          padding: 4px 0;
+          border: none;
+          background: none;
+          cursor: pointer;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 12.5px;
-          letter-spacing: 0.14em;
+          font-size: 15px;
+          letter-spacing: 0.01em;
           color: var(--theme-fg-muted);
-          pointer-events: none;
-          user-select: none;
-          animation: letterMoreBob 2.4s ease-in-out infinite;
-          transition: opacity 400ms ease;
+          text-decoration: underline;
+          text-decoration-color: var(--theme-border-soft);
+          text-underline-offset: 4px;
+          text-decoration-thickness: 1px;
+          display: inline-flex;
+          align-items: baseline;
+          gap: 6px;
+          transition: color 180ms ease, text-decoration-color 180ms ease;
         }
-        .letter-more.is-gone {
-          opacity: 0;
-          animation: none;
+        .letter-toggle:hover {
+          color: var(--theme-fg);
+          text-decoration-color: var(--theme-fg-muted);
         }
-        @keyframes letterMoreBob {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(3px); }
+        .letter-toggle-arrow {
+          font-style: normal;
+          font-size: 12px;
         }
-        @media (prefers-reduced-motion: reduce) {
-          .letter-more { animation: none; }
+        /* The outro sits a touch apart — it is the always-visible "how
+           to start", the landing after the argument. */
+        .letter-outro {
+          margin-top: 2px;
         }
         .cta-block {
           display: flex;
@@ -3352,19 +3369,19 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .statement-close::before {
             left: 0;
           }
-          /* Mobile keeps the flowing letter — no scroll window (a
-             nested scroller inside the page scroll is a trap on
-             touch). The wrappers flatten via display: contents so the
-             paragraphs stay direct flex children of bottom-inner and
-             keep their order rules (the mobile column is ordered
-             per-child; an unflattened wrapper defaults to order 0 and
-             jumps above the ornament — that bug shipped for ~a minute
-             on 2026-07-10). Fade dies with the wrapper's box. */
-          .letter-window,
-          .letter-scroll {
+          /* Mobile keeps the FULL flowing letter — no collapse (page
+             scroll on mobile isn't a fixed-stage commitment, so the
+             intimidation the desktop reveal guards against doesn't
+             apply the same way). .letter-extra flattens via
+             display: contents so ii–v become direct flex children of
+             bottom-inner and inherit the per-child order rules (an
+             unflattened wrapper defaults to order 0 and jumps above the
+             ornament — that bug shipped for ~a minute on 2026-07-10).
+             The toggle is hidden; everything reads top to bottom. */
+          .letter-extra {
             display: contents;
           }
-          .letter-more {
+          .letter-toggle {
             display: none;
           }
           .cta-pair {
