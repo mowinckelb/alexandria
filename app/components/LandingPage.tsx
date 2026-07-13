@@ -302,6 +302,10 @@ function FrontFilm() {
 
 export default function LandingPage({ brandClassName = '' }: Props) {
   const [themeIdx, setThemeIdx] = useState(0);
+  // Letter scroll cue — the box shows only section i at rest; this cue
+  // (plus the fade + scrollbar) makes it clear there's more. It retires
+  // once the reader has scrolled a little.
+  const [letterCue, setLetterCue] = useState(true);
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
   // Default (no param) keeps the existing CSS-built window. Read on
   // mount so the data-attribute picks up the correct CSS branch.
@@ -778,7 +782,13 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     pinned below with the CTAs. Copy consolidated this
                     pass — same ideas and richness, fewer words. Section
                     plates (roman numerals) echo the dictionary block. */}
-                <div className="letter-scroll" tabIndex={0} aria-label="the letter">
+                <div className="letter-window">
+                <div
+                  className="letter-scroll"
+                  tabIndex={0}
+                  aria-label="the letter"
+                  onScroll={(e) => setLetterCue(e.currentTarget.scrollTop < 24)}
+                >
                 <p className="letter-sec">i &middot; the cost</p>
 
                 <p className="statement-close">
@@ -869,6 +879,16 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   connect with the others, learn from them, and share
                   what you build.
                 </p>
+                </div>
+                {/* Scroll cue — the box shows only section i at rest;
+                    this makes "there's more" unmistakable. Retires once
+                    the reader scrolls. */}
+                <span
+                  className={`letter-more${letterCue ? '' : ' is-gone'}`}
+                  aria-hidden
+                >
+                  keep reading&nbsp;&darr;
+                </span>
                 </div>
 
                 <p className="statement-close letter-outro">
@@ -2192,10 +2212,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           /* Was 126px (ornament-top alignment); pulled up 2026-07-10 to
              keep the CTAs above the fold as the letter grew — the fold
              wins over the ornament nicety until the shortening pass. */
-          /* 96 → 26 (2026-07-12, disclosure pass): buys vertical room
-             so the open reveal panel + pinned CTAs fit the fixed stage.
-             Loses exact ornament-top alignment; the fold wins. */
-          margin-top: 26px;
+          /* 96 → 26 → 108 (2026-07-12): with the box now showing only
+             section i, the column is short; push it down so the CTAs
+             sit near the left wordmark's baseline (vertical balance)
+             rather than floating high with empty space below. */
+          margin-top: 108px;
           /* Squeeze the column — narrower text width pushes the left
              edge inward (right edge unchanged because right-lower is
              flex-end aligned). Restored to 680 (letter-box pass) — the
@@ -2588,13 +2609,44 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .letter-sec:first-child {
           margin-top: 0;
         }
-        /* The scroll box — the whole argument (i–v) scrolls here; a
-           soft bottom mask fades the last line to signal there's more,
-           and the thin theme scrollbar reads as progress. The pinned
-           outro + close + CTAs live below, always visible. */
+        /* The scroll box — only section i shows at rest (founder,
+           2026-07-12); the fade + scrollbar + "keep reading" cue make
+           the rest discoverable. The whole argument (i–v) scrolls here;
+           the pinned outro + close + CTAs live below, always visible. */
+        .letter-window {
+          position: relative;
+        }
+        /* Scroll cue — quiet italic on the fade, gentle bob, gone once
+           the reader scrolls. */
+        .letter-more {
+          position: absolute;
+          right: 20px;
+          bottom: 2px;
+          z-index: 2;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-size: 13px;
+          letter-spacing: 0.08em;
+          color: var(--theme-fg-muted);
+          pointer-events: none;
+          user-select: none;
+          animation: letterMoreBob 2.4s ease-in-out infinite;
+          transition: opacity 400ms ease;
+        }
+        .letter-more.is-gone {
+          opacity: 0;
+          animation: none;
+        }
+        @keyframes letterMoreBob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(3px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .letter-more { animation: none; }
+        }
         .letter-scroll {
           position: relative;
-          height: 516px;
+          height: 322px;
           overflow-y: auto;
           padding-right: 18px;
           padding-bottom: 34px;
@@ -2629,25 +2681,30 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           margin-top: 6px;
         }
         /* ─── FRONT-SLIDE OPENING ─── */
-        /* "to the reader" + the calculator hook over the hero, low and
-           centred, quiet ink; peels up with the slide. Anchored in the
-           pixel-locked stage-top so it scales with the scene. */
+        /* "to the reader" + the calculator hook, set on the LEFT of the
+           hero (founder, 2026-07-12: "on the left and elegant") in the
+           open cream beside the arch, vertically centred, quiet ink.
+           Left-aligned like the opening of a page; peels up with the
+           slide. A hairline rule under the salutation gives it the
+           frontispiece air. Anchored in the pixel-locked stage-top. */
         .front-epigraph {
           position: absolute;
-          left: 50%;
-          top: 92px;
-          transform: translateX(-50%);
-          width: 648px;
-          text-align: center;
+          left: 118px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 384px;
+          text-align: left;
           z-index: 3;
           pointer-events: none;
         }
         .front-salutation {
-          margin: 0 0 13px;
+          margin: 0 0 18px;
+          padding-bottom: 14px;
+          border-bottom: 1px solid rgba(26, 19, 24, 0.16);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-size: 13px;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.2em;
           color: rgba(26, 19, 24, 0.5);
           text-transform: lowercase;
           user-select: none;
@@ -2655,10 +2712,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .front-epigraph-line {
           margin: 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 21px;
-          line-height: 1.5;
+          font-size: 20px;
+          line-height: 1.56;
           letter-spacing: 0.004em;
-          color: rgba(26, 19, 24, 0.84);
+          color: rgba(26, 19, 24, 0.85);
         }
         .cta-block {
           display: flex;
@@ -3158,14 +3215,22 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              third, sized to the viewport (the desktop 648px block would
              overflow). stage-top is display:contents here, so this
              anchors to .top-slide. */
+          /* Mobile: centre it over the square scene (the desktop left
+             offset overflows a narrow screen); no hairline rule —
+             centred reads cleaner on phone. */
           .front-epigraph {
-            top: 116px;
+            left: 50%;
+            top: 112px;
+            transform: translateX(-50%);
             width: 84vw;
             max-width: 440px;
+            text-align: center;
           }
           .front-salutation {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 11px;
             font-size: 11px;
-            margin-bottom: 10px;
           }
           .front-epigraph-line {
             font-size: 16.5px;
@@ -3319,8 +3384,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              order 0 and jumps above the ornament — that bug shipped for
              ~a minute on 2026-07-10). Height/mask/scroll all drop with
              the box. */
+          .letter-window,
           .letter-scroll {
             display: contents;
+          }
+          .letter-more {
+            display: none;
           }
           .cta-pair {
             padding-left: 0;
