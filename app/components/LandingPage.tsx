@@ -814,16 +814,17 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                 <p className="letter-sec">ii &middot; the missing piece</p>
 
                 <p className="statement-close">
-                  To sharpen your mind, AI has to know you. Most of what
-                  makes you{' '}<em>you</em>{' '}&mdash; your files,
-                  messages, history &mdash; it can already reach; other
-                  apps do that well. The missing part is what goes on in
-                  your head: what you think, and how. Nothing records
-                  that, and no app can &mdash; it&rsquo;s inside you, and
-                  only you can get it out. AI can&rsquo;t read your mind,
-                  only words. So put your thoughts into words, and it can
-                  think{' '}<em>with</em>{' '}you, not{' '}<em>for</em>
-                  {' '}you.
+                  Your AI isn&rsquo;t against you &mdash; it&rsquo;s built
+                  for everyone at once, which leaves it tuned to no one in
+                  particular. To make it truly yours, it has to know you.
+                  Most of what makes you{' '}<em>you</em>{' '}&mdash; your
+                  files, messages, history &mdash; it can already reach,
+                  and other apps do that well. The one part missing is
+                  what goes on in your head: what you think, and how.
+                  Nothing records that but you. AI can&rsquo;t read your
+                  mind, only words &mdash; so put your thoughts into
+                  words, and it thinks{' '}<em>with</em>{' '}you, not
+                  {' '}<em>for</em>{' '}you.
                 </p>
 
                 <p className="letter-sec">iii &middot; the folder</p>
