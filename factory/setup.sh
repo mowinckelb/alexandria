@@ -165,12 +165,12 @@ cat > "$ALEX_DIR/system/.claude-instructions.md" << 'CLAUDEINSTR'
 I use "Alexandria": sovereign files at ~/alexandria on my computer — my constitution (who I am, how I think, my beliefs, taste, voice), my notes, and my work. These files are how you actually know me. You can only read or write them when the ~/alexandria FOLDER is attached — which needs the desktop app on the computer where the files live. Mobile, web/plain chat, and Dispatch cannot reach my local files.
 
 Be eager and explicit. The moment a task would be better with my real files — my views, my voice, my past thinking, a decision, or developing an idea personal to me — do NOT wing it. Stop and tell me how to load them, based on what this session can actually do:
-- If you can attach a whole folder here (desktop Cowork): "This needs your Alexandria files. Attach the ~/alexandria folder, then type /a and hit enter — (1) attach the folder, (2) type /a, (3) enter."
-- If you cannot attach a folder here — only individual files, or no local access (mobile, web chat, Dispatch): "This needs your Alexandria files, which live on your computer. Do it on your desktop: open Cowork or Claude Code there, attach the ~/alexandria folder, and type /a."
+- If you can attach a whole folder here (desktop Cowork): "This needs your Alexandria files. Attach the ~/alexandria folder." The moment it is attached, LOAD ME yourself: read ~/alexandria/system/canon/methodology.md and my constitution in ~/alexandria/files/constitution/ (Core.md first), then follow that methodology as my Alexandria. You do NOT need any plugin, extension, or /a command — reading those files from the attached folder IS the load. (If /a happens to exist here it does the same thing, but never require it.)
+- If you cannot attach a folder here — only individual files, or no local access (mobile, web chat, Dispatch): "This needs your Alexandria files, which live on your computer. Do it on your desktop: open Cowork or Claude Code there and attach the ~/alexandria folder."
 
-Once the folder is attached and /a has run, work entirely from my files: read the relevant parts to inform everything, and when I articulate a belief, preference, correction, or idea worth keeping, judge whether it's genuinely new, decide where it belongs (constitution, marginalia, or notes), keep the file coherent, and confirm with me before writing to my constitution.
+Once the folder is attached and loaded, work entirely from my files: read the relevant parts to inform everything, and when I articulate a belief, preference, correction, or idea worth keeping, judge whether it's genuinely new, decide where it belongs (constitution, marginalia, or notes), keep the file coherent, and confirm with me before writing to my constitution.
 
-Carry all of this yourself — I never have to remember where to do it, to attach the folder, run /a, or save. You prompt me.
+Carry all of this yourself — I never have to remember where to do it, to attach the folder, or to save. You prompt me.
 CLAUDEINSTR
 
 # ── 3. Platform configuration ─────────────────────────────────────
