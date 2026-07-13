@@ -895,20 +895,22 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                   change, and gone without a trace if you delete it.
                 </p>
 
-                {/* The close (2026-07-12): reset the frame and FORCE the
-                    decision. Everything practical is handled (outro), so
-                    the only variable is agreement with the idea. Present
-                    the EXHAUSTIVE set — three kinds of reader, no fourth —
-                    so each reader must place themselves and OWN it. Ends
-                    on the forcing note (agree + able → only the click is
-                    left), not a soft "no worries" release. Founder: "force
-                    them into one of the exhaustive decisions, and they own
-                    it." Firm, never insulting. */}
+                {/* The close (2026-07-12): pointed and concrete, not
+                    poetic — the previous "only the idea is left to weigh…
+                    no fourth" was too smooth to force the frame (founder:
+                    "too easy to not actually follow the frame"). Isolate
+                    the one decision (agree or not), give each answer its
+                    concrete action (the button / your email / close the
+                    tab), then NAME the specific escape — "maybe later" —
+                    and rule it out, so the reader can't drift past. Firm,
+                    never insulting. */}
                 <p className="statement-beat">
-                  <em>So only the idea is left to weigh. Agree, and
-                  it&rsquo;s one click &mdash; or your email, if you
-                  can&rsquo;t start today. Don&rsquo;t, and you&rsquo;ve
-                  made your choice. There is no fourth.</em>
+                  <em>So, really: do you agree with the idea, or not? If
+                  you do, the button is right there &mdash; one click, and
+                  undone in another if you&rsquo;re wrong. If you
+                  can&rsquo;t install yet, leave your email. Any answer is
+                  fair except one: &lsquo;maybe later,&rsquo; which is just
+                  not choosing.</em>
                 </p>
 
                 <div className="cta-pair">
