@@ -143,20 +143,56 @@ export async function sendFollowerWelcome(email: string, unsubscribeToken?: stri
     unsubscribeToken ? { unsubscribeUrl: `${SERVER_URL}/email/stop?t=${unsubscribeToken}` } : undefined);
 }
 
-export async function sendWelcomeEmail(email: string, githubLogin: string, emailToken?: string): Promise<void> {
+export async function sendWelcomeEmail(email: string, githubLogin: string, emailToken?: string, apiKey?: string): Promise<void> {
   const websiteHost = WEBSITE_URL.replace(/^https?:\/\//, '');
   const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
   const kinLinkDisplay = `${websiteHost}/join?ref=${githubLogin}`;
+  // Connect command — carry it in the email body so a user who finishes GitHub
+  // OAuth but abandons Stripe is never stranded without their key. Same command
+  // the founding-member page shows; re-running setup.sh with the key is
+  // idempotent (installs + links, or just links if already installed). Only
+  // included when we actually minted a key for this sign-in (new / uninstalled).
+  const connectCmd = apiKey
+    ? `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}`
+    : '';
+  const connectBlock = connectCmd
+    ? `<p style="font-size: 1rem; color: #8a8078; margin: 0 0 0.6rem;">to connect your install, paste this into your coding agent (claude code, cursor, codex&hellip;) and hit enter:</p>
+  <p style="margin: 0 0 1.75rem; background: rgba(61,54,48,0.05); border-radius: 6px; padding: 14px 16px; word-break: break-all;"><code style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; color: #3d3630;">${connectCmd}</code></p>`
+    : '';
   await sendEmail(email, 'welcome to alexandria.',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; text-align: left; line-height: 1.7;">
   <p style="font-size: 1.1rem; margin: 0 0 1.5rem;">welcome to alexandria.</p>
   <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.5rem;">the tool is yours, free, on your machine. membership in the collective is $10/month with the first month free &mdash; or free for good with three active friends who join through you.</p>
+  ${connectBlock}
   <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.75rem;">your invite link: <a href="${kinLink}" style="color: #3d3630;">${kinLinkDisplay}</a> &mdash; send it to the people you want thinking for themselves too.</p>
   <p style="font-size: 0.95rem; margin: 0 0 1.8rem;"><a href="${WEBSITE_URL}/join" style="color: #3d3630; text-decoration: none;">open alexandria</a></p>
   <p style="margin: 0 0 0.4rem;">Benjamin a. Mowinckel</p>
   <p style="margin: 0; font-style: italic; color: #8a8078;">a.</p>${emailToken ? `
   <p style="margin: 1.5rem 0 0; font-size: 0.72rem; color: #bbb4aa;"><a href="${SERVER_URL}/email/stop?t=${emailToken}" style="color: #8a8078;">stop these emails</a></p>` : ''}
 </div>`,
+    emailToken ? { unsubscribeUrl: `${SERVER_URL}/email/stop?t=${emailToken}` } : undefined);
+}
+
+// "you're free" carrot — fired once when a member crosses to KIN_THRESHOLD (3)
+// active kin, so membership is now free for good. Celebration + a nudge to keep
+// sharing (the more they share, the more the collective grows). Not a charge
+// email; the crossing itself is detected where kin pricing recalcs run.
+export async function sendKinFreeUnlocked(
+  email: string,
+  githubLogin: string,
+  emailToken?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
+  const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
+  <p style="margin: 0 0 1.4rem;">you&rsquo;re free.</p>
+  <p style="margin: 0 0 1.4rem; color: #8a8078;">three friends joined through you and stayed &mdash; so your membership is free for good. no more $10, ever. thank you for building the collective.</p>
+  <p style="margin: 0 0 1.4rem;">send it to everyone worth it &mdash; most won&rsquo;t act, and the three who do make yours free. it&rsquo;s already done for you; every one after just grows the tribe.</p>
+  <p style="margin: 0 0 1.8rem; font-size: 0.9rem; color: #8a8078;">your invite link: <a href="${kinLink}" style="color: #3d3630;">${kinLink.replace(/^https?:\/\//, '')}</a></p>
+  <p style="margin: 0 0 0.4rem;">Benjamin a. Mowinckel</p>
+  <p style="margin: 0; font-style: italic; color: #8a8078;">a.</p>${emailToken ? `
+  <p style="margin: 1.5rem 0 0; font-size: 0.72rem; color: #bbb4aa;"><a href="${SERVER_URL}/email/stop?t=${emailToken}" style="color: #8a8078;">stop these emails</a></p>` : ''}
+</div>`;
+  return await sendEmail(email, 'alexandria. — you’re free.', html,
     emailToken ? { unsubscribeUrl: `${SERVER_URL}/email/stop?t=${emailToken}` } : undefined);
 }
 

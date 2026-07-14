@@ -152,9 +152,10 @@ export default function CancelClient({
             <p className="cancel-line">i&rsquo;m benjamin. i built this.</p>
 
             <p>
-              you&rsquo;re not just a subscription. you showed up to try
-              something that didn&rsquo;t exist yet &mdash; and that
-              matters more to me than i can say in a page like this.
+              you&rsquo;re one of the first people to actually try this
+              &mdash; back when it barely existed. that means something to
+              me. it also means the product&rsquo;s still early enough that
+              if something&rsquo;s off, i can probably just fix it.
             </p>
 
             <p>
@@ -199,7 +200,7 @@ export default function CancelClient({
             </form>
 
             <p className="cancel-or-call">
-              or <a href={telUrl} className="cancel-inline-cta">call benjamin</a>.
+              or <a href={telUrl} className="cancel-inline-cta">call me</a>.
             </p>
 
             <p className="cancel-sign">&mdash; b</p>

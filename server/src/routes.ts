@@ -12,7 +12,7 @@ import { hashApiKey, generateToken } from './crypto.js';
 import { ACTIVE_AUTHOR_STATUSES, Account, AccountStore, extractApiKey, extractLibrarySessionToken, findByApiKey, findByLibrarySessionToken, requireAuth } from './auth.js';
 import { assignAuthorNumber, generateApiKey, getAccounts, getAccountByLogin, requireAdmin, updateAccountBilling } from './accounts.js';
 import { sendEmail, sendEmailsBatched, sendWelcomeEmail, sendInstallNudge, FOUNDER_EMAIL } from './email.js';
-import { runHealthDigest, runWeekOneCheckIns, runInstallNudges, runOnboardFollowups } from './cron.js';
+import { runHealthDigest, runWeekOneCheckIns, runOnboardFollowups } from './cron.js';
 import { publishFeedback } from './marketplace.js';
 import { handleGithubPushWebhook } from './marketplace-catalog.js';
 
@@ -194,9 +194,9 @@ export function registerRoutes(app: Hono) {
         protocol: 'alexandria',
         version: '1.0',
         constants: {
-          account: 'Payment relationship that governs the other two',
-          file: 'At least one public file on the server, edited monthly',
-          call: 'Communication — machine calls server, server responds',
+          account: 'The membership relationship — governed solely by payment (or the free-with-three-kin path). This is the only thing that gates membership.',
+          file: 'The practice of publishing: keeping at least one public file on the server, refreshed roughly monthly. A rhythm, not a membership condition — nothing here can revoke your account.',
+          call: 'The practice of communicating: your machine calls the server, the server responds. Describes how the tool talks to the collective, not a condition of belonging.',
         },
         endpoints: {
           handshake: '/alexandria',
@@ -602,14 +602,32 @@ export function registerRoutes(app: Hono) {
         }
       } else if (ref && isNewAccount) {
         logEvent('library_signup_referral_self', { attempted_ref: ref, referred: user.login });
+      } else if (ref) {
+        // A valid-looking ref arrived but the invitee is a RETURNING account, so
+        // no referral row is written and the referrer gets no credit. That's the
+        // current (unchanged) billing behaviour — but it was silently invisible.
+        // Log it so "returning user clicked an invite, referrer got nothing" is
+        // observable in the event stream instead of a black hole. (No billing
+        // change — credit rules are unchanged; this only makes the drop visible.)
+        logEvent('library_signup_referral_dropped_returning', { attempted_ref: ref, source: refSource || 'direct', referred: user.login });
       }
 
       // Welcome email — carries the deal ($10/month, first month free, or free
       // with 3 active kin) and the user's invite link so they have a portable
       // reference.
       if (email && isNewAccount) {
-        await sendWelcomeEmail(email, user.login, emailToken);
+        // Pass the freshly-minted apiKey so the welcome email carries the
+        // connect command — a user who abandons Stripe after OAuth still has
+        // their key and can install from the email (GitHub-no-Stripe fix).
+        await sendWelcomeEmail(email, user.login, emailToken, apiKey);
       }
+
+      // Kin progress for the founding-member page — the compliant (member-status)
+      // count the page shows as "N of 3 friends joined". Degrade to 0 if D1 is
+      // unavailable (the page just shows 0-of-3, never errors). A returning
+      // member may already have kin; a brand-new one is 0.
+      let kinCompliant = 0;
+      try { kinCompliant = (await countActiveKin(user.login)).compliant; } catch { /* D1 down — show 0 */ }
 
       // Skip checkout for anyone already in good standing: payment info on
       // file, or an active status — which includes the grandfathered
@@ -621,7 +639,7 @@ export function registerRoutes(app: Hono) {
           return c.redirect(handoffUrl(stateData.next));
         }
         const number = await assignAuthorNumber(user.login);
-        return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0));
+        return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0, kinCompliant));
       }
 
       // New join → Stripe Checkout ($10/mo, first month free via 30-day trial,
@@ -652,7 +670,7 @@ export function registerRoutes(app: Hono) {
         return c.redirect(handoffUrl(stateData.next));
       }
       const number = await assignAuthorNumber(user.login);
-      return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0));
+      return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0, kinCompliant));
     } catch (err: any) {
       console.error('GitHub callback error:', err);
       return c.html(authErrorHtml('something broke signing you in. please try again.'), 500);
@@ -1181,15 +1199,9 @@ export function registerRoutes(app: Hono) {
     return c.json({ ok: true, ...result });
   });
 
-  // Manual trigger for install nudges. ?dry=true returns eligible-recipient
-  // count without sending or stamping the idempotency flag.
-  app.post('/admin/cron/install-nudges', async (c) => {
-    if (!await requireAdmin(c)) return c.text('Unauthorized', 403);
-    if (await checkAdminRateLimit('install-nudges', 10, 60)) return c.json({ error: 'Rate limited (10/min)' }, 429);
-    const dry = c.req.query('dry') === 'true';
-    const result = await runInstallNudges({ dry });
-    return c.json({ ok: true, ...result });
-  });
+  // (/admin/cron/install-nudges removed 2026-07-13 — the account-based install
+  // nudge is obsolete now that install comes before join. See cron.ts. The
+  // mobile keyless onboard follow-ups below are a separate, still-valid flow.)
 
   // Manual trigger for mobile-onboarding follow-ups (keyless email captures,
   // KV `onboard:` records). ?dry=true returns eligible count without sending.
@@ -1277,11 +1289,13 @@ export function registerRoutes(app: Hono) {
     const { api_key, github_login } = JSON.parse(stored) as { api_key: string; github_login: string };
     logEvent('install_token_redeemed', { author: github_login });
     const number = await assignAuthorNumber(github_login);
+    let kinCompliant = 0;
+    try { kinCompliant = (await countActiveKin(github_login)).compliant; } catch { /* D1 down — show 0 */ }
     // Mint a browser session so the founding-member page lands them signed-in,
     // and route it through the welcome handoff so the cookie sticks (Safari).
     const sessionToken = randomBytes(24).toString('hex');
     await kv.put(`library:session:${sessionToken}`, JSON.stringify({ github_login }), { expirationTtl: 30 * 24 * 60 * 60 });
-    return c.redirect(await welcomeHandoffUrl(kv, sessionToken, api_key, github_login, true, number ?? 0));
+    return c.redirect(await welcomeHandoffUrl(kv, sessionToken, api_key, github_login, true, number ?? 0, kinCompliant));
   });
 
   // Public preview — renders the onboarding callback HTML with hardcoded dummy
@@ -1293,8 +1307,8 @@ export function registerRoutes(app: Hono) {
     // Dummy must not be credential-shaped (`sk_test_` reads as a Stripe key
     // to scanners and to anyone who copies the rendered curl command).
     const apiKey = returning ? '' : 'PREVIEW-NOT-A-REAL-KEY';
-    // Dummy number for the founding-member preview; no side effects.
-    const html = await callbackPageHtml(apiKey, 'mowinckelb', false, returning ? 0 : 142);
+    // Dummy number + kin count for the founding-member preview; no side effects.
+    const html = await callbackPageHtml(apiKey, 'mowinckelb', false, returning ? 0 : 142, 1);
     return c.html(html);
   });
 

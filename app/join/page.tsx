@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { SERVER_URL, pageMetadata } from '../lib/config';
-import JoinInterest from './JoinInterest';
+import { pageMetadata } from '../lib/config';
+import JoinCTA from './JoinCTA';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,8 +32,10 @@ export const metadata = pageMetadata({
 // This is also the invite target: a member's invite link is /join?ref=THEIR_CODE.
 // The ref rides through GitHub OAuth (server round-trips it) so the inviter is
 // credited as kin. GitHub usernames are [A-Za-z0-9-], so we sanitise ref to that
-// before it touches the href or the display — React escapes anyway, this just
-// keeps a junk param from rendering.
+// before it touches the client — React escapes anyway, this just keeps a junk
+// param from rendering. The client (JoinCTA) then validates the ref against
+// /check-kin before the invite eyebrow shows or the code rides the OAuth URL, so
+// a fake/typo ref never displays "invited you in" or credits a non-member.
 function cleanRef(raw: string | undefined): string {
   return (raw || '').replace(/[^A-Za-z0-9-]/g, '').slice(0, 39);
 }
@@ -44,13 +46,8 @@ export default async function JoinPage({
   searchParams: Promise<{ ref?: string; ref_source?: string }>;
 }) {
   const params = await searchParams;
-  const ref = cleanRef(params.ref);
+  const ref = cleanRef(params.ref) || undefined;
   const refSource = (params.ref_source || 'invite').replace(/[^a-z_]/g, '').slice(0, 24) || 'invite';
-
-  const joinQuery = new URLSearchParams();
-  if (ref) joinQuery.set('ref', ref);
-  joinQuery.set('ref_source', refSource);
-  const joinUrl = `${SERVER_URL}/auth/github?${joinQuery.toString()}`;
 
   return (
     <div className="primer-page">
@@ -63,46 +60,12 @@ export default async function JoinPage({
       </header>
 
       <main className="primer-main">
-        {ref ? (
-          <p className="join-invite">@{ref} invited you in.</p>
-        ) : (
-          <p className="primer-eyebrow">the collective</p>
-        )}
-
-        <h1 className="primer-h1">become a founding member.</h1>
-
-        {/* The founding bet, honestly told (founder verdict 2026-07-09): the
-            collective is early and small, and the copy says so — you are not
-            buying a finished network, you are founding one. Prose is
-            proper-grammar per the settled Taste boundary (2026-07-01);
-            lowercase stays on the marks (title, button, eyebrow). */}
-        <p className="primer-lede">
-          The tool is free and always will be. The collective is the half
-          still being built &mdash; the library of minds, the marketplace of
-          methods, the people building theirs beside you. It is early, and
-          that is the point: you aren&rsquo;t buying a finished thing, you are
-          founding it.
-        </p>
-
-        <a className="join-btn" href={joinUrl}>
-          join with github
-        </a>
-
-        <p className="join-deal">
-          <span className="join-free">First month free</span>, then $10/month
-          &mdash; or <span className="join-free">free for good</span>{' '}when
-          three friends join through you. If that&rsquo;s a stretch, just{' '}
-          <a href="mailto:benmowinckel@gmail.com?subject=waive%20it">email</a>{' '}
-          and it&rsquo;s waived. You&rsquo;re joining the collective, never
-          paying to use the tool.
-        </p>
-
-        <JoinInterest refCode={ref || undefined} />
-
-        <p className="join-secondary">
-          Here for the free tool? You don&rsquo;t need this &mdash;{' '}
-          <Link href="/start">install it in one line</Link>.
-        </p>
+        {/* Eyebrow through decline path — a client cluster (JoinCTA) so the
+            invite eyebrow, the join button's URL, and the have-a-code field all
+            read the SAME /check-kin-validated ref. This is what fixes the
+            invalid-ref eyebrow bug: nothing ref-dependent renders until the
+            code is confirmed a real member login. */}
+        <JoinCTA urlRef={ref} refSource={refSource} />
 
         <p className="primer-coda"><em>keep thinking.</em></p>
       </main>
@@ -194,7 +157,6 @@ export default async function JoinPage({
           color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: left;
           font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
         }
-        .join-free { color: var(--text-secondary, rgba(26, 19, 24, 0.82)); }
         .join-deal a {
           color: var(--text-secondary, rgba(26, 19, 24, 0.82));
           text-decoration: underline; text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
@@ -202,6 +164,32 @@ export default async function JoinPage({
           transition: color 200ms, text-decoration-color 200ms;
         }
         .join-deal a:hover { color: var(--text-primary); text-decoration-color: var(--text-primary); }
+
+        /* Have-a-referral-code field — subtle by design: it sits under the join
+           button for the person told a code with no ?ref= link, and must never
+           compete with the button. Small label, low-contrast, single line. */
+        .join-code { margin: 20px 0 0; max-width: 450px; width: 100%; }
+        .join-code-label {
+          display: block; margin: 0 0 8px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 13px; letter-spacing: 0.01em;
+          color: var(--text-muted, rgba(26, 19, 24, 0.5));
+        }
+        .join-code-row { display: flex; align-items: center; gap: 10px; }
+        .join-code-row input {
+          flex: 1; min-width: 0; height: 38px; padding: 0 12px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 16px;
+          color: var(--text-primary); background: transparent;
+          border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.22)); border-radius: 8px;
+          outline: none; transition: border-color 200ms;
+        }
+        .join-code-row input::placeholder { color: var(--text-muted, rgba(26, 19, 24, 0.4)); }
+        .join-code-row input:focus { border-color: var(--text-muted, rgba(26, 19, 24, 0.5)); }
+        .join-code-status {
+          flex-shrink: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 13px; font-style: italic; letter-spacing: 0.01em;
+          color: var(--text-muted, rgba(26, 19, 24, 0.6));
+        }
 
         /* Decline path — quiet by design: the escape hatch must not compete
            with the join button. Input/button heights matched; 16px input font

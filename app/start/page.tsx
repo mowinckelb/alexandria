@@ -15,7 +15,23 @@ import MobileStart from './MobileStart';
 // Two CTAs, switched on input method, not width (a narrow desktop window still
 // has a terminal; a wide iPad doesn't): pointer-fine devices get the copy-paste
 // command, touch devices get the Shortcut + send-it-to-my-computer flow.
-export default function StartPage() {
+//
+// Invite target: a member's link is /start?ref=THEIR_LOGIN. The ref rides down
+// into StartCTA, which validates it against /check-kin before showing the invite
+// banner or tagging the install command. GitHub logins are [A-Za-z0-9-], so we
+// sanitise ref to that before it touches the client.
+function cleanRef(raw: string | undefined): string {
+  return (raw || '').replace(/[^A-Za-z0-9-]/g, '').slice(0, 39);
+}
+
+export default async function StartPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
+  const params = await searchParams;
+  const ref = cleanRef(params.ref) || undefined;
+
   return (
     <div className="primer-page">
       <ThemeToggle />
@@ -35,20 +51,10 @@ export default function StartPage() {
         </p>
 
         <div className="start-desktop">
-          <StartCTA />
-
-          <p className="primer-trust">
-            not sure? paste it in and ask what it does first &mdash; your agent
-            reads every line of the{' '}
-            <a
-              href="https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              open script
-            </a>
-            .
-          </p>
+          {/* StartCTA carries the command, the curl|bash reassurance, and the
+              do-it-later email net (the trust line moved inside it 2026-07-13
+              so the email fallback stays the terminal element). */}
+          <StartCTA refCode={ref} />
         </div>
 
         <div className="start-mobile">
@@ -135,24 +141,16 @@ export default function StartPage() {
         }
         .primer-trust a:hover { text-decoration-color: var(--text-primary); color: var(--text-primary); }
 
-        /* CTA — one-click claude code first, the copy-block as the universal
-           fallback beneath. Whole cluster hangs from the left spine. */
+        /* CTA — the copy-block command is the single primary action; the whole
+           cluster hangs from the left spine. */
         .cta-section { display: flex; flex-direction: column; align-items: flex-start; gap: 0; margin: 0; width: 100%; }
-        .cc-cta {
-          display: inline-flex; align-items: center; justify-content: center;
-          min-height: 52px; padding: 14px 34px; border-radius: 9px;
-          background: var(--text-primary); color: var(--bg-primary);
-          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 17.5px;
-          letter-spacing: 0.01em; text-decoration: none; cursor: pointer;
-          transition: opacity 200ms, transform 120ms;
-        }
-        .cc-cta:hover { opacity: 0.85; }
-        .cc-cta:active { transform: scale(0.99); }
-        .cc-hint { margin-top: 14px; }
-        .cta-or {
-          margin: 28px 0 14px; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic; font-size: 12.5px; letter-spacing: 0.06em;
-          color: var(--text-muted); user-select: none;
+
+        /* Invite banner — warmer, personal, sits above the command when a kin
+           link brought them here (only after the ref validates). */
+        .install-invite {
+          margin: 0 0 20px; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 14px; letter-spacing: 0.02em; font-style: italic;
+          color: var(--accent); line-height: 1;
         }
         .install-block {
           display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -184,6 +182,63 @@ export default function StartPage() {
           font-size: 12px; line-height: 1.6; letter-spacing: 0.01em;
           color: var(--text-muted, rgba(26, 19, 24, 0.42)); text-align: left;
           margin: 8px 0 0; max-width: 460px;
+        }
+
+        /* Quiet secondary link — the not-yet-convinced visitor's route back to
+           the homepage pitch. Sits under the CTA cluster, subordinate to it. */
+        .install-new {
+          margin: 18px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 13px; letter-spacing: 0.01em;
+          color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: left;
+        }
+        .install-new a {
+          color: var(--text-secondary, rgba(26, 19, 24, 0.8));
+          text-decoration: underline; text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
+          text-underline-offset: 3px; text-decoration-thickness: 1px;
+          transition: color 200ms, text-decoration-color 200ms;
+        }
+        .install-new a:hover { color: var(--text-primary); text-decoration-color: var(--text-primary); }
+
+        /* Do-it-later net — quiet by design (the command is the hero; this
+           only catches the not-right-now visitor). Hairline rule sets it
+           apart; input/button match the quiet decline capture on /join. */
+        .start-later {
+          margin: 30px 0 0; padding-top: 26px; width: 100%; max-width: 460px;
+          border-top: 1px solid var(--bg-tertiary, rgba(26, 19, 24, 0.10));
+        }
+        .start-later-lede {
+          margin: 0 0 12px; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 13.5px; line-height: 1.65; letter-spacing: 0.01em;
+          color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: left;
+        }
+        .start-later-row { display: flex; gap: 8px; width: 100%; }
+        .start-later-row input {
+          flex: 1; min-width: 0; height: 42px; padding: 0 14px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 16px; /* >=16px — prevents iOS zoom-on-focus */
+          color: var(--text-primary); background: var(--bg-secondary);
+          border: 1px solid var(--bg-tertiary, rgba(26, 19, 24, 0.14)); border-radius: 8px;
+          outline: none; transition: border-color 200ms;
+        }
+        .start-later-row input::placeholder { color: var(--text-muted, rgba(26, 19, 24, 0.42)); }
+        .start-later-row input:focus { border-color: var(--text-muted, rgba(26, 19, 24, 0.42)); }
+        .start-later-row button {
+          height: 42px; padding: 0 18px; flex-shrink: 0;
+          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 15px;
+          letter-spacing: 0.01em; color: var(--text-secondary, rgba(26, 19, 24, 0.82));
+          background: transparent; border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.3));
+          border-radius: 8px; cursor: pointer; transition: border-color 200ms, color 200ms;
+        }
+        .start-later-row button:hover { color: var(--text-primary); border-color: var(--text-secondary, rgba(26, 19, 24, 0.6)); }
+        .start-later-row button:disabled { opacity: 0.5; cursor: default; }
+        .start-later-done {
+          margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 14px; line-height: 1.65; font-style: italic;
+          color: var(--text-secondary, rgba(26, 19, 24, 0.82)); text-align: left;
+        }
+        .start-later-hint {
+          margin: 8px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 13px; color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: left;
         }
 
         .primer-coda {

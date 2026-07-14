@@ -1029,12 +1029,14 @@ export function registerBillingRoutes(app: Hono, onAccountUpdate: AccountUpdater
       const apiKey = (await kv.get(stashKey)) || '';
       if (apiKey) await kv.delete(stashKey);
       const number = await assignAuthorNumber(login);
+      let kinCompliant = 0;
+      try { kinCompliant = (await countActiveKin(login)).compliant; } catch { /* D1 down — show 0 */ }
       // Mint a browser session and route the founding-member page through the
       // welcome handoff so the post-payment cookie is set first-party (Safari
       // drops one set on the api subdomain mid-redirect — WebKit #196375).
       const sessionToken = randomBytes(24).toString('hex');
       await kv.put(`library:session:${sessionToken}`, JSON.stringify({ github_login: login }), { expirationTtl: 30 * 24 * 60 * 60 });
-      return c.redirect(await welcomeHandoffUrl(kv, sessionToken, apiKey, login, false, number ?? 0));
+      return c.redirect(await welcomeHandoffUrl(kv, sessionToken, apiKey, login, false, number ?? 0, kinCompliant));
     } catch (err) {
       console.error('Billing success page error:', err);
       return c.redirect(`${WEBSITE_URL}/signup`);

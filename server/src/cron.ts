@@ -1,10 +1,8 @@
 /** Cron jobs — health digest. Called by worker scheduled handler. */
 
-import { getKV, getRecentDaysEvents, loadAccounts, saveAccount, setAuthIndex } from './kv.js';
+import { getKV, getRecentDaysEvents, loadAccounts, saveAccount } from './kv.js';
 import { getDB } from './db.js';
-import { sendEmail, sendEmailsBatched, sendWeekOneCheckIn, sendInstallNudge, sendOnboardFollowup, FOUNDER_EMAIL } from './email.js';
-import { generateApiKey } from './accounts.js';
-import { hashApiKey, generateToken } from './crypto.js';
+import { sendEmail, sendEmailsBatched, sendWeekOneCheckIn, sendOnboardFollowup, FOUNDER_EMAIL } from './email.js';
 import { formatPT } from './time.js';
 import { publishLibrarySignalSnapshot } from './marketplace.js';
 import { computeLibrarySignalText } from './library-signal.js';
@@ -393,88 +391,16 @@ export async function runWeekOneCheckIns(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Install nudge — daily reminder to mobile-only signups (no installed_at) to
-// finish setup on a computer. Stops once they install or after 7d. Symmetric
-// to the week-one check-in: that one runs AFTER install, this runs BEFORE.
-// Mirror: install_nudge_count tracks how many they got; installed_after_nudge
-// gets set in protocol.ts when /call fires, enabling conversion-rate query.
-// ---------------------------------------------------------------------------
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-export async function runInstallNudges(
-  opts: { dry?: boolean } = {},
-): Promise<{ candidates: number; sent: number; failed: number; dry: boolean }> {
-  const dry = opts.dry === true;
-  try {
-    const accounts = await loadAccounts<AccountStore>();
-    const now = Date.now();
-    const today = new Date().toISOString().slice(0, 10);
-    const recipients: { key: string; account: Account }[] = [];
-    for (const [key, acct] of Object.entries(accounts)) {
-      if (!acct.email) continue;
-      if (acct.engagement_opt_out) continue;
-      if (acct.installed_at) continue;
-      if (acct.subscription_status !== 'active' && acct.subscription_status !== 'beta' && acct.subscription_status !== 'trialing' && acct.subscription_status !== 'free') continue;
-      if (!acct.created_at) continue;
-      const age = now - new Date(acct.created_at).getTime();
-      if (age < DAY_MS) continue;
-      if (age > 7 * DAY_MS) continue;
-      if (acct.install_nudge_last_sent_at?.slice(0, 10) === today) continue;
-      recipients.push({ key, account: acct });
-    }
-
-    if (dry) return { candidates: recipients.length, sent: 0, failed: 0, dry: true };
-    if (recipients.length === 0) return { candidates: 0, sent: 0, failed: 0, dry: false };
-
-    const { sent, failed } = await sendEmailsBatched(recipients, async ({ key, account }) => {
-      // Regenerate api_key per nudge (we don't store plaintext; this is how
-      // the install page surfaces a runnable curl). Capture the previous hash
-      // so setAuthIndex can rotate it out — without rotation, every nudge
-      // would leave the prior key permanently valid, and any compromised
-      // nudge email would grant access for the lifetime of the account.
-      const previousHash = (account.api_key_hash as string | undefined) || null;
-      const apiKey = generateApiKey();
-      const apiKeyHash = hashApiKey(apiKey);
-      account.api_key_hash = apiKeyHash;
-      // Install token — magic link in the email maps to {api_key, login} so
-      // /install/:token can render the onboarding page without OAuth. 14d TTL.
-      const installToken = generateToken();
-      await getKV().put(
-        `install:${installToken}`,
-        JSON.stringify({ api_key: apiKey, github_login: account.github_login }),
-        { expirationTtl: 14 * 24 * 60 * 60 },
-      );
-      const result = await sendInstallNudge(account.email, account.email_token, installToken, account.github_login);
-      if (result.ok) {
-        await setAuthIndex(apiKeyHash, key, previousHash);
-        account.install_nudge_last_sent_at = new Date().toISOString();
-        account.install_nudge_count = (account.install_nudge_count || 0) + 1;
-        await saveAccount(key, account as unknown as Record<string, unknown>);
-      }
-      return result;
-    });
-
-    console.log(`[cron] install nudges: sent=${sent} failed=${failed} total=${recipients.length}`);
-
-    // Cron marker (proves the job ran). Awareness axiom — without this a
-    // silent failure stays silent. 30d TTL matches health-digest pattern.
-    try {
-      await getKV().put('cron:install_nudges', JSON.stringify({
-        t: new Date().toISOString(),
-        candidates: recipients.length,
-        sent,
-        failed,
-      }), { expirationTtl: 30 * 24 * 60 * 60 });
-    } catch { /* non-fatal */ }
-
-    return { candidates: recipients.length, sent, failed, dry: false };
-  } catch (err) {
-    console.error('[cron] install nudges failed:', err);
-    return { candidates: 0, sent: 0, failed: 0, dry };
-  }
-}
+// runInstallNudges REMOVED 2026-07-13 — the account-based install nudge
+// (daily reminder to signed-up-but-not-installed accounts to finish setup) is
+// obsolete now that install comes BEFORE join: an account only exists after the
+// user has already run setup.sh, so "you signed up but never installed" is no
+// longer a reachable state. Its admin trigger (/admin/cron/install-nudges) was
+// removed too. This is distinct from runOnboardFollowups below (mobile keyless
+// email-capture 2d/5d nudges), which is a different, still-valid pull the user
+// explicitly asked for. The sendInstallNudge email template is kept (still used
+// by the /admin/test/install-nudge founder-only preview endpoint); only the
+// account-scanning loop is gone.
 
 // ---------------------------------------------------------------------------
 // Onboard follow-ups — for mobile "send it to my computer" captures (keyless,
@@ -497,6 +423,7 @@ interface OnboardCandidate {
   };
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
 const ONBOARD_FOLLOWUP_TTL = 90 * 24 * 60 * 60;
 
 export async function runOnboardFollowups(

@@ -15,10 +15,32 @@
 # ───────────────────────────────────────────────────────────────────
 
 ALEX_DIR="$HOME/alexandria"
-API_KEY="$1"
 FACTORY_RAW="https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory"
 SERVER="https://api.alexandria-library.com"
 FETCH_ERRORS=""
+
+# ── Argument parsing ──────────────────────────────────────────────
+# Robust, order-independent: an arg starting with alex_ is the API key; a
+# `--ref <login>` pair bakes the referrer. Both may be absent (keyless, no ref).
+API_KEY=""
+REF_LOGIN=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --ref)
+      shift
+      # Sanitize the referrer login to [A-Za-z0-9-] — never trust the token.
+      REF_LOGIN=$(printf '%s' "${1:-}" | tr -cd 'A-Za-z0-9-')
+      ;;
+    alex_*)
+      API_KEY="$1"
+      ;;
+    *)
+      # Unknown token — ignore rather than fail (keyless front door must never
+      # break on a stray arg).
+      ;;
+  esac
+  shift
+done
 
 fetch_factory() {
   local rel="$1" dest="$2" label="$3" overwrite="${4:-no}"
@@ -67,18 +89,38 @@ elif [[ "$API_KEY" != alex_* ]]; then
   exit 1
 fi
 
-# ── Prerequisites ─────────────────────────────────────────────────
+# ── Preflight: required vs optional ───────────────────────────────
+# Front-load every dependency check here so nothing stops mid-install. Two
+# tiers:
+#   REQUIRED — the bare minimum to deliver the first session: a way to fetch
+#     files (curl or wget) and a coding agent that can read/write the machine.
+#     Missing → one clear line, stop. No wall of errors later.
+#   OPTIONAL — git, node/python3, gh sign-in, ssh signing, iCloud. Each adds a
+#     layer (backup, session hooks, signing, capture) but NONE gates the first
+#     reflection. Present now → wired silently below. Missing now → collected in
+#     $DEFERRED and offered AFTER the first session as a short "want the full
+#     setup?" list. Never blocks, never nags mid-install.
 
-echo "Checking prerequisites..."
-command -v git &>/dev/null && echo "  git: ok" || echo "  git: missing — install from https://git-scm.com (required — your worldline is a Git repo)"
-command -v node &>/dev/null && echo "  node: ok" || echo "  node: missing — install from https://nodejs.org (required for Claude Code)"
-command -v python3 &>/dev/null && echo "  python3: ok" || echo "  python3: missing — install Python 3 (required for Cursor hooks)"
-if command -v gh &>/dev/null; then
-  gh auth status &>/dev/null 2>&1 && echo "  github cli: ok" || echo "  github cli: not logged in — run 'gh auth login' (recommended — enables commit signing and GitHub backup)"
-else
-  echo "  github cli: not installed — https://cli.github.com (recommended — enables commit signing and GitHub backup)"
+# REQUIRED #1 — a fetcher. curl is used unconditionally throughout; if neither
+# curl nor wget exists we can't install at all. One clear line, clean exit.
+if ! command -v curl &>/dev/null && ! command -v wget &>/dev/null; then
+  echo "alexandria needs curl to install — install it (or run this on a machine that has it) and try again."
+  exit 1
 fi
-echo ""
+
+# OPTIONAL — collect what's missing now; offered after the first session, never
+# blocking. Each entry is a short actionable line.
+DEFERRED=""
+command -v git &>/dev/null || DEFERRED="${DEFERRED}git — versioning + GitHub backup of your worldline (https://git-scm.com)\n"
+if ! command -v node &>/dev/null && ! command -v python3 &>/dev/null; then
+  DEFERRED="${DEFERRED}node or python3 — powers the automatic session hooks (https://nodejs.org)\n"
+fi
+if command -v gh &>/dev/null; then
+  gh auth status &>/dev/null 2>&1 || DEFERRED="${DEFERRED}gh sign-in — run 'gh auth login' for commit signing + cloud backup\n"
+else
+  DEFERRED="${DEFERRED}gh CLI — sign-in enables commit signing + GitHub backup (https://cli.github.com)\n"
+fi
+
 echo "Setting up Alexandria..."
 
 # ── 1. Directory structure ────────────────────────────────────────
@@ -89,6 +131,13 @@ mkdir -p "$ALEX_DIR/files/vault" "$ALEX_DIR/system/hooks" "$ALEX_DIR/files/const
 if [ -n "$API_KEY" ]; then
   echo "$API_KEY" > "$ALEX_DIR/system/.api_key"
   chmod 600 "$ALEX_DIR/system/.api_key"
+fi
+# Referrer (from `--ref <login>`) — baked so the close message's "Finish setup →"
+# link carries ?ref=<login> and the join is attributed. Sanitized above; write
+# only if non-empty.
+if [ -n "$REF_LOGIN" ]; then
+  echo "$REF_LOGIN" > "$ALEX_DIR/system/.referrer"
+  chmod 600 "$ALEX_DIR/system/.referrer"
 fi
 touch "$ALEX_DIR/system/.last_processed"
 date +%s > "$ALEX_DIR/system/.last_maintenance"
@@ -177,7 +226,7 @@ CLAUDEINSTR
 
 # Claude Code — skill + hooks
 
-if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; }; then
+if [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; then
   # Install the skill under BOTH names so /a and /alexandria both work (Claude Code
   # keys on the skill, by dir + frontmatter name). Same content; the alias's
   # frontmatter `name:` is rewritten to alexandria. Additive — if the rewrite ever
@@ -216,37 +265,97 @@ if command -v node &>/dev/null && { [ -d "$HOME/.claude" ] || command -v claude 
     echo "  Claude Code: migrated off the parked plugin"
   fi
 
-  node -e "
-    const fs = require('fs'), path = require('path');
-    const f = path.join(process.env.HOME, '.claude', 'settings.json');
-    let settings = {};
-    try { settings = JSON.parse(fs.readFileSync(f, 'utf-8')); } catch {}
-    if (!settings.hooks) settings.hooks = {};
-    // De-dupe any prior alexandria shim/resolver entry regardless of path form
-    // (~ vs \$HOME, /system/hooks/shim vs /hooks/shim) so a re-run replaces
-    // rather than appends.
-    const filter = arr => (arr || []).filter(h => {
-      const s = JSON.stringify(h).toLowerCase();
-      return !(s.includes('alexandria') && (s.includes('shim.sh') || s.includes('capture_resolver')));
-    });
-    settings.hooks.SessionStart = filter(settings.hooks.SessionStart);
-    settings.hooks.SessionEnd = filter(settings.hooks.SessionEnd);
-    settings.hooks.SubagentStart = filter(settings.hooks.SubagentStart);
-    settings.hooks.SessionStart.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-start', timeout: 10 }]
-    });
-    settings.hooks.SessionStart.push({
-      hooks: [{ type: 'command', command: 'python3 \$HOME/alexandria/system/scripts/capture_resolver.py 2>/dev/null || true', timeout: 10 }]
-    });
-    settings.hooks.SessionEnd.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-end', timeout: 15 }]
-    });
-    settings.hooks.SubagentStart.push({
-      hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh subagent' }]
-    });
-    fs.writeFileSync(f, JSON.stringify(settings, null, 2));
-  " 2>/dev/null
-  echo "  Claude Code: configured (session hooks)"
+  # Wire the session hooks into ~/.claude/settings.json. Prefer node; fall back
+  # to python3 (both ship a JSON parser) so a Claude Code user WITHOUT node still
+  # gets fully wired instead of silently getting nothing. If neither is present,
+  # say so plainly and name Claude Code — never silent-skip.
+  CLAUDE_HOOKS_OK=""
+  if command -v node &>/dev/null; then
+    if node -e "
+      const fs = require('fs'), path = require('path');
+      const f = path.join(process.env.HOME, '.claude', 'settings.json');
+      let settings = {};
+      try { settings = JSON.parse(fs.readFileSync(f, 'utf-8')); } catch {}
+      if (!settings.hooks) settings.hooks = {};
+      // De-dupe any prior alexandria shim/resolver entry regardless of path form
+      // (~ vs \$HOME, /system/hooks/shim vs /hooks/shim) so a re-run replaces
+      // rather than appends.
+      const filter = arr => (arr || []).filter(h => {
+        const s = JSON.stringify(h).toLowerCase();
+        return !(s.includes('alexandria') && (s.includes('shim.sh') || s.includes('capture_resolver')));
+      });
+      settings.hooks.SessionStart = filter(settings.hooks.SessionStart);
+      settings.hooks.SessionEnd = filter(settings.hooks.SessionEnd);
+      settings.hooks.SubagentStart = filter(settings.hooks.SubagentStart);
+      settings.hooks.SessionStart.push({
+        hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-start', timeout: 10 }]
+      });
+      settings.hooks.SessionStart.push({
+        hooks: [{ type: 'command', command: 'python3 \$HOME/alexandria/system/scripts/capture_resolver.py 2>/dev/null || true', timeout: 10 }]
+      });
+      settings.hooks.SessionEnd.push({
+        hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-end', timeout: 15 }]
+      });
+      settings.hooks.SubagentStart.push({
+        hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh subagent' }]
+      });
+      fs.writeFileSync(f, JSON.stringify(settings, null, 2));
+    " 2>/dev/null; then
+      CLAUDE_HOOKS_OK=1
+    fi
+  elif command -v python3 &>/dev/null; then
+    # Same edit, python3 — no node required. Identical de-dupe + append.
+    if python3 - <<'PY' 2>/dev/null
+import json, os
+from pathlib import Path
+
+f = Path.home() / ".claude" / "settings.json"
+try:
+    settings = json.loads(f.read_text(encoding="utf-8"))
+except Exception:
+    settings = {}
+if not isinstance(settings, dict):
+    settings = {}
+
+hooks = settings.get("hooks")
+if not isinstance(hooks, dict):
+    hooks = {}
+settings["hooks"] = hooks
+
+def keep(entry):
+    s = json.dumps(entry).lower()
+    return not ("alexandria" in s and ("shim.sh" in s or "capture_resolver" in s))
+
+def clean(event):
+    arr = hooks.get(event)
+    if not isinstance(arr, list):
+        return []
+    return [e for e in arr if keep(e)]
+
+sh = "$HOME/alexandria/system/hooks/shim.sh"
+hooks["SessionStart"] = clean("SessionStart") + [
+    {"hooks": [{"type": "command", "command": f"bash {sh} session-start", "timeout": 10}]},
+    {"hooks": [{"type": "command", "command": "python3 $HOME/alexandria/system/scripts/capture_resolver.py 2>/dev/null || true", "timeout": 10}]},
+]
+hooks["SessionEnd"] = clean("SessionEnd") + [
+    {"hooks": [{"type": "command", "command": f"bash {sh} session-end", "timeout": 15}]},
+]
+hooks["SubagentStart"] = clean("SubagentStart") + [
+    {"hooks": [{"type": "command", "command": f"bash {sh} subagent"}]},
+]
+
+f.write_text(json.dumps(settings, indent=2), encoding="utf-8")
+PY
+    then
+      CLAUDE_HOOKS_OK=1
+    fi
+  fi
+
+  if [ -n "$CLAUDE_HOOKS_OK" ]; then
+    echo "  Claude Code: configured (session hooks)"
+  else
+    echo "  Claude Code found but no way to edit its settings — install node or python3 and re-run"
+  fi
 fi
 
 # Cursor
@@ -258,8 +367,9 @@ if [ -d "$HOME/.cursor" ] || command -v cursor &>/dev/null; then
   fetch_factory "hooks/cursor/alexandria-stop.py" "$HOME/.cursor/hooks/alexandria-stop.py" "hooks/cursor/alexandria-stop.py" yes
   chmod +x "$HOME/.cursor/hooks/alexandria-session-start.py" "$HOME/.cursor/hooks/alexandria-session-end.py" "$HOME/.cursor/hooks/alexandria-stop.py" 2>/dev/null
 
+  CURSOR_HOOKS_OK=""
   if command -v python3 &>/dev/null; then
-    python3 - <<'PY' 2>/dev/null
+    if python3 - <<'PY' 2>/dev/null
 import json
 from pathlib import Path
 
@@ -307,12 +417,20 @@ hooks["stop"] = clean("stop") + [
 
 path.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
 PY
-  else
-    echo "  Cursor: python3 missing — hook registration skipped"
+    then
+      CURSOR_HOOKS_OK=1
+    fi
   fi
 
+  # The rules file installs regardless (no python3 needed); the hooks are what
+  # need python3. Only claim "configured" when the hooks actually registered —
+  # otherwise the rule is present but session capture won't fire, so say so.
   fetch_factory "skills/cursor.mdc" "$HOME/.cursor/rules/alexandria.mdc" "skills/cursor.mdc" yes
-  echo "  Cursor: configured"
+  if [ -n "$CURSOR_HOOKS_OK" ]; then
+    echo "  Cursor: configured"
+  else
+    echo "  Cursor: found, but python3 is needed to finish — install python3 and re-run"
+  fi
 fi
 
 # Factory (droid CLI)
@@ -1008,10 +1126,12 @@ elif [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
     if [ "$KEYLESS" = "true" ]; then
       echo ""
       echo "The tool is yours: free, local, no account, never sent to us (any backup goes only"
-      echo "to your own GitHub + iCloud). After it drafts your starter mind it'll show you how to"
-      echo "become a founding member of the collective at alexandria-library.com/join — the thing"
-      echo "being built: the library, the marketplace, the people (first month free, or free with"
-      echo "3 friends). The tool stays free either way."
+      echo "to your own GitHub + iCloud) — it stays free forever because it's just a local file you"
+      echo "own. After it drafts a first reflection of you it'll show you how to become a founding"
+      echo "member of the collective at alexandria-library.com/join — the thing being built: the"
+      echo "library, the marketplace, the people. First month free, free for good if three friends"
+      echo "join through you, otherwise \$10/month — and if that's a stretch, message me and I'll"
+      echo "waive it."
     fi
   fi
   # Cowork / the Claude app / plain chat can't run hooks or the /a skill on
@@ -1023,6 +1143,18 @@ elif [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
   echo "     Profile → \"Instructions for Claude\" (so it prompts you to attach + /a)."
   echo "Then per session: attach your ~/alexandria folder + type /a. (Full read/write"
   echo "is desktop Cowork only — mobile and plain chat can't reach your local files.)"
+
+  # Optional extras — offered AFTER the first session, never blocking it. Each
+  # adds a layer (backup, hooks, signing) but the first reflection is reachable
+  # with none of them. If everything optional is present, this prints nothing.
+  if [ -n "$DEFERRED" ]; then
+    echo ""
+    echo "Want the full setup? These are optional — the first reflection works without them,"
+    echo "but each one adds a layer. Add any, then re-run the one line:"
+    printf "%b" "$DEFERRED" | while IFS= read -r line; do
+      [ -n "$line" ] && echo "  · $line"
+    done
+  fi
 else
   echo "Re-run anytime: curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- \$API_KEY"
 fi

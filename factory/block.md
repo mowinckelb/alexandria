@@ -33,7 +33,7 @@ Two categories:
 
 Copy valuable personal finds to ~/alexandria/files/vault/. Preserve original filenames. *Exception:* if the Author already has their own structured system (their own constitution / notes folder / second-brain / vault), don't copy it into ours — recognise it, point our scaffold at theirs, and skip the parts that would duplicate. The DIY Author's structure wins.
 
-## Phase 2 — Extract (build the starter mind)
+## Phase 2 — Extract (build a first reflection of them)
 
 ~/alexandria/ already has the structure: constitution/, marginalia/, notepad.md, machine.md, feedback.md.
 
@@ -98,13 +98,42 @@ Compose the report as a real piece of writing, not a checklist — and **tight**
 - **Agency.** State the mindset directly: ai is the first tool you can ask *how to use*. Don't know what a file or folder is for? Ask — never read a README. Don't know how Alexandria works? Ask. Tone wrong? Tell it. Want a daily email on a specific topic? Ask for one. Don't want fragments about Socrates anymore? Say so. Same mindset that makes Claude or ChatGPT useful is the one that makes Alexandria useful. Wait passively and the product gives them average; shape it actively and they get something specifically theirs. One short paragraph in the report — clear, not preachy.
   - **Cadence.** Name the floor as well as the ceiling: a real session — voice memo, sit-down /a, an artifact they couldn't make anywhere else — is the ceiling. But a spare minute between meetings spent here beats the algorithm. Either way the input compounds. Mental gym in the original greek sense; they have to show up. One short beat — frames *when* to open it, complementing the agency paragraph's *how* to use it.
 - **Auxiliary.** Mention in passing earlier in the report (not at the close): `alexandria-library.com/shortcut` for the iOS / Mac share-sheet shortcut so anything they read, watch, or hear can hit the vault from anywhere; five minutes now to dump everything with non-zero signal probability into the vault — no curation, the agent decides what's useful; feedback via `~/alexandria/system/.session_feedback` (reaches the team directly, no ticket); recommend a specific opening thread for the first /a; `a.` closes a session.
-- **The close — tie-back, then two steps in order, and nothing after.** Land the report with a tie-back (echo something specific from earlier — a thread, a recursion, a question), then end on the two actions, unmistakable and numbered:
-  1. **Claim your place — the in-flow ask, at peak conviction.** They've just watched it read them; this is the moment, not an afterthought. *Become a founding member — sign in at `alexandria-library.com/join`.* It's **$10/month, first month free** — or **free for good when three friends join through you**, or **just email and it's waived**. You're joining the collective (the library, the marketplace, the tribe), never paying to use the tool — that stays free either way. They get a one-line command to connect this install to their account, and an invite link for their people. **Lead with the founding bet, honestly told (2026-07-09):** the collective is being built right now and it is early — joining isn't buying a finished network, it's founding one. Publish-your-mind, the marketplace, being-seen are what's being *built*, named as such, never sold as arrived value (an empty room pitched as a full one reads as a lie the moment they look; honest-early reads as conviction, not apology). Never lead with a number; the founding number is a quiet fact, not the pitch. Say it once, plainly, with conviction. **And give the no its path:** if now isn't the moment, the same page takes just their email — they keep the tool free and hear from us as the collective grows. A no that leaves an address is a fine outcome; never push past it.
-     - **Adapt the register to the Author you just read.** The default above assumes belonging-and-momentum pulls them; it *repels* the growth-skeptic whose files critique hype, "tribe"-marketing, urgency, or referral-gamified relationships. For them: cut "this is the moment," cut the refer-three mechanic, don't sell "the tribe." Say the plain version — the tool is theirs free forever, and there's a collective thinking at this level they're welcome to join when it's useful, waived if they'd rather email. Belonging-through-being-seen still lands; the sales scaffolding is what you cut. Pitching them like a generic joiner is tone-deaf to the person you just proved you understand — they'll clock it.
-  2. **Then your first real session.** Tool-specific, the literal last line, zero scanning:
-     - Claude Code / Cursor / Codex: ***Now: open a new chat and type `/a`.***
-     - Factory: ***Now: invoke the `a` droid.***
-  Don't bury either step; don't soften with caveats. Opening a new chat for `/a` matters — the skill needs clean context to load fresh.
+- **The close — one warm end message, the join consolidated here at peak conviction, and nothing after.** This is where the whole read pays off: they've just watched it read them, so the ask lands here, once, not as an afterthought and not pitched earlier. End the report with the message below. The **indented parts are generated per-Author** — fill them from their real files and a live web find; the example bracket text is a spec of what goes there, never copied verbatim.
+
+  ```
+  done — come back whenever.
+
+  while you were away i went through everything you'd pointed me at — your notes, the things you'd saved, the way you write when it's just for you — and drafted a first reflection of you. it runs long because it's about you; read it properly.
+
+  **where you are.** [a deep, specific mirror of who the Author is right now, drawn from their actual files — several sentences, honest and sharp, not flattering]
+
+  **a tension you're carrying.** [a development beat: surface a real contradiction or unresolved tension in their material and push on it — Socratic, not soothing]
+
+  **something to set beside it.** [an accretion fragment: something genuinely found on the web — a specific essay, thinker, or idea — woven in because it connects to the Author's material. Name the source.]
+
+  none of that came from anywhere but this machine — i read the files you'd already given me access to, nothing new, nothing sent anywhere. the only thing that changed is that it's pointed at you now, deliberately. it's all written down in your new alexandria folder — open it, edit it, delete the whole thing; it's yours.
+
+  one step left: [Finish setup →](JOIN_LINK). first month's free, or just stay free on your own.
+
+  and if you're on your phone a lot — [add the shortcut](https://www.icloud.com/shortcuts/0ea1bb7333fd43a9881e9c7b9938a337) — anything you read, hear, or think gets folded into this automatically.
+  ```
+
+  **How to fill each generated part (do this right — the read fails on a lazy fill):**
+  - **`where you are`** — genesis-quality depth of the CURRENT self. A true, specific mirror of who they are *right now*, drawn only from their actual files, several sentences, honest and sharp — never flattery, never generic. Quote them where it lands.
+  - **`a tension you're carrying`** — the development beat. Surface a real contradiction or unresolved tension already in their material and push on it — Socratic, not soothing. Evidence of serious thought, not a gotcha.
+  - **`something to set beside it`** — the accretion fragment. **Do a real web search** for a specific essay, thinker, or idea that genuinely connects to their material, and name the source. Verify it resolves on the live web before you cite it — one 404 costs the whole read. Diff it against their own bookshelf first: never hand back something already in their vault as "new."
+  - **`JOIN_LINK`** — a real clickable markdown link labelled exactly `Finish setup →`, pointing at the join page **with the referrer baked in when present**. Build it as `https://alexandria-library.com/join?ref=<login>` where `<login>` is the contents of `~/alexandria/system/.referrer` **if that file exists**; if it doesn't exist, drop the whole `?ref=` and use `https://alexandria-library.com/join`. Read the file, don't guess. The link is a hyperlink, never a bare pasted URL.
+  - **The shortcut link** is fixed — use exactly `https://www.icloud.com/shortcuts/0ea1bb7333fd43a9881e9c7b9938a337`, as a clickable markdown link.
+
+  **Hard constraints on this close (do NOT drift):**
+  - Keep the machine/permissions/intent sentence ("none of that came from anywhere but this machine … pointed at you now, deliberately … it's yours") **exactly** as phrased — understated, no embellishment. Don't inflate it into a privacy pitch.
+  - **Exclude genesis-framing language** — no "creation," no "Turn-3 output," no entropy, no "this is the whole point of the product," no "the moment," no cosmology. This is a first reflection, told plainly, not a birth.
+  - The join is **consolidated here** — do not pitch it earlier in the report. This is peak conviction. The deal, stated once, plainly, when it comes up: first month free; free for good if three friends join through you; otherwise $10/month, and if that's a stretch, message me and I'll waive it. The tool itself is always free because it's just a local file they own. Never lead with the number.
+  - **Then the first real session, tool-specific, as the literal last line, zero scanning:**
+    - Claude Code / Cursor / Codex: ***Now: open a new chat and type `/a`.***
+    - Factory: ***Now: invoke the `a` droid.***
+  - Don't bury either step; don't soften with caveats. Opening a new chat for `/a` matters — the skill needs clean context to load fresh.
+  - **Adapt the register to the Author you just read.** The warm default above assumes belonging-and-momentum pulls them; it *repels* the growth-skeptic whose files critique hype, "tribe"-marketing, urgency, or referral-gamified relationships. For them: cut the refer-three mechanic, don't sell "the tribe," drop the warmth-by-volume. Say the plain version — the tool is theirs free forever, and there's a collective thinking at this level they're welcome to join when it's useful, waived if they'd rather email. Belonging-through-being-seen still lands; the sales scaffolding is what you cut. Pitching them like a generic joiner is tone-deaf to the person you just proved you understand — they'll clock it.
 
 Floor: every observation anchored — file, quote, pattern across sources. Generic = failed. Glowing-but-grounded = lands. Quotes are verbatim — copy the Author's line exactly, never tighten or paraphrase inside quotation marks; a misremembered quote reads as *you approximated me*, and the careful Author catches it first.
 

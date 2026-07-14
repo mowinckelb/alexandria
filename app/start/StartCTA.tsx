@@ -1,18 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { SERVER_URL } from '../lib/config';
 
 // The keyless install one-liner. `/a` redirects (Vercel, next.config.ts) to the
 // raw setup.sh; `curl -fsSL` follows it. No key = the free local product (the gym).
 const INSTALL_CMD = 'curl -fsSL alexandria-library.com/a | bash';
 
-// The claude-cli deep link returns (2026-07-01) in its honest form: an
-// explicit, labelled button on the action page — "open in claude code" is
-// consent, unlike the 2026-06-24 version where the homepage CTA silently
-// deep-linked (felt like a terminal hijack, and most agents aren't CC).
-// Most people DO have claude code, so the one-click path leads; the copy
-// block below stays the universal fallback for every other agent.
-const DEEP_LINK = `claude-cli://open?q=${encodeURIComponent(INSTALL_CMD)}`;
+// Referral-tagged form — an invited install passes the inviter's GitHub login
+// through to setup.sh so the inviter is credited as kin. Only used when a `ref`
+// arrives in the URL AND validates against /check-kin; otherwise the untagged
+// command above is the one shown and copied.
+const installCmd = (ref: string | null) =>
+  ref ? `curl -fsSL alexandria-library.com/a | bash -s -- --ref ${ref}` : INSTALL_CMD;
 
 const ICON_COPY = (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -27,16 +28,50 @@ const ICON_CHECK = (
   </svg>
 );
 
-export default function StartCTA() {
+// `refCode`, not `ref` — `ref` is a reserved prop name React intercepts for
+// ref-forwarding, so it never arrives as a readable prop. The invited-install
+// referral (a GitHub login) rides in under a plain name.
+export default function StartCTA({ refCode }: { refCode?: string }) {
   const [copied, setCopied] = useState(false);
+  // The do-it-later capture — desktop's version of the mobile email hero.
+  // A desktop visitor who's convinced but not at a terminal (borrowed
+  // machine, reading on the couch, "later") had no way to be kept before
+  // this; they'd bounce and we'd lose them. Same /onboard flow the phone
+  // uses: leave an email, the server sends the one line + a 2d/5d nudge.
+  const [email, setEmail] = useState('');
+  const [mailState, setMailState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  // Invited mode. A `ref` in the URL is only trusted once it validates against
+  // /check-kin (a real member login) — a fake/typo ref shows no banner and the
+  // untagged command, exactly as if no ref were present. `validRef` holds the
+  // confirmed login (drives the banner + the tagged command); null means either
+  // no ref or an unvalidated one.
+  const [validRef, setValidRef] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!refCode) { setValidRef(null); return; }
+    let live = true;
+    (async () => {
+      try {
+        const resp = await fetch(`${SERVER_URL}/check-kin?code=${encodeURIComponent(refCode)}`);
+        const data = await resp.json().catch(() => ({ valid: false }));
+        if (live) setValidRef(resp.ok && data.valid ? refCode : null);
+      } catch {
+        if (live) setValidRef(null);
+      }
+    })();
+    return () => { live = false; };
+  }, [refCode]);
+
+  const cmd = installCmd(validRef);
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(INSTALL_CMD);
+      await navigator.clipboard.writeText(cmd);
     } catch {
       // Fallback for browsers without async clipboard.
       const ta = document.createElement('textarea');
-      ta.value = INSTALL_CMD;
+      ta.value = cmd;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
       document.body.appendChild(ta);
@@ -48,27 +83,89 @@ export default function StartCTA() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const sendEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.includes('@') || mailState === 'sending') return;
+    setMailState('sending');
+    try {
+      // No `source` — this visitor intends to install, so they get the
+      // command email + nudge thread (unlike /join's waitlist-only capture).
+      // `ref` rides along when validated so the inviter is credited even on a
+      // deferred, emailed install.
+      const resp = await fetch(`${SERVER_URL}/onboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), ...(validRef ? { ref: validRef } : {}) }),
+      });
+      setMailState(resp.ok ? 'sent' : 'error');
+    } catch {
+      setMailState('error');
+    }
+  };
+
   return (
     <section className="cta-section">
-      <a className="cc-cta" href={DEEP_LINK}>
-        open in claude code
-      </a>
-      <p className="install-hint cc-hint">
-        it opens with the install ready &mdash; press enter and you&rsquo;re in.
-      </p>
-
-      <p className="cta-or" aria-hidden>or copy the command</p>
+      {validRef && (
+        <p className="install-invite">@{validRef} invited you to alexandria.</p>
+      )}
 
       <button type="button" className="install-block" onClick={copy} aria-label="copy the install command">
-        <code className="install-cmd">{INSTALL_CMD}</code>
+        <code className="install-cmd">{cmd}</code>
         <span className="install-copy">{copied ? ICON_CHECK : ICON_COPY}</span>
       </button>
       <p className="install-hint">
         {copied ? 'copied — now paste it into your coding agent.' : 'copy, then paste it into your coding agent.'}
       </p>
       <p className="install-where">
-        claude code · cursor · codex · factory. on claude desktop? use the code tab &mdash; it&rsquo;s claude code, so the same one command works there. live in cowork? works there too &mdash; run this once in one of those, then a one-time settings paste it walks you through. in a plain chat app? it needs one of the above.
+        claude code · cursor · codex · factory. in cowork it works too &mdash; one extra settings step and it walks you through it. a plain chat app won&rsquo;t work &mdash; you need one of the coding agents above.
       </p>
+
+      {validRef && (
+        <p className="install-new">
+          <Link href="/">new here? see what this is &rarr;</Link>
+        </p>
+      )}
+
+      {/* curl|bash reassurance — sits with the command it's about (their own
+          agent reads the open script), before the do-it-later net below. */}
+      <p className="primer-trust">
+        not sure? paste it in and ask your agent what it does &mdash; it reads every line.
+      </p>
+
+      {/* The do-it-later net — hairline-separated, quieter than the command
+          above (the command is the hero; this catches the not-right-now). */}
+      <div className="start-later">
+        {mailState === 'sent' ? (
+          <p className="start-later-done">
+            sent &mdash; the command&rsquo;s in your inbox for when you&rsquo;re back at your computer.
+          </p>
+        ) : (
+          <>
+            <p className="start-later-lede">
+              not at your computer, or&rsquo;d rather do it later? leave your
+              email and we&rsquo;ll send you the one line to run.
+            </p>
+            <form className="start-later-row" onSubmit={sendEmail}>
+              <input
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="email"
+                aria-label="your email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); if (mailState === 'error') setMailState('idle'); }}
+                required
+              />
+              <button type="submit" disabled={mailState === 'sending'}>
+                {mailState === 'sending' ? 'sending…' : 'send it'}
+              </button>
+            </form>
+            {mailState === 'error' && (
+              <p className="start-later-hint">couldn&rsquo;t send &mdash; try again.</p>
+            )}
+          </>
+        )}
+      </div>
     </section>
   );
 }

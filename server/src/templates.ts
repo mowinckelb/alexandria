@@ -7,6 +7,15 @@ import { randomBytes } from 'crypto';
 
 function getWebsiteUrl() { return process.env.WEBSITE_URL || 'https://alexandria-library.com'; }
 
+// The iCloud capture shortcut — same constant the emails + website use
+// (email.ts, app/lib/config.ts). Save anything from your phone; it becomes
+// a session. Surfaced as a subtle link on the founding-member page.
+const SHORTCUT_URL = 'https://www.icloud.com/shortcuts/0ea1bb7333fd43a9881e9c7b9938a337';
+
+// How many active kin make membership free for good. Mirrors billing.ts's
+// KIN_THRESHOLD (same env var); the page reads it to show the progress line.
+function getKinThreshold(): number { return parseInt(process.env.KIN_THRESHOLD || '3', 10); }
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -33,6 +42,7 @@ function jsLiteral(value: string): string {
 const ICON_COPY = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 const ICON_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 const ICON_INFO = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+const ICON_SHARE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
 
 // ---------------------------------------------------------------------------
 // Auth error page — shown when OAuth callback can't complete
@@ -61,7 +71,7 @@ export function authErrorHtml(message: string): string {
 // Callback page — the first brand moment after signup
 // ---------------------------------------------------------------------------
 
-export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false, authorNumber = 0): Promise<string> {
+export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false, authorNumber = 0, kinCompliant = 0): Promise<string> {
   const WEBSITE_URL = getWebsiteUrl();
   const host = WEBSITE_URL.replace(/^https?:\/\//, '');
   // The founding-member page (Strava-for-thought, ground truth e1cd27f). You've
@@ -83,6 +93,19 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   // pre-credited as kin (server validates ref → existing login, rejects self-referral).
   const inviteUrl = githubLogin ? `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}` : '';
   const inviteDisplay = githubLogin ? `${host}/join?ref=${githubLogin}` : '';
+  // Kin progress — let the member SEE where they stand toward free-for-good.
+  // Membership, not usage: count is the compliant (member-status) kin count
+  // the server already has (countActiveKin at the call site). At/over the
+  // threshold shows the done state; short of it shows how many remain.
+  const kinThreshold = getKinThreshold();
+  const kinDone = kinCompliant >= kinThreshold;
+  const kinRemaining = Math.max(0, kinThreshold - kinCompliant);
+  const kinProgressLine = kinDone
+    ? `you&rsquo;re free for good &mdash; three friends joined through you.`
+    : `${kinCompliant} of ${kinThreshold} friends joined &mdash; ${kinRemaining} more and it&rsquo;s free for good.`;
+  // Warm, brief share text for the Web Share API sheet (native share on
+  // mobile; clipboard-copy fallback on desktop). Brand voice, lowercase.
+  const shareText = 'alexandria — a tribe of people who put their minds into writing, so ai thinks with them, not for them. join me.';
   // Inline Mechanics.md so its copy button runs synchronously inside the click handler.
   // Async fetch + clipboard.writeText loses user activation and falls back to opening the raw URL.
   // (block.md is no longer copied here — the agent reads the locally-cached .block after install
@@ -114,6 +137,10 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   .line { font-size: 1.1rem; line-height: 1.9; }
   .deal { font-size: 0.9rem; line-height: 1.8; color: #8a8078; margin-top: 2rem; }
   .deal .free { color: #3d3630; }
+  .kin-progress { font-size: 0.92rem; line-height: 1.8; color: #8a8078; margin-top: 1.25rem; }
+  .shortcut { font-size: 0.82rem; line-height: 1.7; color: #bbb4aa; margin-top: 2rem; }
+  .shortcut a { color: #8a8078; text-decoration: none; border-bottom: 1px dotted #bbb4aa; transition: color 0.15s, border-color 0.15s; }
+  .shortcut a:hover { color: #3d3630; border-bottom-color: #8a8078; }
   .welcome-back { color: #8a8078; margin-top: 1.5rem; }
   .signout { font-size: 0.78rem; line-height: 1.7; color: #bbb4aa; margin-top: 2.5rem; }
   .signout a { color: inherit; text-decoration: none; border-bottom: 1px dotted #bbb4aa; transition: color 0.15s, border-color 0.15s; }
@@ -198,11 +225,13 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
 <body>
 ${isReturning ? `<a class="brand-corner" href="${WEBSITE_URL}/">alexandria.</a>` : ''}
 <div class="container">
-  <h1 class="welcome">${isReturning ? `welcome back.` : `welcome, alexandrian.`}</h1>
+  <h1 class="welcome">${isReturning ? `welcome back.` : `welcome to alexandria.`}</h1>
   ${isReturning ? `<p class="line welcome-back">call /alexandria in your coding agent.</p>` : `<div class="steps">
     ${curlCmd ? `<p class="line"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy connect command">copy your connect command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; paste it into your coding agent (claude code, cursor, codex&hellip;) and hit enter. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">links your install to your membership so you can publish to the library. your thinking stays on your machine &mdash; only what you publish is ever sent.</span></button></p>` : `<p class="line">you're in. call /alexandria in your coding agent.</p>`}
-    ${inviteUrl ? `<p class="line"><button type="button" class="action" onclick="copyInvite(this)" aria-label="copy your invite link">copy your invite link <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; send it to the people you want thinking for themselves too. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">${escapeHtml(inviteDisplay)} &mdash; it carries your code. three who join and stay, and your membership is free for good.</span></button></p>` : ''}
+    ${inviteUrl ? `<p class="line"><button type="button" class="action" onclick="copyInvite(this)" aria-label="copy your invite link">copy your invite link <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> <button type="button" class="action" onclick="shareInvite(this)" aria-label="share your invite link">share <span class="icon"><span class="icon-copy">${ICON_SHARE}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; send it to everyone worth it &mdash; most won&rsquo;t act, and the three who do make yours free. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">${escapeHtml(inviteDisplay)} &mdash; it carries your code. three who join and stay, and your membership is free for good.</span></button></p>
+    <p class="kin-progress">${kinProgressLine}</p>` : ''}
   </div>
+  <p class="shortcut">on your phone? <a href="${SHORTCUT_URL}" target="_blank" rel="noopener noreferrer">add the shortcut</a> &mdash; capture anything, anywhere.</p>
   <p class="deal"><span class="free">first month free</span>, then $10/month &mdash; or free for good with three friends, or just email if that&rsquo;s a stretch. you&rsquo;re joining the collective, not paying for the tool.</p>`}
   <p class="signout">wrong account? <a href="https://github.com/logout" target="_blank" rel="noopener noreferrer">sign out of github</a></p>
 </div>
@@ -232,6 +261,18 @@ function manualCopy(text, el) {
 }
 function copyCmd(el) { copyText(${jsLiteral(curlCmd)}, el); }
 function copyInvite(el) { copyText(${jsLiteral(inviteUrl)}, el); }
+function shareInvite(el) {
+  var url = ${jsLiteral(inviteUrl)};
+  var text = ${jsLiteral(shareText)};
+  // Web Share API on mobile (one tap → native share sheet). navigator.share
+  // must be called synchronously inside the click to keep user activation.
+  if (navigator.share) {
+    navigator.share({ url: url, text: text }).catch(function() {});
+    return;
+  }
+  // Desktop fallback — no share sheet, so copy the link and flash the check.
+  copyText(url, el);
+}
 function toggleTip(el) {
   var wasActive = el.classList.contains('active');
   document.querySelectorAll('.info.active').forEach(function(e) { e.classList.remove('active'); });
@@ -269,8 +310,9 @@ export async function welcomeHandoffUrl(
   githubLogin: string,
   viaToken: boolean,
   authorNumber: number,
+  kinCompliant = 0,
 ): Promise<string> {
-  const html = await callbackPageHtml(apiKey, githubLogin, viaToken, authorNumber);
+  const html = await callbackPageHtml(apiKey, githubLogin, viaToken, authorNumber, kinCompliant);
   const code = randomBytes(24).toString('hex');
   // handoff:<code> → session token, consumed by /api/auth/session (sets the cookie).
   // welcome:<code> → the rendered page, consumed by the website /welcome peek.
