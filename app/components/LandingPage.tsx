@@ -161,22 +161,20 @@ const THEMES: Theme[] = [
 // action page: open-in-claude-code + copy-command on desktop, shortcut +
 // email on mobile). One scalable door — new agents, deep links, and flows
 // land on /start without ever touching this button again.
-// Label renamed 2026-07-09: "join the tribe" → "try it free". Founder
-// field data — visitors interested in trying it still weren't pressing;
-// the identity label hid a free five-minute action behind a commitment-
-// sounding one. The button now names the action; the tribe identity
-// moved to the sub-line.
+// Label history: "join the tribe" → "try it free" (07-09) → back to "join
+// the tribe" (2026-07-13, founder). The commitment-sounding-label risk that
+// drove the 07-09 rename is now handled by the sub, which plainly names the
+// action (free, one line) so the identity label can carry the aspiration.
 function HomeInstall() {
   return (
     <div className="cta-block">
       <Link href="/start" className="install-cta">
-        try it free
+        join the tribe
       </Link>
-      {/* The agency sell at the button (his free-sample note): the
-          fear-killers moved into the letter (fully private, fully
-          sovereign); the sub now sells zero cost + reversibility. */}
+      {/* Sub = the no-risk nudge (founder 2026-07-13), tightened: free,
+          yours, zero risk — the yes should feel like taking a free gift. */}
       <span className="cta-sub">
-        free &mdash; five minutes in, one delete out
+        just try it &mdash; free, yours, nothing to lose
       </span>
     </div>
   );
@@ -305,6 +303,30 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   // Letter scroll cue — "keep reading" sits at the box's bottom over the
   // ghost text; it retires once the reader scrolls the box.
   const [letterCue, setLetterCue] = useState(true);
+  // WHY / WHAT / HOW expandable overviews (2026-07-13 exploration). Accordion —
+  // one open at a time — so the fixed back-slide stage can never overflow.
+  const [openPillar, setOpenPillar] = useState<string | null>(null);
+  // The front slide carries the fork (why-care). The back opens with the
+  // SECOND why — why it's on you (your AI is aligned to no one; only you can
+  // close the gap) — then what / how, then the close. One cohesive arc:
+  // stakes → why only you can → the solution → the practice → decide.
+  const SECTIONS = [
+    {
+      title: 'why',
+      lead: 'Your ai is built for everyone at once, so it’s aligned to no one in particular. It already reaches the outside of your life — your files, your messages, your history — but not the inside: what you actually think, and how. Only you can give it that.',
+      body: 'No company will fix this at the model level; they’re solving a general problem, for everyone. The distance between an ai that answers the whole world and one that’s truly yours is exactly the part only you hold — your own view, from the inside. Close it, and the same model everyone else uses quietly becomes yours in particular.',
+    },
+    {
+      title: 'what',
+      lead: 'So put your mind into a file any ai can read: who you are, how you think, what you’re after. Point any ai at it, and its job flips — from answering you to developing you. It stays yours: private, portable, gone in a click if you ever want it gone.',
+      body: 'It’s a folder on your computer, holding a file that tells any ai who you are and how you think — like the one a codebase keeps to explain itself, except this one is you. Nothing else records your inner monologue; you’re the only one who can. Plug your other apps and data in too, and it all gathers in one place that’s yours.',
+    },
+    {
+      title: 'how',
+      lead: 'It runs two ways — quietly in the background as you work, and on purpose when you sit down with it and think out loud. Either way it builds into a record of your mind that’s yours alone. And you’re not building it by yourself.',
+      body: 'The passive side only ever adds; the active side is a gym for your mind — you sit with it like a coach, and it draws out what you couldn’t quite put into words. We give the equipment, you lift; what matters is who walks out. Around it is the tribe: everyone building the same way, trading what works — a living library of minds. Strava for the mind.',
+    },
+  ];
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
   // Default (no param) keeps the existing CSS-built window. Read on
   // mount so the data-attribute picks up the correct CSS branch.
@@ -605,17 +627,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             <span className="nav-subtitle" aria-hidden>mentes aeternae</span>
           </div>
           <div className="nav-links">
-            {/* Two groups, hairline-divided: the places (library ·
-                marketplace — the collective, first-class) and the
-                reading (whitepaper + letter). Restores the original
-                four-link grouped nav; the shelf register is the quiet
-                italic, differentiated from the letter's underlined
-                hand. Hidden on mobile — the colophon footer line
-                carries the places there. */}
-            <span className="nav-shelf">
-              <a href="/library" className="nav-shelf-link">library<span className="shelf-dot">.</span></a>
-              <a href="/marketplace" className="nav-shelf-link">marketplace<span className="shelf-dot">.</span></a>
-            </span>
+            {/* Just the reading now — whitepaper + letter. library ·
+                marketplace moved OUT of the nav down to the bottom of the
+                back slide (2026-07-13, founder): they're the collective's
+                places, not for a first-time viewer, so they no longer
+                compete for attention at the top. The colophon foot carries
+                them on every viewport now. */}
             <span className="nav-group">
               {/* Two reading documents, two registers: the whitepaper is
                   a LABEL (tracked uppercase, wax accent — a document
@@ -695,13 +712,20 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             with the slide, handing off to the argument on the back
             slide. Positioned in the pixel-locked stage so it scales
             cleanly with the scene. */}
+        {/* The why — the frame/hook, on the front slide (2026-07-13,
+            founder): the cold visitor meets the argument on arrival, before
+            the peel. what / how + the decision live on the back slide. */}
         <div className="front-epigraph">
-          <p className="front-salutation"><em>to the reader.</em></p>
-          <p className="front-epigraph-line">
-            When calculators arrived, we let them do the math &mdash; and
-            got worse at doing it ourselves. Thinking is no different: the
-            more you let ai do it for you, the weaker the muscle gets.
-          </p>
+          <p className="front-lead">Soon, ai/robotics can do everything.</p>
+          {/* The three doors as form (2026-07-13, founder): the two losing
+              paths dimmed, the way through alive in full ink — the eye is
+              made to land on it. Form is the content: the choice is shown,
+              not argued. */}
+          <div className="front-fork">
+            <p className="fork-line fork-lose">Reject it, and fall behind.</p>
+            <p className="fork-line fork-lose">Surrender to it, and disappear.</p>
+            <p className="fork-line fork-win">Or use it &mdash; and become more yourself.</p>
+          </div>
         </div>
         <div className="top-inner" />
         </div>
@@ -765,8 +789,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               <p className="dict-line">
                 <em>II. n.</em> its rebuilding; a library of
                 human minds, written by their authors so ai
-                thinks with them, not for them; the path through
-                the singularity.
+                thinks with them, not for them; this time, it
+                cannot burn.
               </p>
             </div>
           </div>
@@ -781,176 +805,83 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     pinned below with the CTAs. Copy consolidated this
                     pass — same ideas and richness, fewer words. Section
                     plates (roman numerals) echo the dictionary block. */}
-                <div className="letter-window">
-                <div
-                  className="letter-scroll"
-                  tabIndex={0}
-                  aria-label="the letter"
-                  onScroll={(e) => setLetterCue(e.currentTarget.scrollTop < 24)}
-                >
-                <p className="letter-sec">i &middot; the cost</p>
-
-                <p className="statement-close">
-                  It creeps in. You ask AI to write the email, make the
-                  plan, weigh the decision &mdash; and it does, often
-                  better than you would have. So you keep asking. It
-                  handles more of your thinking and you do less of it
-                  yourself, until one day you notice how much you have
-                  handed over.
-                </p>
-
-                <p className="statement-close">
-                  There are three doors. Take the benefit and the cost:
-                  let AI think for you, and let your mind go soft. Refuse
-                  both: reject AI, and fall behind. Or take the benefit
-                  without the cost &mdash; use AI fully, and have it keep
-                  you{' '}<em>sharp</em>. Alexandria is that third door.
-                </p>
-
-                <p className="letter-sec">ii &middot; the missing piece</p>
-
-                <p className="statement-close">
-                  Your AI isn&rsquo;t against you &mdash; it&rsquo;s built
-                  for everyone at once, which leaves it tuned to no one in
-                  particular. To make it truly yours, it has to know you.
-                  Most of what makes you{' '}<em>you</em>{' '}&mdash; your
-                  files, messages, history &mdash; it can already reach,
-                  and other apps do that well. The one part missing is
-                  what goes on in your head: what you think, and how.
-                  Nothing records that but you. AI can&rsquo;t read your
-                  mind, only words &mdash; so put your thoughts into
-                  words, and it thinks{' '}<em>with</em>{' '}you, not
-                  {' '}<em>for</em>{' '}you.
-                </p>
-
-                <p className="letter-sec">iii &middot; the folder</p>
-
-                <p className="statement-close">
-                  So here it is, plainly: a folder on your computer.
-                  Inside is a file that tells any AI who you are and how
-                  you think. (Coding tools use one like it &mdash; an
-                  AGENTS.md &mdash; to learn a project; this is the same,
-                  but for a person.) Point any AI at it and you&rsquo;re
-                  someone it knows, not a stranger. Plug in your other
-                  apps and data too; it all gathers here.
-                </p>
-
-                <p className="statement-close">
-                  It stays on your machine, fully yours &mdash; organise
-                  it, hide parts, even sell access, or delete it in a
-                  second. And it frees you: your context lives with you,
-                  not locked in one company, so you can switch AI any
-                  time and take everything. It&rsquo;s your own AI, on
-                  your own computer. We never see it. We just gave you
-                  the idea.
-                </p>
-
-                <p className="letter-sec">iv &middot; the gym</p>
-
-                <p className="statement-close">
-                  Most of it runs on its own: as you work, your AI notes
-                  how you think &mdash; your ideas, decisions,
-                  patterns &mdash; and saves them. The more it knows you,
-                  the better it helps, everywhere. It only ever adds.
-                </p>
-
-                <p className="statement-close">
-                  The deeper part you do on purpose. Now and then you sit
-                  with it like a coach: it asks questions, draws out what
-                  you haven&rsquo;t put into words, helps you work through
-                  it, then sends you off to act. A Wikipedia page is
-                  pieced together from outside; a biography comes from
-                  someone who sat with you for months and got let in.
-                  That version only happens if you show up. It&rsquo;s a
-                  gym for your mind: we give the equipment, you lift.
-                  What matters isn&rsquo;t the gym &mdash; it&rsquo;s who
-                  walks out.
-                </p>
-
-                <p className="letter-sec">v &middot; the tribe</p>
-
-                <p className="statement-close">
-                  Everyone doing this is Alexandria &mdash; like Strava,
-                  but for the mind. One shared belief, that a sharper
-                  mind is worth the work; everyone their own way. You
-                  connect with the others, learn from them, and share
-                  what you build.
-                </p>
-                </div>
-                {/* Scroll cue — its own solid backing masks the ghost
-                    text behind it so the two don't visually collide
-                    (founder: the old overlap "looked bad"). Retires once
-                    the reader scrolls. */}
-                <span
-                  className={`letter-more${letterCue ? '' : ' is-gone'}`}
-                  aria-hidden
-                >
-                  keep reading&nbsp;&darr;
-                </span>
+                {/* WHY / WHAT / HOW — a small section title (the old
+                    letter-plate register) over full-width copy (2026-07-13),
+                    flowing with no dividers between them. A lead paragraph
+                    shows; a rotating caret reveals the rest. Accordion (one
+                    open at a time) keeps the fixed stage bounded. */}
+                <div className="secs">
+                  {SECTIONS.map((s) => {
+                    const isOpen = openPillar === s.title;
+                    return (
+                      <div key={s.title} className={`sec${isOpen ? ' is-open' : ''}`}>
+                        <button
+                          type="button"
+                          className="sec-head"
+                          aria-expanded={isOpen}
+                          onClick={() => setOpenPillar(isOpen ? null : s.title)}
+                        >
+                          <span className="sec-title">{s.title}</span>
+                          <span className="sec-caret" aria-hidden />
+                        </button>
+                        <p className="sec-lead">{s.lead}</p>
+                        <div className="sec-body"><div className="sec-body-inner"><p>{s.body}</p></div></div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <p className="statement-close letter-outro">
-                  To start, one command installs the founder&rsquo;s own
-                  folder on your computer &mdash; free, private, yours to
-                  change, and gone without a trace if you delete it.
-                </p>
+                {/* The line break — one rule between the sections and the
+                    single action beat below. */}
+                <div className="secs-rule" aria-hidden />
 
-                {/* The close (2026-07-12): the EXHAUSTIVE decision tree,
-                    literal (founder: "have that exhaustive decision tree
-                    thing… explain how the person reading literally has to
-                    pick one of them… clear action items… force them to
-                    make a decision and follow the resulting action"). An
-                    enumerated three-branch tree — the reader is
-                    necessarily in one — each with its concrete action; the
-                    tag collapses the "maybe later" escape into branch one
-                    so there is no drift. Firm, never insulting. */}
-                {/* The close (2026-07-12): concise, gently forcing, with
-                    a clear action for BOTH CTAs (try it / keep me posted).
-                    Softer than the "no you won't admit" line. */}
-                <p className="statement-beat">
-                  <em>So it&rsquo;s your call. If you agree, try it &mdash;
-                  that&rsquo;s one click. If you&rsquo;d rather follow
-                  along first, leave your email.</em>
+                {/* ONE action + agency section (2026-07-13, founder): the
+                    agency push and the locked close (plain, isolate-and-
+                    point — wording preserved verbatim) as a single italic
+                    beat that points at the CTAs. */}
+                <p className="statement-beat action-beat">
+                  <em>AI is coming either way. The only choice left is whether
+                  you meet it as more yourself, or less &mdash; and that&rsquo;s
+                  the one call no one can make for you, not even the ai. So
+                  it&rsquo;s your call. If you agree, try it &mdash;
+                  that&rsquo;s one click. If you&rsquo;d rather follow along
+                  first, leave your email.</em>
                 </p>
 
                 <div className="cta-pair">
                   <HomeInstall />
                   <div className="cta-block">
-                    {/* The ghost CTA: the watch-the-company path (vs the
-                        use-it path on the left). Label history: "stay
-                        close" → "follow along" (07-01) → "stay close"
-                        (07-08) → "keep me posted" (07-09). The kill was
-                        field data, not taste: visitors interested in the
-                        company never pressed it, and some asked out loud
-                        what "stay close" meant. The label now names the
-                        transaction; the sub names its cost. */}
+                    {/* The ghost CTA — the follow / watch-the-company path.
+                        Label back to "stay close" (2026-07-13, founder). The
+                        "visitors asked what it meant" problem that killed it
+                        on 07-09 is now handled by the sub, which plainly
+                        states it — the identity label rides on top. */}
                     <Link href="/follow" className="lr-cta lr-cta-ghost">
-                      keep me posted
+                      stay close
                     </Link>
-                    {/* Sub carries what you get, in the founder's first
-                        person ("I'll send stuff, post all the updates and
-                        behind the scenes things" — 2026-07-10 riff). */}
-                    {/* Command register, per the founder: too-passive
-                        kills this button — "every single one of my
-                        friends and family should immediately know that
-                        they are to press that button." */}
+                    {/* Sub back to the old command register (founder
+                        2026-07-13): the too-passive version killed the
+                        button — "every friend and family should immediately
+                        know they are to press it." */}
                     <span className="cta-sub">
                       rooting for us? make it official
                     </span>
                   </div>
                 </div>
 
-                {/* The places line — mobile-only colophon footer (ordered
-                    after the wordmark block). On desktop these links live
-                    in the nav shelf group; the orphan line under the CTAs
-                    was cut 2026-07-08 (it floated over the watermark and
-                    read as an afterthought). */}
-                <p className="quiet-links">
-                  <Link href="/library">library</Link>
-                  <span className="quiet-sep" aria-hidden>&middot;</span>
-                  <Link href="/marketplace">marketplace</Link>
-                </p>
               </div>
+
+              {/* The places line — library. marketplace., bottom-pinned in
+                  the right column so its baseline lines up with the wordmark/
+                  dictionary block at bottom-left (2026-07-13, founder). Out
+                  of the nav, carrying the exact prod nav-shelf styling
+                  (period marks, 15px medium, spaced). right-col's
+                  space-between drops it to the bottom; matching right-lower's
+                  752px flex-end box keeps it under the CTAs. */}
+              <p className="quiet-links">
+                <Link href="/library" className="quiet-link">library<span className="shelf-dot">.</span></Link>
+                <Link href="/marketplace" className="quiet-link">marketplace<span className="shelf-dot">.</span></Link>
+              </p>
           </div>
 
         </div>
@@ -2634,41 +2565,25 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .letter-window {
           position: relative;
         }
-        /* Scroll cue — sits at the box's bottom-right on its own solid
-           backing (theme bg) so the ghost text behind it is masked and
-           they don't collide. Gentle bob; retires once the reader
-           scrolls the box. */
+        /* Read-on cue — a centered whisper below the reading column. No
+           pill, no backing, no bob (2026-07-13): the bottom fade already
+           carries "there's more"; this quietly names the choice and fades
+           out the moment the reader scrolls into the letter. */
         .letter-more {
-          position: absolute;
-          right: 18px;
-          /* Sits in the whitespace between section i's last line and the
-             ii heading (~52px up), so it's on clean space, not over the
-             ghost text (founder). */
-          bottom: 44px;
-          z-index: 2;
-          padding: 2px 9px 3px;
-          background: var(--theme-bg);
-          border-radius: 10px;
+          display: block;
+          text-align: center;
+          margin-top: 13px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 12.5px;
-          letter-spacing: 0.06em;
-          color: var(--theme-fg-muted);
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          color: var(--theme-fg-faint);
           pointer-events: none;
           user-select: none;
-          animation: letterMoreBob 2.4s ease-in-out infinite;
-          transition: opacity 400ms ease;
+          transition: opacity 500ms ease;
         }
         .letter-more.is-gone {
           opacity: 0;
-          animation: none;
-        }
-        @keyframes letterMoreBob {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(2px); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .letter-more { animation: none; }
         }
         .letter-scroll {
           position: relative;
@@ -2681,8 +2596,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           padding-right: 18px;
           padding-bottom: 34px;
           display: block;
-          scrollbar-width: thin;
-          scrollbar-color: var(--theme-border-soft) transparent;
+          /* Scrollbar hidden (2026-07-13) — a visible bar reads as a "box";
+             the soft fade + the read-on cue carry the scroll affordance. */
+          scrollbar-width: none;
           /* Soft bottom fade so section ii ghosts under it (the "ghost
              text" the founder wants) and the cue signals more. */
           -webkit-mask-image: linear-gradient(
@@ -2692,18 +2608,117 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             to bottom, #000 0, #000 calc(100% - 48px), transparent 100%
           );
         }
+        /* Once scrolled in, the top edge fades too so the upper text
+           dissolves instead of hard-cutting (2026-07-13). */
+        .letter-scroll.is-scrolled {
+          -webkit-mask-image: linear-gradient(
+            to bottom, transparent 0, #000 30px, #000 calc(100% - 48px), transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom, transparent 0, #000 30px, #000 calc(100% - 48px), transparent 100%
+          );
+        }
         .letter-scroll::-webkit-scrollbar {
-          width: 4px;
+          display: none;
         }
-        .letter-scroll::-webkit-scrollbar-track {
-          background: transparent;
+        /* ─── WHY / WHAT / HOW pillars (2026-07-13 exploration) ─── */
+        .secs {
+          display: flex;
+          flex-direction: column;
         }
-        .letter-scroll::-webkit-scrollbar-thumb {
+        /* Header — small title + rotating caret, a compact click target.
+           No dividers between sections (they flow like the old letter). */
+        .sec-head {
+          display: inline-flex;
+          align-items: center;
+          gap: 9px;
+          align-self: flex-start;
+          padding: 6px 6px 6px 0;
+          margin: 20px 0 0 0;
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+        }
+        .sec:first-child .sec-head { margin-top: 0; }
+        .sec-title {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-size: 12px;
+          letter-spacing: 0.16em;
+          color: var(--theme-fg-faint);
+          transition: color 180ms ease;
+        }
+        .sec-head:hover .sec-title { color: var(--theme-fg-muted); }
+        /* Rotating caret — points down collapsed, flips up open. Replaces
+           the +/− (founder: more elegant). */
+        .sec-caret {
+          width: 6px;
+          height: 6px;
+          border-right: 1.4px solid var(--theme-fg-faint);
+          border-bottom: 1.4px solid var(--theme-fg-faint);
+          transform: translateY(-2px) rotate(45deg);
+          transition: transform 520ms cubic-bezier(0.33, 0, 0.2, 1), border-color 200ms ease;
+        }
+        .sec-lead {
+          margin: 7px 0 0;
+          font-size: 15px;
+          line-height: 1.62;
+          letter-spacing: 0.004em;
+          color: var(--theme-fg);
+        }
+        /* Body reveal — grid-rows 0fr→1fr eases to the body's EXACT height
+           (no max-height overshoot), so expand and collapse move at the same
+           real rate. Fixes the cycle-jitter: the old collapse "snapped"
+           because max-height overshot the content and idled through the gap
+           before the real height fell. Slow + gentle so cycling reads fluid. */
+        .sec-body {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 620ms cubic-bezier(0.33, 0, 0.2, 1);
+        }
+        .sec-body-inner {
+          overflow: hidden;
+          min-height: 0;
+          opacity: 0;
+          transition: opacity 500ms ease;
+        }
+        /* Fluid HOVER-expand on pointer devices (founder 2026-07-13): move
+           over a section and it opens; move off and it eases shut — no click.
+           Only one is ever open (you hover one at a time), so the fixed
+           stage can't overflow. */
+        @media (hover: hover) and (pointer: fine) {
+          .sec:hover .sec-body { grid-template-rows: 1fr; }
+          .sec:hover .sec-body-inner { opacity: 1; }
+          .sec:hover .sec-title { color: var(--theme-fg-muted); }
+          .sec:hover .sec-caret {
+            border-color: var(--theme-fg-muted);
+            transform: translateY(1px) rotate(-135deg);
+          }
+        }
+        /* Touch has no hover — tap toggles (is-open) instead. */
+        @media (hover: none) {
+          .sec.is-open .sec-body { grid-template-rows: 1fr; }
+          .sec.is-open .sec-body-inner { opacity: 1; }
+          .sec.is-open .sec-caret {
+            border-color: var(--theme-fg-muted);
+            transform: translateY(1px) rotate(-135deg);
+          }
+        }
+        .sec-body-inner > p {
+          margin: 10px 0 0;
+          font-size: 15px;
+          line-height: 1.62;
+          letter-spacing: 0.004em;
+          color: var(--theme-fg);
+        }
+        .secs-rule {
+          height: 1px;
           background: var(--theme-border-soft);
-          border-radius: 2px;
+          margin: 26px 0 22px;
         }
-        .letter-scroll::-webkit-scrollbar-thumb:hover {
-          background: var(--theme-fg-muted);
+        .action-beat {
+          margin: 0;
         }
         /* THE CLOSING MOVEMENT — set apart from the argument box above
            and given its own rhythm so it doesn't read as two more blocks
@@ -2759,7 +2774,37 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           font-size: 20px;
           line-height: 1.56;
           letter-spacing: 0.004em;
-          color: rgba(26, 19, 24, 0.85);
+          /* Mellowed toward grey (2026-07-13, founder) — a lower-opacity ink
+             reads as a warm grey over the cream, softer on the page than the
+             near-black 0.85 without leaving the plum palette. */
+          color: rgba(26, 19, 24, 0.66);
+        }
+        /* ─── The front trichotomy (2026-07-13) — form is content: the two
+           losing doors dimmed, the way through alive. ─── */
+        .front-lead {
+          margin: 0 0 22px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 20px;
+          line-height: 1.45;
+          letter-spacing: 0.004em;
+          color: rgba(26, 19, 24, 0.72);
+        }
+        .front-fork { margin: 0; }
+        .fork-line {
+          margin: 0 0 10px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 18.5px;
+          line-height: 1.5;
+          letter-spacing: 0.004em;
+        }
+        .fork-line:last-child { margin-bottom: 0; }
+        /* The two losing paths — dimmed, half-faded out of the frame. */
+        .fork-lose { color: rgba(26, 19, 24, 0.32); }
+        /* The way through — alive, full ink, in the letter's italic voice;
+           the eye is drawn to it against the two faded lines above. */
+        .fork-win {
+          color: rgba(26, 19, 24, 0.74);
+          font-style: italic;
         }
         .cta-block {
           display: flex;
@@ -2781,28 +2826,39 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           letter-spacing: 0.01em;
           color: var(--theme-fg-muted);
         }
-        /* One faint link line — mobile-only colophon footer. Desktop
-           carries library · marketplace in the nav shelf group instead
-           (2026-07-08); the mobile block below re-displays this. */
+        /* The places line — library. marketplace. under the CTAs, carrying
+           the exact prod nav-shelf styling (period marks, 15px medium,
+           spaced) now that it lives on the themed bottom slide instead of
+           the nav — theme-toned like the shelf was when scrolled to the
+           bottom. Mobile re-orders it to the colophon footer (order 7). */
         .quiet-links {
-          display: none;
-          margin: 18px 0 0;
+          display: flex;
+          align-items: center;
+          gap: clamp(18px, 1.8vw, 26px);
+          /* Bottom-pinned in right-col — its space-between drops this to the
+             bottom. Matches right-lower's box (752px, flex-end, -32px) and
+             the letter column's 64px left inset so it left-aligns with the
+             CTAs; margin-bottom equals the wordmark-block's so both baselines
+             align across the slide. */
+          align-self: flex-end;
+          width: 752px;
+          padding-left: 72px;
+          margin: 0 -32px var(--lower-block-bottom) 0;
+        }
+        .quiet-link {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 12.5px;
+          font-style: normal;
+          font-weight: 500;
+          font-size: 15px;
           letter-spacing: 0.02em;
-          color: var(--theme-fg-faint);
-        }
-        .quiet-links a {
-          color: var(--theme-fg-muted);
           text-decoration: none;
-          transition: opacity 180ms ease;
-          /* Tap-target extension without shifting the line. */
-          display: inline-block;
-          padding: 6px 2px;
-          margin: -6px -2px;
+          color: var(--theme-fg-faint);
+          transition: color 180ms ease;
         }
-        .quiet-links a:hover { opacity: 0.62; }
-        .quiet-sep { padding: 0 9px; user-select: none; }
+        .quiet-link:hover { color: var(--theme-fg); }
+        /* The mark — upright period, a breath tighter to the word than the
+           tracking sets it, echoing the brand nav-dot (same as the shelf). */
+        .quiet-link .shelf-dot { letter-spacing: 0; margin-left: 0.02em; }
         .cta-pair a.lr-cta {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           /* Matches button.install-cta exactly (font-size + padding) so the
@@ -3361,9 +3417,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             margin-top: 96px;
           }
           .quiet-links {
-            display: block;
             order: 7;
-            margin-top: 0;
+            width: auto;
+            align-self: auto;
+            padding-left: 0;
+            margin: 0;
           }
 
           /* Film plate on mobile — geometry for the SQUARE mobile asset
