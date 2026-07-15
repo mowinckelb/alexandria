@@ -7,6 +7,8 @@ import remarkGfm from 'remark-gfm';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import PromptBox from '../../../components/PromptBox';
 import ActionButton from '../../../components/ActionButton';
+import TwinText from '../../../components/TwinText';
+import { librarySignInUrlHere } from '../../../lib/config';
 import { type TwinVariantSummary } from '../types';
 
 /**
@@ -305,7 +307,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                     ? <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6, margin: 0 }}>{m.text}</p>
                     : (
                       <>
-                        <div style={{ borderLeft: '2px solid var(--accent)', paddingLeft: '0.9rem', color: 'var(--text-secondary)', fontSize: '0.98rem', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>{m.text}</div>
+                        <div style={{ borderLeft: '2px solid var(--accent)', paddingLeft: '0.9rem', color: 'var(--text-secondary)', fontSize: '0.98rem', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}><TwinText text={m.text} /></div>
                         <div style={{ paddingLeft: '0.9rem' }}>
                           <ActionButton icon={CopyIcon} onAction={() => copyText(m.text)} title="copy" style={{ ...iconBtn, marginTop: '0.45rem', marginRight: '0.5rem', padding: 0 }} className="hover:opacity-60" />
                           {referenced(m.text).map((f) => (
@@ -326,7 +328,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
               <div style={{ flex: 'none', padding: '0.75rem 1.2rem 0', borderTop: '1px solid var(--border-light)' }}>
                 {invite ? (
                   <p style={{ color: 'var(--text-ghost)', fontSize: '0.8rem', margin: 0 }}>
-                    invite code applied{!signedIn ? ' — sign in to keep this mind' : ''}.{' '}
+                    invite code applied{!signedIn ? <> — <a href={librarySignInUrlHere()} style={{ color: 'var(--text-muted)', textDecoration: 'underline' }} className="hover:opacity-60">sign in</a> to ask with it</> : ''}.{' '}
                     <button type="button" onClick={() => { setInvite(''); setInviteDraft(''); }}
                       style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', color: 'var(--text-muted)', fontFamily: 'inherit', fontSize: '0.8rem', textDecoration: 'underline' }} className="hover:opacity-60">
                       change
@@ -334,7 +336,9 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                   </p>
                 ) : (
                   <>
-                    <p style={{ color: 'var(--text-ghost)', fontSize: '0.8rem', margin: '0 0 0.45rem' }}>this mind is invite-only — enter a code to unlock.</p>
+                    <p style={{ color: 'var(--text-ghost)', fontSize: '0.8rem', margin: '0 0 0.45rem' }}>
+                      this mind is invite-only — {!signedIn ? <><a href={librarySignInUrlHere()} style={{ color: 'var(--text-muted)', textDecoration: 'underline' }} className="hover:opacity-60">sign in</a> and enter your code to unlock.</> : 'enter a code to unlock.'}
+                    </p>
                     {/* Same physics as the composer below it (radius, 1rem font — also the iOS no-zoom floor). */}
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <input value={inviteDraft} onChange={(e) => setInviteDraft(e.target.value)}

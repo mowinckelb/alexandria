@@ -7,6 +7,11 @@ import remarkGfm from 'remark-gfm';
 import { ThemeToggle } from './ThemeToggle';
 import PromptBox from './PromptBox';
 import ActionButton from './ActionButton';
+import TwinText from './TwinText';
+import {
+  processNumbered, TocBlock,
+  MD_COMPONENTS, MD_COMPONENTS_NUMBERED, MD_COMPONENTS_NUMBERED_PRE, MD_COMPONENTS_ABSTRACT,
+} from './MarkdownDoc';
 
 /**
  * ReaderShell — the reader UI, extracted so the library route AND the public
@@ -105,6 +110,16 @@ export type ReaderShellProps = {
   status: 'loading' | 'ok' | 'signin' | 'pay' | 'error';
   pdfUrl?: string;                                // set → render as PDF
   markdown?: string;                              // set → render as markdown
+  /** Book setting for long-form docs (the whitepaper). Runs the markdown
+   *  through MarkdownDoc's numbered pipeline — strips the `## contents.`
+   *  stub and injects the real TOC, hangs part/chapter numerals in the
+   *  margin, and splits everything after `<!-- colophon -->` into its own
+   *  end plate. Without it those sentinels render literally (a bare
+   *  "contents." heading, a visible HTML comment over the signature). */
+  numbered?: boolean;
+  /** With `numbered`: the plain variant of the book setting (ragged-right,
+   *  no per-section initials) — the whitepaper's approved register. */
+  plain?: boolean;
   artifactText?: string;                          // text for the copy button
   downloadBlob?: Blob | null;
   downloadName?: string;                          // filename base
@@ -120,10 +135,15 @@ export type ReaderShellProps = {
 
 export default function ReaderShell({
   name, backHref, backTitle, visibility = 'public', status, pdfUrl, markdown,
+  numbered = false, plain = false,
   artifactText = '', downloadBlob, downloadName = 'document', downloadExt = 'md',
   signInUrl = '', checkoutUrl = '', who = '', askPlaceholder = 'ask about this piece…', askFn,
   intro, defaultChatOpen = false,
 }: ReaderShellProps) {
+  const book = useMemo(
+    () => (numbered && markdown ? processNumbered(markdown) : null),
+    [numbered, markdown]
+  );
   const [leftOpen, setLeftOpen] = useState(false);   // history
   const [midOpen, setMidOpen] = useState(defaultChatOpen);     // chat
   const [rightOpen, setRightOpen] = useState(true);  // the piece
@@ -283,7 +303,7 @@ export default function ReaderShell({
                     ? <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6, margin: 0 }}>{m.text}</p>
                     : (
                       <>
-                        <div style={{ borderLeft: '2px solid var(--accent)', paddingLeft: '0.9rem', color: 'var(--text-secondary)', fontSize: '0.98rem', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>{m.text}</div>
+                        <div style={{ borderLeft: '2px solid var(--accent)', paddingLeft: '0.9rem', color: 'var(--text-secondary)', fontSize: '0.98rem', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}><TwinText text={m.text} /></div>
                         <ActionButton icon={CopyIcon} onAction={() => copyText(m.text)} title="copy" style={{ ...iconBtn, marginTop: '0.45rem', marginLeft: '0.9rem', padding: 0 }} className="hover:opacity-60" />
                       </>
                     )}
@@ -327,6 +347,42 @@ export default function ReaderShell({
               {status === 'error' && <p style={{ color: 'var(--text-ghost)' }}>couldn’t load this piece.</p>}
               {status === 'ok' && (pdfUrl
                 ? <PdfView url={pdfUrl} />
+                : book ? (
+                  <>
+                    {/* The book setting (the whitepaper) — same pipeline and classes
+                        as MarkdownDoc's numbered mode, so the genesis CSS applies
+                        unchanged inside the pane. The colophon sits OUTSIDE the
+                        article div: the signature's :last-child styling depends on
+                        the sign-off being the article's final paragraph. */}
+                    <div className={`reader-book mdoc-article pdoc pdoc-longform pdoc-numbered${plain ? ' pdoc-plain' : ''}`}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS_NUMBERED_PRE}>
+                        {book.pre}
+                      </ReactMarkdown>
+                      {book.frontispiece && (
+                        <section className="pdoc-frontispiece" aria-label="In brief">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{book.frontispiece}</ReactMarkdown>
+                        </section>
+                      )}
+                      {book.abstract && (
+                        <section className="pdoc-abstract" aria-label="Abstract">
+                          <p className="pdoc-abstract-label">abstract.</p>
+                          <div className="pdoc-abstract-body">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS_ABSTRACT}>{book.abstract}</ReactMarkdown>
+                          </div>
+                        </section>
+                      )}
+                      {book.toc.length > 0 && <TocBlock entries={book.toc} />}
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS_NUMBERED}>
+                        {book.post}
+                      </ReactMarkdown>
+                    </div>
+                    {book.colophon && (
+                      <section className="reader-book pdoc pdoc-colophon" aria-label="Begin">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{book.colophon}</ReactMarkdown>
+                      </section>
+                    )}
+                  </>
+                )
                 : <div className="reader-prose"><ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown || ''}</ReactMarkdown></div>)}
             </div>
           </article>
@@ -334,6 +390,7 @@ export default function ReaderShell({
       </div>
 
       <style>{`
+        .reader-book { max-width: 680px; margin: 0 auto; }
         .reader-prose { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.75; max-width: 42rem; margin: 0 auto; }
         .reader-prose h1, .reader-prose h2, .reader-prose h3 { color: var(--text-primary); font-weight: 500; line-height: 1.25; margin: 2.2rem 0 0.8rem; }
         .reader-prose h1 { font-size: 1.9rem; } .reader-prose h2 { font-size: 1.4rem; } .reader-prose h3 { font-size: 1.15rem; }
