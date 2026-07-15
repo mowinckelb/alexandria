@@ -318,20 +318,23 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   // read as one complete argument: stakes → gap → the file → the practice
   // → decide.
   const SECTIONS = [
+    // Pizza-shove skim layer (2026-07-15): each lead is ONE spoken sentence
+    // — the whole visible page reads aloud in ~20 seconds. Everything else
+    // lives in the bodies, opt-in.
     {
       title: 'what it is',
-      lead: 'One file on your computer that tells any ai who you are and how you think. Every ai you use reads it, and its job flips: from answering you to developing you. Not software, not a subscription — a file.',
-      body: 'It works like an AGENTS.md, but for a person. Most of it builds itself: as you work with your ai, it writes your thinking down. When you want more, you sit with it and think out loud — a gym for your mind. And you don’t start from a blank page: you get the founder’s own file, working from the first minute, yours to reshape.',
+      lead: 'One file that tells any ai who you are and how you think.',
+      body: 'Like an AGENTS.md, but for a person — not software, not a subscription. Every ai you use reads it, and its job flips: from answering you to developing you. Most of it builds itself as you work; when you want more, you sit with it and think out loud — a gym for your mind. And you start with the founder’s own file, working from the first minute, yours to reshape.',
     },
     {
       title: 'why it works',
-      lead: 'Your ai can read your files, your messages, your history — but not your mind. It’s built for everyone at once, so it doesn’t really know you. This file is the missing piece — the one only you can add.',
-      body: 'AI can’t read your mind, but it can read words: put your thoughts into words, and it can finally think with you, not for you. Nothing records your inner monologue; nobody can write it down but you. Do it, and the same model everyone else uses quietly becomes yours in particular.',
+      lead: 'Your ai can read everything except your mind. Only you can give it that.',
+      body: 'It’s built for everyone at once, so it doesn’t really know you. AI can’t read your mind, but it can read words: put your thoughts into words, and it can finally think with you, not for you. Nothing records your inner monologue; nobody can write it down but you. Do it, and the same model everyone else uses quietly becomes yours in particular.',
     },
     {
       title: 'what it costs',
-      lead: 'Nothing. It’s free, it’s private, and it’s yours — we never see a word. Five minutes to start, one delete to make it like it never happened.',
-      body: 'The file is open source and stays free — the paid part, if you ever want it later, is the tribe: everyone building their own, trading what works. Strava for the mind. The file never needs it. Everything lives on your computer in plain text: read every line, change any word, take it to any model, or bin it.',
+      lead: 'Nothing. It’s free, it’s private, it’s yours — one delete and it’s gone.',
+      body: 'The file is open source and stays free — the paid part, if you ever want it later, is the tribe: everyone building their own, trading what works. Strava for the mind. The file never needs it. Everything lives on your computer in plain text: read every line, change any word, take it to any model, or bin it. We never see a word.',
     },
   ];
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
@@ -723,16 +726,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             founder): the cold visitor meets the argument on arrival, before
             the peel. what / how + the decision live on the back slide. */}
         <div className="front-epigraph">
-          <p className="front-lead">People are outsourcing more and more of their thinking to ai.</p>
-          {/* The front is the founder's spoken chain, verbatim register
-              (2026-07-15): the observation everyone already nods at →
-              the felt threat (dim) → the company's fix (ink) → the
-              sample-cart question. The entire pitch lands before the
-              scroll; the back slide is the cart: what it is, why it
-              works, what it costs, take it or walk past. */}
+          <p className="front-lead">People are outsourcing their thinking to ai.</p>
+          {/* The founder's spoken chain at pizza-shove length (2026-07-15,
+              "radically simple — I could hardly be bothered to read it"):
+              whole page reads aloud in ~20 seconds. Observation → threat
+              (dim) → the fix (ink) → the offer. */}
           <div className="front-fork">
-            <p className="fork-line fork-lose">Keep going, and eventually you forget how to think for yourself.</p>
-            <p className="fork-line fork-win">We built the fix: the same ai, but it develops you instead of replacing you.</p>
+            <p className="fork-line fork-lose">Keep going, and you forget how to think for yourself.</p>
+            <p className="fork-line fork-win">We built the fix: the same ai, but it develops you instead.</p>
             <p className="fork-line fork-offer">Try it &mdash; it&rsquo;s free.</p>
           </div>
         </div>
@@ -849,8 +850,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     forcing speech. One warm hand-over line naming the thing,
                     and the button is the outstretched plate. */}
                 <p className="statement-beat action-beat">
-                  <em>Ours is ready &mdash; the founder&rsquo;s own file,
-                  already set up. Take it.</em>
+                  <em>It&rsquo;s ready &mdash; take it.</em>
                 </p>
 
                 <div className="cta-pair">
