@@ -10,7 +10,7 @@ import MobileStart from './MobileStart';
 //
 // Composition: a single flush-left editorial column (not a centred stack). The
 // eyebrow ("the free tool") is the one accent on the skeleton and names which
-// half of the two things this is — the free tool, vs the collective at /join.
+// half of the two things this is — the free tool, vs the community at /join.
 //
 // Two CTAs, switched on input method, not width (a narrow desktop window still
 // has a terminal; a wide iPad doesn't): pointer-fine devices get the copy-paste
@@ -62,10 +62,10 @@ export default async function StartPage({
         </div>
 
         {/* The handoff to the other half: the tool is free and stands alone, but
-            the funnel's terminal step is the collective. Quiet, below the action,
+            the funnel's terminal step is the community. Quiet, below the action,
             so it reads as "next" not "instead". */}
         <p className="primer-next">
-          once it&rsquo;s running, <Link href="/join" className="primer-next-link">join the collective &rarr;</Link>
+          once it&rsquo;s running, <Link href="/join" className="primer-next-link">join the community &rarr;</Link>
         </p>
 
         <p className="primer-coda"><em>keep thinking.</em></p>

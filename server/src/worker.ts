@@ -608,7 +608,7 @@ app.post('/onboard', async (c) => {
 
   // Join-decline capture (founder verdict 2026-07-09): the /join page's "not
   // now" path. Capture-only — a waitlist row so the address is contactable as
-  // the collective grows; NO install email and NO nudge thread (they're at the
+  // the community grows; NO install email and NO nudge thread (they're at the
   // join step, not the install step — many already run the tool). `ref`
   // preserves kin attribution on the lead (sanitised like /join does: GitHub
   // logins are [A-Za-z0-9-]).

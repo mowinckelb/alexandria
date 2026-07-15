@@ -34,7 +34,7 @@ export default function UpdatesIndex({ updates }: { updates: UpdateMeta[] }) {
           </ol>
         )}
 
-        <p className="cta"><em>keep thinking.</em> <Link href="/start" className="cta-link">start free →</Link> <span className="cta-sep">·</span> <Link href="/join" className="cta-link">join the collective →</Link></p>
+        <p className="cta"><em>keep thinking.</em> <Link href="/start" className="cta-link">start free →</Link> <span className="cta-sep">·</span> <Link href="/join" className="cta-link">join the community →</Link></p>
       </section>
 
       <span className="watermark" aria-hidden><em>a.</em></span>

@@ -13,7 +13,7 @@ export const metadata = pageMetadata({
 });
 
 // The founding-member JOIN — the paid half of the two things. The tool (the run)
-// is free and keyless; this is the collective (the Strava): the library, the
+// is free and keyless; this is the community (the Strava): the library, the
 // marketplace, the tribe. Signing in with GitHub starts the trial ($10/mo, first
 // month free, free with 3 kin, or email-to-waive) and assigns your number.
 //
@@ -23,10 +23,10 @@ export const metadata = pageMetadata({
 // the thing being built. No roster pitch from the outside (who's in is
 // visible once you're in, never the sell). A "no" has its own path: the
 // JoinInterest email capture below the deal — every decline leaves a
-// contactable address (the reach the collective gets recruited from).
+// contactable address (the reach the community gets recruited from).
 //
 // Composition mirrors /start: one flush-left editorial column, an accent
-// eyebrow ("the collective") as the spine's anchor — the paid half, twinned
+// eyebrow ("the community") as the spine's anchor — the paid half, twinned
 // with /start's "the free tool".
 //
 // This is also the invite target: a member's invite link is /join?ref=THEIR_CODE.

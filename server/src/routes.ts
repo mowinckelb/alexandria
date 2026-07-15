@@ -196,7 +196,7 @@ export function registerRoutes(app: Hono) {
         constants: {
           account: 'The membership relationship — governed solely by payment (or the free-with-three-kin path). This is the only thing that gates membership.',
           file: 'The practice of publishing: keeping at least one public file on the server, refreshed roughly monthly. A rhythm, not a membership condition — nothing here can revoke your account.',
-          call: 'The practice of communicating: your machine calls the server, the server responds. Describes how the tool talks to the collective, not a condition of belonging.',
+          call: 'The practice of communicating: your machine calls the server, the server responds. Describes how the tool talks to the community, not a condition of belonging.',
         },
         endpoints: {
           handshake: '/alexandria',
@@ -494,7 +494,7 @@ export function registerRoutes(app: Hono) {
         created_at: existing?.created_at || new Date().toISOString(),
         last_session: new Date().toISOString(),
         // FOUNDING-MEMBER JOIN (Strava-for-thought, ground truth e1cd27f): the
-        // local tool is free and keyless (no account); JOINING the collective is
+        // local tool is free and keyless (no account); JOINING the community is
         // the one paid thing. So a NEW account carries NO active status — it falls
         // through to the Stripe-trial checkout below ($10/mo, first month free,
         // free with 3 active kin, or email-to-waive as a manual comp). The webhook

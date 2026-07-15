@@ -576,7 +576,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         <em>The more you write, the sharper your thinking stays.</em>
       </p>
       <p>
-        <span className="beat-title">The collective</span>
+        <span className="beat-title">The community</span>
         <em className="em-strong">Three friends and your membership
         is free.</em>{' '}Share files with friends you choose &mdash;
         both ways, revocable any time. AI stops guessing about the
@@ -629,7 +629,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           <div className="nav-links">
             {/* Just the reading now — whitepaper + letter. library ·
                 marketplace moved OUT of the nav down to the bottom of the
-                back slide (2026-07-13, founder): they're the collective's
+                back slide (2026-07-13, founder): they're the community's
                 places, not for a first-time viewer, so they no longer
                 compete for attention at the top. The colophon foot carries
                 them on every viewport now. */}
@@ -2403,7 +2403,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .statement-close::before {
           content: none;
         }
-        /* The pulled-out beat — the one line carrying the collective,
+        /* The pulled-out beat — the one line carrying the community,
            set as its own typographic event between the paragraphs and
            the numbered ways. Italic, a half-step up, room around it. */
         .statement-beat .no-orphan { white-space: nowrap; }

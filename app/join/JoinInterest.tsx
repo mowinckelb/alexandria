@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { SERVER_URL } from '../lib/config';
 
 // The decline path (founder verdict 2026-07-09): a "no" at the join step
-// should still leave a contactable address — the reach the collective gets
+// should still leave a contactable address — the reach the community gets
 // recruited from. POSTs /onboard with source:'join' (waitlist row only — no
 // install email, no nudge thread; see server/src/worker.ts). `refCode`
 // preserves kin attribution on the lead, so the inviter's code stays with
@@ -45,7 +45,7 @@ export default function JoinInterest({ refCode }: { refCode?: string }) {
     <div className="join-interest">
       <p className="join-interest-lede">
         Not now? Leave your email and carry on free &mdash; you&rsquo;ll hear
-        from us as the collective grows.
+        from us as the community grows.
       </p>
       <form className="join-interest-row" onSubmit={send}>
         <input

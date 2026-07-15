@@ -81,7 +81,7 @@ export default function JoinCTA({
       <h1 className="primer-h1">become a founding member.</h1>
 
       {/* The founding bet, honestly told (founder verdict 2026-07-09): the
-          collective is early and small, and the copy says so — you are not
+          community is early and small, and the copy says so — you are not
           buying a finished network, you are founding one. Prose is
           proper-grammar per the settled Taste boundary (2026-07-01);
           lowercase stays on the marks (title, button, eyebrow). */}
@@ -129,7 +129,7 @@ export default function JoinCTA({
 
       {/* The deal — small, below the button. The community pitch, not shouting:
           first month free, free for good with three referrals, else $10/mo with
-          a message-to-waive escape; you pay for the collective, never the tool. */}
+          a message-to-waive escape; you pay for the community, never the tool. */}
       <p className="join-deal">
         The first month is free, and if you get three friends to join using
         your referral code it&rsquo;s free indefinitely &mdash; otherwise it&rsquo;s

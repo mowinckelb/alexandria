@@ -10,7 +10,7 @@ import type { CSSProperties } from 'react';
  * own OAuth/referral cluster.)
  * the funnel coherent: two doors in one fixed order —
  *   1. start free  → /start  (the tool: free, yours, runs on your own files)
- *   2. join the collective → /join  (the tribe: the library beside everyone else's)
+ *   2. join the community → /join  (the tribe: the library beside everyone else's)
  * Kept in a single component so the copy and the look can never diverge page to
  * page, and so every route reinforces the same next step instead of trailing off.
  *
@@ -21,7 +21,7 @@ import type { CSSProperties } from 'react';
  */
 export default function StartJoinCTA({
   lead = 'make your own.',
-  sub = 'the tool is free — one line adds it to the ai you already use, and your mind lives in a folder you own. join the collective to put it in the library, beside everyone else’s.',
+  sub = 'the tool is free — one line adds it to the ai you already use, and your mind lives in a folder you own. join the community to put it in the library, beside everyone else’s.',
   align = 'center',
   compact = false,
 }: {
@@ -65,7 +65,7 @@ export default function StartJoinCTA({
       )}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.9rem 1.4rem', alignItems: 'center', justifyContent: align === 'center' ? 'center' : 'flex-start', marginTop: compact ? '0.9rem' : 0 }}>
         <Link href="/start" style={primary} className="hover:opacity-80">start free →</Link>
-        <Link href="/join" style={secondary} className="hover:opacity-60">or join the collective →</Link>
+        <Link href="/join" style={secondary} className="hover:opacity-60">or join the community →</Link>
       </div>
     </div>
   );

@@ -75,7 +75,7 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   const WEBSITE_URL = getWebsiteUrl();
   const host = WEBSITE_URL.replace(/^https?:\/\//, '');
   // The founding-member page (Strava-for-thought, ground truth e1cd27f). You've
-  // just JOINED the collective — the local tool was already free. The page leads
+  // just JOINED the community — the local tool was already free. The page leads
   // with belonging (you're in), then the two actions: the connect command (links
   // your local install so you can publish + be seen) and your invite link (carries
   // your code; three friends through it = free for good). A founding number IS
@@ -232,7 +232,7 @@ ${isReturning ? `<a class="brand-corner" href="${WEBSITE_URL}/">alexandria.</a>`
     <p class="kin-progress">${kinProgressLine}</p>` : ''}
   </div>
   <p class="shortcut">on your phone? <a href="${SHORTCUT_URL}" target="_blank" rel="noopener noreferrer">add the shortcut</a> &mdash; capture anything, anywhere.</p>
-  <p class="deal"><span class="free">first month free</span>, then $10/month &mdash; or free for good with three friends, or just email if that&rsquo;s a stretch. you&rsquo;re joining the collective, not paying for the tool.</p>`}
+  <p class="deal"><span class="free">first month free</span>, then $10/month &mdash; or free for good with three friends, or just email if that&rsquo;s a stretch. you&rsquo;re joining the community, not paying for the tool.</p>`}
   <p class="signout">wrong account? <a href="https://github.com/logout" target="_blank" rel="noopener noreferrer">sign out of github</a></p>
 </div>
 <script>

@@ -30,7 +30,7 @@ export default function Terms() {
 
       <section style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: 400 }}>Your data</h2>
-        <p>You own your cognitive data. Your Constitution, Vault, notepad, feedback log, and ontology are local files at <code>~/alexandria/</code> on your machine. Alexandria does not store, access, or claim any rights to this data. If you stop using Alexandria, your files remain on your machine, unchanged and fully yours. If Alexandria the company shuts down entirely, your files and your local machine continue to function — what ends is your access to the Library and other collective surfaces, which are by definition hosted by us.</p>
+        <p>You own your cognitive data. Your Constitution, Vault, notepad, feedback log, and ontology are local files at <code>~/alexandria/</code> on your machine. Alexandria does not store, access, or claim any rights to this data. If you stop using Alexandria, your files remain on your machine, unchanged and fully yours. If Alexandria the company shuts down entirely, your files and your local machine continue to function — what ends is your access to the Library and other community surfaces, which are by definition hosted by us.</p>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
@@ -40,7 +40,7 @@ export default function Terms() {
 
       <section style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: 400 }}>The service</h2>
-        <p>Alexandria is provided as-is. Things may change, break, or be discontinued. We will give reasonable notice before changes that affect your data or access. Pricing: the product is free — it is open source and runs on your own AI, on your own machine. If a paid layer is ever added (deeper access to the collective Library), it will be optional; the core stays free.</p>
+        <p>Alexandria is provided as-is. Things may change, break, or be discontinued. We will give reasonable notice before changes that affect your data or access. Pricing: the product is free — it is open source and runs on your own AI, on your own machine. If a paid layer is ever added (deeper access to the community Library), it will be optional; the core stays free.</p>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>

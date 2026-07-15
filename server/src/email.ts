@@ -162,7 +162,7 @@ export async function sendWelcomeEmail(email: string, githubLogin: string, email
   await sendEmail(email, 'welcome to alexandria.',
     `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; text-align: left; line-height: 1.7;">
   <p style="font-size: 1.1rem; margin: 0 0 1.5rem;">welcome to alexandria.</p>
-  <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.5rem;">the tool is yours, free, on your machine. membership in the collective is $10/month with the first month free &mdash; or free for good with three active friends who join through you.</p>
+  <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.5rem;">the tool is yours, free, on your machine. membership in the community is $10/month with the first month free &mdash; or free for good with three active friends who join through you.</p>
   ${connectBlock}
   <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.75rem;">your invite link: <a href="${kinLink}" style="color: #3d3630;">${kinLinkDisplay}</a> &mdash; send it to the people you want thinking for themselves too.</p>
   <p style="font-size: 0.95rem; margin: 0 0 1.8rem;"><a href="${WEBSITE_URL}/join" style="color: #3d3630; text-decoration: none;">open alexandria</a></p>
@@ -175,7 +175,7 @@ export async function sendWelcomeEmail(email: string, githubLogin: string, email
 
 // "you're free" carrot — fired once when a member crosses to KIN_THRESHOLD (3)
 // active kin, so membership is now free for good. Celebration + a nudge to keep
-// sharing (the more they share, the more the collective grows). Not a charge
+// sharing (the more they share, the more the community grows). Not a charge
 // email; the crossing itself is detected where kin pricing recalcs run.
 export async function sendKinFreeUnlocked(
   email: string,
@@ -185,7 +185,7 @@ export async function sendKinFreeUnlocked(
   const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">you&rsquo;re free.</p>
-  <p style="margin: 0 0 1.4rem; color: #8a8078;">three friends joined through you and stayed &mdash; so your membership is free for good. no more $10, ever. thank you for building the collective.</p>
+  <p style="margin: 0 0 1.4rem; color: #8a8078;">three friends joined through you and stayed &mdash; so your membership is free for good. no more $10, ever. thank you for building the community.</p>
   <p style="margin: 0 0 1.4rem;">send it to everyone worth it &mdash; most won&rsquo;t act, and the three who do make yours free. it&rsquo;s already done for you; every one after just grows the tribe.</p>
   <p style="margin: 0 0 1.8rem; font-size: 0.9rem; color: #8a8078;">your invite link: <a href="${kinLink}" style="color: #3d3630;">${kinLink.replace(/^https?:\/\//, '')}</a></p>
   <p style="margin: 0 0 0.4rem;">Benjamin a. Mowinckel</p>

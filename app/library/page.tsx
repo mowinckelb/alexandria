@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 // pageMetadata supplies the per-page canonical + og:url.
 const LIBRARY_TITLE = 'the library of human minds — alexandria.';
 const LIBRARY_DESCRIPTION =
-  'the member directory of the collective — find the Alexandrians near you and reach them. each mind has its own page, shared by link.';
+  'the member directory of the community — find the Alexandrians near you and reach them. each mind has its own page, shared by link.';
 
 export const metadata: Metadata = {
   title: LIBRARY_TITLE,
@@ -112,7 +112,7 @@ export default async function LibraryPage({
         {!signed_in ? (
           <div style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>
             <p style={{ margin: '0 0 1rem' }}>
-              the member directory is for the collective — sign in to browse the Alexandrians,
+              the member directory is for the community — sign in to browse the Alexandrians,
               find who&rsquo;s near you, and reach them.
             </p>
             <p style={{ margin: '0 0 1.25rem' }}>
@@ -122,7 +122,7 @@ export default async function LibraryPage({
               <a href={signInUrl} style={linkStyle}>sign in</a>
             </p>
             <p style={{ margin: 0, color: 'var(--text-ghost)', fontSize: '0.9rem' }}>
-              not a member yet? <Link href="/join" style={linkStyle}>join the collective</Link>.
+              not a member yet? <Link href="/join" style={linkStyle}>join the community</Link>.
               &nbsp;have a direct link to someone&rsquo;s page? that always works.
             </p>
           </div>

@@ -283,7 +283,7 @@ export async function countActiveKin(githubLogin: string): Promise<{ count: numb
   const kinLogins = results.map(r => r.referred_github_login).filter(Boolean);
   if (kinLogins.length === 0) return { count: 0, compliant: 0 };
 
-  // Compliant kin = a referral who has JOINED the collective and not cancelled —
+  // Compliant kin = a referral who has JOINED the community and not cancelled —
   // their subscription is in a member status (paying, on trial, past-due, beta,
   // or grandfathered-free, i.e. ACTIVE_AUTHOR_STATUSES). Membership, not usage: a
   // kin who is quiet in the app still counts; they stop counting only if they

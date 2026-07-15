@@ -11,7 +11,7 @@ type Props = {
   src: string;
   header: string;
   homeHref?: string;
-  /** Append the shared conversion block (start free / join the collective)
+  /** Append the shared conversion block (start free / join the community)
    *  above the footer, so an info page hands off to the funnel instead of
    *  dead-ending at the wordmark. On for the public reads (questions,
    *  mechanics); off for internal/noindex docs (memo). */
