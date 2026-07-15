@@ -61,6 +61,13 @@ export default async function StartPage({
           <MobileStart />
         </div>
 
+        {/* The handoff to the other half: the tool is free and stands alone, but
+            the funnel's terminal step is the collective. Quiet, below the action,
+            so it reads as "next" not "instead". */}
+        <p className="primer-next">
+          once it&rsquo;s running, <Link href="/join" className="primer-next-link">join the collective &rarr;</Link>
+        </p>
+
         <p className="primer-coda"><em>keep thinking.</em></p>
       </main>
 
@@ -241,8 +248,21 @@ export default async function StartPage({
           font-size: 13px; color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: left;
         }
 
+        .primer-next {
+          margin: 44px 0 0; text-align: left; max-width: 460px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 15px; line-height: 1.6; color: var(--text-muted);
+        }
+        .primer-next-link {
+          color: var(--text-secondary);
+          text-decoration: underline; text-decoration-color: var(--text-muted);
+          text-underline-offset: 3px; text-decoration-thickness: 1px;
+          transition: opacity 220ms ease;
+        }
+        .primer-next-link:hover { opacity: 0.6; }
+
         .primer-coda {
-          margin: 60px 0 0; text-align: left; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          margin: 28px 0 0; text-align: left; font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 20px; font-style: italic; color: var(--text-primary);
           letter-spacing: 0.005em; opacity: 0.72;
         }
