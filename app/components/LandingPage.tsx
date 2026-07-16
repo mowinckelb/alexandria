@@ -322,7 +322,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       // His Problem paragraph, near-verbatim. The front carries the trend
       // and the stakes; this carries the cause (ai is DESIGNED to answer)
       // and the mechanism of the fading (the muscle).
-      lead: 'ai is designed to give you all the answers. But when it does everything for you, your mind — like any muscle you don’t use — begins to fade.',
+      lead: 'ai is designed to give you all the answers — but your mind, like any muscle you don’t use, begins to fade.',
       // Depth: the creep (the seduction mechanics) + the three doors from
       // the letter, ending on the company as the third door.
       body: 'It creeps in. You ask ai to write the email, make the plan, weigh the decision — and it does, often better than you would have. So you keep asking, and it handles more of your thinking while you do less of it. There are three doors: reject ai, and fall behind. Let it think for you, and go soft. Or use it fully — and have it keep you sharp. Alexandria is the third door.',
@@ -330,14 +330,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
     {
       title: 'the solution',
       // His Solution paragraph: the orientation tweak + with-not-for.
-      lead: 'You tweak the orientation of your ai so that it develops you instead of replacing you: it writes what and how you think into private files on your own computer, and reads them to build on your thinking alongside answering you. It can’t read your mind, but it can read words — put your thoughts into words, and it thinks with you, not for you.',
-      body: 'Every alexandrian has their own Alexandria folder, holding personalized instructions for their ai — the way coding tools keep a file that teaches any ai a project, but for a person. As you work, your ai writes the full richness of how you think — every idea, decision, and pattern — into it: a maximum-detail map of your mind, on your own storage, that we never see. Most of it runs in the background; now and then you sit with it on purpose, think out loud, and let it draw out what you haven’t put into words yet.',
+      lead: 'You tweak the orientation of your ai so that it develops you instead of replacing you: put your thoughts into words, and it thinks with you, not for you.',
+      body: 'Every alexandrian has their own Alexandria folder, holding personalized instructions for their ai — the way coding tools keep a file that teaches any ai a project, but for a person. As you work, your ai writes the full richness of how you think — every idea, decision, and pattern — into it: a maximum-detail map of your mind, on your own storage, that we never see. It can’t read your mind, but it can read words — and it reads that map to build on your thinking alongside answering you. Most of it runs in the background; now and then you sit with it on purpose, think out loud, and let it draw out what you haven’t put into words yet.',
     },
     {
       title: 'the community',
       // Identity by choice — an alexandrian is a decision, not a download.
-      lead: 'Everyone doing this together is Alexandria — like Strava, but for the mind. An alexandrian is someone who decided they don’t want their thinking to fade, and did something about it. The community is the only paid part; the tool itself is free.',
-      body: 'One shared belief — that a sharper mind is worth the work — and everyone their own way of working at it. Members share how they’ve set up their folders, what they’ve changed, and what they’ve made because of them; the best of it flows into a library of minds and a marketplace of methods. We provide the philosophy, the gathering place, and the free starter system — the rest is yours. None of it is required: the tool works alone, forever.',
+      lead: 'Everyone doing this together is Alexandria — like Strava, but for the mind. The community is the only paid part; the tool itself is free.',
+      body: 'An alexandrian is someone who decided they don’t want their thinking to fade, and did something about it. One shared belief — that a sharper mind is worth the work — and everyone their own way of working at it. Members share how they’ve set up their folders, what they’ve changed, and what they’ve made because of them; the best of it flows into a library of minds and a marketplace of methods. We provide the philosophy, the gathering place, and the free starter system — the rest is yours. None of it is required: the tool works alone, forever.',
     },
     {
       title: 'the free sample',
@@ -345,8 +345,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       // four-branch sweep (bin it / merge it / let it run / remake it) as
       // the depth, his sentences near-verbatim, every branch ending with
       // the sample in hand.
-      lead: 'It works like a free sample at the supermarket: if the idea is even remotely interesting, all you have to do is reach out your hand. One command installs the founder’s own setup — no account, five minutes, on your computer, and we never see a word. Keep it, change everything, or delete it without a trace.',
-      body: 'Whoever you are, it works. Don’t like it? Bin it — one delete, gone. Already have something similar? Add this anyway, and keep only the valuable pieces. Agree, but no time? It’s the easiest way possible — it updates itself and works in the background while you use your ai normally. Like it, but want it different? Then you’re a true alexandrian: it’s designed to be the starting point for your own version.',
+      lead: 'To start, take the founder’s own setup — one command, five minutes, no account. Keep it, change it, or delete it without a trace.',
+      body: 'It works like a free sample at the supermarket: if the idea is even remotely interesting, all you have to do is reach out your hand. Don’t like it? Bin it — one delete, gone. Already have something similar? Add this anyway, and keep only the valuable pieces. Agree, but no time? It’s the easiest way possible — it updates itself and works in the background while you use your ai normally. Like it, but want it different? Then you’re a true alexandrian: it’s designed to be the starting point for your own version.',
     },
   ];
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
