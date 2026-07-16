@@ -258,13 +258,28 @@ function fileAccessUrl(authorId: string, name: string): string {
 }
 
 /**
- * The living-page corpus for the deep twin's `search_my_works` tool: the Author's
- * published works CONTENT, gated to what THIS querier may see. readWork() is the
- * single visibility authority (same gate as a direct read), so denied works are
- * simply skipped — the corpus is correct by construction, no parallel rules.
- * Bounded (12 works × 4k chars) to keep the payload sane.
+ * The living-page corpus for the deep twin's `search_my_works` tool. Two sources:
+ *
+ *   1. The works product (`works` table) — content gated by readWork(), the
+ *      single visibility authority; denied works are skipped.
+ *   2. The Library pieces (`protocol_files`) — the surface the Author's profile
+ *      actually shows. Readable text pieces enter with CONTENT (gated by
+ *      readProtocolFile, same brain as a direct read). Everything else — a piece
+ *      this querier can't read, or a PDF the Worker can't extract — enters as a
+ *      TEASER entry: title + always-public subtitle + its reader URL. Titles and
+ *      teasers are already public on the profile, so this leaks nothing; it lets
+ *      the twin KNOW every published piece exists and point the reader there,
+ *      instead of denying its own work ("no such passage exists") when asked
+ *      about a gated piece.
+ *
+ * Bounded (12 works + 24 files × 4k chars) to keep the payload sane.
  */
-async function fetchTwinWorks(authorId: string, accessor: Account | null): Promise<TwinWork[]> {
+async function fetchTwinWorks(
+  authorId: string,
+  authorGithubId: string | number,
+  accessor: Account | null,
+  context?: { inviteValid?: boolean },
+): Promise<TwinWork[]> {
   const db = getDB();
   const { results } = await db.prepare(
     'SELECT id, title, tier FROM works WHERE author_id = ? ORDER BY published_at DESC LIMIT 12',
@@ -276,6 +291,44 @@ async function fetchTwinWorks(authorId: string, accessor: Account | null): Promi
     let content = '';
     try { content = await new Response(r.obj.body).text(); } catch { continue; }
     if (content.trim()) out.push({ name: w.title, visibility: w.tier, content: content.slice(0, 4000) });
+  }
+
+  const { results: files } = await db.prepare(
+    'SELECT name, title, visibility, content_type FROM protocol_files WHERE account_id = ? ORDER BY updated_at DESC LIMIT 24',
+  ).bind(String(authorGithubId)).all<{ name: string; title: string | null; visibility: string; content_type: string | null }>();
+  const subtitles = await getFileSubtitles(authorId);
+  for (const f of files ?? []) {
+    if (isInternalProtocolFileName(f.name)) continue;
+    if (f.name === 'shadow') continue; // the shadow reaches the twin as substrate, never as a searchable work
+    const label = f.title || f.name;
+    const teaser = subtitles[f.name] || '';
+    const type = f.content_type || '';
+    const textual = !type || type.includes('markdown') || type.startsWith('text/');
+    if (textual) {
+      const r = await readProtocolFile({
+        authorGithubId,
+        fileName: f.name,
+        accessorGithubId: accessor?.github_id ?? null,
+        context: { inviteValid: context?.inviteValid },
+      });
+      if (r.ok) {
+        let content = '';
+        try { content = await new Response(r.obj.body).text(); } catch { content = ''; }
+        if (content.trim()) {
+          out.push({ name: label, visibility: f.visibility, content: content.slice(0, 4000) });
+          continue;
+        }
+      }
+    }
+    const gated = f.visibility !== 'public';
+    out.push({
+      name: label,
+      visibility: f.visibility,
+      content: `[${gated ? 'locked' : 'reference'} — '${label}' is a piece I published on my Library`
+        + `${gated ? ` (${f.visibility}-only)` : ''}.${teaser ? ` teaser: ${teaser}` : ''}`
+        + ` the full text isn't loaded in this conversation${gated ? ' — the reader can sign in or use an invite to read it' : ''};`
+        + ` it lives at /library/${authorId}/read/${f.name}.]`,
+    });
   }
   return out;
 }
@@ -893,7 +946,7 @@ export function registerLibraryRoutes(app: Hono): void {
     // corpus is correct by construction — search_my_works never re-derives it.
     let works: TwinWork[] | undefined;
     if (cfg.variant === 'context' && cfg.tools?.works) {
-      works = await fetchTwinWorks(p.authorId, p.accessor ?? null);
+      works = await fetchTwinWorks(p.authorId, p.authorAccount.github_id, p.accessor ?? null, { inviteValid: grantValid });
     }
     const sidecar = await getSidecar(p.authorId);
     const result = await runTwinInference(
