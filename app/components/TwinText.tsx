@@ -12,8 +12,9 @@ import { safeUrl } from '../lib/url';
  * plain text; the container's pre-wrap keeps the line breaks.
  */
 
-// One pass, one regex: markdown link | bare URL | bold span.
-const TOKEN = /\[([^\]]+)\]\(([^)\s]+)\)|(https?:\/\/[^\s)\]]+)|\*\*([^*\n]+)\*\*/g;
+// One pass, one regex: markdown link | bare URL | bold span | italic span.
+// Bold sits before italic in the alternation so `**` never half-matches as `*`.
+const TOKEN = /\[([^\]]+)\]\(([^)\s]+)\)|(https?:\/\/[^\s)\]]+)|\*\*([^*\n]+)\*\*|\*([^*\n]+)\*/g;
 
 const linkStyle = { color: 'var(--accent)', textDecoration: 'underline', textUnderlineOffset: '2px' } as const;
 
@@ -44,6 +45,8 @@ export default function TwinText({ text }: { text: string }) {
       if (bare.length < m[3].length) nodes.push(m[3].slice(bare.length));
     } else if (m[4] !== undefined) {
       nodes.push(<strong key={key++} style={{ fontWeight: 600 }}>{m[4]}</strong>);
+    } else if (m[5] !== undefined) {
+      nodes.push(<em key={key++}>{m[5]}</em>);
     }
     last = i + m[0].length;
   }
