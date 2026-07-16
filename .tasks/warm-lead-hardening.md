@@ -10,7 +10,7 @@
 
 2. **DONE 2026-07-15** — `.block` first-run branch added to `cursor.mdc`, `codex.md`, `droid.md` (check constitution-empty + `.block` present → run the block end-to-end, touch `.block_complete` after) and to the Cursor session-start hook (required section, first claim on the context budget). Reaches new installs via setup.sh fetches from main.
 
-3. **HALF DONE, HALF ARMED (2026-07-15).** Shipped: `setup.sh` shim SessionStart timeout 10s→60s (new installs). ARMED, needs the signing passphrase: payload.sh cold-start fast path (skip the 11-module update-check on first session — canon was fetched by the installer minutes earlier — so THE BLOCK notice lands within any timeout; reaches EXISTING installs since payload re-fetches per session). The edit sits in `git stash` ("payload cold-start fast path (P0.3)"). To fire: `git stash pop && bash factory/ship.sh "payload: cold-start fast path (P0.3)"` and type the signing-key passphrase.
+3. **DONE 2026-07-15** — `setup.sh` shim SessionStart timeout 10s→60s (new installs), and payload.sh cold-start fast path founder-shipped via `ship.sh` (`d1b2cd1`, Signing CI green): first session skips the 11-module update-check (canon was fetched by the installer minutes earlier), so THE BLOCK notice lands within any timeout — reaches existing installs since payload re-fetches per session.
 
 4. **No "get a coding agent first" path.** `/start` names claude code · cursor · codex · factory but links none (`app/start/StartCTA.tsx:120`); runbook pre-flight says "get the agent working first" with no how. Fix (copy): one line on /start defaulting to Claude Code (`npm install -g @anthropic-ai/claude-code`) + runbook paragraph (done 2026-07-15 in `~/alexandria-inc/private/live-install.md`).
 
