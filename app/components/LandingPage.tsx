@@ -330,13 +330,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
     {
       title: 'the solution',
       // His Solution paragraph: the orientation tweak + with-not-for.
-      lead: 'You tweak the orientation of your ai so that it develops you instead of replacing you: put your thoughts into words, and it thinks with you, not for you.',
-      body: 'Every alexandrian has their own Alexandria folder, holding personalized instructions for their ai — the way coding tools keep a file that teaches any ai a project, but for a person. As you work, your ai writes the full richness of how you think — every idea, decision, and pattern — into it: a maximum-detail map of your mind, on your own storage, that we never see. It can’t read your mind, but it can read words — and it reads that map to build on your thinking alongside answering you. Most of it runs in the background; now and then you sit with it on purpose, think out loud, and let it draw out what you haven’t put into words yet.',
+      // Cashes the front's promise directly: "teach your ai who you are" →
+      // here is HOW you teach it (the folder, concrete), why it works
+      // (words are the bridge), and the payoff (with, not for).
+      lead: 'You teach it with one folder on your computer that holds who you are and how you think — your ai fills it in as you go, and reads it whenever you work. It can’t read your mind, but it can read words — so it thinks with you, not for you.',
+      body: 'The folder holds personalized instructions for personal alignment — the way coding tools keep a file that teaches any ai a project, but for a person. As you work, your ai writes the full richness of how you think — every idea, decision, and pattern — into it: a maximum-detail map of your mind, on your own storage, that we never see. And it reads that map to build on your thinking alongside answering you. Most of it runs in the background; now and then you sit with it on purpose, think out loud, and let it draw out what you haven’t put into words yet.',
     },
     {
       title: 'the community',
       // Identity by choice — an alexandrian is a decision, not a download.
-      lead: 'Everyone doing this together is Alexandria — like Strava, but for the mind. The community is the only paid part; the tool itself is free.',
+      // "the tool" (a noun no earlier beat introduced) → "everything else",
+      // which needs no referent at all.
+      lead: 'Everyone doing this together is Alexandria — like Strava, but for the mind. The community is the only paid part; everything else is free.',
       body: 'An alexandrian is someone who decided they don’t want their thinking to fade, and did something about it. One shared belief — that a sharper mind is worth the work — and everyone their own way of working at it. Members share how they’ve set up their folders, what they’ve changed, and what they’ve made because of them; the best of it flows into a library of minds and a marketplace of methods. We provide the philosophy, the gathering place, and the free starter system — the rest is yours. None of it is required: the tool works alone, forever.',
     },
     {
@@ -743,15 +748,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               anchors the composition (background layer: "what kind of thing
               is this"); the beats below carry the argument (foreground). */}
           <p className="front-salutation">to the reader</p>
-          <p className="front-lead">People are outsourcing more and more of their thinking to ai.</p>
-          {/* Four beats, one line each — the founder's 30-second bar applies
-              here hardest ("front slide already too long. didnt even read
-              it"): trend → threat (dim) → the fix exists (ink, five words)
-              → free, try it. The conviction line and the mission's
-              enumeration live on the back (problem body / section titles). */}
+          {/* THREE text sections (founder, 2026-07-15), a complete chain a
+              zero-context reader follows with no effort: (1) trend + threat,
+              (2) the named fix — this beat must say WHAT the fix is (the
+              four-beat front jumped from "founded to fix it" to "setup is
+              free" with no referent for what the setup was), (3) the free
+              offer, whose "setup" now has its referent in beat 2. */}
+          <p className="front-lead">People are outsourcing more and more of their thinking to ai. Keep going, and eventually you forget how to think for yourself.</p>
           <div className="front-fork">
-            <p className="fork-line fork-lose">Keep going, and eventually you forget how to think for yourself.</p>
-            <p className="fork-line fork-win">Alexandria was founded to fix it.</p>
+            <p className="fork-line fork-win">Alexandria was founded to fix it: teach your ai who you are, and it develops your thinking instead of replacing it.</p>
             <p className="fork-line fork-offer">To get you started, the founder&rsquo;s whole setup is free. Try it.</p>
           </div>
         </div>
