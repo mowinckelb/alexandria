@@ -184,6 +184,27 @@ def _run() -> None:
     )
 
     sections: list[tuple[str, str, bool]] = []
+
+    # Brand-new install: onboarding never auto-starts on Cursor (no installer
+    # same-session stdout here), so surface THE BLOCK as the first required
+    # section until it completes. Mirrors payload.sh's session-start branch.
+    block_path = root / "system" / ".block"
+    block_complete = root / "system" / ".block_complete"
+    if block_path.is_file() and not block_complete.is_file():
+        sections.append(
+            (
+                "Onboarding pending (`system/.block`)",
+                (
+                    "New Author. First impression. The full onboarding lives at "
+                    f"`{block_path}` — read it now and follow it end-to-end (tell the "
+                    "Author you're starting; they can step away). Do not run a normal "
+                    f"/a on an empty constitution. When it completes, create "
+                    f"`{block_complete}` so this notice retires.\n"
+                ),
+                True,
+            )
+        )
+
     if agent_path.is_file():
         sections.append(
             ("Founder axioms (`agent.md`)", _read_or_note(agent_path, "Alexandria agent.md"), True)

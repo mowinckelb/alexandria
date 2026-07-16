@@ -288,7 +288,10 @@ if [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; then
       settings.hooks.SessionEnd = filter(settings.hooks.SessionEnd);
       settings.hooks.SubagentStart = filter(settings.hooks.SubagentStart);
       settings.hooks.SessionStart.push({
-        hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-start', timeout: 10 }]
+        // 60s not 10: the shim verifies + fetches the payload over the network
+        // before any output — hotel-wifi first sessions were killed mid-fetch
+        // at 10s, eating THE BLOCK notice (warm-lead P0.3, 2026-07-15).
+        hooks: [{ type: 'command', command: 'bash \$HOME/alexandria/system/hooks/shim.sh session-start', timeout: 60 }]
       });
       settings.hooks.SessionStart.push({
         hooks: [{ type: 'command', command: 'python3 \$HOME/alexandria/system/scripts/capture_resolver.py 2>/dev/null || true', timeout: 10 }]
