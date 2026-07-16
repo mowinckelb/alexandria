@@ -310,48 +310,40 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   // Expandable overviews (accordion — one open at a time — so the fixed
   // back-slide stage can never overflow).
   const [openPillar, setOpenPillar] = useState<string | null>(null);
-  // The back slide is the founder's mission skeleton in his own structure
-  // (2026-07-15 second rebuild): problem → solution → community → the free
-  // sample, leads built from his skeleton's sentences nearly verbatim. Two
-  // tracks: the leads are the skim layer (full spoken sentences, one
-  // complete argument front → close); the bodies are the opt-in depth (the
-  // creep + three doors, the folder mechanism, the objection sweep).
+  // The founder's own text (2026-07-16) — his why/what/how, set verbatim
+  // (mechanical cleanup only: typos, punctuation; no word choices touched).
+  // Lead = each section's opening line as he wrote it; body = his remaining
+  // paragraphs, rendered as paragraphs.
   const SECTIONS = [
     {
-      title: 'the problem',
-      // His Problem paragraph, near-verbatim. The front carries the trend
-      // and the stakes; this carries the cause (ai is DESIGNED to answer)
-      // and the mechanism of the fading (the muscle).
-      lead: 'ai is designed to give you all the answers — but your mind, like any muscle you don’t use, begins to fade.',
-      // Depth: the creep (the seduction mechanics) + the three doors from
-      // the letter, ending on the company as the third door.
-      body: 'It creeps in. You ask ai to write the email, make the plan, weigh the decision — and it does, often better than you would have. So you keep asking, and it handles more of your thinking while you do less of it. Most people are on this trajectory; we think it will be disastrous for humanity. There are three doors: reject ai, and fall behind. Let it think for you, and go soft. Or use it fully — and have it keep you sharp. Alexandria is the third door.',
+      title: 'why',
+      lead: 'Cultures must choose to value humans, but humans must choose to value themselves.',
+      body: [
+        'Human chess is more popular than ever — even though ai can do it better — because humans value humans; but only if they can still play the games.',
+        'It will be increasingly tempting to let ai think and decide for you; but then your mind, like any muscle you don’t use, will begin to fade — and forget how to compete.',
+        'Technology is a multiplier — ai is the most extreme version in history, so it will take you down the path you point it. Continue to let it think for you, and you’ll end up like the humans in Wall-E. Align it to think with you, and you can master anything.',
+        'Alexandrians are defined by this choice alone.',
+      ],
     },
     {
-      title: 'the solution',
-      // His Solution paragraph: the orientation tweak + with-not-for.
-      // Cashes the front's promise directly: "teach your ai who you are" →
-      // here is HOW you teach it (the folder, concrete), why it works
-      // (words are the bridge), and the payoff (with, not for).
-      lead: 'You teach it with one folder on your computer that holds who you are and how you think — your ai fills it in as you go, and reads it whenever you work. It can’t read your mind, but it can read words — so it thinks with you, not for you.',
-      body: 'The folder holds personalized instructions for personal alignment — the way coding tools keep a file that teaches any ai a project, but for a person. As you work, your ai writes the full richness of how you think — every idea, decision, and pattern — into it: a maximum-detail map of your mind, on your own storage, that we never see. And it reads that map to build on your thinking alongside answering you. Most of it runs in the background; now and then you sit with it on purpose, think out loud, and let it draw out what you haven’t put into words yet.',
+      title: 'what',
+      lead: 'We help humans build systems to keep thinking and not lose our minds.',
+      body: [
+        'Alexandrians choose growth over emptiness — aligning their ai to act as a thought partner; but personal alignment requires personal context — your ai needs to know where you are now, in order to help you get to where you want to go.',
+        'ai can’t read your mind, but it can read words. So if you think out loud and put your thoughts into words, it can build a full mirror of what and how you think — enabling effective personal growth.',
+        'Alexandria was founded to convince people to want to keep thinking; to help them align their ai towards this aim, and build a system to reflect their current internal thought space and develop it in the directions they want; and to assemble a community of all the people doing the same — to share how they do it, and what they’ve done with it.',
+        'The founder has made his entire system free to download — anybody can start, if they make the choice for themselves.',
+      ],
     },
     {
-      title: 'the community',
-      // Identity by choice — an alexandrian is a decision, not a download.
-      // "the tool" (a noun no earlier beat introduced) → "everything else",
-      // which needs no referent at all.
-      lead: 'Everyone doing this together is Alexandria — like Strava, but for the mind. The community is the only paid part; everything else is free.',
-      body: 'An alexandrian is someone who decided they don’t want their thinking to fade, and did something about it. One shared belief — that a sharper mind is worth the work — and everyone their own way of working at it. Members share how they’ve set up their folders, what they’ve changed, and what they’ve made because of them; the best of it flows into a library of minds and a marketplace of methods. We provide the philosophy, the gathering place, and the free starter system — the rest is yours. None of it is required: the tool works alone, forever.',
-    },
-    {
-      title: 'the free sample',
-      // His supermarket frame, stated once, as the lead — then the
-      // four-branch sweep (bin it / merge it / let it run / remake it) as
-      // the depth, his sentences near-verbatim, every branch ending with
-      // the sample in hand.
-      lead: 'To start, take the founder’s own setup — one command, five minutes, no account. Keep it, change it, or delete it without a trace.',
-      body: 'It works like a free sample at the supermarket: if the idea is even remotely interesting, all you have to do is reach out your hand. Don’t like it? Bin it — one delete, gone. Already have something similar? Add this anyway, and keep only the valuable pieces. Agree, but no time? It’s the easiest way possible — it updates itself and works in the background while you use your ai normally. Like it, but want it different? Then you’re a true alexandrian: it’s designed to be the starting point for your own version.',
+      title: 'how',
+      lead: 'Your private Alexandria folder connects to your ai so that it can follow instructions and use what it knows about you.',
+      body: [
+        'A local, private, custom folder is made on your own computer — containing files of everything your ai already knows about what and how you think, and instruction files on how your ai should read/write to these files to update, develop, and use.',
+        'Dump all the data you have into this one folder so your ai can tie together everything and extract all the messy connections into one unified map of your mind — to know where you currently stand, and then help you get to where you want to go: actively chatting with you to fill in any gaps, analysing connections you might have never seen, showing you new ideas it now knows you’d find interesting, stopping you from forgetting details that might drift, and synthesizing the unique knowledge you have so that you can get it out into the world.',
+        'Any ai, product, or service can connect to your folder because it’s just plain files owned on your computer alone. This is the simplest system possible — just you, plain files you own, any ai, any input, unlimited output.',
+        'All of this is free because it’s your ai and your files and system. The founder has his own system and he just made it free so it’s easy for people to start — they can personalize the system however they want, and the files they create are personal regardless. Joining the community is the price of two coffees a month, and it’s just sharing how they have their systems set up, and showing what they’ve been able to do because of it — connecting the humans who chose to keep thinking.',
+      ],
     },
   ];
   // A/B variant for the slide-1 centerpiece. URL: ?v=arch | ?v=frame
@@ -748,16 +740,17 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               anchors the composition (background layer: "what kind of thing
               is this"); the beats below carry the argument (foreground). */}
           <p className="front-salutation">to the reader</p>
-          {/* THREE text sections (founder, 2026-07-15), a complete chain a
-              zero-context reader follows with no effort: (1) trend + threat,
-              (2) the named fix — this beat must say WHAT the fix is (the
-              four-beat front jumped from "founded to fix it" to "setup is
-              free" with no referent for what the setup was), (3) the free
-              offer, whose "setup" now has its referent in beat 2. */}
-          <p className="front-lead">People are outsourcing more and more of their thinking to ai. Keep going, and eventually you forget how to think for yourself.</p>
+          {/* The founder's own text (2026-07-16, verbatim — his rewrite after
+              six agent passes): the question, then the name, then the three
+              functions with their labels set in the letter-plate register.
+              The labels mirror the back's section-title style (visual
+              rhyme); each function line is his sentence, unedited. */}
+          <p className="front-lead">When ai can do everything humans can, what do we do?</p>
           <div className="front-fork">
-            <p className="fork-line fork-win">Alexandria was founded to fix it: teach your ai who you are, and it develops your thinking instead of replacing it.</p>
-            <p className="fork-line fork-offer">To get you started, the founder&rsquo;s whole setup is free. Try it.</p>
+            <p className="fork-line fork-win">Alexandria</p>
+            <p className="fork-line front-fn"><span className="fn-label">idea</span><span>articulates our philosophy as an answer</span></p>
+            <p className="fork-line front-fn"><span className="fn-label">community</span><span>connects those who, even slightly, agree</span></p>
+            <p className="fork-line front-fn"><span className="fn-label">sample</span><span>provides infrastructure so anyone can join</span></p>
           </div>
         </div>
         <div className="top-inner" />
@@ -858,7 +851,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                           <span className="sec-caret" aria-hidden />
                         </button>
                         <p className="sec-lead">{s.lead}</p>
-                        <div className="sec-body"><div className="sec-body-inner"><p>{s.body}</p></div></div>
+                        <div className="sec-body"><div className="sec-body-inner">{s.body.map((para, i) => <p key={i}>{para}</p>)}</div></div>
                       </div>
                     );
                   })}
@@ -868,16 +861,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     single action beat below. */}
                 <div className="secs-rule" aria-hidden />
 
-                {/* The close (2026-07-15, "way too weak" fix): back to the
-                    locked forcing form — isolate the one question, show the
-                    zero-cost ledger, make putting-it-off a no (the pass-33
-                    escape-naming, minus the accusatory "you won't admit"
-                    killed in pass 39). Email stays the spectator's door. */}
+                {/* The close — the founder's own sample paragraph
+                    (2026-07-16, verbatim). */}
                 <p className="statement-beat action-beat">
-                  <em>The only question is whether the idea interests you
-                  &mdash; the rest is free, five minutes, and one delete to
-                  undo. If it does, take it; putting it off is just a no.
-                  Just here to watch? Leave your email.</em>
+                  <em>See this as a free food sample at the supermarket. The
+                  only reason you&rsquo;d say no is if you&rsquo;re allergic&hellip;
+                  reading this is proof you&rsquo;re interested enough to try.
+                  If you don&rsquo;t like it, bin it. This should be the
+                  smallest decision you make all day. Just try the free
+                  sample, and see how you like it.</em>
                 </p>
 
                 <div className="cta-pair">
@@ -2712,6 +2704,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           opacity: 0;
           transition: opacity 500ms ease;
         }
+        /* The founder's full paragraphs can exceed the fixed stage when a
+           section opens (the how-body did, 2026-07-16) — cap the open body
+           and let it scroll inside, desktop only (mobile flows naturally,
+           no fixed stage). Thin quiet scrollbar as the more-content cue. */
+        @media (min-width: 900px) {
+          .sec-body-inner {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--theme-border-soft) transparent;
+          }
+        }
         /* Fluid HOVER-expand on pointer devices (founder 2026-07-13): move
            over a section and it opens; move off and it eases shut — no click.
            Only one is ever open (you hover one at a time), so the fixed
@@ -2861,6 +2865,26 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           font-size: 16px;
           font-style: italic;
           color: rgba(26, 19, 24, 0.55);
+        }
+        /* The three function lines — label column in the letter-plate
+           register (mirrors the back's section titles), sentence beside it;
+           wrapped lines align on the text column. */
+        .front-fn {
+          display: flex;
+          gap: 14px;
+          margin-top: 9px;
+          font-size: 17px;
+          line-height: 1.5;
+          color: rgba(26, 19, 24, 0.62);
+        }
+        .front-fork .front-fn:first-of-type { margin-top: 16px; }
+        .fn-label {
+          flex: 0 0 96px;
+          padding-top: 3px;
+          font-style: italic;
+          font-size: 12px;
+          letter-spacing: 0.16em;
+          color: rgba(26, 19, 24, 0.45);
         }
         .cta-block {
           display: flex;
