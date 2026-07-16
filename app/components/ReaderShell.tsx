@@ -130,7 +130,6 @@ export type ReaderShellProps = {
   askPlaceholder?: string;
   askFn: (question: string) => Promise<string>;   // the twin call (wrapper decides which)
   intro?: React.ReactNode;                        // chat empty-state (who you're talking to + CTAs)
-  defaultChatOpen?: boolean;                       // open the chat pane on load (surface the ask)
 };
 
 export default function ReaderShell({
@@ -138,14 +137,14 @@ export default function ReaderShell({
   numbered = false, plain = false,
   artifactText = '', downloadBlob, downloadName = 'document', downloadExt = 'md',
   signInUrl = '', checkoutUrl = '', who = '', askPlaceholder = 'ask about this piece…', askFn,
-  intro, defaultChatOpen = false,
+  intro,
 }: ReaderShellProps) {
   const book = useMemo(
     () => (numbered && markdown ? processNumbered(markdown) : null),
     [numbered, markdown]
   );
   const [leftOpen, setLeftOpen] = useState(false);   // history
-  const [midOpen, setMidOpen] = useState(defaultChatOpen);     // chat
+  const [midOpen, setMidOpen] = useState(false);     // chat
   const [rightOpen, setRightOpen] = useState(true);  // the piece
   const [tab, setTab] = useState<'piece' | 'ask'>('piece'); // mobile
   const [expanded, setExpanded] = useState(false);   // full-screen the piece

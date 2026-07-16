@@ -74,7 +74,9 @@
 }
 
 html {
-  overscroll-behavior: none;
+  /* y only — the `none` shorthand also sets overscroll-behavior-x, which
+     disables the trackpad swipe-back/forward navigation gesture site-wide. */
+  overscroll-behavior-y: none;
   overflow-x: hidden;
 }
 
@@ -108,7 +110,7 @@ html.app-shell body {
   overflow: hidden;
   position: fixed;
   inset: 0;
-  overscroll-behavior: none;
+  overscroll-behavior-y: none;
 }
 
 html.app-shell #__next {

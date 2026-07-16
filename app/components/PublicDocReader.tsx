@@ -109,7 +109,6 @@ export default function PublicDocReader({
       askPlaceholder={'ask benjamin about this…'}
       askFn={askFn}
       intro={intro}
-      defaultChatOpen
     />
   );
 }

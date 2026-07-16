@@ -142,7 +142,7 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
         ) : (
           <>
             <p className="start-later-lede">
-              not at your computer, or&rsquo;d rather do it later? leave your
+              not at your computer, or want to do it later? leave your
               email and we&rsquo;ll send you the one line to run.
             </p>
             <form className="start-later-row" onSubmit={sendEmail}>
