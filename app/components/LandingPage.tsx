@@ -738,6 +738,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             founder): the cold visitor meets the argument on arrival, before
             the peel. what / how + the decision live on the back slide. */}
         <div className="front-epigraph">
+          {/* The frontispiece plate — the block reads as the opening of a
+              letter, not floating lines: a small salutation over a hairline
+              anchors the composition (background layer: "what kind of thing
+              is this"); the beats below carry the argument (foreground). */}
+          <p className="front-salutation">to the reader</p>
           <p className="front-lead">People are outsourcing more and more of their thinking to ai.</p>
           {/* Four beats, one line each — the founder's 30-second bar applies
               here hardest ("front slide already too long. didnt even read
@@ -2775,6 +2780,20 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           z-index: 3;
           pointer-events: none;
         }
+        /* Orientation robustness — the wall scales by cover while the stage
+           scales by min(), so as the viewport squares up (below ~10:7) the
+           arch drifts left under the stage's left-anchored epigraph
+           (verified at 1280×1024 and 1080×1400: text lands on the window).
+           In exactly those cases the stage is width-limited (spans the full
+           viewport) and the clean cream sits RIGHT of the arch — so flip
+           the epigraph to the right side of the stage. Text stays
+           left-aligned; only the anchor moves. */
+        @media (min-width: 900px) and (max-aspect-ratio: 10/7) {
+          .front-epigraph {
+            left: auto;
+            right: 108px;
+          }
+        }
         .front-salutation {
           margin: 0 0 18px;
           padding-bottom: 14px;
@@ -2801,35 +2820,39 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         /* ─── The front trichotomy (2026-07-13) — form is content: the two
            losing doors dimmed, the way through alive. ─── */
         .front-lead {
-          margin: 0 0 22px;
+          margin: 0 0 14px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 20px;
           line-height: 1.45;
           letter-spacing: 0.004em;
           color: rgba(26, 19, 24, 0.72);
+          text-wrap: pretty;
         }
         .front-fork { margin: 0; }
         .fork-line {
-          margin: 0 0 10px;
+          margin: 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 18.5px;
           line-height: 1.5;
           letter-spacing: 0.004em;
+          text-wrap: pretty;
         }
-        .fork-line:last-child { margin-bottom: 0; }
-        /* The two losing paths — dimmed, half-faded out of the frame. */
+        /* The losing path — dimmed, half-faded out of the frame; sits
+           close under the lead (same thought, fading). */
         .fork-lose { color: rgba(26, 19, 24, 0.32); }
-        /* The way through — alive, full ink, in the letter's italic voice;
-           the eye is drawn to it against the two faded lines above. */
+        /* The turn — a full breath of air above marks the argument's
+           pivot (rhythm does the work, not another rule); ink and the
+           letter's italic voice lift it against the faded line above. */
         .fork-win {
-          color: rgba(26, 19, 24, 0.74);
+          margin-top: 26px;
+          color: rgba(26, 19, 24, 0.78);
           font-style: italic;
         }
         /* The offer line — the free-sample frame planted on slide one:
            quieter and smaller than the win line (it's the footnote-sized
            fact that shrinks the decision), set apart by a breath. */
         .fork-offer {
-          margin-top: 22px;
+          margin-top: 16px;
           font-size: 16px;
           font-style: italic;
           color: rgba(26, 19, 24, 0.55);
