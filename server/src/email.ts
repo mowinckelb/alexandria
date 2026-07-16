@@ -145,15 +145,20 @@ export async function sendFollowerWelcome(email: string, unsubscribeToken?: stri
 
 export async function sendWelcomeEmail(email: string, githubLogin: string, emailToken?: string, apiKey?: string): Promise<void> {
   const websiteHost = WEBSITE_URL.replace(/^https?:\/\//, '');
-  const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
-  const kinLinkDisplay = `${websiteHost}/join?ref=${githubLogin}`;
+  // Invite link uses the TRY door (/start — the free tool), not the paid /join
+  // door: the ask is "get a friend using it", and /start carries the ref
+  // through install → eventual join, so kin attribution is intact either way.
+  const kinLink = `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}`;
+  const kinLinkDisplay = `${websiteHost}/start?ref=${githubLogin}`;
   // Connect command — carry it in the email body so a user who finishes GitHub
   // OAuth but abandons Stripe is never stranded without their key. Same command
   // the founding-member page shows; re-running setup.sh with the key is
   // idempotent (installs + links, or just links if already installed). Only
   // included when we actually minted a key for this sign-in (new / uninstalled).
+  // Branded form: /a is a 307 to the raw setup.sh on GitHub — the L in -fsSL
+  // (--location) follows it, so the redirect MUST stay paired with -fsSL.
   const connectCmd = apiKey
-    ? `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}`
+    ? `curl -fsSL alexandria-library.com/a | bash -s -- ${apiKey}`
     : '';
   const connectBlock = connectCmd
     ? `<p style="font-size: 1rem; color: #8a8078; margin: 0 0 0.6rem;">to connect your install, paste this into your coding agent (claude code, cursor, codex&hellip;) and hit enter:</p>
@@ -182,7 +187,9 @@ export async function sendKinFreeUnlocked(
   githubLogin: string,
   emailToken?: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
+  // TRY door — the sender is already free; "every one after just grows the
+  // tribe" is a get-them-using-it ask, so the link opens the free tool.
+  const kinLink = `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}`;
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">you&rsquo;re free.</p>
   <p style="margin: 0 0 1.4rem; color: #8a8078;">three friends joined through you and stayed &mdash; so your membership is free for good. no more $10, ever. thank you for building the community.</p>
@@ -206,6 +213,9 @@ export async function sendKinLapseWarning(
   resumeDate: Date | null,
   emailToken?: string,
 ): Promise<{ ok: boolean; error?: string }> {
+  // JOIN door (deliberate — not the /start TRY door the other emails use):
+  // "add one more and it's free again" needs the friend to become a MEMBER
+  // before $10 resumes, so the link opens the membership page directly.
   const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
   const when = resumeDate
     ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric' }).format(resumeDate).toLowerCase()
@@ -251,7 +261,9 @@ export async function sendInstallNudge(
 ): Promise<{ ok: boolean; error?: string }> {
   const MECHANICS_URL = `${WEBSITE_URL}/Mechanics.md`;
   const installUrl = `${SERVER_URL}/install/${installToken}`;
-  const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
+  // TRY door — a generic "invite link" ask; the friend lands on the free tool
+  // and the ref rides through install → eventual join for kin attribution.
+  const kinLink = `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}`;
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.8rem; color: #8a8078;">ready when you are.</p>
 
@@ -278,8 +290,12 @@ export async function sendInstallNudge(
 // in its path (alexandria-library.com/a/TOKEN) so the setup-script fetch
 // marks the capture as installed — the public web command stays tokenless.
 
-function onboardCommandBlock(installToken: string): string {
-  const cmd = `curl -fsSL alexandria-library.com/a/${installToken} | bash`;
+function onboardCommandBlock(installToken: string, ref?: string): string {
+  // `-s -- --ref <login>` forwards the referrer into setup.sh (it parses --ref
+  // and bakes system/.referrer), so a command emailed off a /start?ref visit
+  // keeps kin attribution. ref is sanitised to [A-Za-z0-9-] at capture
+  // (POST /onboard), so it's shell- and HTML-safe to interpolate here.
+  const cmd = `curl -fsSL alexandria-library.com/a/${installToken} | bash${ref ? ` -s -- --ref ${ref}` : ''}`;
   return `<p style="margin: 0 0 1.4rem; background: rgba(61,54,48,0.05); border-radius: 6px; padding: 14px 16px;"><code style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; color: #3d3630;">${cmd}</code></p>`;
 }
 
@@ -287,10 +303,11 @@ export async function sendOnboardCommand(
   email: string,
   installToken: string,
   unsubscribeToken: string,
+  ref?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">here it is. when you&rsquo;re at your computer, paste this into your coding agent (claude code, cursor, codex, factory):</p>
-  ${onboardCommandBlock(installToken)}
+  ${onboardCommandBlock(installToken, ref)}
   <p style="margin: 0 0 1.4rem; color: #8a8078;">it links up everything you&rsquo;ve been saving.</p>
   <p style="margin: 0 0 1.8rem;">until then &mdash; <a href="${SHORTCUT_URL}" style="color: #3d3630;">add the shortcut</a>: save anything you read, hear, or think, straight from your phone.</p>
   <p style="margin: 0 0 0.4rem;">Benjamin a. Mowinckel</p>
@@ -307,13 +324,14 @@ export async function sendOnboardFollowup(
   installToken: string,
   unsubscribeToken: string,
   nth: number,
+  ref?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const first = nth <= 1;
   const html = `<div style="font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; max-width: 480px; margin: 0 auto; padding: 48px 24px; color: #3d3630; font-size: 1.05rem; line-height: 1.7;">
   <p style="margin: 0 0 1.4rem;">${first
     ? 'still here when you are &mdash; paste this into your coding agent when you&rsquo;re back at your computer:'
     : 'last one from me. the command:'}</p>
-  ${onboardCommandBlock(installToken)}
+  ${onboardCommandBlock(installToken, ref)}
   <p style="margin: 0 0 1.8rem; color: #8a8078;">${first
     ? 'everything you&rsquo;ve saved on your phone gets picked up the moment you run it.'
     : 'no rush &mdash; it&rsquo;ll keep. everything you&rsquo;ve saved stays yours.'}</p>

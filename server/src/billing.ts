@@ -20,6 +20,14 @@ import { generateToken } from './crypto.js';
 import { safeEqual, hashApiKey } from './crypto.js';
 
 // ---------------------------------------------------------------------------
+// Membership price — single source of truth for Stripe's unit_amount
+// (ensurePrice) and every dollars-derived display (pre-bill warning). A price
+// change edits this one constant; the two can't drift apart.
+// ---------------------------------------------------------------------------
+
+const MEMBERSHIP_PRICE_CENTS = 1000; // $10/mo
+
+// ---------------------------------------------------------------------------
 // Stripe client — lazy init (needs env to be populated)
 // ---------------------------------------------------------------------------
 
@@ -234,7 +242,7 @@ async function ensurePrice(): Promise<string> {
   if (!price) {
     price = await stripe.prices.create({
       product: product.id,
-      unit_amount: 1000,
+      unit_amount: MEMBERSHIP_PRICE_CENTS,
       currency: 'usd',
       recurring: { interval: 'month' },
       metadata: { tier: 'standard' },
@@ -443,9 +451,9 @@ async function maybeWarnAboutBill(
  */
 export async function recalculateAllKinPricing(): Promise<void> {
   const sevenDaysFromNow = Date.now() + 7 * 86400 * 1000;
-  // $10 unit price — matches ensurePrice(). Hardcoded to avoid an extra Stripe
-  // call per user per day; update here if pricing changes.
-  const billDollars = 10;
+  // Derived from the same constant ensurePrice() charges — no extra Stripe
+  // call per user per day, and a price change can't drift the warning copy.
+  const billDollars = MEMBERSHIP_PRICE_CENTS / 100;
 
   // Source of truth is Stripe, not the KV `subscription_id` field. An account
   // whose blob never got subscription_id (a webhook that set it missed, a
@@ -1573,7 +1581,21 @@ async function sendPreBillWarningEmail(
   dueAt: Date | null,
 ): Promise<void> {
   const WEBSITE_URL = process.env.WEBSITE_URL || 'https://alexandria-library.com';
+  const SERVER_URL = process.env.SERVER_URL || 'https://api.alexandria-library.com';
+  // JOIN door (deliberate — matches sendKinLapseWarning, not the /start TRY
+  // door): the discount needs the friend to become a MEMBER before the charge
+  // lands, so the link opens the membership page directly.
   const kinLink = `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}`;
+
+  // Unsubscribe footer — every other template carries one; this was the only
+  // send without it. KinPricingState doesn't hold email_token, so resolve it
+  // from the account (one KV read per warning; warnings fire at most once per
+  // cycle). Token missing → footer omitted, same conditional as the others.
+  // The send itself stays unconditional: this is a money-moves-soon notice
+  // (the paid-without-warning failure class), not an engagement email.
+  let emailToken: string | undefined;
+  try { emailToken = (await getAccountByLogin(githubLogin))?.account.email_token; } catch { /* footer omitted */ }
+  const stopUrl = emailToken ? `${SERVER_URL}/email/stop?t=${emailToken}` : '';
 
   // Warning fires only when not-free — i.e. the author is short of the 3
   // member-kin needed for the discount. Author usage is no longer a condition
@@ -1598,10 +1620,12 @@ async function sendPreBillWarningEmail(
   ${actionLine ? `<p style="font-size: 1rem; color: #3d3630; margin: 0 0 1.5rem;">${actionLine}</p>` : ''}
   <p style="font-size: 0.9rem; color: #8a8078; margin: 0 0 2rem;">${billLine}</p>
   <p style="font-size: 0.85rem; color: #8a8078; margin: 0;"><a href="${kinLink}" style="color: #8a8078;">your kin link</a></p>
-  <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 2rem;">the examined life.</p>
+  <p style="font-size: 0.78rem; color: #bbb4aa; margin-top: 2rem;">the examined life.</p>${stopUrl ? `
+  <p style="margin: 1.5rem 0 0; font-size: 0.72rem; color: #bbb4aa;"><a href="${stopUrl}" style="color: #8a8078;">stop these emails</a></p>` : ''}
 </div>`;
 
-  const result = await sendEmail(email, 'alexandria. — heads up', html);
+  const result = await sendEmail(email, 'alexandria. — heads up', html,
+    stopUrl ? { unsubscribeUrl: stopUrl } : undefined);
   if (!result.ok) {
     logEvent('kin_prebill_warning_failed', { reason: result.error || 'unknown' });
   }

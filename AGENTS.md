@@ -62,10 +62,9 @@ Operational overhead — OAuth, billing, email, admin:
 | GET | `/auth/github/callback` | OAuth callback |
 | GET | `/account` | Billing portal redirect |
 | DELETE | `/account` | Account deletion (GDPR-ready) |
-| POST | `/brief` | Morning brief (autoloop trigger) |
+| GET | `/account/rotate-key` | Lost-key self-serve rotation (single-use code minted on returning-member OAuth; old key dies atomically) |
 | POST | `/feedback` | Author-explicit feedback (typed into `~/alexandria/system/.session_feedback`, posted at session end, stored in private `mowinckelb/alexandria-feedback` GitHub repo) |
-| GET/GET | `/email/less`, `/email/stop` | Email preferences |
-| GET/GET | `/brief/less`, `/brief/stop` | Brief preferences |
+| GET/POST | `/email/stop` | Email unsubscribe |
 | POST | `/admin/nudge` | Nudge uninstalled users (admin) |
 | POST | `/admin/email` | Send email (admin) |
 

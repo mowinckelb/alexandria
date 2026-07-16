@@ -31,10 +31,10 @@ const SEO_DESCRIPTION =
 
 // Sharing-optimised description — punchier than the SEO sentence. Lands as
 // the body of social previews (Twitter / Slack / iMessage / LinkedIn).
-// Leads with the existential stakes from the back-slide, then states the
-// practice. More compelling for click-through than a noun definition.
+// Leads with the homepage's own hook (the 2026-07-15 sample-frame rebuild
+// dropped the old existential-stakes back-slide), then states the practice.
 const SHARE_DESCRIPTION =
-  "humanity's greatest challenge — and perhaps our last. write yourself into plain files, so every ai you ever use thinks with you, not for you.";
+  "your ai already knows almost everything — except you. write yourself into one file, and every ai you use thinks with you, not for you.";
 
 export const metadata: Metadata = {
   title: "alexandria — the library of human minds",

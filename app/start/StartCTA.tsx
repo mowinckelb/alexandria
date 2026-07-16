@@ -119,6 +119,14 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
       <p className="install-where">
         claude code · cursor · codex · factory. in cowork it works too &mdash; one extra settings step and it walks you through it. a plain chat app won&rsquo;t work &mdash; you need one of the coding agents above.
       </p>
+      {/* The no-agent rescue — one quiet line so a visitor with no coding
+          agent isn't dead-ended; the with-agent majority skims past it. */}
+      <p className="install-where">
+        don&rsquo;t have one? get claude code: <code>npm install -g @anthropic-ai/claude-code</code> &mdash; then paste the line above into it.
+      </p>
+      <p className="install-where">
+        on windows? run it inside your coding agent, or in git bash / wsl.
+      </p>
 
       {validRef && (
         <p className="install-new">

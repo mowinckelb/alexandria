@@ -40,7 +40,10 @@ interface ParsedId {
 function parseGithubId(id: string): ParsedId | null {
   const m = id.match(/^github:([^\/]+)\/([^#]+)#(.+)$/);
   if (!m) return null;
-  return { user: m[1], repo: m[2], path: m[3] };
+  // Legacy module ids predate the repo rename alexandria-systems →
+  // alexandria-modules; normalise so click-throughs skip the 301.
+  const repo = m[2] === 'alexandria-systems' ? 'alexandria-modules' : m[2];
+  return { user: m[1], repo, path: m[3] };
 }
 
 // Canonical Machine — the factory's output repo. Items here are Alexandria's;

@@ -71,7 +71,7 @@ export function authErrorHtml(message: string): string {
 // Callback page — the first brand moment after signup
 // ---------------------------------------------------------------------------
 
-export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false, authorNumber = 0, kinCompliant = 0): Promise<string> {
+export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false, authorNumber = 0, kinCompliant = 0, rotateUrl = ''): Promise<string> {
   const WEBSITE_URL = getWebsiteUrl();
   const host = WEBSITE_URL.replace(/^https?:\/\//, '');
   // The founding-member page (Strava-for-thought, ground truth e1cd27f). You've
@@ -82,17 +82,23 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   // assigned server-side, but it is NOT the pitch — nobody cares which number they
   // are, so the page doesn't headline it.
   // `isReturning` is the bare re-login fallback — nothing minted, not a fresh join.
+  // `rotateUrl` (set only for returning INSTALLED members, minted per-OAuth by
+  // the callback) renders the low-key lost-key escape hatch below.
   const isReturning = !apiKey && authorNumber <= 0;
   // The connect command is copy-paste, matching /start. (A claude-cli:// deep link was tried
   // and removed 2026-06-24: it auto-ran the script and felt like a terminal hijack — copy-paste
   // is calmer and universal across Claude Code / Cursor / Codex / Factory.) Same command whether
   // they installed keyless first (it links the account) or join from the web first (it installs +
-  // links) — re-running setup.sh with the key is idempotent.
-  const curlCmd = apiKey ? `curl -fsSL https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/setup.sh | bash -s -- ${apiKey}` : '';
-  // The invite link carries the member's code (their github login). A friend who opens it is
-  // pre-credited as kin (server validates ref → existing login, rejects self-referral).
-  const inviteUrl = githubLogin ? `${WEBSITE_URL}/join?ref=${encodeURIComponent(githubLogin)}` : '';
-  const inviteDisplay = githubLogin ? `${host}/join?ref=${githubLogin}` : '';
+  // links) — re-running setup.sh with the key is idempotent. Branded form: /a is
+  // a 307 to the raw setup.sh; the L in -fsSL (--location) follows it — keep it.
+  const curlCmd = apiKey ? `curl -fsSL alexandria-library.com/a | bash -s -- ${apiKey}` : '';
+  // The invite link carries the member's code (their github login) through the TRY
+  // door (/start — the free tool), not the paid /join door: the ask on this page is
+  // "send it to friends", and /start forwards the ref through install → eventual
+  // join, where the server credits kin (validates ref → existing login, rejects
+  // self-referral). Three who join and stay = free for good, same as before.
+  const inviteUrl = githubLogin ? `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}` : '';
+  const inviteDisplay = githubLogin ? `${host}/start?ref=${githubLogin}` : '';
   // Kin progress — let the member SEE where they stand toward free-for-good.
   // Membership, not usage: count is the compliant (member-status) kin count
   // the server already has (countActiveKin at the call site). At/over the
@@ -142,6 +148,9 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   .shortcut a { color: #8a8078; text-decoration: none; border-bottom: 1px dotted #bbb4aa; transition: color 0.15s, border-color 0.15s; }
   .shortcut a:hover { color: #3d3630; border-bottom-color: #8a8078; }
   .welcome-back { color: #8a8078; margin-top: 1.5rem; }
+  .lostkey { font-size: 0.78rem; line-height: 1.7; color: #bbb4aa; margin-top: 1.25rem; }
+  .lostkey a { color: #8a8078; text-decoration: none; border-bottom: 1px dotted #bbb4aa; transition: color 0.15s, border-color 0.15s; }
+  .lostkey a:hover { color: #3d3630; border-bottom-color: #8a8078; }
   .signout { font-size: 0.78rem; line-height: 1.7; color: #bbb4aa; margin-top: 2.5rem; }
   .signout a { color: inherit; text-decoration: none; border-bottom: 1px dotted #bbb4aa; transition: color 0.15s, border-color 0.15s; }
   .signout a:hover { color: #8a8078; border-bottom-color: #8a8078; }
@@ -226,8 +235,10 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
 ${isReturning ? `<a class="brand-corner" href="${WEBSITE_URL}/">alexandria.</a>` : ''}
 <div class="container">
   <h1 class="welcome">${isReturning ? `welcome back.` : `welcome to alexandria.`}</h1>
-  ${isReturning ? `<p class="line welcome-back">call /alexandria in your coding agent.</p>` : `<div class="steps">
-    ${curlCmd ? `<p class="line"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy connect command">copy your connect command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; paste it into your coding agent (claude code, cursor, codex&hellip;) and hit enter. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">links your install to your membership so you can publish to the library. your thinking stays on your machine &mdash; only what you publish is ever sent.</span></button></p>` : `<p class="line">you're in. call /alexandria in your coding agent.</p>`}
+  ${isReturning ? `<p class="line welcome-back">call /alexandria in your coding agent.</p>${rotateUrl ? `
+  <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}` : `<div class="steps">
+    ${curlCmd ? `<p class="line"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy connect command">copy your connect command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; paste it into your coding agent (claude code, cursor, codex&hellip;) and hit enter. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">links your install to your membership so you can publish to the library. your thinking stays on your machine &mdash; only what you publish is ever sent.</span></button></p>` : `<p class="line">you're in. call /alexandria in your coding agent.</p>${rotateUrl ? `
+    <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}`}
     ${inviteUrl ? `<p class="line"><button type="button" class="action" onclick="copyInvite(this)" aria-label="copy your invite link">copy your invite link <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> <button type="button" class="action" onclick="shareInvite(this)" aria-label="share your invite link">share <span class="icon"><span class="icon-copy">${ICON_SHARE}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; send it to everyone worth it &mdash; most won&rsquo;t act, and the three who do make yours free. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">${escapeHtml(inviteDisplay)} &mdash; it carries your code. three who join and stay, and your membership is free for good.</span></button></p>
     <p class="kin-progress">${kinProgressLine}</p>` : ''}
   </div>
@@ -311,8 +322,9 @@ export async function welcomeHandoffUrl(
   viaToken: boolean,
   authorNumber: number,
   kinCompliant = 0,
+  rotateUrl = '',
 ): Promise<string> {
-  const html = await callbackPageHtml(apiKey, githubLogin, viaToken, authorNumber, kinCompliant);
+  const html = await callbackPageHtml(apiKey, githubLogin, viaToken, authorNumber, kinCompliant, rotateUrl);
   const code = randomBytes(24).toString('hex');
   // handoff:<code> → session token, consumed by /api/auth/session (sets the cookie).
   // welcome:<code> → the rendered page, consumed by the website /welcome peek.

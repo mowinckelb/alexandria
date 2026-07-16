@@ -420,6 +420,9 @@ interface OnboardCandidate {
     installed_at?: string;
     followups?: number;
     followup_last_sent_at?: string;
+    /** Referrer login (sanitised at capture) — rides the emailed command as
+     *  `--ref <login>` so follow-ups keep kin attribution too. */
+    ref?: string;
   };
 }
 
@@ -477,7 +480,7 @@ export async function runOnboardFollowups(
 
     const { sent, failed } = await sendEmailsBatched(eligible, async ({ token, record }) => {
       const nth = (record.followups || 0) + 1;
-      const result = await sendOnboardFollowup(record.email, token, record.unsubscribe_token, nth);
+      const result = await sendOnboardFollowup(record.email, token, record.unsubscribe_token, nth, record.ref);
       if (result.ok) {
         record.followups = nth;
         record.followup_last_sent_at = new Date().toISOString();

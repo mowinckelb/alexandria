@@ -11,7 +11,12 @@ import { SERVER_URL, SHORTCUT_URL } from '../lib/config';
 // install or unsubscribe — and the email lands on the list for anything later).
 // Underneath, quiet: the Shortcut (start capturing now) and the places to
 // follow along / explore from the phone right now.
-export default function MobileStart() {
+//
+// `refCode`, not `ref` — same reserved-prop dodge as StartCTA. An invited
+// visitor's ref (sanitised by the page) rides the /onboard POST so the
+// inviter is still credited as kin when the emailed command is run later;
+// the server validates it, so no /check-kin round trip here.
+export default function MobileStart({ refCode }: { refCode?: string }) {
   const [email, setEmail] = useState('');
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
@@ -23,7 +28,7 @@ export default function MobileStart() {
       const resp = await fetch(`${SERVER_URL}/onboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim(), ...(refCode ? { ref: refCode } : {}) }),
       });
       setState(resp.ok ? 'sent' : 'error');
     } catch {

@@ -128,6 +128,35 @@ app.use('/library/*', async (c, next) => {
 });
 
 // ---------------------------------------------------------------------------
+// Rate limits for public company endpoints (handlers live in routes.ts —
+// registered below, so this middleware must attach FIRST or it never runs).
+// Each GET /auth/github writes an oauth-state KV record (write amplification)
+// and /check-kin is an unauthenticated membership oracle; both were unlimited.
+// Limits sized to never bite a human: a normal OAuth is 1 init + 1 callback,
+// so 10/min/IP absorbs retries and a shared office NAT; check-kin fires once
+// per /join page view; rotate-key is a single click behind a single-use code.
+// Same limiter + 429 shape as /waitlist below. Function declarations hoist,
+// so referencing enforcePublicRateLimit (defined lower) at request time is fine.
+// ---------------------------------------------------------------------------
+
+const PUBLIC_RATE_LIMITED_ROUTES = [
+  { path: '/auth/github', scope: 'auth', limit: 10 },
+  { path: '/auth/github/callback', scope: 'auth-callback', limit: 10 },
+  { path: '/check-kin', scope: 'check-kin', limit: 10 },
+  { path: '/account/rotate-key', scope: 'rotate-key', limit: 5 },
+] as const;
+
+for (const { path, scope, limit } of PUBLIC_RATE_LIMITED_ROUTES) {
+  app.use(path, async (c, next) => {
+    const ip = c.req.header('cf-connecting-ip') || 'unknown';
+    if (!await enforcePublicRateLimit(scope, ip, limit)) {
+      return c.json({ error: 'Too many requests.' }, 429);
+    }
+    await next();
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Protocol — the incompressible core (file, call, library, marketplace)
 // ---------------------------------------------------------------------------
 
@@ -326,9 +355,14 @@ async function ensureRateLimitSchema(db: D1Database): Promise<void> {
   await rateLimitSchemaInit;
 }
 
-async function enforcePublicRateLimit(scope: 'waitlist' | 'follow' | 'onboard', ip: string): Promise<boolean> {
+type PublicRateLimitScope =
+  | 'waitlist' | 'follow' | 'onboard'          // POST bodies (5/min default)
+  | 'auth' | 'auth-callback'                   // OAuth pair (10/min — see middleware above)
+  | 'check-kin'                                // unauthenticated membership oracle
+  | 'rotate-key';                              // lost-key rotation (single click)
+
+async function enforcePublicRateLimit(scope: PublicRateLimitScope, ip: string, limit = PUBLIC_RATE_LIMIT_MAX): Promise<boolean> {
   const windowSeconds = PUBLIC_RATE_LIMIT_WINDOW_SECONDS;
-  const limit = PUBLIC_RATE_LIMIT_MAX;
 
   // Primary path — D1 upsert + increment (atomic).
   try {
@@ -579,6 +613,9 @@ export interface OnboardRecord {
   installed_at?: string;
   followups?: number;
   followup_last_sent_at?: string;
+  /** Referrer login (sanitised [A-Za-z0-9-]) — the emailed install command
+   *  appends `--ref <login>` so the eventual join keeps kin attribution. */
+  ref?: string;
 }
 
 app.post('/onboard', async (c) => {
@@ -609,11 +646,15 @@ app.post('/onboard', async (c) => {
   // Join-decline capture (founder verdict 2026-07-09): the /join page's "not
   // now" path. Capture-only — a waitlist row so the address is contactable as
   // the community grows; NO install email and NO nudge thread (they're at the
-  // join step, not the install step — many already run the tool). `ref`
-  // preserves kin attribution on the lead (sanitised like /join does: GitHub
-  // logins are [A-Za-z0-9-]).
+  // join step, not the install step — many already run the tool).
   const isJoinDecline = body?.source === 'join';
-  const joinRef = typeof body?.ref === 'string' ? body.ref.replace(/[^A-Za-z0-9-]/g, '').slice(0, 39) : '';
+  // Referral attribution — sanitised like /join does (GitHub logins are
+  // [A-Za-z0-9-]). Honored on EVERY source, not just join declines: install
+  // intents (/start, mobile) store it on the KV record so the emailed command
+  // carries `--ref <login>` (setup.sh parses it) and the eventual join is
+  // attributed. Dropping it here was where the free-with-3-kin engine lost
+  // most of its attribution (warm-lead audit item 5, 2026-07-15).
+  const ref = typeof body?.ref === 'string' ? body.ref.replace(/[^A-Za-z0-9-]/g, '').slice(0, 39) : '';
 
   try {
     const kv = getKV();
@@ -652,7 +693,7 @@ app.post('/onboard', async (c) => {
     ).bind(
       normalizedEmail,
       isJoinDecline ? 'join' : 'onboard',
-      isJoinDecline ? (joinRef ? `ref:${joinRef}` : 'join_page') : 'public',
+      isJoinDecline ? (ref ? `ref:${ref}` : 'join_page') : 'public',
       new Date().toISOString(),
       newToken,
     ).first<{ unsubscribe_token: string | null }>();
@@ -661,7 +702,7 @@ app.post('/onboard', async (c) => {
     // confirmation email (nothing was requested), no onboard KV record (no
     // install-nudge sequence).
     if (isJoinDecline) {
-      logEvent('join_email_captured', { ref: joinRef ? 'yes' : 'no', upserted: upserted ? 'true' : 'false' });
+      logEvent('join_email_captured', { ref: ref ? 'yes' : 'no', upserted: upserted ? 'true' : 'false' });
       return c.json({ ok: true });
     }
 
@@ -672,15 +713,21 @@ app.post('/onboard', async (c) => {
         unsubscribe_token: upserted?.unsubscribe_token || newToken,
         created_at: new Date().toISOString(),
         followups: 0,
+        ...(ref ? { ref } : {}),
       };
       await kv.put(`onboard:${installToken}`, JSON.stringify(record), { expirationTtl: ONBOARD_TTL_SECONDS });
       await kv.put(emailIndexKey, installToken, { expirationTtl: ONBOARD_TTL_SECONDS });
+    } else if (ref && !record.ref) {
+      // Resubmit carrying a ref the original capture lacked — backfill. First
+      // ref wins: never overwrite an existing attribution on a resubmit.
+      record.ref = ref;
+      await kv.put(`onboard:${installToken}`, JSON.stringify(record), { expirationTtl: ONBOARD_TTL_SECONDS });
     }
 
     // Await the send — this email IS what the user asked for; a silent
     // failure here would read as "sent" in the UI.
-    const result = await sendOnboardCommand(normalizedEmail, installToken!, record.unsubscribe_token);
-    logEvent('onboard_email_captured', { new: record.followups === 0 && !record.installed_at ? 'true' : 'false', sent: result.ok ? 'true' : 'false' });
+    const result = await sendOnboardCommand(normalizedEmail, installToken!, record.unsubscribe_token, record.ref);
+    logEvent('onboard_email_captured', { new: record.followups === 0 && !record.installed_at ? 'true' : 'false', ref: record.ref ? 'yes' : 'no', sent: result.ok ? 'true' : 'false' });
     if (!result.ok) return c.json({ error: 'Could not send just now — try again.' }, 502);
     return c.json({ ok: true });
   } catch (err: any) {

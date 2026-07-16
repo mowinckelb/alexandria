@@ -58,7 +58,7 @@ export default async function StartPage({
         </div>
 
         <div className="start-mobile">
-          <MobileStart />
+          <MobileStart refCode={ref} />
         </div>
 
         {/* The handoff to the other half: the tool is free and stands alone, but
@@ -189,6 +189,10 @@ export default async function StartPage({
           font-size: 12px; line-height: 1.6; letter-spacing: 0.01em;
           color: var(--text-muted, rgba(26, 19, 24, 0.42)); text-align: left;
           margin: 8px 0 0; max-width: 460px;
+        }
+        .install-where code {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 11px;
         }
 
         /* Quiet secondary link — the not-yet-convinced visitor's route back to

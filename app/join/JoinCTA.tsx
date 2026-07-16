@@ -145,7 +145,9 @@ export default function JoinCTA({
 
       <p className="join-secondary">
         Here for the free tool? You don&rsquo;t need this &mdash;{' '}
-        <Link href="/start">install it in one line</Link>.
+        {/* Forward the validated ref so an invited visitor who takes the
+            free door still credits their inviter as kin on install. */}
+        <Link href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}>install it in one line</Link>.
       </p>
     </>
   );

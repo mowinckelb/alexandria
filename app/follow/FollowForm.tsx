@@ -100,7 +100,7 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
     );
   }
 
-  const isHonourary = amount > 0;
+  const isHonorary = amount > 0;
 
   return (
     <main className="follow-root">
@@ -171,11 +171,11 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
               </p>
             </div>
             <div className="tier-row" aria-live="polite">
-              <span className={`tier ${isHonourary ? 'is-dim' : 'is-on'}`}>
+              <span className={`tier ${isHonorary ? 'is-dim' : 'is-on'}`}>
                 <em>follower of alexandria.</em>
               </span>
-              <span className={`tier tier-right ${isHonourary ? 'is-on' : 'is-dim'}`}>
-                <em>honourary alexandrian.</em>
+              <span className={`tier tier-right ${isHonorary ? 'is-on' : 'is-dim'}`}>
+                <em>honorary alexandrian.</em>
               </span>
             </div>
           </div>

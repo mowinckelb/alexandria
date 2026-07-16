@@ -629,6 +629,20 @@ export function registerRoutes(app: Hono) {
       let kinCompliant = 0;
       try { kinCompliant = (await countActiveKin(user.login)).compliant; } catch { /* D1 down — show 0 */ }
 
+      // Lost-key self-serve rotation (single-use, 10-min TTL). A returning
+      // INSTALLED member gets no new key from re-OAuth — deliberate, so a
+      // casual re-login never kills the key on their working machine. But a
+      // member on a wiped machine needs a path back, so bind an explicit
+      // "generate a new one" action to THIS fresh OAuth: a code the welcome
+      // page renders as a low-key link to GET /account/rotate-key. Clicking
+      // it is the deliberate act that rotates (the old key dies there).
+      let rotateUrl = '';
+      if (!needsKey) {
+        const rotateCode = randomBytes(24).toString('hex');
+        await kv.put(`rotate:${rotateCode}`, key, { expirationTtl: 600 });
+        rotateUrl = `${getServerUrl()}/account/rotate-key?code=${rotateCode}`;
+      }
+
       // Skip checkout for anyone already in good standing: payment info on
       // file, or an active status — which includes the grandfathered
       // seeding-stage `free` cohort (joined 2026-06-05 → 06-11 while signup
@@ -639,7 +653,7 @@ export function registerRoutes(app: Hono) {
           return c.redirect(handoffUrl(stateData.next));
         }
         const number = await assignAuthorNumber(user.login);
-        return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0, kinCompliant));
+        return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0, kinCompliant, rotateUrl));
       }
 
       // New join → Stripe Checkout ($10/mo, first month free via 30-day trial,
@@ -670,7 +684,7 @@ export function registerRoutes(app: Hono) {
         return c.redirect(handoffUrl(stateData.next));
       }
       const number = await assignAuthorNumber(user.login);
-      return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0, kinCompliant));
+      return c.redirect(await welcomeHandoffUrl(kv, librarySessionToken, apiKey, user.login, false, number ?? 0, kinCompliant, rotateUrl));
     } catch (err: any) {
       console.error('GitHub callback error:', err);
       return c.html(authErrorHtml('something broke signing you in. please try again.'), 500);
@@ -768,6 +782,62 @@ export function registerRoutes(app: Hono) {
 
     logEvent('account_deleted', { github_login: account.github_login });
     return c.json({ ok: true, deleted: account.github_login });
+  });
+
+  // --- Lost-key self-serve rotation ---
+  //
+  // The only path to a new key once installed_at is stamped (re-OAuth
+  // deliberately mints none — see the needsKey comment in the callback). The
+  // action is explicit and OAuth-bound: the welcome page's "lost your key?"
+  // link carries a single-use code (rotate:<code> → account key, 10-min TTL)
+  // minted by a fresh OAuth callback — so rotation can never happen as a side
+  // effect of casual re-login, only from a deliberate click made minutes after
+  // proving GitHub ownership. setAuthIndex(new, key, previous) kills the old
+  // key in the same operation (the setAuthIndex contract) — a lost machine's
+  // stranded key stops resolving the moment the new one exists. Rate-limited
+  // 5/min/IP in worker.ts (PUBLIC_RATE_LIMITED_ROUTES).
+  app.get('/account/rotate-key', async (c) => {
+    const code = c.req.query('code') || '';
+    // randomBytes(24).hex = 48 chars; reject anything else before touching KV.
+    if (!/^[a-f0-9]{48}$/.test(code)) {
+      return c.html(authErrorHtml('this link isn’t valid — sign in again and use “lost your key?” on the welcome page.'), 400);
+    }
+    const kv = getKV();
+    const storeKey = await kv.get(`rotate:${code}`);
+    if (!storeKey) {
+      return c.html(authErrorHtml('this link has expired — sign in again and use “lost your key?” on the welcome page.'), 400);
+    }
+    await kv.delete(`rotate:${code}`); // single-use, burned even if the rest fails
+
+    const account = await loadAccount(storeKey) as Account | null;
+    if (!account) {
+      return c.html(authErrorHtml('account not found — please sign in again.'), 400);
+    }
+
+    // Same save-then-index order as the OAuth callback: the account blob holds
+    // the new hash before the auth index flips, so no window where the index
+    // resolves to a blob still carrying the old hash.
+    const newKey = generateApiKey();
+    const newHash = hashApiKey(newKey);
+    const previousHash = account.api_key_hash || null;
+    const updated = { ...account, api_key_hash: newHash } as Record<string, unknown>;
+    delete updated.api_key;
+    await saveAccount(storeKey, updated);
+    await setAuthIndex(newHash, storeKey, previousHash);
+    logEvent('api_key_rotated', { github_login: account.github_login });
+
+    // Show the standard connect command with the fresh key — same welcome
+    // handoff the magic-link install uses (routes the page + session cookie
+    // first-party so it sticks in Safari too).
+    const number = await assignAuthorNumber(account.github_login);
+    let kinCompliant = 0;
+    try { kinCompliant = (await countActiveKin(account.github_login)).compliant; } catch { /* D1 down — show 0 */ }
+    const sessionToken = randomBytes(24).toString('hex');
+    await kv.put(`library:session:${sessionToken}`, JSON.stringify({
+      account_key: storeKey,
+      github_login: account.github_login,
+    }), { expirationTtl: 30 * 24 * 60 * 60 });
+    return c.redirect(await welcomeHandoffUrl(kv, sessionToken, newKey, account.github_login, false, number ?? 0, kinCompliant));
   });
 
   // --- Subscription cancel / reactivate (save-screen) ---

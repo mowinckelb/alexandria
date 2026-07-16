@@ -3533,6 +3533,21 @@ export default function LandingPage({ brandClassName = '' }: Props) {
 
         }
 
+        /* Short phones (≤700px tall): at max scroll the closing block
+           (wordmark + quiet links + padding) fills the whole viewport and
+           parks the primary CTA under the fixed nav wordmark (measured
+           375×667: cta top 18px vs nav bottom 58px). Trim the closing
+           block's breath only here so the resting state leaves the CTA
+           clear. Spacing-only — order and peel untouched. */
+        @media (max-width: 899px) and (max-height: 700px) {
+          .wordmark-block {
+            margin-top: 24px;
+          }
+          .bottom-slide {
+            padding-bottom: 24px;
+          }
+        }
+
       `}</style>
     </div>
   );
