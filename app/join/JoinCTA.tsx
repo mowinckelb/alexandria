@@ -90,16 +90,18 @@ export default function JoinCTA({
         The tool was the free sample &mdash; the community is the whole thing.
       </h1>
 
-      {/* THE OFFER — the two simple facts, plain ink, no colour (founder
-          2026-07-17: "no colours like that… too loud… really simple"). The
-          reader's whole decision is here: it's free, just try it. */}
+      {/* THE OFFER — the two simple facts. "free" set in italic (not colour)
+          both times: draws the eye to the value AND adds intra-line style
+          contrast against the roman body (founder 2026-07-17: too flat, "all
+          the same font/style"). */}
       <div className="join-offer">
         <p className="join-offer-line">
-          The first month is free, so just try it &mdash; cancel anytime.
+          The first month is <span className="join-emph">free</span>, so just
+          try it &mdash; cancel anytime.
         </p>
         <p className="join-offer-line">
-          If you like it, get three friends to join, and it becomes free
-          indefinitely.
+          If you like it, get three friends to join, and it becomes{' '}
+          <span className="join-emph">free indefinitely</span>.
         </p>
       </div>
 
@@ -175,13 +177,17 @@ export default function JoinCTA({
 
         <JoinInterest refCode={effectiveRef || undefined} />
 
-        <p className="join-door join-door-link">
-          Don&rsquo;t have the free tool yet?{' '}
-          {/* Forward the validated ref so an invited visitor who takes the
-              free door still credits their inviter as kin on install. */}
-          <Link href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}>install it</Link>{' '}
-          &mdash; it&rsquo;ll take you here later.
-        </p>
+        {/* Install door — same shape as the other two (question label, answer
+            below) for consistency (founder 2026-07-17). */}
+        <div className="join-door">
+          <p className="join-door-q">don&rsquo;t have the free tool yet?</p>
+          <p className="join-door-answer">
+            {/* Forward the validated ref so an invited visitor who takes the
+                free door still credits their inviter as kin on install. */}
+            <Link href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}>install it</Link>{' '}
+            &mdash; it&rsquo;ll take you here later.
+          </p>
+        </div>
       </div>
     </>
   );

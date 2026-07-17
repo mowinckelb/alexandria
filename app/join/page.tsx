@@ -137,22 +137,25 @@ export default async function JoinPage({
           color: var(--accent); line-height: 1;
         }
 
-        /* THE HERO — a headline with real character, not a shout. Bigger than
-           the monochrome pass (which read "flat") but well below the loud 44px:
-           expressive italic, discretionary ligatures, wide measure so it holds
-           one graceful line-break. Ink only — the colour lives on the title. */
+        /* THE HERO — set in EB GARAMOND (not Spectral like the rest), so the
+           page carries two distinct faces (founder 2026-07-17: "all the same
+           font… looks flat"). EB Garamond's italic is markedly more
+           calligraphic than the body serif — the biggest single un-flattening
+           move. Expressive display: discretionary ligatures, contextual
+           alternates, old-style figures. Ink only; the colour lives on the
+           title. */
         .join-hero {
-          margin: 0 0 28px; max-width: 620px;
-          font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic; font-weight: 400;
-          font-size: clamp(27px, 1.5rem + 1.4vw, 33px); line-height: 1.22;
-          letter-spacing: -0.015em; color: var(--text-primary);
+          margin: 0 0 30px; max-width: 620px;
+          font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+          font-style: italic; font-weight: 500;
+          font-size: clamp(29px, 1.5rem + 1.7vw, 36px); line-height: 1.2;
+          letter-spacing: -0.005em; color: var(--text-primary);
           text-wrap: balance;
-          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "calt" 1;
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "calt" 1, "swsh" 1;
         }
 
-        /* THE OFFER — the two simple facts. Plain ink, a touch larger than
-           body so the decision reads before the fine print. */
+        /* THE OFFER — the two simple facts, roman body serif. "free" is set
+           italic (.join-emph) so an accent of style falls on the value. */
         .join-offer { max-width: 560px; margin: 0 0 32px; }
         .join-offer-line {
           margin: 0 0 10px;
@@ -161,6 +164,7 @@ export default async function JoinPage({
           color: var(--text-primary); text-wrap: pretty;
         }
         .join-offer-line:last-child { margin-bottom: 0; }
+        .join-emph { font-style: italic; letter-spacing: 0.01em; }
 
         /* THE $10 TRUTH — de-emphasised reassurance, clearly below the action. */
         .join-explain {
@@ -207,18 +211,24 @@ export default async function JoinPage({
           display: flex; flex-direction: column; gap: 26px;
         }
         .join-door { width: 100%; }
+        /* The three door questions — a small-caps tracked label (a different
+           texture from the flowing serif above; echoes the plum title's label
+           language but in muted ink). This is the bottom half's answer to
+           "flat / all the same style". */
         .join-door-q {
-          display: block; margin: 0 0 9px;
+          display: block; margin: 0 0 10px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic; font-size: 14px; letter-spacing: 0.01em;
-          color: var(--text-secondary, rgba(61, 54, 48, 0.7));
+          font-weight: 500; font-size: 12px; letter-spacing: 0.12em;
+          text-transform: lowercase; font-variant-caps: all-small-caps;
+          font-feature-settings: "smcp" 1, "kern" 1;
+          color: var(--text-muted); line-height: 1;
         }
         /* Underline field — border-bottom only, editorial not form-y. Capped
-           short (founder: the write/paste lines "are too long and look weird")
-           so the rule sits under the text, not across the whole column. */
+           SHORT (founder: the write/paste lines "are still way too long, looks
+           weird") so the rule sits just under the text. */
         .join-door-field {
           display: flex; align-items: baseline; gap: 12px;
-          max-width: 300px; width: 100%;
+          max-width: 240px; width: 100%;
         }
         .join-door-field input {
           flex: 1; min-width: 0; height: 34px; padding: 0 2px;
@@ -252,19 +262,20 @@ export default async function JoinPage({
           font-size: 14px; line-height: 1.7; font-style: italic;
           color: var(--text-secondary, rgba(61, 54, 48, 0.82));
         }
-        /* The install door — plain sentence with an inline link, no field. */
-        .join-door-link {
+        /* The install door's answer — sits BELOW its question (same shape as
+           the referral/email doors). Body serif with an inline link. */
+        .join-door-answer {
           margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic; font-size: 14px; line-height: 1.6; letter-spacing: 0.01em;
-          color: var(--text-secondary, rgba(61, 54, 48, 0.7));
+          font-size: 15px; line-height: 1.55; letter-spacing: 0.01em;
+          color: var(--text-primary);
         }
-        .join-door-link a {
-          font-style: normal; color: var(--text-primary);
+        .join-door-answer a {
+          color: var(--text-primary);
           text-decoration: underline; text-decoration-color: var(--text-muted, rgba(61, 54, 48, 0.4));
           text-underline-offset: 3px; text-decoration-thickness: 1px;
           transition: text-decoration-color 200ms;
         }
-        .join-door-link a:hover { text-decoration-color: var(--text-primary); }
+        .join-door-answer a:hover { text-decoration-color: var(--text-primary); }
 
         .primer-coda {
           margin: 56px 0 0; text-align: left; font-family: var(--font-serif), ui-serif, Georgia, serif;
