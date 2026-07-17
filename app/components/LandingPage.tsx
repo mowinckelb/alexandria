@@ -769,12 +769,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               and labels all explained what the words already say, so they
               are gone; hierarchy is size and air alone. */}
           <p className="front-lead">When ai can do everything humans can, what do we do?</p>
-          <div className="front-fork">
-            <p className="fork-line front-alex">Our answer is Alexandria &mdash;</p>
-            <p className="fork-line fork-ans">to explain why we must keep thinking, and how,</p>
-            <p className="fork-line fork-ans">to connect those who, even slightly, agree,</p>
-            <p className="fork-line fork-ans">to provide free tools so anyone can join.</p>
-          </div>
+          <p className="front-answer">our answer is alexandria<span className="front-answer-dot">.</span></p>
         </div>
         <div className="top-inner" />
         </div>
@@ -859,7 +854,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     flowing with no dividers between them. A lead paragraph
                     shows; a rotating caret reveals the rest. Accordion (one
                     open at a time) keeps the fixed stage bounded. */}
-                <p className="secs-kicker">on alexandria</p>
+                <p className="secs-kicker">On Alexandria</p>
                 <div className="secs">
                   {SECTIONS.map((s) => {
                     const isOpen = openPillar === s.title;
@@ -2684,17 +2679,21 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         /* The back kicker — a faint letter-plate title telling the reader
            what why/what/how refer to: the answer in full (front gives it
            in short). Sits where the sections' top margin was. */
+        /* Essay-title register (2026-07-17): proper caps 'On Alexandria'
+           (the essay convention), bigger than the why/what/how labels so it
+           clearly reads as the section's title, muted ink, on an elegant
+           hairline that spans only the words. */
         .secs-kicker {
           display: inline-block;
           align-self: flex-start;
           margin: 40px 0 0;
-          padding-bottom: 8px;
-          border-bottom: 1px solid var(--theme-border-soft);
+          padding-bottom: 10px;
+          border-bottom: 1px solid var(--theme-border);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 12px;
-          letter-spacing: 0.18em;
-          color: var(--theme-fg-faint);
+          font-size: 16px;
+          letter-spacing: 0.02em;
+          color: var(--theme-fg-muted);
         }
         /* The kicker travels with the sections in focus mode (hidden while
            a section is open so the open body owns the stage). */
@@ -2986,65 +2985,23 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           color: rgba(26, 19, 24, 0.78);
           text-wrap: balance;
         }
-        .front-fork { margin: 0; }
-        .fork-line {
-          margin: 0;
+        /* The answer (2026-07-17, direction B — restraint): the front is
+           just the question and this one line. Lowercase to match the
+           brand marks (wordmark, a. signature); italic gives it the quiet
+           reveal after the roman question; a generous breath sets it
+           apart. The dot is the wordmark's — roman, tight to the name. */
+        .front-answer {
+          margin: 40px 0 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 18.5px;
-          line-height: 1.5;
+          font-style: italic;
+          font-size: 21px;
+          line-height: 1.4;
           letter-spacing: 0.004em;
-          text-wrap: pretty;
+          color: rgba(26, 19, 24, 0.66);
         }
-        /* The losing path — dimmed, half-faded out of the frame; sits
-           close under the lead (same thought, fading). */
-        .fork-lose { color: rgba(26, 19, 24, 0.32); }
-        /* The turn — a full breath of air above marks the argument's
-           pivot (rhythm does the work, not another rule); ink and the
-           letter's italic voice lift it against the faded line above. */
-        .fork-win {
-          margin-top: 26px;
-          color: rgba(26, 19, 24, 0.78);
-          font-style: italic;
-        }
-        /* The offer line — the free-sample frame planted on slide one:
-           quieter and smaller than the win line (it's the footnote-sized
-           fact that shrinks the decision), set apart by a breath. */
-        .fork-offer {
-          margin-top: 16px;
-          font-size: 16px;
-          font-style: italic;
-          color: rgba(26, 19, 24, 0.55);
-        }
-        /* The second plate — mirrors "the question" above it (same
-           register, same hairline), a full breath apart so the front reads
-           as two mini-sections; carries the name so no sentence has to. */
-        .front-salutation-answer {
-          margin-top: 64px;
-        }
-        /* The founding line — the quiet hinge between question and list:
-           roman, a step smaller than the question, a full breath below
-           it. */
-        .front-alex {
-          margin: 48px 0 0;
-          font-family: var(--font-serif), ui-serif, Georgia, serif;
+        .front-answer-dot {
           font-style: normal;
-          font-size: 17px;
-          line-height: 1.58;
-          letter-spacing: 0.006em;
-          color: rgba(26, 19, 24, 0.6);
-        }
-        /* The three things — bare parallel verb-lines in the letter's
-           italic voice; their parallelism is the only structure needed. */
-        .fork-ans {
-          margin: 11px 0 0;
-          font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic;
-          font-size: 18.5px;
-          line-height: 1.5;
-          color: rgba(26, 19, 24, 0.72);
-        }
-        .front-alex + .fork-ans {
-          margin-top: 15px;
+          margin-left: -0.01em;
         }
         .cta-block {
           display: flex;
