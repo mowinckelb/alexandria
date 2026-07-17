@@ -792,7 +792,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               are gone; hierarchy is size and air alone. */}
           <p className="front-lead">When ai can do everything humans can, what do we do?</p>
           <div className="front-fork">
-            <p className="fork-line front-alex">Alexandria was founded to do three things.</p>
+            <p className="fork-line front-alex">Alexandria was founded with this question in mind &mdash; our answer comes in three parts.</p>
             <p className="fork-line fork-ans">explain why we must keep thinking &mdash; and how</p>
             <p className="fork-line fork-ans">connect those who, even slightly, agree</p>
             <p className="fork-line fork-ans">provide free tools so anyone can join</p>
