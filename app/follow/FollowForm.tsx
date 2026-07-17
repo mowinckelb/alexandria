@@ -146,21 +146,26 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
             spellCheck={false}
             aria-label="email"
           />
+          {/* Fixed min-width + a stable one-word label ("follow" / "support")
+              so the button never resizes as the amount changes — only the word
+              swaps, no reflow of the input beside it (founder 2026-07-17: don't
+              jitter/shift when sliding, just change the CTA seamlessly). The
+              live $ amount lives in the display below, not the button. */}
           <button
             type="button"
             onClick={handleSubmit}
             disabled={loading}
             className="follow-cta"
           >
-            {loading ? '…' : isHonorary ? `support $${amount}/mo` : 'follow'}
+            {loading ? '…' : isHonorary ? 'support' : 'follow'}
           </button>
         </div>
         {error ? <p className="follow-error">{error}</p> : null}
-        {isHonorary ? (
-          <p className="follow-checkout-note">
-            secure checkout on the next screen &mdash; cancel anytime.
-          </p>
-        ) : null}
+        {/* Always rendered (visibility toggled, not mounted) so showing/hiding
+            it never pushes the slider block down. */}
+        <p className="follow-checkout-note" style={{ visibility: isHonorary ? 'visible' : 'hidden' }}>
+          secure checkout on the next screen &mdash; cancel anytime.
+        </p>
 
         {/* Optional support — free by default; drag the slider to set a monthly
             amount, and the button above turns into the "support" action. */}
@@ -308,7 +313,7 @@ const styles = `
     75%      { transform: translateX(3px);  border-bottom-color: #b3261e; }
   }
   .follow-cta {
-    flex-shrink: 0;
+    flex-shrink: 0; min-width: 112px; text-align: center;
     padding: 11px 24px; border-radius: 9px;
     background: var(--text-primary); color: var(--bg-primary);
     font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 16px;
@@ -340,8 +345,11 @@ const styles = `
     font-size: 13.5px; line-height: 1.6; font-style: italic; letter-spacing: 0.01em;
     color: var(--text-muted, rgba(61, 54, 48, 0.6));
   }
+  /* min-height reserves the line so switching "free" ↔ "$X / month" never
+     shifts the slider below it. */
   .follow-amount {
     display: flex; align-items: baseline; gap: 9px; margin: 0 0 14px;
+    min-height: 30px;
   }
   .follow-amount-free {
     font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
