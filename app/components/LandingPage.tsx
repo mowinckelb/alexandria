@@ -738,18 +738,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               pair — the question / our answer — so the two halves visibly
               fit together; the answer is the name over its three functions,
               each under a faint mini header. All copy his, verbatim. */}
-          <p className="front-salutation">the question</p>
+          {/* Zero apparatus (2026-07-17, zero-inertia derivation): the
+              text performs its own structure — the question mark announces
+              the question, the founding line announces a list of three,
+              and three parallel verb-lines ARE the list. Plates, rules,
+              and labels all explained what the words already say, so they
+              are gone; hierarchy is size and air alone. */}
           <p className="front-lead">When ai can do everything humans can, what do we do?</p>
-          {/* The answer (founder, 2026-07-17): "our answer" plate, a
-              founding line that sets up a list of three, then the labeled
-              rows — verbs in the bare form (explain / connect / provide)
-              so each reads as one of the "three things in mind". */}
-          <p className="front-salutation front-salutation-answer">our answer</p>
           <div className="front-fork">
             <p className="fork-line front-alex">Alexandria was founded with three things in mind.</p>
-            <p className="front-fn"><span className="fn-label">idea</span><span className="fn-text">explain why we must keep thinking &mdash; and how</span></p>
-            <p className="front-fn"><span className="fn-label">community</span><span className="fn-text">connect those who, even slightly, agree</span></p>
-            <p className="front-fn"><span className="fn-label">sample</span><span className="fn-text">provide free tools so anyone can join</span></p>
+            <p className="fork-line fork-ans">explain why we must keep thinking &mdash; and how</p>
+            <p className="fork-line fork-ans">connect those who, even slightly, agree</p>
+            <p className="fork-line fork-ans">provide free tools so anyone can join</p>
           </div>
         </div>
         <div className="top-inner" />
@@ -2873,7 +2873,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           left: 118px;
           top: 50%;
           transform: translateY(-50%);
-          width: 348px;
+          width: 402px;
           text-align: left;
           z-index: 3;
           pointer-events: none;
@@ -2918,12 +2918,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         /* ─── The front trichotomy (2026-07-13) — form is content: the two
            losing doors dimmed, the way through alive. ─── */
         .front-lead {
-          margin: 0 0 14px;
+          margin: 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 20px;
-          line-height: 1.45;
-          letter-spacing: 0.004em;
-          color: rgba(26, 19, 24, 0.72);
+          font-size: 23px;
+          line-height: 1.42;
+          letter-spacing: 0.002em;
+          color: rgba(26, 19, 24, 0.78);
           text-wrap: balance;
         }
         .front-fork { margin: 0; }
@@ -2961,45 +2961,30 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .front-salutation-answer {
           margin-top: 64px;
         }
-        /* The founding line — ROMAN, same register as the question (the
-           two plate-sections rhyme: faint plate → roman statement → then
-           the italic material). Differentiates it from the three italic
-           rows below, which read as its subordinate list. */
+        /* The founding line — the quiet hinge between question and list:
+           roman, a step smaller than the question, a full breath below
+           it. */
         .front-alex {
-          margin: 0;
+          margin: 44px 0 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: normal;
-          font-size: 20px;
-          line-height: 1.45;
-          letter-spacing: 0.004em;
-          color: rgba(26, 19, 24, 0.72);
-          text-wrap: balance;
+          font-size: 17px;
+          line-height: 1.5;
+          letter-spacing: 0.006em;
+          color: rgba(26, 19, 24, 0.6);
         }
-        /* The three things — faint mini header over each, the row text in
-           the letter's italic voice, bare verbs continuing the founding
-           line above. */
-        .front-fn {
-          display: flex;
-          flex-direction: column;
-          gap: 1px;
-          margin: 15px 0 0;
-        }
-        /* A fuller break between the founding statement and its list. */
-        .front-alex + .front-fn {
-          margin-top: 24px;
-        }
-        .fn-label {
-          font-style: italic;
-          font-size: 11px;
-          letter-spacing: 0.18em;
-          color: rgba(26, 19, 24, 0.38);
-        }
-        .fn-text {
+        /* The three things — bare parallel verb-lines in the letter's
+           italic voice; their parallelism is the only structure needed. */
+        .fork-ans {
+          margin: 14px 0 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 17.5px;
+          font-size: 18.5px;
           line-height: 1.5;
-          color: rgba(26, 19, 24, 0.68);
+          color: rgba(26, 19, 24, 0.72);
+        }
+        .front-alex + .fork-ans {
+          margin-top: 22px;
         }
         .cta-block {
           display: flex;
