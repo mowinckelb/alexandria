@@ -361,7 +361,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       body: [
         'A private folder on your own computer holds what and how you think. Dump everything you have into it, and your ai ties it into one unified map of your mind — then works with you to fill the gaps, sharpen it, and get what only you know out into the world.',
         'Privacy is simple: the folder is just files on your computer. There’s no server, no account, and nothing is ever sent to anyone. It works with any ai, and it’s completely free.',
-        'The community is where alexandrians share their systems and what they’ve made with them. Joining costs about two coffees a month — or it’s free with friends.',
+        'The community is where alexandrians share their systems and what they’ve made with them. It’s free when you bring friends.',
       ],
     },
   ];
