@@ -742,7 +742,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           <p className="front-lead">When ai can do everything humans can, what do we do?</p>
           <p className="front-salutation front-salutation-answer">our answer</p>
           <div className="front-fork">
-            <p className="fork-line front-alex">Alexandria</p>
+            <p className="fork-line front-alex">alexandria.</p>
             <p className="front-fn"><span className="fn-label">idea</span><span className="fn-text">articulates our philosophy as an answer</span></p>
             <p className="front-fn"><span className="fn-label">community</span><span className="fn-text">connects those who, even slightly, agree</span></p>
             <p className="front-fn"><span className="fn-label">sample</span><span className="fn-text">provides infrastructure so anyone can join</span></p>
