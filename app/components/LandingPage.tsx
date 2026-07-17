@@ -305,42 +305,6 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   // Expandable overviews (accordion — one open at a time — so the fixed
   // back-slide stage can never overflow).
   const [openPillar, setOpenPillar] = useState<string | null>(null);
-  // Focus-mode controller — MOUSEMOVE only, never mouseenter/leave: focus
-  // mode moves the layout, and browsers dispatch hover-boundary events when
-  // elements shift under a stationary cursor, so enter/leave semantics
-  // self-trigger (the 2026-07-17 auto-cascade: hovering why slid the block
-  // up, what swept under the cursor, stole the open, reshuffled again).
-  // mousemove fires only on physical pointer movement — layout shifts are
-  // silent — and the settle lockout stops a moving pointer from switching
-  // sections mid-transition.
-  const focusLockUntil = useRef(0);
-  // Hover-intent: a section opens only when the pointer RESTS on it
-  // (~160ms), never on transit — a path crossing sections en route opens
-  // nothing, so the layout slide can't trap the wrong section under the
-  // cursor. The short post-change lock covers the animation window.
-  const focusPending = useRef<{ title: string | null; timer: ReturnType<typeof setTimeout> } | null>(null);
-  const handleSecsPointer = (e: React.MouseEvent) => {
-    const el = e.target as HTMLElement;
-    const sec = el.closest?.('.sec');
-    const title = sec?.getAttribute('data-sec') ?? null;
-    // Gaps inside the sections block keep the current state.
-    if (title === null && el.closest?.('.secs')) return;
-    if (title === openPillar) {
-      if (focusPending.current) { clearTimeout(focusPending.current.timer); focusPending.current = null; }
-      return;
-    }
-    if (Date.now() < focusLockUntil.current) return;
-    if (focusPending.current?.title === title) return;
-    if (focusPending.current) clearTimeout(focusPending.current.timer);
-    focusPending.current = {
-      title,
-      timer: setTimeout(() => {
-        focusPending.current = null;
-        focusLockUntil.current = Date.now() + 560;
-        setOpenPillar(title);
-      }, 160),
-    };
-  };
   // The founder's own text (2026-07-16) — his why/what/how, set verbatim
   // (mechanical cleanup only: typos, punctuation; no word choices touched).
   // Lead = each section's opening line as he wrote it; body = his remaining
@@ -823,7 +787,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               '<!-- with a fleeting thank you to fleetai.com -->',
           }}
         />
-        <div className="bottom-inner" onMouseMove={handleSecsPointer}>
+        <div className="bottom-inner">
           {/* TWO COLUMNS spanning full vertical height.
                 LEFT  : ornament (top, original padding-top preserved)
                         + wordmark/dict (bottom)
@@ -879,12 +843,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                         key={s.title}
                         data-sec={s.title}
                         className={`sec${isOpen ? ' is-open' : ''}`}
+                        onClick={() => setOpenPillar(isOpen ? null : s.title)}
                       >
                         <button
                           type="button"
                           className="sec-head"
                           aria-expanded={isOpen}
-                          onClick={() => setOpenPillar(isOpen ? null : s.title)}
                         >
                           <span className="sec-title">{s.title}</span>
                           <span className="sec-caret" aria-hidden />
@@ -2779,9 +2743,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             column-count: 2;
             column-gap: 30px;
           }
-          .sec-body-inner > p {
-            font-size: 13.5px;
-            line-height: 1.58;
+          /* Higher specificity than the base body rule below it in the
+             sheet (same selector in a media query loses on source order —
+             this bug shipped the 15px override unnoticed). */
+          .secs .sec .sec-body-inner > p {
+            font-size: 13px;
+            line-height: 1.52;
           }
           .sec-lead {
             max-height: 160px;
@@ -2815,18 +2782,19 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            container (or tapping elsewhere) clears it, so layout shifts
            can't break the state. */
         @media (min-width: 900px) {
-          /* min-height pins the container's hover footprint while its
-             content shrinks — otherwise the cursor can fall outside the
-             collapsed bounds and close what it just opened (the boundary
-             half of the 2026-07-17 glitch). */
-          .secs:has(.sec.is-open) { margin-top: 28px; min-height: 350px; }
-          .secs:has(.sec.is-open) .sec:not(.is-open) .sec-lead,
-          .secs:has(.sec.is-open) .sec:not(.is-open) .sec-head {
+          /* CLICK-driven focus (2026-07-17, after every hover variant
+             failed on real hardware — browsers dispatch hover-boundary
+             events on layout shift, and hidden siblings left nothing to
+             reach): heads stay VISIBLE as the switch targets; only the
+             sibling leads collapse; the block rises to make room. Clicks
+             have no cursor coupling, so movement can never cascade. */
+          .secs:has(.sec.is-open) { margin-top: 28px; }
+          .secs:has(.sec.is-open) .sec:not(.is-open) .sec-lead {
             max-height: 0;
             opacity: 0;
             margin: 0;
-            padding: 0;
           }
+          .sec { cursor: pointer; }
           /* The library·marketplace row is peripheral chrome — it yields
              during focus so a long open body's slide never collides. */
           .right-col:has(.sec.is-open) .quiet-links { opacity: 0; }
