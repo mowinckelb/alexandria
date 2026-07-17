@@ -80,56 +80,57 @@ export default function JoinCTA({
 
       <h1 className="primer-h1">become a founding member.</h1>
 
-      {/* Above the button: two lines only (founder note 2026-07-17, "wall of
-          text… just have them click, and the explanation is under"). The
-          click costs nothing — first month free — so that's all the reader
-          needs before clicking; the rest of the deal explains itself below,
-          consolidated to two short paragraphs in his voice. */}
+      {/* FOUNDER-WRITTEN COPY (2026-07-17, fifth pass — he dictated the whole
+          page; transcript cleaned, nothing invented). Above the button: the
+          sample→meal frame, first-month-free, and the three-friends deal.
+          Under the button: the $10 paragraph in his voice (worked up / penny
+          pincher! / a dollar there is a dollar here / supporting our project)
+          and the no-friends-no-dollars waive ending on "keep thinking,
+          together". His one open slot was "the full product (or dish, or
+          something idk)" — rendered as "the full meal" to complete the
+          supermarket-sample frame. */}
       <p className="primer-lede">
-        The tool is the free sample. This is the community around it.
+        The tool was the free sample &mdash; the community is the full meal.
       </p>
 
-      <p className="join-line">
-        The first month is free &mdash; cancel anytime, just try it and see
-        how you like it.
-      </p>
+      <div className="join-terms">
+        <p className="join-line">
+          The first month is free, so just try it &mdash; cancel anytime.
+        </p>
+        <p className="join-line">
+          If you like it, get three friends to join, and it becomes free
+          indefinitely.
+        </p>
+      </div>
 
       <a className="join-btn" href={joinUrl}>
         join with github
       </a>
 
-      {/* The explanation, under the click (his dictation, consolidated):
-          friends → free while they're on; otherwise $10, a tiny decision;
-          then the appeal + waive merged into one quieter paragraph. */}
       <p className="join-explain">
-        Then get your friends on it: if three join with your code, yours is
-        free for as long as they&rsquo;re on. Otherwise it&rsquo;s $10 a
-        month &mdash; don&rsquo;t overthink the 10. One Uber ride, two
-        coffees, a package delivery charge.
+        After the month, if you haven&rsquo;t found three friends, it&rsquo;s
+        $10 a month. Now, before you get yourself worked up &mdash;
+        that&rsquo;s the same as two coffees a month, one Uber ride, or even
+        a package delivery charge. So don&rsquo;t be a penny pincher! A
+        dollar there is the same as a dollar here, but at least here
+        you&rsquo;re supporting our project and trying to help people out.
       </p>
       <p className="join-waive">
-        This is my project &mdash; we want as many people thinking as
-        possible. So please don&rsquo;t decide this is where you start being
-        a penny pincher; but if $10 is genuinely difficult and the three
-        friends aren&rsquo;t happening,{' '}
+        And if you don&rsquo;t have any friends and don&rsquo;t have ten
+        dollars,{' '}
         <a href="mailto:benmowinckel@gmail.com?subject=waive%20it">message me</a>{' '}
-        and I&rsquo;ll waive it.
+        and I&rsquo;ll waive it for you &mdash; I just want people to keep
+        thinking, together.
       </p>
 
-      {/* The fine print — everything that isn't the deal, grouped under one
-          hairline like /start's details zone: tool-free-forever, the
-          founding-bet honesty (2026-07-09 verdict, kept), and the
-          have-a-code field for someone told a code with no ?ref= link
-          (live-validated; when valid the code rides the join URL above). */}
+      {/* The fine print — his three questions under one hairline, each an
+          exit for a different reader: the invitee (code field, live-validated;
+          when valid the code rides the join URL above), the not-joining
+          (JoinInterest email capture), and the no-tool-yet (/start). */}
       <div className="join-details">
-        <p>
-          You&rsquo;re never paying for the tool &mdash; that&rsquo;s yours,
-          free forever. And it&rsquo;s early: you&rsquo;re founding the
-          community, not joining it finished.
-        </p>
         <div className="join-code">
           <label className="join-code-label" htmlFor="join-code-input">
-            have a referral code?
+            been referred by a friend?
           </label>
           <div className="join-code-row">
             <input
@@ -139,8 +140,8 @@ export default function JoinCTA({
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
-              placeholder="their github username"
-              aria-label="referral code (a github username)"
+              placeholder="referral code"
+              aria-label="referral code (their github username)"
               value={typedRef}
               onChange={(e) => setTypedRef(e.target.value)}
             />
@@ -156,17 +157,19 @@ export default function JoinCTA({
               </span>
             )}
           </div>
+          <p className="join-code-hint">you&rsquo;ll get your own after joining.</p>
         </div>
+
+        <JoinInterest refCode={effectiveRef || undefined} />
+
+        <p className="join-secondary">
+          Don&rsquo;t have the free tool yet?{' '}
+          {/* Forward the validated ref so an invited visitor who takes the
+              free door still credits their inviter as kin on install. */}
+          <Link href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}>Install it</Link>{' '}
+          &mdash; it&rsquo;ll take you back here after.
+        </p>
       </div>
-
-      <JoinInterest refCode={effectiveRef || undefined} />
-
-      <p className="join-secondary">
-        Here for the free tool? You don&rsquo;t need this &mdash;{' '}
-        {/* Forward the validated ref so an invited visitor who takes the
-            free door still credits their inviter as kin on install. */}
-        <Link href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}>install it in one line</Link>.
-      </p>
     </>
   );
 }

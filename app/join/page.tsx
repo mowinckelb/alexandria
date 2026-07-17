@@ -9,7 +9,7 @@ export const metadata = pageMetadata({
   path: '/join',
   title: 'join alexandria.',
   description:
-    'first month free; free for good when three friends join with your code; otherwise $10 — one uber ride, or two coffees a month. become a founding member.',
+    'the tool was the free sample — the community is the full meal. first month free; three friends = free indefinitely; otherwise $10 — two coffees a month. become a founding member.',
 });
 
 // The founding-member JOIN — the paid half of the two things. The tool (the run)
@@ -17,16 +17,18 @@ export const metadata = pageMetadata({
 // marketplace, the tribe. Signing in with GitHub starts the trial ($10/mo, first
 // month free, free with 3 kin, or email-to-waive) and assigns your number.
 //
-// The structure is CLICK-FIRST (founder note 2026-07-17, fourth pass — the
-// full narrative above the button was "a wall of text"): above the button
-// only the orienting line and "the first month is free — just try it";
-// the rest of his dictation sits UNDER the click, consolidated to two short
-// paragraphs — friends on = free while they're on, otherwise $10 (one Uber,
-// two coffees, a package delivery charge, don't overthink it), then the
-// appeal + waive merged (my project, as many people thinking as possible,
-// don't start penny-pinching here, genuine-hardship waive). Everything else
-// — tool-free-forever, the founding-bet honesty (2026-07-09 verdict), the
-// have-a-code field — sits below a hairline like /start's fine print. No roster pitch from the outside (who's in is visible
+// The copy is FOUNDER-WRITTEN (2026-07-17, fifth pass — he dictated the
+// whole page; near-verbatim, transcript cleaned). Above the button: the
+// sample→full-meal frame, first-month-free-just-try-it, three-friends =
+// free indefinitely. Under the button: his $10 paragraph (before you get
+// yourself worked up / two coffees, one Uber, a package delivery charge /
+// don't be a penny pincher! / a dollar there is a dollar here, but here
+// you're supporting our project) and the no-friends-no-dollars waive ending
+// on "keep thinking, together". Fine print under one hairline is his three
+// questions: been referred by a friend? (code field) · don't want the
+// community? (JoinInterest email) · don't have the free tool yet? (/start).
+// "The full meal" fills his open slot ("the full product (or dish, or
+// something idk)"). No roster pitch from the outside (who's in is visible
 // once you're in, never the sell). A "no" has its own path: the JoinInterest
 // email capture below the fine print — every decline leaves a contactable
 // address (the reach the community gets recruited from).
@@ -146,13 +148,15 @@ export default async function JoinPage({
           text-wrap: pretty;
         }
 
-        /* The one line above the button — the click costs nothing. */
+        /* The two lines above the button — try it free, three friends = free. */
+        .join-terms { max-width: 460px; }
         .join-line {
-          margin: 0;
+          margin: 0 0 12px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 17px; line-height: 1.55; letter-spacing: 0.01em;
           color: var(--text-primary); text-wrap: pretty; max-width: 460px;
         }
+        .join-line:last-child { margin-bottom: 0; }
         /* The explanation under the click — the rest of the deal, one step
            quieter than the line above. */
         .join-explain {
@@ -189,22 +193,23 @@ export default async function JoinPage({
         .join-btn:hover { opacity: 0.85; }
         .join-btn:active { transform: scale(0.99); }
 
-        /* The fine print — everything that isn't the deal, under one hairline
-           (mirrors /start's details zone). */
+        /* The fine print — his three questions under one hairline (mirrors
+           /start's details zone): referred? · don't want the community? ·
+           don't have the tool yet? */
         .join-details {
-          margin: 36px 0 0; padding-top: 24px; width: 100%; max-width: 460px;
+          margin: 36px 0 0; padding-top: 26px; width: 100%; max-width: 460px;
           border-top: 1px solid var(--bg-tertiary, rgba(26, 19, 24, 0.10));
         }
-        .join-details > p {
-          margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 13px; line-height: 1.6; letter-spacing: 0.01em;
-          color: var(--text-muted, rgba(26, 19, 24, 0.55));
-        }
 
-        /* Have-a-referral-code field — subtle by design: it sits in the fine
+        /* Referred-by-a-friend field — subtle by design: it sits in the fine
            print for the person told a code with no ?ref= link, and must never
            compete with the button. Small label, low-contrast, single line. */
-        .join-code { margin: 18px 0 0; max-width: 450px; width: 100%; }
+        .join-code { margin: 0; max-width: 450px; width: 100%; }
+        .join-code-hint {
+          margin: 8px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic; font-size: 12.5px; letter-spacing: 0.02em;
+          color: var(--text-muted, rgba(26, 19, 24, 0.5));
+        }
         .join-code-label {
           display: block; margin: 0 0 8px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -230,7 +235,7 @@ export default async function JoinPage({
         /* Decline path — quiet by design: the escape hatch must not compete
            with the join button. Input/button heights matched; 16px input font
            so iOS Safari doesn't zoom on focus. */
-        .join-interest { margin: 36px 0 0; max-width: 450px; width: 100%; }
+        .join-interest { margin: 26px 0 0; max-width: 450px; width: 100%; }
         .join-interest-lede {
           margin: 0 0 12px; font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 14px; line-height: 1.7; letter-spacing: 0.01em;
@@ -266,7 +271,7 @@ export default async function JoinPage({
         }
 
         .join-secondary {
-          margin: 28px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          margin: 26px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 14px; line-height: 1.6; color: var(--text-muted, rgba(26, 19, 24, 0.55));
           text-align: left;
         }

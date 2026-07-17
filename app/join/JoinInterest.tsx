@@ -44,8 +44,8 @@ export default function JoinInterest({ refCode }: { refCode?: string }) {
   return (
     <div className="join-interest">
       <p className="join-interest-lede">
-        Not now? Leave your email and carry on free &mdash; you&rsquo;ll hear
-        from us as the community grows.
+        Don&rsquo;t want the community? Leave your email to continue on your
+        own.
       </p>
       <form className="join-interest-row" onSubmit={send}>
         <input
