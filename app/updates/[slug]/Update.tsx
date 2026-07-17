@@ -4,8 +4,13 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Update, UpdateMeta } from '../../lib/updates';
-import { INK, PAPER, INK_MUTED, INK_FAINT, RULE } from '../../lib/palette';
+import { ThemeToggle } from '../../components/ThemeToggle';
 
+// The single-update reader — rebuilt onto the shared primer skeleton (founder
+// 2026-07-17, funnel-consistency sweep): CSS-var theme (dark mode now works),
+// flush-left spine, brand header, ThemeToggle. Was on the old hardcoded palette
+// (styled-jsx, light-only) with the "a." watermark chrome. Content structure —
+// meta, title, optional YouTube embed, markdown body, prev/next nav — unchanged.
 export default function UpdatePage({
   update,
   chronological,
@@ -14,214 +19,178 @@ export default function UpdatePage({
   chronological: UpdateMeta[];
 }) {
   return (
-    <main className="update-root">
-      <Link href="/" className="nav-brand" aria-label="alexandria">
-        <em>alexandria</em>
-        <span className="nav-dot">.</span>
-      </Link>
+    <div className="primer-page">
+      <ThemeToggle />
 
-      <article className="update">
-        <header className="update-head">
-          <p className="update-meta">
-            <Link href="/updates" className="update-meta-link">updates</Link>
-            <span className="update-meta-sep"> · </span>
-            <span className="update-slug">{update.slug}</span>
-            {update.date ? (
-              <>
-                <span className="update-meta-sep"> · </span>
-                <span className="update-date">{update.date}</span>
-              </>
-            ) : null}
-          </p>
-          <h1 className="update-title">{update.subject}</h1>
-        </header>
+      <header className="primer-header">
+        <Link href="/" className="primer-brand">
+          alexandria<span className="primer-brand-dot">.</span>
+        </Link>
+      </header>
 
-        {update.youtube ? (
-          <div className="update-video">
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${update.youtube}`}
-              title={update.subject}
-              loading="lazy"
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
+      <main className="primer-main">
+        <article className="update">
+          <header className="update-head">
+            <p className="update-meta">
+              <Link href="/updates" className="update-meta-link">updates</Link>
+              <span className="update-meta-sep"> &middot; </span>
+              <span className="update-slug">{update.slug}</span>
+              {update.date ? (
+                <>
+                  <span className="update-meta-sep"> &middot; </span>
+                  <span className="update-date">{update.date}</span>
+                </>
+              ) : null}
+            </p>
+            <h1 className="update-title">{update.subject}</h1>
+          </header>
+
+          {update.youtube ? (
+            <div className="update-video">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${update.youtube}`}
+                title={update.subject}
+                loading="lazy"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          ) : null}
+
+          <div className="update-body">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{update.body}</ReactMarkdown>
           </div>
-        ) : null}
 
-        <div className="update-body">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{update.body}</ReactMarkdown>
-        </div>
+          {chronological.length > 1 ? (
+            <nav className="update-nav" aria-label="other updates">
+              {chronological.map((u, i) => (
+                <span key={u.slug} className="update-nav-item">
+                  {u.slug === update.slug ? (
+                    <strong>{u.slug}</strong>
+                  ) : (
+                    <Link href={`/updates/${u.slug}`}>{u.slug}</Link>
+                  )}
+                  {i < chronological.length - 1 ? <span className="update-nav-sep"> &middot; </span> : null}
+                </span>
+              ))}
+            </nav>
+          ) : null}
+        </article>
+      </main>
 
-        {chronological.length > 1 ? (
-          <nav className="update-nav" aria-label="other updates">
-            {chronological.map((u, i) => (
-              <span key={u.slug} className="update-nav-item">
-                {u.slug === update.slug ? (
-                  <strong>{u.slug}</strong>
-                ) : (
-                  <Link href={`/updates/${u.slug}`}>{u.slug}</Link>
-                )}
-                {i < chronological.length - 1 ? <span className="update-nav-sep"> · </span> : null}
-              </span>
-            ))}
-          </nav>
-        ) : null}
-      </article>
-
-      <span className="watermark" aria-hidden><em>a.</em></span>
-
-      <style jsx>{`
-        :global(html), :global(body) { background: ${PAPER}; }
-        .update-root {
-          position: relative;
-          min-height: 100vh;
-          min-height: 100dvh;
-          background: ${PAPER};
-          color: ${INK};
-          font-family: var(--font-eb-garamond), Georgia, 'Times New Roman', serif;
-          -webkit-font-smoothing: antialiased;
-        }
-        .nav-brand {
-          position: fixed;
-          top: 12px;
-          left: calc(clamp(24px, 6vw, 120px) - 8px);
-          z-index: 10;
-          font-style: italic;
-          font-weight: 500;
-          font-size: 28px;
-          line-height: 1;
-          color: ${INK};
-          text-decoration: none;
-          display: inline-flex;
-          align-items: baseline;
-          padding: 10px 8px;
-          transition: opacity 200ms ease;
-        }
-        .nav-brand:hover { opacity: 0.7; }
-        .nav-brand :global(em) { font-style: italic; }
-        .nav-brand .nav-dot {
-          font-style: normal;
-          display: inline-block;
-          animation: dotBreathe 3.2s ease-in-out infinite;
-        }
-        @keyframes dotBreathe {
-          0%, 100% { opacity: 1; }
-          50%      { opacity: 0.42; }
-        }
-        .update {
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 128px clamp(24px, 6vw, 80px) 96px;
-        }
-        .update-head {
-          margin-bottom: 40px;
-        }
-        .update-meta {
-          margin: 0 0 14px;
-          font-size: 13px;
-          color: ${INK_MUTED};
-          letter-spacing: 0.02em;
-          font-style: italic;
-        }
-        .update-meta-link {
-          color: ${INK_MUTED};
-          text-decoration: none;
-          border-bottom: 1px solid ${INK_FAINT};
-          padding-bottom: 1px;
-        }
-        .update-meta-link:hover { color: ${INK}; }
-        .update-meta-sep { color: ${INK_FAINT}; font-style: normal; }
-        .update-slug { font-variant-numeric: tabular-nums; }
-        .update-date { font-variant-numeric: tabular-nums; }
-        .update-title {
-          font-size: 32px;
-          font-weight: 400;
-          letter-spacing: -0.015em;
-          line-height: 1.2;
-          margin: 0;
-        }
-        .update-video {
-          position: relative;
-          padding-bottom: 56.25%;
-          height: 0;
-          margin: 0 0 40px;
-          background: rgba(26, 19, 24, 0.04);
-          border-radius: 2px;
-          overflow: hidden;
-        }
-        .update-video :global(iframe) {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          border: 0;
-        }
-        .update-body {
-          font-size: 19px;
-          line-height: 1.7;
-          color: ${INK};
-        }
-        .update-body :global(p) { margin: 0 0 1.4em; }
-        .update-body :global(em) { font-style: italic; }
-        .update-body :global(strong) { font-weight: 600; }
-        .update-body :global(a) {
-          color: ${INK};
-          text-decoration: none;
-          border-bottom: 1px solid ${RULE};
-        }
-        .update-body :global(a:hover) { border-bottom-color: ${INK}; }
-        .update-body :global(hr) {
-          border: none;
-          border-top: 1px solid ${RULE};
-          margin: 2.2em 0;
-        }
-        .update-body :global(blockquote) {
-          margin: 1.4em 0;
-          padding-left: 18px;
-          border-left: 2px solid ${RULE};
-          color: ${INK_MUTED};
-          font-style: italic;
-        }
-        .update-nav {
-          margin-top: 56px;
-          padding-top: 24px;
-          border-top: 1px solid ${RULE};
-          font-size: 14px;
-          color: ${INK_MUTED};
-          letter-spacing: 0.02em;
-          font-variant-numeric: tabular-nums;
-        }
-        .update-nav :global(a) {
-          color: ${INK_MUTED};
-          text-decoration: none;
-          transition: color 200ms ease;
-        }
-        .update-nav :global(a:hover) { color: ${INK}; }
-        .update-nav :global(strong) {
-          color: ${INK};
-          font-weight: 500;
-        }
-        .update-nav-sep { color: ${INK_FAINT}; }
-        .watermark {
-          position: fixed;
-          bottom: 22px;
-          right: clamp(24px, 6vw, 120px);
-          z-index: 10;
-          font-size: 22px;
-          font-style: italic;
-          color: ${INK};
-          pointer-events: none;
-        }
-        .watermark :global(em) { font-style: italic; }
-        @media (max-width: 600px) {
-          .nav-brand { font-size: 24px; top: 8px; left: 14px; }
-          .watermark { font-size: 20px; bottom: 18px; right: 22px; }
-          .update { padding: 104px 24px 80px; }
-          .update-title { font-size: 26px; }
-          .update-body { font-size: 17px; }
-        }
-      `}</style>
-    </main>
+      <style>{styles}</style>
+    </div>
   );
 }
+
+const styles = `
+  .primer-page {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    background-image:
+      radial-gradient(ellipse 120% 80% at 30% 20%, rgba(91, 31, 71, 0.025) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 70% at 70% 80%, rgba(74, 50, 30, 0.020) 0%, transparent 60%);
+    animation: primerFadeIn 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  @keyframes primerFadeIn {
+    0% { opacity: 0; transform: translateY(6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .primer-header { padding: 28px 32px 0; }
+  .primer-brand {
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-style: italic; font-weight: 400; font-size: 21px;
+    color: var(--text-primary); text-decoration: none;
+    letter-spacing: 0.005em; transition: opacity 220ms ease;
+    display: inline-block; padding: 10px 8px; margin: -10px -8px;
+  }
+  .primer-brand:hover { opacity: 0.6; }
+  .primer-brand-dot { font-style: normal; }
+
+  .primer-main {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: flex-start; justify-content: flex-start;
+    max-width: 680px; margin: 0 auto; padding: clamp(3rem, 9vh, 6rem) 40px 6rem; width: 100%;
+  }
+  .update { width: 100%; max-width: 620px; }
+
+  .update-head { margin-bottom: 36px; }
+  .update-meta {
+    margin: 0 0 14px; font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: 12.5px; color: var(--text-muted); letter-spacing: 0.03em; font-style: italic;
+    font-variant-caps: all-small-caps; text-transform: lowercase;
+  }
+  .update-meta-link {
+    color: var(--text-muted); text-decoration: none;
+    border-bottom: 1px solid var(--bg-tertiary, rgba(61, 54, 48, 0.2)); padding-bottom: 1px;
+    transition: color 200ms;
+  }
+  .update-meta-link:hover { color: var(--text-primary); }
+  .update-meta-sep { color: var(--text-muted); font-style: normal; opacity: 0.6; }
+  .update-slug, .update-date { font-variant-numeric: tabular-nums; }
+
+  .update-title {
+    margin: 0; font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+    font-style: italic; font-weight: 400;
+    font-size: clamp(28px, 1.6rem + 1.4vw, 34px); line-height: 1.2;
+    letter-spacing: -0.015em; color: var(--text-primary); text-wrap: balance;
+  }
+
+  .update-video {
+    position: relative; padding-bottom: 56.25%; height: 0; margin: 32px 0 8px;
+    background: var(--bg-secondary); border-radius: 4px; overflow: hidden;
+  }
+  .update-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+  .update-body {
+    margin-top: 32px; font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: 18px; line-height: 1.72; color: var(--text-secondary);
+    font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
+  }
+  .update-body p { margin: 0 0 1.4em; text-wrap: pretty; }
+  .update-body em { font-style: italic; color: var(--text-primary); }
+  .update-body strong { font-weight: 600; color: var(--text-primary); }
+  .update-body a {
+    color: var(--text-primary); text-decoration: underline;
+    text-decoration-color: var(--text-muted, rgba(61, 54, 48, 0.4));
+    text-underline-offset: 3px; text-decoration-thickness: 1px; transition: text-decoration-color 200ms;
+  }
+  .update-body a:hover { text-decoration-color: var(--text-primary); }
+  .update-body h2, .update-body h3 {
+    font-weight: 500; color: var(--text-primary); letter-spacing: -0.01em;
+    margin: 1.6em 0 0.5em; line-height: 1.3;
+  }
+  .update-body h2 { font-size: 22px; }
+  .update-body h3 { font-size: 19px; }
+  .update-body hr { border: none; border-top: 1px solid var(--bg-tertiary, rgba(61, 54, 48, 0.14)); margin: 2.2em 0; }
+  .update-body blockquote {
+    margin: 1.4em 0; padding-left: 18px;
+    border-left: 2px solid var(--bg-tertiary, rgba(61, 54, 48, 0.18));
+    color: var(--text-muted); font-style: italic;
+  }
+  .update-body ul, .update-body ol { margin: 0 0 1.4em; padding-left: 1.4em; }
+  .update-body li { margin: 0 0 0.5em; }
+
+  .update-nav {
+    margin-top: 52px; padding-top: 24px;
+    border-top: 1px solid var(--bg-tertiary, rgba(61, 54, 48, 0.14));
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: 14px; color: var(--text-muted); letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .update-nav a { color: var(--text-muted); text-decoration: none; transition: color 200ms ease; }
+  .update-nav a:hover { color: var(--text-primary); }
+  .update-nav strong { color: var(--text-primary); font-weight: 500; }
+  .update-nav-sep { color: var(--text-muted); opacity: 0.6; }
+
+  @media (max-width: 640px) {
+    .primer-main { padding: 2.5rem 24px 4rem; }
+    .update-title { font-size: 25px; }
+    .update-body { font-size: 17px; }
+  }
+`;
