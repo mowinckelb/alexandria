@@ -206,9 +206,9 @@ export default async function JoinPage({
            control (no boxes), evenly spaced so the eye can pick its exit in
            one scan. This is the "simple to navigate" the founder asked for. */
         .join-doors {
-          margin: 42px 0 0; padding-top: 30px; width: 100%; max-width: 600px;
+          margin: 48px 0 0; padding-top: 34px; width: 100%; max-width: 600px;
           border-top: 1px solid var(--bg-tertiary, rgba(61, 54, 48, 0.12));
-          display: flex; flex-direction: column; gap: 26px;
+          display: flex; flex-direction: column; gap: 40px;
         }
         .join-door { width: 100%; }
         /* The three door questions — a small-caps tracked label (a different
@@ -270,6 +270,23 @@ export default async function JoinPage({
           from { opacity: 0; transform: translateX(-5px); }
           to { opacity: 1; transform: none; }
         }
+
+        /* Install row — a link dressed as a field so it reads like the other
+           two: an underlined "value" ("the free tool") + the launch action.
+           .join-door-faux mirrors the input's border-bottom and metrics. */
+        .join-door-launchrow { text-decoration: none; cursor: pointer; }
+        .join-door-faux {
+          display: inline-flex; align-items: center; flex: none;
+          height: 32px; padding: 0 1px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 15px;
+          color: var(--text-secondary, rgba(61, 54, 48, 0.72));
+          border-bottom: 1px solid var(--text-muted, rgba(61, 54, 48, 0.3));
+          transition: color 200ms, border-color 200ms;
+        }
+        .join-door-launchrow:hover .join-door-faux {
+          color: var(--text-primary); border-bottom-color: var(--text-secondary, rgba(61, 54, 48, 0.7));
+        }
+        .join-door-launchrow:hover .join-door-go { color: var(--text-primary); }
 
         .join-door-hint {
           margin: 9px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
