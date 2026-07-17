@@ -170,7 +170,7 @@ export default function FollowForm({ initialDone }: { initialDone: boolean }) {
         {/* Optional support — free by default; drag the slider to set a monthly
             amount, and the button above turns into the "support" action. */}
         <div className="follow-support">
-          <p className="follow-support-q">It&rsquo;s free either way &mdash; drag the slider if you&rsquo;d like to support the project.</p>
+          <p className="follow-support-q">Following is free &mdash; drag the slider if you&rsquo;d like to support the project.</p>
           <div className="follow-amount">
             {amount === 0 ? (
               <span className="follow-amount-free"><em>free</em></span>
