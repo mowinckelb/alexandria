@@ -162,23 +162,18 @@ const THEMES: Theme[] = [
 // email on mobile). One scalable door — new agents, deep links, and flows
 // land on /start without ever touching this button again.
 // Label history: "join the tribe" → "try it free" (07-09) → "join the
-// tribe" (07-13) → "take it — it's free" (2026-07-15, the free-sample
-// frame): the button IS the biggest frame-setter on the page, and an
-// identity label ("join") re-inflates the decision the whole page works
-// to shrink. The sample frame demands the button name the tiny free grab.
+// tribe" (07-13) → "take it — it's free" (2026-07-15) → "free sample"
+// (2026-07-16, founder): the button names the thing itself, and the sub
+// carries his even-slightly-interested test — the pair with the ghost
+// CTA covers product-interest and company-interest as parallel doors.
 function HomeInstall() {
   return (
     <div className="cta-block">
       <Link href="/start" className="install-cta">
-        take it &mdash; it&rsquo;s free
+        free sample
       </Link>
-      {/* Sub = defuse the PRESS, not describe the product (2026-07-15
-          simulation pass): the last flinch before any unknown button is
-          "what happens when I click — a wizard? a signup?" The sub answers
-          the next ten seconds. All three claims true: setup is one pasted
-          command, the free tool needs no account, install runs ~5 min. */}
       <span className="cta-sub">
-        one command, no account &mdash; five minutes
+        if even slightly interested in the product &mdash; just try it
       </span>
     </div>
   );
@@ -337,7 +332,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
     },
     {
       title: 'how',
-      lead: 'Your private Alexandria folder connects to your ai so that it can follow your instructions and use what it knows about you.',
+      lead: 'Connect an Alexandria folder to your ai so it knows your thinking and how to use it.',
       body: [
         'A local, private, custom folder is made on your own computer — containing files of everything your ai already knows about what and how you think, and instruction files on how your ai should read/write to these files to update, develop, and use them.',
         'Dump all the data you have into this one folder so your ai can tie together everything and extract all the messy connections into one unified map of your mind — to know where you currently stand, and then help you get to where you want to go: actively chatting with you to fill in any gaps, analyzing connections you might have never seen, showing you new ideas it now knows you’d find interesting, stopping you from forgetting details that might drift, and synthesizing the unique knowledge you have so that you can get it out into the world.',
@@ -739,22 +734,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               letter, not floating lines: a small salutation over a hairline
               anchors the composition (background layer: "what kind of thing
               is this"); the beats below carry the argument (foreground). */}
-          <p className="front-salutation">to the reader</p>
-          {/* The founder's own text (2026-07-16, verbatim — his rewrite after
-              six agent passes): the question, then the name, then the three
-              functions with their labels set in the letter-plate register.
-              The labels mirror the back's section-title style (visual
-              rhyme); each function line is his sentence, unedited. */}
+          {/* The front as two mini-sections (founder, 2026-07-16): a plate
+              pair — the question / our answer — so the two halves visibly
+              fit together; the answer is the name over its three functions,
+              each under a faint mini header. All copy his, verbatim. */}
+          <p className="front-salutation">the question</p>
           <p className="front-lead">When ai can do everything humans can, what do we do?</p>
+          <p className="front-salutation front-salutation-answer">our answer</p>
           <div className="front-fork">
-            {/* The answer (founder, 2026-07-16): one line, answering both
-                readings of the question — what shall we do / what remains
-                ours to do. */}
-            <p className="fork-line fork-win">We keep thinking &mdash; and use ai to help us do it.</p>
             <p className="fork-line front-alex">Alexandria</p>
-            <p className="fork-line front-fn"><span className="fn-label">idea</span><span>articulates our philosophy as an answer</span></p>
-            <p className="fork-line front-fn"><span className="fn-label">community</span><span>connects those who, even slightly, agree</span></p>
-            <p className="fork-line front-fn"><span className="fn-label">sample</span><span>provides infrastructure so anyone can join</span></p>
+            <p className="front-fn"><span className="fn-label">idea</span><span className="fn-text">articulates our philosophy as an answer</span></p>
+            <p className="front-fn"><span className="fn-label">community</span><span className="fn-text">connects those who, even slightly, agree</span></p>
+            <p className="front-fn"><span className="fn-label">sample</span><span className="fn-text">provides infrastructure so anyone can join</span></p>
           </div>
         </div>
         <div className="top-inner" />
@@ -865,16 +856,25 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     single action beat below. */}
                 <div className="secs-rule" aria-hidden />
 
-                {/* The close — the founder's own sample paragraph
-                    (2026-07-16, verbatim). */}
-                <p className="statement-beat action-beat">
-                  <em>See this as a free food sample at the supermarket. The
-                  only reason you&rsquo;d say no is if you&rsquo;re allergic&hellip;
-                  reading this is proof you&rsquo;re interested enough to try.
-                  If you don&rsquo;t like it, bin it. This should be the
-                  smallest decision you make all day. Just try the free
-                  sample, and see how you like it.</em>
-                </p>
+                {/* The close — the founder's sample paragraph, split into
+                    three beats (founder, 2026-07-16: "split up the text
+                    under the line so that its maximally engaging"):
+                    the frame / the punch / the action. */}
+                <div className="action-close">
+                  <p className="statement-beat action-beat">
+                    <em>See this as a free food sample at the supermarket.
+                    The only reason you&rsquo;d say no is if you&rsquo;re
+                    allergic&hellip; reading this is proof you&rsquo;re
+                    interested enough to try.</em>
+                  </p>
+                  <p className="statement-beat action-beat">
+                    <em>If you don&rsquo;t like it, bin it. This should be
+                    the smallest decision you make all day.</em>
+                  </p>
+                  <p className="statement-beat action-beat action-beat-final">
+                    <em>Just try the free sample, and see how you like it.</em>
+                  </p>
+                </div>
 
                 <div className="cta-pair">
                   <HomeInstall />
@@ -886,10 +886,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                         binary. Label names the transaction (07-09 field
                         data: "stay close" was unparseable). */}
                     <Link href="/follow" className="lr-cta lr-cta-ghost">
-                      keep me posted
+                      show support
                     </Link>
                     <span className="cta-sub">
-                      just your email &mdash; watch us build
+                      if even slightly interested in the company &mdash; founder updates
                     </span>
                   </div>
                 </div>
@@ -2666,12 +2666,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           text-align: left;
         }
         .sec:first-child .sec-head { margin-top: 0; }
+        /* Section titles lifted from whisper to voice (founder, 2026-07-16:
+           "bigger and more engaging") — the why/what/how are now the
+           slide's landmarks; the leads and bodies stay small beneath. */
         .sec-title {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 12px;
-          letter-spacing: 0.16em;
-          color: var(--theme-fg-faint);
+          font-size: 21px;
+          letter-spacing: 0.045em;
+          color: var(--theme-fg);
           transition: color 180ms ease;
         }
         .sec-head:hover .sec-title { color: var(--theme-fg-muted); }
@@ -2756,6 +2759,17 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .action-beat {
           margin: 0;
+        }
+        /* The split close — three beats with air between them (frame /
+           punch / action); the final beat gains a touch of ink so the
+           action line lands strongest, right above the buttons. */
+        .action-close {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .action-beat-final em {
+          color: var(--theme-fg);
         }
         /* THE CLOSING MOVEMENT — set apart from the argument box above
            and given its own rhythm so it doesn't read as two more blocks
@@ -2870,35 +2884,42 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           font-style: italic;
           color: rgba(26, 19, 24, 0.55);
         }
-        /* The name over its functions — a small letterspaced plate (the
-           letter-title register), introducing the three rows beneath as
-           what the name provides. */
-        .front-alex {
-          margin-top: 24px;
-          font-style: italic;
-          font-size: 14px;
-          letter-spacing: 0.14em;
-          color: rgba(26, 19, 24, 0.6);
+        /* The second plate — "our answer" mirrors "the question" above it
+           (same register, same hairline), separated from the question by a
+           full breath so the front reads as two mini-sections that fit
+           together. */
+        .front-salutation-answer {
+          margin-top: 34px;
         }
-        /* The three function lines — label column in the letter-plate
-           register (mirrors the back's section titles), sentence beside it;
-           wrapped lines align on the text column. */
+        /* The name as the answer's first word. */
+        .front-alex {
+          margin: 0;
+          font-style: italic;
+          font-size: 18px;
+          letter-spacing: 0.02em;
+          color: rgba(26, 19, 24, 0.72);
+        }
+        /* The three functions — each under a faint mini header (founder,
+           2026-07-16: "mini faint headers"), stacked like small entries in
+           an index; the header whispers the category, the sentence carries
+           the content. */
         .front-fn {
           display: flex;
-          gap: 14px;
-          margin-top: 9px;
+          flex-direction: column;
+          gap: 1px;
+          margin: 13px 0 0;
+        }
+        .fn-label {
+          font-style: italic;
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          color: rgba(26, 19, 24, 0.38);
+        }
+        .fn-text {
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 17px;
           line-height: 1.5;
-          color: rgba(26, 19, 24, 0.62);
-        }
-        .front-fork .front-fn:first-of-type { margin-top: 16px; }
-        .fn-label {
-          flex: 0 0 96px;
-          padding-top: 3px;
-          font-style: italic;
-          font-size: 12px;
-          letter-spacing: 0.16em;
-          color: rgba(26, 19, 24, 0.45);
+          color: rgba(26, 19, 24, 0.66);
         }
         .cta-block {
           display: flex;
@@ -3490,6 +3511,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                founder's phone screenshots read the 64px gaps as
                "spacing all off". Net ≈ 26px inside the letter. */
             margin-top: -38px;
+          }
+          /* The split close travels as ONE block: the wrapper takes the
+             order and the gap-pull; the beats inside keep only their own
+             12px rhythm (the per-beat -38px above would stack them into
+             each other — that overlap shipped for a minute on 07-16). */
+          .action-close {
+            order: 4;
+            margin-top: -38px;
+          }
+          .action-close .statement-beat {
+            order: 0;
+            margin-top: 0;
           }
           .letter-sec {
             margin-bottom: -44px;
