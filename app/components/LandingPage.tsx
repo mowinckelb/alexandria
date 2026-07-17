@@ -792,7 +792,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               are gone; hierarchy is size and air alone. */}
           <p className="front-lead">When ai can do everything humans can, what do we do?</p>
           <div className="front-fork">
-            <p className="fork-line front-alex">Alexandria was founded with this question in mind &mdash; our answer comes in three parts.</p>
+            <p className="fork-line front-alex">Founded with this question in mind &mdash;<br />our answer comes in three parts.</p>
             <p className="fork-line fork-ans">explain why we must keep thinking &mdash; and how</p>
             <p className="fork-line fork-ans">connect those who, even slightly, agree</p>
             <p className="fork-line fork-ans">provide free tools so anyone can join</p>
@@ -3024,18 +3024,18 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            roman, a step smaller than the question, a full breath below
            it. */
         .front-alex {
-          margin: 44px 0 0;
+          margin: 48px 0 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: normal;
           font-size: 17px;
-          line-height: 1.5;
+          line-height: 1.58;
           letter-spacing: 0.006em;
           color: rgba(26, 19, 24, 0.6);
         }
         /* The three things — bare parallel verb-lines in the letter's
            italic voice; their parallelism is the only structure needed. */
         .fork-ans {
-          margin: 14px 0 0;
+          margin: 11px 0 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-size: 18.5px;
@@ -3043,7 +3043,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           color: rgba(26, 19, 24, 0.72);
         }
         .front-alex + .fork-ans {
-          margin-top: 22px;
+          margin-top: 26px;
         }
         .cta-block {
           display: flex;
