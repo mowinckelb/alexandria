@@ -770,7 +770,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               are gone; hierarchy is size and air alone. */}
           <p className="front-lead">When ai can do everything humans can, what do we do?</p>
           <div className="front-fork">
-            <p className="fork-line front-alex">Founded with this question in mind &mdash;<br />our answer comes in three parts.</p>
+            <p className="fork-line front-alex">Founded with this question in mind &mdash;<br />here, in short, is our answer:</p>
             <p className="fork-line fork-ans">explain why we must keep thinking &mdash; and how</p>
             <p className="fork-line fork-ans">connect those who, even slightly, agree</p>
             <p className="fork-line fork-ans">provide free tools so anyone can join</p>
@@ -859,6 +859,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     flowing with no dividers between them. A lead paragraph
                     shows; a rotating caret reveals the rest. Accordion (one
                     open at a time) keeps the fixed stage bounded. */}
+                <p className="secs-kicker">the answer, in full</p>
                 <div className="secs">
                   {SECTIONS.map((s) => {
                     const isOpen = openPillar === s.title;
@@ -2680,12 +2681,37 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           display: none;
         }
         /* ─── WHY / WHAT / HOW pillars (2026-07-13 exploration) ─── */
+        /* The back kicker — a faint letter-plate title telling the reader
+           what why/what/how refer to: the answer in full (front gives it
+           in short). Sits where the sections' top margin was. */
+        .secs-kicker {
+          margin: 40px 0 0;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic;
+          font-size: 12px;
+          letter-spacing: 0.18em;
+          color: var(--theme-fg-faint);
+        }
+        /* The kicker travels with the sections in focus mode (hidden while
+           a section is open so the open body owns the stage). */
+        @media (min-width: 900px) {
+          .secs-kicker {
+            margin-top: 92px;
+            transition: max-height 520ms cubic-bezier(0.33, 0, 0.2, 1), opacity 380ms ease, margin 520ms cubic-bezier(0.33, 0, 0.2, 1);
+            overflow: hidden;
+            max-height: 40px;
+          }
+          .right-col:has(.sec.is-open) .secs-kicker {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+          }
+        }
         .secs {
           display: flex;
           flex-direction: column;
-          /* Sections sit a third down the column, not jammed at the top
-             (founder, 2026-07-17) — composed against the seal opposite. */
-          margin-top: 136px;
+          /* Sits under the kicker now (kicker carries the top offset). */
+          margin-top: 20px;
         }
         /* Header — small title + rotating caret, a compact click target.
            No dividers between sections (they flow like the old letter). */
