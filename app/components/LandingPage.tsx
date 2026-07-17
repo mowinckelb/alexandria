@@ -326,7 +326,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       body: [
         'Alexandrians choose growth over emptiness — aligning their ai to act as a thought partner; but personal alignment requires personal context — your ai needs to know where you are now, in order to help you get to where you want to go.',
         'ai can’t read your mind, but it can read words. So if you think out loud and put your thoughts into words, it can build a full mirror of what and how you think — enabling effective personal growth.',
-        'Alexandria was founded to convince people to want to keep thinking; to help them align their ai towards this aim, and build a system to reflect their current internal thought space and develop it in the directions they want; and to assemble a community of all the people doing the same — to share how they do it, and what they’ve done with it.',
+        'Alexandria was founded to convince people to want to keep thinking. To help them align their ai towards this aim, and build a system to reflect their current internal thought space and develop it in the directions they want. And to assemble a community of all the people doing the same — to share how they do it, and what they’ve done with it.',
         'The founder has made his entire system free to download — anybody can start, if they make the choice for themselves.',
       ],
     },
@@ -335,9 +335,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       lead: 'Connect an Alexandria folder to your ai so it knows your thinking and how to use it.',
       body: [
         'A local, private, custom folder is made on your own computer — containing files of everything your ai already knows about what and how you think, and instruction files on how your ai should read/write to these files to update, develop, and use them.',
-        'Dump all the data you have into this one folder so your ai can tie together everything and extract all the messy connections into one unified map of your mind — to know where you currently stand, and then help you get to where you want to go: actively chatting with you to fill in any gaps, analyzing connections you might have never seen, showing you new ideas it now knows you’d find interesting, stopping you from forgetting details that might drift, and synthesizing the unique knowledge you have so that you can get it out into the world.',
+        'Dump all the data you have into this one folder so your ai can tie together everything and extract all the messy connections into one unified map of your mind — to know where you currently stand, and then help you get to where you want to go: actively chatting with you to fill in any gaps, analysing connections you might have never seen, showing you new ideas it now knows you’d find interesting, stopping you from forgetting details that might drift, and synthesising the unique knowledge you have so that you can get it out into the world.',
         'Any ai, product, or service can connect to your folder because it’s just plain files owned on your computer alone. This is the simplest system possible — just you, plain files you own, any ai, any input, unlimited output.',
-        'All of this is free because it’s your ai and your files and system. The founder has his own system and he just made it free so it’s easy for people to start — they can personalize the system however they want, and the files they create are personal regardless. Joining the community is the price of two coffees a month, and it’s just sharing how they have their systems set up, and showing what they’ve been able to do because of it — connecting the humans who chose to keep thinking.',
+        'All of this is free because it’s your ai and your files and system. The founder has his own system and he just made it free so it’s easy for people to start — they can personalise the system however they want, and the files they create are personal regardless. Joining the community is the price of two coffees a month, and it’s just sharing how they have their systems set up, and showing what they’ve been able to do because of it — connecting the humans who chose to keep thinking.',
       ],
     },
   ];
@@ -749,7 +749,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             <p className="fork-line front-alex">Alexandria was founded with three things in mind.</p>
             <p className="front-fn"><span className="fn-label">idea</span><span className="fn-text">explain why we must keep thinking &mdash; and how</span></p>
             <p className="front-fn"><span className="fn-label">community</span><span className="fn-text">connect those who, even slightly, agree</span></p>
-            <p className="front-fn"><span className="fn-label">sample</span><span className="fn-text">provide infrastructure so anyone can join</span></p>
+            <p className="front-fn"><span className="fn-label">sample</span><span className="fn-text">provide free tools so anyone can join</span></p>
           </div>
         </div>
         <div className="top-inner" />
@@ -2726,21 +2726,75 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           opacity: 0;
           transition: opacity 500ms ease;
         }
-        /* The founder's full paragraphs can exceed the fixed stage when a
-           section opens (the how-body did, 2026-07-16) — cap the open body
-           and let it scroll inside, desktop only (mobile flows naturally,
-           no fixed stage). Thin quiet scrollbar as the more-content cue. */
+        /* NO SCROLLING in the expand (founder, 2026-07-17: "i dont want
+           scrolling… if we need to hide the other sections to make space
+           then we do that, if we need to move the line break then we do
+           that" — supersedes the scroll cap). Desktop strategy: the open
+           body lays out in TWO columns at a quieter size (halving its
+           height), the sibling sections' leads collapse to lend their
+           room, and the rule below may slide within the stage. Mobile
+           keeps the natural single-column flow. */
         @media (min-width: 900px) {
           .sec-body-inner {
-            /* Cap ≤ the sections↔rule gap so an open body NEVER moves the
-               rule or anything below it (founder, 2026-07-17: "only the
-               three sections move when expanding") — long bodies scroll
-               inside the window instead. */
-            max-height: 118px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--theme-border-soft) transparent;
+            column-count: 2;
+            column-gap: 30px;
           }
+          .sec-body-inner > p {
+            font-size: 13.5px;
+            line-height: 1.58;
+          }
+          .sec-lead {
+            max-height: 160px;
+            overflow: hidden;
+            transition:
+              max-height 520ms cubic-bezier(0.33, 0, 0.2, 1),
+              opacity 380ms ease,
+              margin 520ms cubic-bezier(0.33, 0, 0.2, 1);
+          }
+        }
+        @media (min-width: 900px) {
+          /* Focus mode machinery — heads and the block's top margin get
+             transitions so the whole move eases as one gesture. */
+          .sec-head {
+            max-height: 64px;
+            overflow: hidden;
+            transition:
+              max-height 520ms cubic-bezier(0.33, 0, 0.2, 1),
+              opacity 380ms ease,
+              margin 520ms cubic-bezier(0.33, 0, 0.2, 1),
+              padding 520ms cubic-bezier(0.33, 0, 0.2, 1);
+          }
+          .secs {
+            transition: margin-top 520ms cubic-bezier(0.33, 0, 0.2, 1);
+          }
+        }
+        @media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+          /* FOCUS MODE: while one section is open its siblings hide
+             entirely (head + lead) and the block slides up — the open
+             section takes the stage alone, and even the longest body fits
+             without scroll or spill. Mouse off, everything returns. */
+          .secs:has(.sec:hover) { margin-top: 28px; }
+          .secs:has(.sec:hover) .sec:not(:hover) .sec-lead,
+          .secs:has(.sec:hover) .sec:not(:hover) .sec-head {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+          }
+          /* The library·marketplace row is peripheral chrome — it yields
+             during focus so a long open body's slide never collides. */
+          .right-col:has(.sec:hover) .quiet-links { opacity: 0; }
+        }
+        @media (min-width: 900px) and (hover: none) {
+          .secs:has(.sec.is-open) { margin-top: 28px; }
+          .secs:has(.sec.is-open) .sec:not(.is-open) .sec-lead,
+          .secs:has(.sec.is-open) .sec:not(.is-open) .sec-head {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+          }
+          .right-col:has(.sec.is-open) .quiet-links { opacity: 0; }
         }
         /* Fluid HOVER-expand on pointer devices (founder 2026-07-13): move
            over a section and it opens; move off and it eases shut — no click.
@@ -2933,6 +2987,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           line-height: 1.45;
           letter-spacing: 0.004em;
           color: rgba(26, 19, 24, 0.72);
+          text-wrap: balance;
         }
         /* The three things — faint mini header over each, the row text in
            the letter's italic voice, bare verbs continuing the founding
@@ -2988,6 +3043,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .quiet-links {
           display: flex;
           align-items: center;
+          transition: opacity 320ms ease;
           gap: clamp(18px, 1.8vw, 26px);
           /* Bottom-pinned in right-col — its space-between drops this to the
              bottom. Matches right-lower's box (752px, flex-end, -32px) and
