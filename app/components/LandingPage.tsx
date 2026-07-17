@@ -867,12 +867,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     you&rsquo;re allergic&hellip; reading this is proof
                     you&rsquo;re interested enough to try.</em>
                   </p>
-                  <p className="statement-beat action-beat">
-                    <em>If you don&rsquo;t like it, bin it. This should be
-                    the smallest decision you make all day.</em>
-                  </p>
                   <p className="statement-beat action-beat action-beat-final">
-                    <em>Just try the free sample, and see how you like it.</em>
+                    <em>Just try it, if you don&rsquo;t like it, bin it.
+                    This should be the smallest decision you make all day.</em>
                   </p>
                 </div>
 
