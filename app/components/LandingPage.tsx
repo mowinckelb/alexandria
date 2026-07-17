@@ -360,9 +360,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       title: 'why',
       lead: 'Cultures must choose to value humans, but humans must choose to value themselves.',
       body: [
-        'Human chess is more popular than ever — even though ai can do it better — because humans value humans; but only if they can still play the games.',
-        'It will be increasingly tempting to let ai think and decide for you; but then your mind, like any muscle you don’t use, will begin to fade — and forget how to compete.',
-        'Technology is a multiplier — ai is the most extreme version in history, so it will take you down the path you point it down. Continue to let it think for you, and you’ll end up like the humans in Wall-E. Align it to think with you, and you can master anything.',
+        'Human chess is more popular than ever — even though ai plays better — because humans value humans; but only if they can still play.',
+        'Let ai think for you, and your mind — like any muscle you don’t use — begins to fade. Technology is a multiplier — it will take you down the path you point it down: continue to let it think for you, and you’ll end up like the humans in Wall-E; align it to think with you, and you can master anything.',
         'Alexandrians are defined by this choice alone.',
       ],
     },
@@ -370,9 +369,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       title: 'what',
       lead: 'We help humans build systems to keep thinking and not lose our minds.',
       body: [
-        'Alexandrians choose growth over emptiness — aligning their ai to act as a thought partner; but personal alignment requires personal context — your ai needs to know where you are now, in order to help you get to where you want to go.',
-        'ai can’t read your mind, but it can read words. So if you think out loud and put your thoughts into words, it can build a full mirror of what and how you think — enabling effective personal growth.',
-        'Alexandria was founded to convince people to want to keep thinking. To help them align their ai towards this aim, and build a system to reflect their current internal thought space and develop it in the directions they want. And to assemble a community of all the people doing the same — to share how they do it, and what they’ve done with it.',
+        'Alexandrians choose growth over emptiness — aligning their ai to act as a thought partner. But personal alignment requires personal context: your ai needs to know where you are now to help you get where you want to go.',
+        'ai can’t read your mind, but it can read words. Think out loud, and it builds a full mirror of what and how you think.',
         'The founder has made his entire system free to download — anybody can start, if they make the choice for themselves.',
       ],
     },
@@ -380,10 +378,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       title: 'how',
       lead: 'Connect an Alexandria folder to your ai so it knows your thinking and how to use it.',
       body: [
-        'A local, private, custom folder is made on your own computer — containing files of everything your ai already knows about what and how you think, and instruction files on how your ai should read/write to these files to update, develop, and use them.',
-        'Dump all the data you have into this one folder so your ai can tie together everything and extract all the messy connections into one unified map of your mind — to know where you currently stand, and then help you get to where you want to go: actively chatting with you to fill in any gaps, analysing connections you might have never seen, showing you new ideas it now knows you’d find interesting, stopping you from forgetting details that might drift, and synthesising the unique knowledge you have so that you can get it out into the world.',
-        'Any ai, product, or service can connect to your folder because it’s just plain files owned on your computer alone. This is the simplest system possible — just you, plain files you own, any ai, any input, unlimited output.',
-        'All of this is free because it’s your ai and your files and system. The founder has his own system and he just made it free so it’s easy for people to start — they can personalise the system however they want, and the files they create are personal regardless. Joining the community is the price of two coffees a month, and it’s just sharing how they have their systems set up, and showing what they’ve been able to do because of it — connecting the humans who chose to keep thinking.',
+        'A private folder on your own computer holds everything your ai knows about what and how you think — plus instructions for how to read, write, and develop it.',
+        'Dump everything you have into it, and your ai ties it into one unified map of your mind: chatting with you to fill the gaps, surfacing connections you’d never seen, showing you new ideas it now knows you’d find interesting, catching details before they drift, and synthesising what only you know so you can get it out into the world.',
+        'It’s just plain files you own, that we never see — any ai can connect, any input, unlimited output. All of it free, because it’s your ai and your files.',
+        'Joining the community is the price of two coffees a month: share how your system is set up, show what you’ve made because of it — connecting the humans who chose to keep thinking.',
       ],
     },
   ];
