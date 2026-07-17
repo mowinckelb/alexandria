@@ -35,24 +35,28 @@ export default function JoinInterest({ refCode }: { refCode?: string }) {
 
   if (state === 'sent') {
     return (
-      <p className="join-interest-done">
-        Noted &mdash; the tool stays free. We&rsquo;ll be in touch.
-      </p>
+      <div className="join-door">
+        <p className="join-door-done">
+          Noted &mdash; the tool stays free. We&rsquo;ll be in touch.
+        </p>
+      </div>
     );
   }
 
+  // Styled as one of the three "doors" — question label + editorial underline
+  // input — so the decline path sits flush with the referral and install exits.
   return (
-    <div className="join-interest">
-      <p className="join-interest-lede">
-        Don&rsquo;t want the community? Leave your email to continue on your
-        own.
-      </p>
-      <form className="join-interest-row" onSubmit={send}>
+    <div className="join-door">
+      <label className="join-door-q" htmlFor="join-interest-email">
+        don&rsquo;t want the community?
+      </label>
+      <form className="join-door-field" onSubmit={send}>
         <input
+          id="join-interest-email"
           type="email"
           inputMode="email"
           autoComplete="email"
-          placeholder="email"
+          placeholder="leave your email to continue on your own"
           aria-label="your email"
           value={email}
           onChange={(e) => {
@@ -61,12 +65,12 @@ export default function JoinInterest({ refCode }: { refCode?: string }) {
           }}
           required
         />
-        <button type="submit" disabled={state === 'sending'}>
-          {state === 'sending' ? 'sending…' : 'keep in touch'}
+        <button type="submit" className="join-door-submit" disabled={state === 'sending'}>
+          {state === 'sending' ? 'sending…' : 'send'}
         </button>
       </form>
       {state === 'error' && (
-        <p className="join-interest-hint">couldn&rsquo;t send &mdash; try again.</p>
+        <p className="join-door-hint">couldn&rsquo;t send &mdash; try again.</p>
       )}
     </div>
   );

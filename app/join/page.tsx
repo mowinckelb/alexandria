@@ -106,13 +106,15 @@ export default async function JoinPage({
         .primer-brand:hover { opacity: 0.6; }
         .primer-brand-dot { font-style: normal; }
 
-        /* One flush-left editorial column, vertically centred — the same spine
-           as /start. */
+        /* One flush-left editorial column, vertically centred. Wider than
+           /start (620 vs 540) so the hero has room to breathe — the founder's
+           "why is it so narrow" note. Body paragraphs re-cap their own measure
+           for readability; the hero spans the full column. */
         .primer-main {
           flex: 1;
           display: flex; flex-direction: column;
           align-items: flex-start; justify-content: center;
-          max-width: 540px; margin: 0 auto; padding: 3rem 32px 6rem; width: 100%;
+          max-width: 620px; margin: 0 auto; padding: 3rem 32px 6rem; width: 100%;
           text-align: left;
         }
 
@@ -133,44 +135,49 @@ export default async function JoinPage({
           color: var(--accent); line-height: 1;
         }
 
-        .primer-h1 {
-          margin: 0 0 20px; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic; font-weight: 400; font-size: 34px; line-height: 1.25;
-          letter-spacing: -0.01em; color: var(--text-primary); text-wrap: balance;
+        /* THE HERO — the star. Large editorial display, fluid so it scales
+           with the viewport (design.md: clamp for marketing display only).
+           Italic, one weight, tight tracking; text-wrap: balance keeps the
+           two clauses evenly split around the em-dash. */
+        .join-hero {
+          margin: 0 0 30px; max-width: 600px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic; font-weight: 400;
+          font-size: clamp(30px, 2rem + 2.2vw, 44px); line-height: 1.14;
+          letter-spacing: -0.02em; color: var(--text-primary);
+          text-wrap: balance;
           font-feature-settings: "kern" 1, "liga" 1, "dlig" 1;
         }
 
-        /* One orienting line — short, so it reads as a caption, not a pitch. */
-        .primer-lede {
-          margin: 0 0 32px; max-width: 460px;
+        /* THE OFFER — second tier, larger than body so the eye reads it before
+           the fine print, primary ink. */
+        .join-offer { max-width: 520px; margin: 0 0 34px; }
+        .join-offer-line {
+          margin: 0 0 11px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 17px; line-height: 1.6; color: var(--text-secondary);
-          text-wrap: pretty;
+          font-size: 19px; line-height: 1.5; letter-spacing: 0.005em;
+          color: var(--text-primary); text-wrap: pretty;
+        }
+        .join-offer-line:last-child { margin-bottom: 0; }
+        /* "free" — the one controlled pop: brand plum, a touch heavier. Used
+           twice = visual rhyme; this is what fixes "boring / all the same". */
+        .join-free {
+          color: var(--accent); font-weight: 500;
+          font-style: italic; letter-spacing: 0;
         }
 
-        /* The two lines above the button — try it free, three friends = free. */
-        .join-terms { max-width: 460px; }
-        .join-line {
-          margin: 0 0 12px;
-          font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 17px; line-height: 1.55; letter-spacing: 0.01em;
-          color: var(--text-primary); text-wrap: pretty; max-width: 460px;
-        }
-        .join-line:last-child { margin-bottom: 0; }
-        /* The explanation under the click — the rest of the deal, one step
-           quieter than the line above. */
+        /* THE $10 TRUTH — de-emphasised reassurance, clearly below the action. */
         .join-explain {
-          margin: 28px 0 0; max-width: 460px;
+          margin: 32px 0 0; max-width: 500px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 14px; line-height: 1.7; letter-spacing: 0.01em;
+          font-size: 14px; line-height: 1.72; letter-spacing: 0.01em;
           color: var(--text-secondary, rgba(26, 19, 24, 0.75)); text-wrap: pretty;
         }
-        /* The appeal + waive — quietest: his voice, the generosity that
-           keeps the ask fair. */
+        /* The waive — quietest: his voice, the generosity that keeps it fair. */
         .join-waive {
-          margin: 12px 0 0; max-width: 460px;
+          margin: 12px 0 0; max-width: 500px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 14px; line-height: 1.7; letter-spacing: 0.01em;
+          font-size: 14px; line-height: 1.72; letter-spacing: 0.01em;
           color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-wrap: pretty;
         }
         .join-waive a {
@@ -181,107 +188,88 @@ export default async function JoinPage({
         }
         .join-waive a:hover { color: var(--text-primary); text-decoration-color: var(--text-primary); }
 
-        /* The one action on the page. Filled, calm, hung from the left spine. */
+        /* THE ONE ACTION — the page's second star, hung from the left spine.
+           Filled, a little more presence than /start's (18px, roomier pad, a
+           soft shadow that lifts it off the cream) so the eye lands here. */
         .join-btn {
           display: inline-flex; align-items: center; justify-content: center;
-          margin: 26px 0 0; padding: 14px 30px; border-radius: 9px;
+          margin: 30px 0 0; padding: 15px 34px; border-radius: 10px;
           background: var(--text-primary); color: var(--bg-primary);
-          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 17px;
+          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 18px;
           letter-spacing: 0.01em; text-decoration: none; cursor: pointer;
-          transition: opacity 200ms, transform 120ms;
+          box-shadow: 0 1px 2px rgba(61, 54, 48, 0.10), 0 8px 24px -12px rgba(61, 54, 48, 0.28);
+          transition: opacity 200ms, transform 120ms, box-shadow 200ms;
         }
-        .join-btn:hover { opacity: 0.85; }
-        .join-btn:active { transform: scale(0.99); }
+        .join-btn:hover {
+          opacity: 0.92;
+          box-shadow: 0 1px 2px rgba(61, 54, 48, 0.12), 0 12px 30px -12px rgba(61, 54, 48, 0.34);
+        }
+        .join-btn:active { transform: scale(0.985); }
 
-        /* The fine print — his three questions under one hairline (mirrors
-           /start's details zone): referred? · don't want the community? ·
-           don't have the tool yet? */
-        .join-details {
-          margin: 36px 0 0; padding-top: 26px; width: 100%; max-width: 460px;
-          border-top: 1px solid var(--bg-tertiary, rgba(26, 19, 24, 0.10));
+        /* THE OTHER DOORS — the three exits under one hairline. Tertiary by
+           design: each is a small muted question + an editorial underline
+           control (no boxes), evenly spaced so the eye can pick its exit in
+           one scan. This is the "simple to navigate" the founder asked for. */
+        .join-doors {
+          margin: 40px 0 0; padding-top: 30px; width: 100%; max-width: 520px;
+          border-top: 1px solid var(--bg-tertiary, rgba(61, 54, 48, 0.12));
+          display: flex; flex-direction: column; gap: 26px;
         }
-
-        /* Referred-by-a-friend field — subtle by design: it sits in the fine
-           print for the person told a code with no ?ref= link, and must never
-           compete with the button. Small label, low-contrast, single line. */
-        .join-code { margin: 0; max-width: 450px; width: 100%; }
-        .join-code-hint {
-          margin: 8px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic; font-size: 12.5px; letter-spacing: 0.02em;
-          color: var(--text-muted, rgba(26, 19, 24, 0.5));
-        }
-        .join-code-label {
-          display: block; margin: 0 0 8px;
+        .join-door { width: 100%; }
+        .join-door-q {
+          display: block; margin: 0 0 9px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 13px; letter-spacing: 0.01em;
-          color: var(--text-muted, rgba(26, 19, 24, 0.5));
+          font-style: italic; font-size: 14px; letter-spacing: 0.01em;
+          color: var(--text-secondary, rgba(61, 54, 48, 0.7));
         }
-        .join-code-row { display: flex; align-items: center; gap: 10px; }
-        .join-code-row input {
-          flex: 1; min-width: 0; height: 38px; padding: 0 12px;
+        /* Underline field — border-bottom only, editorial not form-y. Shared by
+           the referral code and the email door. */
+        .join-door-field { display: flex; align-items: baseline; gap: 12px; }
+        .join-door-field input {
+          flex: 1; min-width: 0; height: 34px; padding: 0 2px;
           font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 16px;
           color: var(--text-primary); background: transparent;
-          border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.22)); border-radius: 8px;
-          outline: none; transition: border-color 200ms;
+          border: none; border-bottom: 1px solid var(--text-muted, rgba(61, 54, 48, 0.28));
+          border-radius: 0; outline: none; transition: border-color 200ms;
         }
-        .join-code-row input::placeholder { color: var(--text-muted, rgba(26, 19, 24, 0.4)); }
-        .join-code-row input:focus { border-color: var(--text-muted, rgba(26, 19, 24, 0.5)); }
-        .join-code-status {
+        .join-door-field input::placeholder { color: var(--text-muted, rgba(61, 54, 48, 0.42)); }
+        .join-door-field input:focus { border-bottom-color: var(--accent); }
+        .join-door-submit {
+          flex-shrink: 0; padding: 0 2px 4px; align-self: flex-end;
+          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 14px;
+          font-style: italic; letter-spacing: 0.02em; color: var(--accent);
+          background: none; border: none; cursor: pointer; transition: opacity 200ms;
+        }
+        .join-door-submit:hover { opacity: 0.7; }
+        .join-door-submit:disabled { opacity: 0.5; cursor: default; }
+        .join-door-status {
           flex-shrink: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 13px; font-style: italic; letter-spacing: 0.01em;
-          color: var(--text-muted, rgba(26, 19, 24, 0.6));
+          color: var(--accent);
         }
-
-        /* Decline path — quiet by design: the escape hatch must not compete
-           with the join button. Input/button heights matched; 16px input font
-           so iOS Safari doesn't zoom on focus. */
-        .join-interest { margin: 26px 0 0; max-width: 450px; width: 100%; }
-        .join-interest-lede {
-          margin: 0 0 12px; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 14px; line-height: 1.7; letter-spacing: 0.01em;
-          color: var(--text-muted, rgba(26, 19, 24, 0.55));
-        }
-        .join-interest-row { display: flex; gap: 8px; }
-        .join-interest-row input {
-          flex: 1; min-width: 0; height: 40px; padding: 0 12px;
-          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 16px;
-          color: var(--text-primary); background: transparent;
-          border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.3)); border-radius: 8px;
-          outline: none; transition: border-color 200ms;
-        }
-        .join-interest-row input::placeholder { color: var(--text-muted, rgba(26, 19, 24, 0.45)); }
-        .join-interest-row input:focus { border-color: var(--text-secondary, rgba(26, 19, 24, 0.6)); }
-        .join-interest-row button {
-          height: 40px; padding: 0 16px; flex-shrink: 0;
-          font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 14px;
-          letter-spacing: 0.01em; color: var(--text-secondary, rgba(26, 19, 24, 0.82));
-          background: transparent; border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.3));
-          border-radius: 8px; cursor: pointer; transition: border-color 200ms, color 200ms;
-        }
-        .join-interest-row button:hover { color: var(--text-primary); border-color: var(--text-secondary, rgba(26, 19, 24, 0.6)); }
-        .join-interest-row button:disabled { opacity: 0.5; cursor: default; }
-        .join-interest-done {
-          margin: 36px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 14px; line-height: 1.7; font-style: italic;
-          color: var(--text-secondary, rgba(26, 19, 24, 0.82));
-        }
-        .join-interest-hint {
+        .join-door-hint {
           margin: 8px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 13px; color: var(--text-muted, rgba(26, 19, 24, 0.55));
+          font-style: italic; font-size: 12.5px; letter-spacing: 0.02em;
+          color: var(--text-muted, rgba(61, 54, 48, 0.5));
         }
-
-        .join-secondary {
-          margin: 26px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 14px; line-height: 1.6; color: var(--text-muted, rgba(26, 19, 24, 0.55));
-          text-align: left;
+        .join-door-done {
+          margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-size: 14px; line-height: 1.7; font-style: italic;
+          color: var(--text-secondary, rgba(61, 54, 48, 0.82));
         }
-        .join-secondary a {
-          color: var(--text-secondary, rgba(26, 19, 24, 0.8));
-          text-decoration: underline; text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
+        /* The install door — plain sentence with an inline link, no field. */
+        .join-door-link {
+          margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic; font-size: 14px; line-height: 1.6; letter-spacing: 0.01em;
+          color: var(--text-secondary, rgba(61, 54, 48, 0.7));
+        }
+        .join-door-link a {
+          font-style: normal; color: var(--accent);
+          text-decoration: underline; text-decoration-color: var(--accent-faint, rgba(91, 31, 71, 0.3));
           text-underline-offset: 3px; text-decoration-thickness: 1px;
-          transition: color 200ms, text-decoration-color 200ms;
+          transition: text-decoration-color 200ms;
         }
-        .join-secondary a:hover { color: var(--text-primary); text-decoration-color: var(--text-primary); }
+        .join-door-link a:hover { text-decoration-color: var(--accent); }
 
         .primer-coda {
           margin: 56px 0 0; text-align: left; font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -291,8 +279,9 @@ export default async function JoinPage({
 
         @media (max-width: 640px) {
           .primer-main { padding: 2rem 24px 4rem; }
-          .primer-h1 { font-size: 28px; line-height: 1.3; margin-bottom: 18px; }
-          .primer-lede { font-size: 16px; margin-bottom: 32px; }
+          .join-hero { margin-bottom: 26px; }
+          .join-offer { margin-bottom: 30px; }
+          .join-offer-line { font-size: 18px; }
           .primer-coda { font-size: 18px; margin-top: 48px; }
         }
       `}</style>

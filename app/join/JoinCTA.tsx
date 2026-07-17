@@ -78,28 +78,29 @@ export default function JoinCTA({
         <p className="primer-eyebrow">the community</p>
       )}
 
-      <h1 className="primer-h1">become a founding member.</h1>
-
-      {/* FOUNDER-WRITTEN COPY (2026-07-17, fifth pass — he dictated the whole
-          page; transcript cleaned, nothing invented). Above the button: the
-          sample→meal frame, first-month-free, and the three-friends deal.
-          Under the button: the $10 paragraph in his voice (worked up / penny
-          pincher! / a dollar there is a dollar here / supporting our project)
-          and the no-friends-no-dollars waive ending on "keep thinking,
-          together". His one open slot was "the full product (or dish, or
-          something idk)" — rendered as "the full meal" to complete the
-          supermarket-sample frame. */}
-      <p className="primer-lede">
+      {/* HERO — the frame line is the star (design.md: one star per page,
+          semantic ≠ visual). Large editorial display carries the whole pitch
+          in one breath; the old "become a founding member" H1 is dropped so
+          the top isn't three same-weight lines stacked (founder 2026-07-17:
+          "all roughly the same… boring… draw attention to the right places").
+          His copy is verbatim — this is a LAYOUT/hierarchy pass, not a rewrite.
+          His open slot ("the full product (or dish, or something idk)") stays
+          "the full meal", completing the supermarket-sample frame. */}
+      <h1 className="join-hero">
         The tool was the free sample &mdash; the community is the full meal.
-      </p>
+      </h1>
 
-      <div className="join-terms">
-        <p className="join-line">
-          The first month is free, so just try it &mdash; cancel anytime.
+      {/* THE OFFER — second tier. The word "free" pulled into the plum accent
+          (twice = visual rhyme) so the eye lands on the value before the
+          button. This is the one controlled pop that fixes "boring". */}
+      <div className="join-offer">
+        <p className="join-offer-line">
+          The first month is <span className="join-free">free</span>, so just
+          try it &mdash; cancel anytime.
         </p>
-        <p className="join-line">
-          If you like it, get three friends to join, and it becomes free
-          indefinitely.
+        <p className="join-offer-line">
+          If you like it, get three friends to join, and it becomes{' '}
+          <span className="join-free">free&nbsp;indefinitely</span>.
         </p>
       </div>
 
@@ -107,6 +108,9 @@ export default function JoinCTA({
         join with github
       </a>
 
+      {/* THE $10 TRUTH — de-emphasised reassurance for the worried reader (his
+          copy verbatim). Sits below the action, quieter, so it never competes
+          with the hero or the button. */}
       <p className="join-explain">
         After the month, if you haven&rsquo;t found three friends, it&rsquo;s
         $10 a month. Now, before you get yourself worked up &mdash;
@@ -123,30 +127,38 @@ export default function JoinCTA({
         thinking, together.
       </p>
 
-      {/* The fine print — his three questions under one hairline, each an
-          exit for a different reader: the invitee (code field, live-validated;
-          when valid the code rides the join URL above), the not-joining
-          (JoinInterest email capture), and the no-tool-yet (/start). */}
-      <div className="join-details">
-        <div className="join-code">
-          <label className="join-code-label" htmlFor="join-code-input">
+      {/* THE OTHER DOORS — his three questions as a quiet trio under one
+          hairline, each an exit for a different reader. Editorial underline
+          inputs (not boxes) keep it light and simple to navigate. Autofill
+          fix: the referral field no longer says "username" anywhere the
+          browser reads (that word triggered Safari's saved-password heuristic
+          → localhost login autofill); autoComplete off + password-manager
+          ignore attrs seal it. */}
+      <div className="join-doors">
+        <div className="join-door">
+          <label className="join-door-q" htmlFor="join-code-input">
             been referred by a friend?
           </label>
-          <div className="join-code-row">
+          <div className="join-door-field">
             <input
               id="join-code-input"
               type="text"
               inputMode="text"
+              name="alexandria-referral"
+              autoComplete="off"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
-              placeholder="referral code"
-              aria-label="referral code (their github username)"
+              data-1p-ignore="true"
+              data-lpignore="true"
+              data-form-type="other"
+              placeholder="paste their referral code"
+              aria-label="referral code"
               value={typedRef}
               onChange={(e) => setTypedRef(e.target.value)}
             />
             {typedRef.trim() && (
-              <span className="join-code-status" aria-live="polite">
+              <span className="join-door-status" aria-live="polite">
                 {typedState === 'checking'
                   ? 'checking…'
                   : typedValid
@@ -157,17 +169,17 @@ export default function JoinCTA({
               </span>
             )}
           </div>
-          <p className="join-code-hint">you&rsquo;ll get your own after joining.</p>
+          <p className="join-door-hint">you&rsquo;ll get your own after joining.</p>
         </div>
 
         <JoinInterest refCode={effectiveRef || undefined} />
 
-        <p className="join-secondary">
+        <p className="join-door join-door-link">
           Don&rsquo;t have the free tool yet?{' '}
           {/* Forward the validated ref so an invited visitor who takes the
               free door still credits their inviter as kin on install. */}
-          <Link href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}>Install it</Link>{' '}
-          &mdash; it&rsquo;ll take you back here after.
+          <Link href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}>install it</Link>{' '}
+          &mdash; it&rsquo;ll bring you back here after.
         </p>
       </div>
     </>
