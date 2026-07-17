@@ -69,8 +69,10 @@ export default function JoinInterest({ refCode }: { refCode?: string }) {
           {state === 'sending' ? 'sending…' : 'send'}
         </button>
       </form>
-      {state === 'error' && (
+      {state === 'error' ? (
         <p className="join-door-hint">couldn&rsquo;t send &mdash; try again.</p>
+      ) : (
+        <p className="join-door-hint">leave your email to continue on your own.</p>
       )}
     </div>
   );

@@ -114,18 +114,19 @@ export default async function JoinPage({
           flex: 1;
           display: flex; flex-direction: column;
           align-items: flex-start; justify-content: center;
-          max-width: 620px; margin: 0 auto; padding: 3rem 32px 6rem; width: 100%;
+          max-width: 720px; margin: 0 auto; padding: 3rem 40px 6rem; width: 100%;
           text-align: left;
         }
 
-        /* The one label on the skeleton — small-caps, spaced, muted ink (no
-           colour, per the founder's calm-monochrome steer). */
+        /* The title label — small-caps, spaced, brand plum (founder 2026-07-17:
+           "add back the colour to the community title"). The one spot of
+           colour on the page; it also lifts the "flat" feeling. */
         .primer-eyebrow {
           margin: 0 0 18px; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-weight: 500; font-size: 11px; letter-spacing: 0.3em;
+          font-weight: 500; font-size: 11.5px; letter-spacing: 0.3em;
           text-transform: lowercase; font-variant-caps: all-small-caps;
           font-feature-settings: "smcp" 1, "kern" 1;
-          color: var(--text-muted); line-height: 1;
+          color: var(--accent); line-height: 1;
         }
 
         /* Invite variant — warmer, personal, replaces the label when a kin
@@ -133,44 +134,46 @@ export default async function JoinPage({
         .join-invite {
           margin: 0 0 18px; font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 14px; letter-spacing: 0.02em; font-style: italic;
-          color: var(--text-secondary); line-height: 1;
+          color: var(--accent); line-height: 1;
         }
 
-        /* THE HERO — a calm headline, not a shout (founder 2026-07-17: "too
-           loud… really simple"). Modest display size, ink only, italic. */
+        /* THE HERO — a headline with real character, not a shout. Bigger than
+           the monochrome pass (which read "flat") but well below the loud 44px:
+           expressive italic, discretionary ligatures, wide measure so it holds
+           one graceful line-break. Ink only — the colour lives on the title. */
         .join-hero {
-          margin: 0 0 26px; max-width: 480px;
+          margin: 0 0 28px; max-width: 620px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic; font-weight: 400;
-          font-size: clamp(23px, 1.5rem + 0.7vw, 27px); line-height: 1.28;
-          letter-spacing: -0.01em; color: var(--text-primary);
+          font-size: clamp(27px, 1.5rem + 1.4vw, 33px); line-height: 1.22;
+          letter-spacing: -0.015em; color: var(--text-primary);
           text-wrap: balance;
-          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1;
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "calt" 1;
         }
 
-        /* THE OFFER — the two simple facts. Plain body ink, no colour, no
-           emphasis — the reader's whole decision, read in two seconds. */
-        .join-offer { max-width: 460px; margin: 0 0 30px; }
+        /* THE OFFER — the two simple facts. Plain ink, a touch larger than
+           body so the decision reads before the fine print. */
+        .join-offer { max-width: 560px; margin: 0 0 32px; }
         .join-offer-line {
           margin: 0 0 10px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 16px; line-height: 1.55; letter-spacing: 0.005em;
+          font-size: 17px; line-height: 1.55; letter-spacing: 0.005em;
           color: var(--text-primary); text-wrap: pretty;
         }
         .join-offer-line:last-child { margin-bottom: 0; }
 
         /* THE $10 TRUTH — de-emphasised reassurance, clearly below the action. */
         .join-explain {
-          margin: 32px 0 0; max-width: 500px;
+          margin: 32px 0 0; max-width: 600px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 14px; line-height: 1.72; letter-spacing: 0.01em;
+          font-size: 14.5px; line-height: 1.72; letter-spacing: 0.01em;
           color: var(--text-secondary, rgba(26, 19, 24, 0.75)); text-wrap: pretty;
         }
         /* The waive — quietest: his voice, the generosity that keeps it fair. */
         .join-waive {
-          margin: 12px 0 0; max-width: 500px;
+          margin: 12px 0 0; max-width: 600px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 14px; line-height: 1.72; letter-spacing: 0.01em;
+          font-size: 14.5px; line-height: 1.72; letter-spacing: 0.01em;
           color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-wrap: pretty;
         }
         .join-waive a {
@@ -199,7 +202,7 @@ export default async function JoinPage({
            control (no boxes), evenly spaced so the eye can pick its exit in
            one scan. This is the "simple to navigate" the founder asked for. */
         .join-doors {
-          margin: 40px 0 0; padding-top: 30px; width: 100%; max-width: 520px;
+          margin: 42px 0 0; padding-top: 30px; width: 100%; max-width: 600px;
           border-top: 1px solid var(--bg-tertiary, rgba(61, 54, 48, 0.12));
           display: flex; flex-direction: column; gap: 26px;
         }

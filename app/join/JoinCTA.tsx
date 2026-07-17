@@ -87,7 +87,7 @@ export default function JoinCTA({
           His open slot ("the full product (or dish, or something idk)") stays
           "the full meal", completing the supermarket-sample frame. */}
       <h1 className="join-hero">
-        The tool was the free sample &mdash; the community is the full meal.
+        The tool was the free sample &mdash; the community is the whole thing.
       </h1>
 
       {/* THE OFFER — the two simple facts, plain ink, no colour (founder
@@ -118,12 +118,14 @@ export default function JoinCTA({
         dollar there is the same as a dollar here, but at least here
         you&rsquo;re supporting our project and trying to help people out.
       </p>
+      {/* "message me" is plain text, not a link (founder 2026-07-17: "don't
+          have a link to message me — if they don't have my contact then they
+          can't do it lol"). The waive is a casual gesture; people who know
+          him can reach him, and that's the point. */}
       <p className="join-waive">
         And if you don&rsquo;t have any friends and don&rsquo;t have ten
-        dollars,{' '}
-        <a href="mailto:benmowinckel@gmail.com?subject=waive%20it">message me</a>{' '}
-        and I&rsquo;ll waive it for you &mdash; I just want people to keep
-        thinking, together.
+        dollars, message me and I&rsquo;ll waive it for you &mdash; I just
+        want people to keep thinking, together.
       </p>
 
       {/* THE OTHER DOORS — his three questions as a quiet trio under one
@@ -168,7 +170,7 @@ export default function JoinCTA({
               </span>
             )}
           </div>
-          <p className="join-door-hint">you&rsquo;ll get your own after joining.</p>
+          <p className="join-door-hint">you&rsquo;ll get yours after joining.</p>
         </div>
 
         <JoinInterest refCode={effectiveRef || undefined} />
@@ -178,7 +180,7 @@ export default function JoinCTA({
           {/* Forward the validated ref so an invited visitor who takes the
               free door still credits their inviter as kin on install. */}
           <Link href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}>install it</Link>{' '}
-          &mdash; it&rsquo;ll bring you back here after.
+          &mdash; it&rsquo;ll take you here later.
         </p>
       </div>
     </>
