@@ -3654,6 +3654,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           }
           .cta-pair {
             order: 5;
+            /* Pull the CTAs up closer to the closing text (founder,
+               2026-07-18) — cancel most of the bottom-inner 64px flex
+               gap so the buttons sit just under the invitation. */
+            margin-top: -40px;
           }
           .low-agency {
             order: 5;
@@ -3688,11 +3692,19 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             --wall-w: max(100vw, 116svh);
             --wall-h: max(100vw, 116svh);
             left: calc(50vw + 0.005 * var(--wall-w));
-            top: calc(58svh + 0.144 * var(--wall-h));
+            /* 0.150 (was 0.144) — nudge 'the demo' a hair lower down the
+               wall (founder, 2026-07-18). */
+            top: calc(58svh + 0.150 * var(--wall-h));
             transform: translate(-50%, -50%);
           }
           .film-invite-btn {
             font-size: 13.5px;
+            /* Fainter than desktop's 0.46 (founder, 2026-07-18) — the
+               caption whispers harder on the phone. */
+            color: rgba(26, 19, 24, 0.34);
+          }
+          .film-play-glyph {
+            color: rgba(26, 19, 24, 0.24);
           }
           /* Window hit-area on mobile — offsets from the plate's anchor
              in the same wall units. Tap-to-play; the hover cue is
