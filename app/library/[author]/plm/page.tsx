@@ -89,7 +89,10 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
   }, []);
 
   const who = authorName || author;
-  const mindLabel = activeVariant === 'weights' ? 'quick' : 'deep';
+  // free = the weights twin (the floor, included for everyone); premium = the
+  // frontier context twin. Renamed from quick/deep (founder, 2026-07-17: the
+  // weights twin is NOT quick — speed was the wrong axis, tier is the honest one).
+  const mindLabel = activeVariant === 'weights' ? 'free' : 'premium';
   const usable = useMemo(() => variants.filter((v) => v.enabled && (v.accessible || v.needsInvite)), [variants]);
   const activeCfg = useMemo(() => variants.find((v) => v.variant === activeVariant), [variants, activeVariant]);
   // Either mind can be invite-gated (which one is the Author's call). Show the
@@ -193,13 +196,26 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
     setQuestion('');
   };
 
+  // Mid-thought questions QUEUE instead of bouncing (founder, 2026-07-17): the
+  // composer stays typable while the mind is answering (typeWhileLoading), the
+  // new question lands in the thread immediately, and it fires as soon as the
+  // in-flight answer returns — FIFO, conversation order preserved.
+  const queueRef = useRef<{ text: string; convoId: string }[]>([]);
+  const askingRef = useRef(false);
+
   const ask = async (textArg?: string) => {
     const text = (textArg ?? question).trim();
-    if (!text || asking) return;
+    if (!text) return;
     const targetId = activeId;
-    setAsking(true);
     setQuestion('');
     setConvos((cs) => cs.map((c) => (c.id === targetId ? { ...c, messages: [...c.messages, { role: 'you', text }] } : c)));
+    if (askingRef.current) { queueRef.current.push({ text, convoId: targetId }); return; }
+    await fire(text, targetId);
+  };
+
+  const fire = async (text: string, targetId: string): Promise<void> => {
+    askingRef.current = true;
+    setAsking(true);
     try {
       // If a PDF piece is open and still extracting, wait so the PLM gets its text.
       let fc = open ? (open.content || openTextRef.current) : '';
@@ -226,7 +242,13 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
     } catch {
       setConvos((cs) => cs.map((c) => (c.id === targetId ? { ...c, messages: [...c.messages, { role: 'twin', text: 'could not reach the mind.' }] } : c)));
     } finally {
-      setAsking(false);
+      const next = queueRef.current.shift();
+      if (next) {
+        void fire(next.text, next.convoId);
+      } else {
+        askingRef.current = false;
+        setAsking(false);
+      }
     }
   };
 
@@ -301,7 +323,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                       style={{ border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.82rem', padding: '0 0 0.15rem',
                         color: activeVariant === v.variant ? 'var(--text-primary)' : 'var(--text-ghost)',
                         borderBottom: activeVariant === v.variant ? '1px solid var(--accent)' : '1px solid transparent' }}>
-                      {v.variant === 'weights' ? 'quick' : 'deep'}
+                      {v.variant === 'weights' ? 'free' : 'premium'}
                     </button>
                   ))}
                 </div>
@@ -377,7 +399,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
               </div>
             )}
             <div style={{ flex: 'none', padding: '0.9rem 1.2rem', borderTop: locked ? 'none' : '1px solid var(--border-light)' }}>
-              <PromptBox ref={promptRef} value={question} onChange={setQuestion} onSubmit={() => void ask()} loading={asking} placeholder="ask anything…" />
+              <PromptBox ref={promptRef} value={question} onChange={setQuestion} onSubmit={() => void ask()} loading={asking} typeWhileLoading placeholder="ask anything…" />
             </div>
           </section>
 
@@ -408,7 +430,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                       <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{f.visibility || 'public'}</span>
                     </button>
                   ))}
-                  {!signedIn && <p style={{ color: 'var(--text-ghost)', fontSize: '0.82rem', marginTop: '1.6rem' }}>sign in for the deeper version of this mind.</p>}
+                  {!signedIn && <p style={{ color: 'var(--text-ghost)', fontSize: '0.82rem', marginTop: '1.6rem' }}>sign in for more of this mind.</p>}
                 </div>
               )}
               {open && open.loading && <p style={{ color: 'var(--text-ghost)', padding: '2rem' }}>loading…</p>}

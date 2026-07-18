@@ -31,11 +31,15 @@ const PromptBox = forwardRef<PromptBoxHandle, {
   onChange: (v: string) => void;
   onSubmit: () => void;
   loading?: boolean;
+  /** Keep the box typable (and submit live) while loading — the PARENT then
+   *  owns what a mid-flight submit means (e.g. the PLM chat queues it). Default
+   *  off: every other caller keeps the original loading gate. */
+  typeWhileLoading?: boolean;
   placeholder?: string;
   ariaLabel?: string;
   submitLabel?: string;
 }>(function PromptBox({
-  value, onChange, onSubmit, loading = false, placeholder = '', ariaLabel, submitLabel = 'ask',
+  value, onChange, onSubmit, loading = false, typeWhileLoading = false, placeholder = '', ariaLabel, submitLabel = 'ask',
 }, ref) {
   const taRef = useRef<HTMLTextAreaElement>(null);
   const [voiceOn, setVoiceOn] = useState(false);
@@ -100,7 +104,7 @@ const PromptBox = forwardRef<PromptBoxHandle, {
   // "go" — neither hits onKeyDown's "any key ends dictation", so the recognizer
   // would otherwise keep running through the clear.
   const submit = () => {
-    if (loading || !value.trim()) return;
+    if ((loading && !typeWhileLoading) || !value.trim()) return;
     endVoice(true);
     onSubmit();
   };
@@ -122,7 +126,7 @@ const PromptBox = forwardRef<PromptBoxHandle, {
     }
   };
 
-  const disabled = loading || !value.trim();
+  const disabled = (loading && !typeWhileLoading) || !value.trim();
   const btn: CSSProperties = {
     border: 'none', borderRadius: '11px', background: 'var(--accent)', color: 'var(--bg-primary)',
     fontFamily: 'inherit', fontSize: '0.95rem', padding: '0.72rem 1.25rem',
@@ -138,7 +142,7 @@ const PromptBox = forwardRef<PromptBoxHandle, {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
-          disabled={loading}
+          disabled={loading && !typeWhileLoading}
           placeholder={placeholder}
           aria-label={ariaLabel || placeholder}
           style={{

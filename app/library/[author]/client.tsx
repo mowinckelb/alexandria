@@ -193,9 +193,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
     ...(author.socials || [])
       .filter((s) => s && s.label && s.url)
       .map((s) => ({ label: s.label.trim().toLowerCase(), url: safeUrl(cleanUrl(s.url)), external: true })),
-    ...(author.contact
-      ? [{ label: contactForm(author.contact).toLowerCase(), url: contactHref(author.contact), external: author.contact.startsWith('http') }]
-      : []),
   ];
   const renderLinkedText = (text: string) =>
     text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
@@ -335,12 +332,23 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               ))}
             </div>
           )}
-          {/* Alexandria-native pill — location filters the directory. */}
-          {author.location && author.location_key && (
+          {/* Alexandria-native pills — location (filters the directory) and
+              contact, side by side in the same form (founder, 2026-07-17). */}
+          {(author.location || author.contact) && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.9rem' }}>
-              <Link href={`/library?locations=${encodeURIComponent(author.location_key)}`} style={tagStyle} className="hover:opacity-60">
-                {author.location}
-              </Link>
+              {author.location && author.location_key && (
+                <Link href={`/library?locations=${encodeURIComponent(author.location_key)}`} style={tagStyle} className="hover:opacity-60">
+                  {author.location}
+                </Link>
+              )}
+              {author.contact && (
+                <a href={contactHref(author.contact)}
+                  target={author.contact.startsWith('http') ? '_blank' : undefined}
+                  rel={author.contact.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  style={tagStyle} className="hover:opacity-60">
+                  {contactForm(author.contact)}
+                </a>
+              )}
             </div>
           )}
         </header>
@@ -357,15 +365,17 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             const first = (author.display_name || author.id).split(' ')[0];
             return (
               <div style={{ margin: '0 0 3rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 0.75rem' }}>
-                  <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', margin: 0 }}>ask my mind.</p>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{online ? 'online' : 'offline'}</span>
-                </div>
+                <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', margin: '0 0 0.75rem' }}>ask my mind.</p>
                 <PromptBox value={doorQ} onChange={setDoorQ} onSubmit={goAsk} loading={doorGoing} placeholder={`ask ${first} anything…`} />
+                {/* PLM named in full here (founder: "say personal language model
+                    somewhere"); the online state lives in this line too — as a
+                    fact among facts, not a floating badge. */}
                 <p style={{ color: 'var(--text-ghost)', fontSize: '0.82rem', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                  {first}&rsquo;s twin — built with alexandria from everything they&rsquo;ve published; it answers as them.{' '}
+                  {first}&rsquo;s personal language model — built with alexandria from everything they&rsquo;ve published; it answers as them.
+                  {' '}<span style={{ color: online ? 'var(--text-muted)' : 'var(--text-ghost)' }}>{online ? 'online now' : 'offline right now'}</span>
+                  {' '}·{' '}
                   <Link href={`/library/${encodeURIComponent(authorId)}/plm`} style={{ color: 'var(--text-muted)', textDecoration: 'none' }} className="hover:opacity-60">
-                    or open the chat →
+                    open the chat →
                   </Link>
                 </p>
               </div>
@@ -378,12 +388,23 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               </p>
             )
           ) : (
-            grouped.map(({ cat, items }) => (
-              <div key={cat} style={{ marginTop: '2.8rem' }}>
-                <p style={sectionLabelStyle}>{cat}</p>
-                {items.map(fileRow)}
-              </div>
-            ))
+            // The library zone — a clear break from the bio + PLM above (founder,
+            // 2026-07-17): one hairline, then the atoms. Each section label
+            // carries a whisper of what it is; "shadows" especially is a term
+            // no visitor arrives knowing.
+            <div style={{ borderTop: '1px solid var(--border-light)', marginTop: '0.4rem' }}>
+              {grouped.map(({ cat, items }) => (
+                <div key={cat} style={{ marginTop: '2.8rem' }}>
+                  <p style={sectionLabelStyle}>
+                    {cat}
+                    <span style={{ letterSpacing: 0, marginLeft: '0.6rem' }}>
+                      · {cat === 'works' ? 'what they’ve made' : cat === 'projects' ? 'what they’re building' : 'how they think — published fragments of the mind'}
+                    </span>
+                  </p>
+                  {items.map(fileRow)}
+                </div>
+              ))}
+            </div>
           )}
         </section>
         {/* The "make your own version of these" door — this profile (a mind + a
