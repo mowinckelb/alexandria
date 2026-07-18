@@ -1,7 +1,7 @@
 /** Alexandria HTTP routes. */
 
 import { randomBytes } from 'crypto';
-import type { Hono } from 'hono';
+import type { Context, Hono } from 'hono';
 import { logEvent } from './analytics.js';
 import { countActiveKin, createCheckoutSession, createConnectOnboardingLink, createPortalSession, ensurePayoutsReady, getOrCreateConnectAccount, getStripe, recalculateKinPricing, resolveActiveSubscription } from './billing.js';
 import { authErrorHtml, callbackPageHtml, welcomeHandoffUrl } from './templates.js';
@@ -1368,11 +1368,13 @@ export function registerRoutes(app: Hono) {
     return c.redirect(await welcomeHandoffUrl(kv, sessionToken, api_key, github_login, true, number ?? 0, kinCompliant));
   });
 
-  // Public preview — renders the onboarding callback HTML with hardcoded dummy
-  // values so the page can be shown in demos / screenshotted without OAuth.
-  // ?returning=true for the welcome-back variant. No side effects, no real
-  // data — keep the values dummy and this stays safe to expose.
-  app.get('/preview/onboarding', async (c) => {
+  // Public preview — renders the WELCOME page HTML (the post-signup/post-Stripe
+  // founding-member page) with hardcoded dummy values so it can be shown in
+  // demos / screenshotted without OAuth. ?returning=true for the welcome-back
+  // variant. No side effects, no real data — keep the values dummy and this
+  // stays safe to expose. /preview/welcome is canonical (founder 2026-07-17);
+  // /preview/onboarding kept as an alias for anything that cached the old path.
+  const previewWelcome = async (c: Context) => {
     const returning = c.req.query('returning') === 'true';
     // Dummy must not be credential-shaped (`sk_test_` reads as a Stripe key
     // to scanners and to anyone who copies the rendered curl command).
@@ -1380,7 +1382,9 @@ export function registerRoutes(app: Hono) {
     // Dummy number + kin count for the founding-member preview; no side effects.
     const html = await callbackPageHtml(apiKey, 'mowinckelb', false, returning ? 0 : 142, 1);
     return c.html(html);
-  });
+  };
+  app.get('/preview/welcome', previewWelcome);
+  app.get('/preview/onboarding', previewWelcome);
 
   // Mirror loop for install nudges — how many of the last 30d signups got a
   // nudge, how many of those installed after it. Tells us if the email is

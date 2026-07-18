@@ -41,8 +41,7 @@ function jsLiteral(value: string): string {
 
 const ICON_COPY = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 const ICON_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-const ICON_INFO = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
-const ICON_SHARE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
+const ICON_SHARE =`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
 
 // ---------------------------------------------------------------------------
 // Auth error page — shown when OAuth callback can't complete
@@ -73,7 +72,6 @@ export function authErrorHtml(message: string): string {
 
 export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false, authorNumber = 0, kinCompliant = 0, rotateUrl = ''): Promise<string> {
   const WEBSITE_URL = getWebsiteUrl();
-  const host = WEBSITE_URL.replace(/^https?:\/\//, '');
   // The founding-member page (Strava-for-thought, ground truth e1cd27f). You've
   // just JOINED the community — the local tool was already free. The page leads
   // with belonging (you're in), then the two actions: the connect command (links
@@ -98,7 +96,6 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   // join, where the server credits kin (validates ref → existing login, rejects
   // self-referral). Three who join and stay = free for good, same as before.
   const inviteUrl = githubLogin ? `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}` : '';
-  const inviteDisplay = githubLogin ? `${host}/start?ref=${githubLogin}` : '';
   // Kin progress — let the member SEE where they stand toward free-for-good.
   // Membership, not usage: count is the compliant (member-status) kin count
   // the server already has (countActiveKin at the call site). At/over the
@@ -175,28 +172,42 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
     font-size: clamp(28px, 1.6rem + 1.6vw, 38px); line-height: 1.2;
     letter-spacing: -0.01em; color: var(--ink); text-wrap: balance;
   }
-  .line { font-size: 1.05rem; line-height: 1.75; color: var(--ink-secondary); margin-bottom: 16px; max-width: 520px; }
-  /* Staggered effort: the connect command is THE thing to do — full ink.
-     The invite ask is the second beat — one step quieter, so the just-paid
-     member's eye lands on the must-do first and reads on only if they want. */
-  .line-primary { color: var(--ink); }
-  .line-second { color: var(--ink-muted); font-size: 0.98rem; }
-  .line-second .action { color: var(--ink-secondary); }
-  .deal { font-size: 0.9rem; line-height: 1.75; color: var(--ink-muted); margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--rule); max-width: 520px; }
-  .deal .free { color: var(--ink); }
-  .kin-progress { font-size: 0.92rem; line-height: 1.75; color: var(--ink-muted); margin-top: 14px; max-width: 520px; }
-  .shortcut { font-size: 0.82rem; line-height: 1.7; color: var(--ink-faint); margin-top: 30px; }
-  .shortcut a { color: var(--ink-muted); text-decoration: none; border-bottom: 1px dotted var(--ink-faint); transition: color 0.15s, border-color 0.15s; }
-  .shortcut a:hover { color: var(--ink); border-bottom-color: var(--ink-muted); }
-  .welcome-back { color: var(--ink-secondary); }
+  .line { font-size: 1.05rem; line-height: 1.75; color: var(--ink); margin-bottom: 16px; max-width: 520px; }
+  /* The two steps — the /start pattern: faint numerals, the copy action IS
+     step 1. Unmistakably the main thing on the page. */
+  .steps { margin-top: 4px; width: 100%; }
+  .step {
+    margin: 0 0 12px; font-size: 1.08rem; line-height: 1.6;
+    color: var(--ink); max-width: 520px;
+  }
+  .step-num { color: var(--ink-faint); }
+  .step-note {
+    margin: 14px 0 0; font-size: 0.85rem; line-height: 1.65;
+    color: var(--ink-muted); max-width: 480px; font-style: italic;
+  }
+  /* The invite — the second beat, one step quieter, under its own air. */
+  .invite { margin-top: 34px; }
+  .invite-line { font-size: 0.95rem; line-height: 1.75; color: var(--ink-muted); max-width: 520px; }
+  .invite-line .action { color: var(--ink-secondary); }
+  .invite-sep { color: var(--ink-faint); margin: 0 2px; }
+  .kin-progress { font-size: 0.9rem; line-height: 1.75; color: var(--ink-muted); margin-top: 10px; max-width: 520px; }
+  /* Fine print — one hairline, everything else. */
+  .fineprint {
+    margin-top: 36px; padding-top: 26px; max-width: 520px;
+    border-top: 1px solid var(--rule);
+  }
+  .fineprint p { font-size: 0.84rem; line-height: 1.7; color: var(--ink-muted); margin: 0 0 8px; }
+  .fineprint p:last-child { margin-bottom: 0; }
+  .fineprint .free { color: var(--ink); }
+  .fineprint a { color: var(--ink-muted); text-decoration: none; border-bottom: 1px dotted var(--ink-faint); transition: color 0.15s, border-color 0.15s; }
+  .fineprint a:hover { color: var(--ink); border-bottom-color: var(--ink-muted); }
+  .fineprint-solo { font-size: 0.78rem; line-height: 1.7; color: var(--ink-faint); margin-top: 34px; }
+  .fineprint-solo a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--ink-faint); transition: color 0.15s, border-color 0.15s; }
+  .fineprint-solo a:hover { color: var(--ink-muted); border-bottom-color: var(--ink-muted); }
   .lostkey { font-size: 0.78rem; line-height: 1.7; color: var(--ink-faint); margin-top: 16px; }
   .lostkey a { color: var(--ink-muted); text-decoration: none; border-bottom: 1px dotted var(--ink-faint); transition: color 0.15s, border-color 0.15s; }
   .lostkey a:hover { color: var(--ink); border-bottom-color: var(--ink-muted); }
-  .signout { font-size: 0.78rem; line-height: 1.7; color: var(--ink-faint); margin-top: 34px; }
-  .signout a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--ink-faint); transition: color 0.15s, border-color 0.15s; }
-  .signout a:hover { color: var(--ink-muted); border-bottom-color: var(--ink-muted); }
   .coda { margin-top: 48px; font-size: 20px; font-style: italic; color: var(--ink); opacity: 0.72; letter-spacing: 0.005em; }
-  .steps { margin-top: 4px; width: 100%; }
   .action {
     background: none;
     border: none;
@@ -219,45 +230,6 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   .action .icon .icon-check { display: none; }
   .action.done .icon .icon-copy { display: none; }
   .action.done .icon .icon-check { display: inline; }
-  .info {
-    background: none;
-    border: none;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    color: var(--ink-faint);
-    cursor: pointer;
-    transition: color 0.15s;
-    vertical-align: middle;
-    margin-left: 4px;
-    position: relative;
-  }
-  .info:hover, .info:focus-visible { color: var(--ink-muted); outline: none; }
-  .tooltip {
-    display: none;
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: -8px;
-    background: var(--tip-bg);
-    color: var(--tip-fg);
-    font-size: 0.78rem;
-    line-height: 1.6;
-    padding: 10px 14px;
-    border-radius: 6px;
-    width: 260px;
-    max-width: calc(100vw - 4rem);
-    text-align: left;
-    z-index: 10;
-  }
-  .tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 14px;
-    border: 6px solid transparent;
-    border-top-color: var(--tip-bg);
-  }
-  .info.active .tooltip { display: block; }
   .brand-corner {
     position: fixed;
     top: 28px;
@@ -286,16 +258,23 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
 <main class="wrap">
   <p class="eyebrow">the community</p>
   <h1 class="welcome">${isReturning ? `welcome back.` : `welcome to alexandria.`}</h1>
-  ${isReturning ? `<p class="line welcome-back">call /alexandria in your coding agent.</p>${rotateUrl ? `
+  ${isReturning ? `<p class="line">call /alexandria in your coding agent.</p>${rotateUrl ? `
   <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}` : `<div class="steps">
-    ${curlCmd ? `<p class="line line-primary"><button type="button" class="action" onclick="copyCmd(this)" aria-label="copy connect command">copy your connect command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; paste it into your coding agent (claude code, cursor, codex&hellip;) and hit enter. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">links your install to your membership so you can publish to the library. your thinking stays on your machine &mdash; only what you publish is ever sent.</span></button></p>` : `<p class="line line-primary">you're in. call /alexandria in your coding agent.</p>${rotateUrl ? `
+    ${curlCmd ? `<p class="step"><span class="step-num">1 &mdash;</span> <button type="button" class="action" onclick="copyCmd(this)" aria-label="copy connect command">copy your connect command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></p>
+    <p class="step"><span class="step-num">2 &mdash;</span> paste it into your coding agent and hit enter</p>
+    <p class="step-note">it links your install to your membership &mdash; your thinking stays on your machine.</p>` : `<p class="line">you're in. call /alexandria in your coding agent.</p>${rotateUrl ? `
     <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}`}
-    ${inviteUrl ? `<p class="line line-second"><button type="button" class="action" onclick="copyInvite(this)" aria-label="copy your invite link">copy your invite link <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> <button type="button" class="action" onclick="shareInvite(this)" aria-label="share your invite link">share <span class="icon"><span class="icon-copy">${ICON_SHARE}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; send it to everyone worth it &mdash; most won&rsquo;t act, and the three who do make yours free. <button type="button" class="info" onclick="toggleTip(this)" aria-label="what this does">${ICON_INFO}<span class="tooltip">${escapeHtml(inviteDisplay)} &mdash; it carries your code. three who join and stay, and your membership is free for good.</span></button></p>
-    <p class="kin-progress">${kinProgressLine}</p>` : ''}
+    ${inviteUrl ? `<div class="invite">
+    <p class="invite-line">your invite link: <button type="button" class="action" onclick="copyInvite(this)" aria-label="copy your invite link">copy <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> <span class="invite-sep">&middot;</span> <button type="button" class="action" onclick="shareInvite(this)" aria-label="share your invite link">share <span class="icon"><span class="icon-copy">${ICON_SHARE}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; three friends join and stay, and yours is free for good.</p>
+    <p class="kin-progress">${kinProgressLine}</p>
+    </div>` : ''}
   </div>
-  <p class="shortcut">on your phone? <a href="${SHORTCUT_URL}" target="_blank" rel="noopener noreferrer">add the shortcut</a> &mdash; capture anything, anywhere.</p>
-  <p class="deal"><span class="free">first month free</span>, then $10/month &mdash; or free for good with three friends, or just email if that&rsquo;s a stretch. you&rsquo;re joining the community, not paying for the tool.</p>`}
-  <p class="signout">wrong account? <a href="https://github.com/logout" target="_blank" rel="noopener noreferrer">sign out of github</a></p>
+  <div class="fineprint">
+    <p><span class="free">first month free</span>, then $10/month &mdash; or free for good with three friends, or just email if that&rsquo;s a stretch. you&rsquo;re joining the community, not paying for the tool.</p>
+    <p>on your phone? <a href="${SHORTCUT_URL}" target="_blank" rel="noopener noreferrer">add the shortcut</a> &mdash; capture anything, anywhere.</p>
+    <p>wrong account? <a href="https://github.com/logout" target="_blank" rel="noopener noreferrer">sign out of github</a></p>
+  </div>`}
+  ${isReturning ? `<p class="fineprint-solo">wrong account? <a href="https://github.com/logout" target="_blank" rel="noopener noreferrer">sign out of github</a></p>` : ''}
   <p class="coda">keep thinking.</p>
 </main>
 <script>
@@ -336,16 +315,6 @@ function shareInvite(el) {
   // Desktop fallback — no share sheet, so copy the link and flash the check.
   copyText(url, el);
 }
-function toggleTip(el) {
-  var wasActive = el.classList.contains('active');
-  document.querySelectorAll('.info.active').forEach(function(e) { e.classList.remove('active'); });
-  if (!wasActive) el.classList.add('active');
-}
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.info')) {
-    document.querySelectorAll('.info.active').forEach(function(el) { el.classList.remove('active'); });
-  }
-});
 </script>
 </body>
 </html>`;

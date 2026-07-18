@@ -9,7 +9,7 @@ export const metadata = pageMetadata({
   path: '/join',
   title: 'join alexandria.',
   description:
-    'the tool was the free sample — the community is the full meal. first month free; three friends = free indefinitely; otherwise $10 — two coffees a month. become a founding member.',
+    'the tool was the free sample — the community is the main course. first month free; three friends on = free for good; otherwise $10 — two coffees a month. become a founding member.',
 });
 
 // The founding-member JOIN — the paid half of the two things. The tool (the run)
@@ -165,6 +165,12 @@ export default async function JoinPage({
         }
         .join-offer-line:last-child { margin-bottom: 0; }
         .join-emph { font-style: italic; letter-spacing: 0.01em; }
+
+        /* Plain one-line dollar sign — the serif glyph read too ornate. */
+        .usd {
+          font-family: -apple-system, system-ui, 'Helvetica Neue', Arial, sans-serif;
+          font-size: 0.88em; letter-spacing: 0;
+        }
 
         /* THE $10 TRUTH — de-emphasised reassurance, clearly below the action. */
         .join-explain {

@@ -69,13 +69,6 @@ export default async function StartPage({
           <MobileStart refCode={ref} />
         </div>
 
-        {/* The handoff to the other half: the tool is free and stands alone, but
-            the funnel's terminal step is the community. Quiet, below the action,
-            so it reads as "next" not "instead". */}
-        <p className="primer-next">
-          once it&rsquo;s running, <Link href="/join" className="primer-next-link">join the community &rarr;</Link>
-        </p>
-
         <p className="primer-coda"><em>keep thinking.</em></p>
       </main>
 
@@ -170,10 +163,6 @@ export default async function StartPage({
         }
         .step-two { margin: 28px 0 6px; }
         .step-num { color: var(--text-muted, rgba(26, 19, 24, 0.45)); font-variant-numeric: lining-nums; }
-        .step-copied {
-          font-style: italic; font-size: 14px;
-          color: var(--text-muted, rgba(26, 19, 24, 0.55));
-        }
         .step-agents {
           margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 14px; line-height: 1.6;
@@ -255,60 +244,68 @@ export default async function StartPage({
         }
         .install-new a:hover { color: var(--text-primary); text-decoration-color: var(--text-primary); }
 
-        /* Do-it-later net — quiet by design (the command is the hero; this
-           only catches the not-right-now visitor). Hairline rule sets it
-           apart; input/button match the quiet decline capture on /join. */
+        /* Do-it-later net — the SECOND section, in /join's door idiom:
+           small-caps question, underline field sized to its ghost text, the
+           send-arrow appearing only on typing, tick on sent, shake on an
+           invalid submit. */
         .start-later {
-          margin: 30px 0 0; padding-top: 26px; width: 100%; max-width: 460px;
+          margin: 34px 0 0; padding-top: 28px; width: 100%; max-width: 460px;
           border-top: 1px solid var(--bg-tertiary, rgba(26, 19, 24, 0.10));
         }
-        .start-later-lede {
-          margin: 0 0 12px; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 13.5px; line-height: 1.65; letter-spacing: 0.01em;
-          color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: left;
-        }
-        .start-later-row { display: flex; gap: 8px; width: 100%; }
-        .start-later-row input {
-          flex: 1; min-width: 0; height: 42px; padding: 0 14px;
+        .join-door-q {
+          display: block; margin: 0 0 10px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 16px; /* >=16px — prevents iOS zoom-on-focus */
-          color: var(--text-primary); background: var(--bg-secondary);
-          border: 1px solid var(--bg-tertiary, rgba(26, 19, 24, 0.14)); border-radius: 8px;
-          outline: none; transition: border-color 200ms;
+          font-weight: 500; font-size: 12px; letter-spacing: 0.12em;
+          text-transform: lowercase; font-variant-caps: all-small-caps;
+          font-feature-settings: "smcp" 1, "kern" 1;
+          color: var(--text-muted); line-height: 1;
         }
-        .start-later-row input::placeholder { color: var(--text-muted, rgba(26, 19, 24, 0.42)); }
-        .start-later-row input:focus { border-color: var(--text-muted, rgba(26, 19, 24, 0.42)); }
-        .start-later-row button {
-          height: 42px; padding: 0 18px; flex-shrink: 0;
+        .join-door-field {
+          display: inline-flex; align-items: baseline; gap: 9px;
+          max-width: 100%;
+        }
+        .join-door-field input {
+          width: auto; flex: none; min-width: 0; max-width: 340px;
+          height: 32px; padding: 0 1px;
           font-family: var(--font-serif), ui-serif, Georgia, serif; font-size: 15px;
-          letter-spacing: 0.01em; color: var(--text-secondary, rgba(26, 19, 24, 0.82));
-          background: transparent; border: 1px solid var(--text-muted, rgba(26, 19, 24, 0.3));
-          border-radius: 8px; cursor: pointer; transition: border-color 200ms, color 200ms;
+          color: var(--text-primary); background: transparent;
+          border: none; border-bottom: 1px solid var(--text-muted, rgba(61, 54, 48, 0.3));
+          border-radius: 0; outline: none; transition: border-color 200ms;
         }
-        .start-later-row button:hover { color: var(--text-primary); border-color: var(--text-secondary, rgba(26, 19, 24, 0.6)); }
-        .start-later-row button:disabled { opacity: 0.5; cursor: default; }
-        .start-later-done {
-          margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 14px; line-height: 1.65; font-style: italic;
-          color: var(--text-secondary, rgba(26, 19, 24, 0.82)); text-align: left;
+        .join-door-field input::placeholder { color: var(--text-muted, rgba(61, 54, 48, 0.42)); }
+        .join-door-field input:focus { border-bottom-color: var(--text-secondary, rgba(61, 54, 48, 0.7)); }
+        .join-door-field input[data-shake="on"] { animation: startShake 320ms ease-in-out; }
+        @keyframes startShake {
+          0%, 100% { transform: translateX(0); }
+          25%      { transform: translateX(-3px); border-bottom-color: #b3261e; }
+          75%      { transform: translateX(3px);  border-bottom-color: #b3261e; }
         }
-        .start-later-hint {
-          margin: 8px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 13px; color: var(--text-muted, rgba(26, 19, 24, 0.55)); text-align: left;
+        .join-door-go {
+          display: inline-flex; align-items: center; gap: 5px; flex: none;
+          align-self: center; padding: 0; background: none; border: none;
+          color: var(--text-muted); cursor: pointer; text-decoration: none;
+          transition: color 200ms, opacity 200ms;
+          animation: startGoAppear 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
         }
-
-        .primer-next {
-          margin: 44px 0 0; text-align: left; max-width: 460px;
+        .join-door-go:hover { color: var(--text-primary); }
+        .join-door-go.is-done { color: var(--text-primary); cursor: default; }
+        .join-door-go:disabled { cursor: default; }
+        .join-go-word {
           font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 15px; line-height: 1.6; color: var(--text-muted);
+          font-weight: 500; font-size: 11px; letter-spacing: 0.1em;
+          text-transform: lowercase; font-variant-caps: all-small-caps;
+          font-feature-settings: "smcp" 1, "kern" 1; line-height: 1;
         }
-        .primer-next-link {
-          color: var(--text-secondary);
-          text-decoration: underline; text-decoration-color: var(--text-muted);
-          text-underline-offset: 3px; text-decoration-thickness: 1px;
-          transition: opacity 220ms ease;
+        .join-door-go .door-glyph { display: block; }
+        @keyframes startGoAppear {
+          from { opacity: 0; transform: translateX(-5px); }
+          to { opacity: 1; transform: none; }
         }
-        .primer-next-link:hover { opacity: 0.6; }
+        .join-door-hint {
+          margin: 9px 0 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-style: italic; font-size: 12.5px; letter-spacing: 0.02em;
+          color: var(--text-muted, rgba(61, 54, 48, 0.5));
+        }
 
         .primer-coda {
           margin: 28px 0 0; text-align: left; font-family: var(--font-serif), ui-serif, Georgia, serif;

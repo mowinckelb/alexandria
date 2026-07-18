@@ -87,10 +87,11 @@ export default function JoinCTA({
           the top isn't three same-weight lines stacked (founder 2026-07-17:
           "all roughly the same… boring… draw attention to the right places").
           His copy is verbatim — this is a LAYOUT/hierarchy pass, not a rewrite.
-          His open slot ("the full product (or dish, or something idk)") stays
-          "the full meal", completing the supermarket-sample frame. */}
+          His open slot ("the full product (or dish, or something idk)"):
+          "full meal" rejected, "the whole thing" rejected — now "the main
+          course", the natural idiom the sample points at. */}
       <h1 className="join-hero">
-        The tool was the free sample &mdash; the community is the whole thing.
+        The tool was the free sample &mdash; the community is the main course.
       </h1>
 
       {/* THE OFFER — the two simple facts. "free" set in italic (not colour)
@@ -103,8 +104,8 @@ export default function JoinCTA({
           try it &mdash; cancel anytime.
         </p>
         <p className="join-offer-line">
-          If you like it, get three friends to join, and it becomes{' '}
-          <span className="join-emph">free indefinitely</span>.
+          If you like it, get three friends to join, and it&rsquo;s{' '}
+          <span className="join-emph">free for good</span>.
         </p>
       </div>
 
@@ -115,13 +116,17 @@ export default function JoinCTA({
       {/* THE $10 TRUTH — de-emphasised reassurance for the worried reader (his
           copy verbatim). Sits below the action, quieter, so it never competes
           with the hero or the button. */}
+      {/* .usd — the serif's dollar glyph read too ornate (founder 2026-07-17:
+          "one that's less fancy, one line, consistent with the text"); a
+          plain system-sans $ sized to blend. */}
       <p className="join-explain">
-        After the month, if you haven&rsquo;t found three friends, it&rsquo;s
-        $10 a month. Now, before you get yourself worked up &mdash;
-        that&rsquo;s the same as two coffees a month, one Uber ride, or even
-        a package delivery charge. So don&rsquo;t be a penny pincher! A
-        dollar there is the same as a dollar here, but at least here
-        you&rsquo;re supporting our project and trying to help people out.
+        After the month, if you haven&rsquo;t found three friends, it&rsquo;s{' '}
+        <span className="usd">$</span>10 a month. Now, before you get yourself
+        worked up &mdash; that&rsquo;s the same as two coffees a month, one
+        Uber ride, or even a package delivery charge. So don&rsquo;t be a
+        penny pincher! A dollar there is the same as a dollar here, but at
+        least here you&rsquo;re supporting our project and trying to help
+        people out.
       </p>
       {/* "message me" is plain text, not a link (founder 2026-07-17: "don't
           have a link to message me — if they don't have my contact then they
@@ -187,7 +192,7 @@ export default function JoinCTA({
               </span>
             )}
           </div>
-          <p className="join-door-hint">you&rsquo;ll get yours after joining.</p>
+          <p className="join-door-hint">you&rsquo;ll get your own to share after you join.</p>
         </div>
 
         <JoinInterest refCode={effectiveRef || undefined} />
@@ -198,7 +203,7 @@ export default function JoinCTA({
             ref so an invited visitor who installs still credits their inviter
             as kin. */}
         <div className="join-door">
-          <p className="join-door-q">don&rsquo;t have the free tool yet?</p>
+          <p className="join-door-q">don&rsquo;t have the tool yet?</p>
           <Link
             className="join-door-field join-door-launchrow"
             href={effectiveRef ? `/start?ref=${effectiveRef}` : '/start'}

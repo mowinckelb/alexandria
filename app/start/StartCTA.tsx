@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SERVER_URL } from '../lib/config';
+import { ArrowIcon, TickIcon } from '../join/DoorIcons';
+
+const EMAIL_GHOST = 'your email';
 
 // The keyless install one-liner. `/a` redirects (Vercel, next.config.ts) to the
 // raw setup.sh; `curl -fsSL` follows it. No key = the free local product (the gym).
@@ -40,6 +43,9 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
   // uses: leave an email, the server sends the one line + a 2d/5d nudge.
   const [email, setEmail] = useState('');
   const [mailState, setMailState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  // Shake-on-invalid, matching the /follow field (founder 2026-07-17:
+  // consistent with how we have it in the other places).
+  const [shakeKey, setShakeKey] = useState(0);
 
   // Invited mode. A `ref` in the URL is only trusted once it validates against
   // /check-kin (a real member login) — a fake/typo ref shows no banner and the
@@ -85,7 +91,12 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
 
   const sendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes('@') || mailState === 'sending') return;
+    if (mailState === 'sending') return;
+    const trimmed = email.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setShakeKey((k) => k + 1);
+      return;
+    }
     setMailState('sending');
     try {
       // No `source` — this visitor intends to install, so they get the
@@ -120,7 +131,6 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
 
       <p className="step-line step-two">
         <span className="step-num">2 &mdash;</span> paste it into your coding agent
-        {copied && <span className="step-copied"> (copied &mdash; go ahead)</span>}
       </p>
       <p className="step-agents">
         claude code &middot; cursor &middot; codex &middot; factory &mdash; it walks you through the rest.
@@ -132,52 +142,64 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
         </p>
       )}
 
-      {/* The fine print — one concern per line, ordered by how many readers
-          need it; each line self-contained and instantly parseable (the
-          founder's bar: simple, no noise, but never so compressed it turns
-          unclear). */}
-      <div className="start-details">
-        <p>it all runs on your own computer &mdash; nothing is ever sent to us.</p>
-        <p>unsure? paste it in and ask your agent what it does &mdash; it can read the whole script first.</p>
-        <p>a plain chat app won&rsquo;t work &mdash; it has to be one of the coding agents above.</p>
-        <p>no coding agent yet? get claude code: <code>npm install -g @anthropic-ai/claude-code</code> &mdash; then paste the line into it.</p>
-        <p>using cowork? one extra settings step &mdash; it walks you through it.</p>
-        <p>on windows, run it inside your coding agent, or in git bash / wsl.</p>
+      {/* The do-it-later net — SECOND section (founder 2026-07-17), in the
+          same door idiom as /join: small-caps question, underline field, the
+          send-arrow appearing only once they type, tick on sent, shake on an
+          empty/invalid submit. */}
+      <div className="start-later">
+        <label className="join-door-q" htmlFor="start-later-email">
+          not at your computer?
+        </label>
+        <form className="join-door-field" onSubmit={sendEmail}>
+          <input
+            id="start-later-email"
+            key={shakeKey}
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            size={Math.max(EMAIL_GHOST.length, email.length) + 1}
+            placeholder={EMAIL_GHOST}
+            aria-label="your email"
+            data-shake={shakeKey > 0 ? 'on' : 'off'}
+            value={email}
+            readOnly={mailState === 'sent'}
+            onChange={(e) => { setEmail(e.target.value); if (mailState === 'error' || mailState === 'sent') setMailState('idle'); }}
+          />
+          {(email.trim() || mailState === 'sent') && (
+            <button
+              type="submit"
+              className={`join-door-go${mailState === 'sent' ? ' is-done' : ''}`}
+              aria-label={mailState === 'sent' ? 'sent' : 'send'}
+              disabled={mailState === 'sending' || mailState === 'sent'}
+            >
+              {mailState === 'sent' ? (
+                <TickIcon />
+              ) : (
+                <>
+                  <span className="join-go-word">send</span>
+                  <ArrowIcon />
+                </>
+              )}
+            </button>
+          )}
+        </form>
+        <p className="join-door-hint">
+          {mailState === 'error'
+            ? 'couldn’t send — try again.'
+            : mailState === 'sent'
+              ? 'sent — the line’s in your inbox.'
+              : 'we’ll email you the line for later.'}
+        </p>
       </div>
 
-      {/* The do-it-later net — hairline-separated, quieter than the command
-          above (the command is the hero; this catches the not-right-now). */}
-      <div className="start-later">
-        {mailState === 'sent' ? (
-          <p className="start-later-done">
-            sent &mdash; the command&rsquo;s in your inbox for when you&rsquo;re back at your computer.
-          </p>
-        ) : (
-          <>
-            <p className="start-later-lede">
-              not at your computer, or want to do it later? leave your
-              email and we&rsquo;ll send you the one line to run.
-            </p>
-            <form className="start-later-row" onSubmit={sendEmail}>
-              <input
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                placeholder="email"
-                aria-label="your email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); if (mailState === 'error') setMailState('idle'); }}
-                required
-              />
-              <button type="submit" disabled={mailState === 'sending'}>
-                {mailState === 'sending' ? 'sending…' : 'send it'}
-              </button>
-            </form>
-            {mailState === 'error' && (
-              <p className="start-later-hint">couldn&rsquo;t send &mdash; try again.</p>
-            )}
-          </>
-        )}
+      {/* The fine print — compressed to the three things a reader might
+          actually need (founder 2026-07-17: the six-line block was noise):
+          chat apps won't work, cowork has a small detour, and the
+          unsure-about-security answer. */}
+      <div className="start-details">
+        <p>a plain chat app won&rsquo;t work &mdash; it has to be one of the coding agents above.</p>
+        <p>using cowork? a couple of quick setup steps &mdash; it walks you through, then you&rsquo;re back in cowork.</p>
+        <p>unsure? it all runs on your own computer &mdash; and your agent can read the whole script before running it.</p>
       </div>
     </section>
   );

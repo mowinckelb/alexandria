@@ -88,7 +88,7 @@ export default function JoinInterest({ refCode }: { refCode?: string }) {
           ? 'couldn’t send — try again.'
           : sent
             ? 'sent — we’ll be in touch.'
-            : 'leave your email to continue on your own.'}
+            : 'and continue on your own.'}
       </p>
     </div>
   );
