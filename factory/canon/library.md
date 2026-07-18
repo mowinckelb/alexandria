@@ -118,7 +118,7 @@ Module IDs are GitHub identity tags. Once a module has a public GitHub path, its
 
 The server appends `.md` when fetching from `https://raw.githubusercontent.com/<user>/<repo>/main/<path>.md`.
 
-Example: `github:mowinckelb/alexandria#factory/canon/library`.
+Example: `github:benmowinckel/alexandria#factory/canon/library`.
 
 Before a module is contributed, use a provisional local ID in `.call_manifest`:
 
@@ -193,21 +193,21 @@ On the website: `alexandria-library.com/marketplace/<user>/<repo>/<path>` — fr
 
 ## Worked example — `brief-setup`
 
-The first module on the public Marketplace is `factory/skills/brief-setup` from this repo — the one-time setup walkthrough for the daily morning brief (sovereign SMTP + local launchd). Its module ID is `github:mowinckelb/alexandria#factory/skills/brief-setup`. It's already in the canonical alexandria repo with valid `name` + `description` front-matter, so no separate publish step was needed — the protocol's logic carries: write to a public path, register in `.call_manifest`, the next `/call` POST surfaces it.
+The first module on the public Marketplace is `factory/skills/brief-setup` from this repo — the one-time setup walkthrough for the daily morning brief (sovereign SMTP + local launchd). Its module ID is `github:benmowinckel/alexandria#factory/skills/brief-setup`. It's already in the canonical alexandria repo with valid `name` + `description` front-matter, so no separate publish step was needed — the protocol's logic carries: write to a public path, register in `.call_manifest`, the next `/call` POST surfaces it.
 
 Catalog entry it produced:
 
 ```json
 {
-  "id": "github:mowinckelb/alexandria#factory/skills/brief-setup",
+  "id": "github:benmowinckel/alexandria#factory/skills/brief-setup",
   "name": "brief-setup",
   "description": "One-time setup for the daily morning brief — local launchd schedule + user-owned SMTP credentials. Sovereign by construction; survives Alexandria the company vanishing.",
-  "author_github_login": "mowinckelb",
+  "author_github_login": "benmowinckel",
   "status": "ok"
 }
 ```
 
-Browsable at `alexandria-library.com/marketplace/mowinckelb/alexandria/factory/skills/brief-setup`. Install on any machine with `bash install.sh github:mowinckelb/alexandria#factory/skills/brief-setup`.
+Browsable at `alexandria-library.com/marketplace/benmowinckel/alexandria/factory/skills/brief-setup`. Install on any machine with `bash install.sh github:benmowinckel/alexandria#factory/skills/brief-setup`.
 
 ## When to suggest contributing
 

@@ -54,7 +54,7 @@ setup() {
   if [[ -f "$file" ]]; then
     echo "publish: $file already exists — re-editing" >&2
   else
-    template_url="https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/templates/module.md"
+    template_url="https://raw.githubusercontent.com/benmowinckel/alexandria/main/factory/templates/module.md"
     # Fetch to a tempfile and gate on content BEFORE writing $file: a 404 or
     # truncated response piped straight through sed would leave an empty
     # scaffold that sails past finalize()'s H1 grep and ships blank. The

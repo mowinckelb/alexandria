@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Alexandria Hooks Payload — live, auto-updating
-# Source: https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/hooks/payload.sh
+# Source: https://raw.githubusercontent.com/benmowinckel/alexandria/main/factory/hooks/payload.sh
 # The canon is public on GitHub (factory/canon/ folder). No signing needed.
 
 MODE="$1"
@@ -8,7 +8,7 @@ ALEX_DIR="$2"
 API_KEY="$3"
 EXTRA="$4"
 SERVER="https://api.alexandria-library.com"
-CANON_GITHUB="https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/canon"
+CANON_GITHUB="https://raw.githubusercontent.com/benmowinckel/alexandria/main/factory/canon"
 PAYLOAD_FRESH="$5"
 
 # Agent-facing path display. ALEX_DIR is the ground truth for every file
@@ -354,7 +354,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
       # which would false-positive every file that ends with one).
       local factory_tmp
       factory_tmp=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null) || return
-      if ! curl -sf --max-time 3 "https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/$factory_path" -o "$factory_tmp" 2>/dev/null; then
+      if ! curl -sf --max-time 3 "https://raw.githubusercontent.com/benmowinckel/alexandria/main/factory/$factory_path" -o "$factory_tmp" 2>/dev/null; then
         rm -f "$factory_tmp"
         return
       fi
@@ -398,7 +398,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
       codex_factory_tmp=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null)
       if [ -n "$codex_local_tmp" ] && [ -n "$codex_factory_tmp" ]; then
         sed -n '/<!-- alexandria:start -->/,/<!-- alexandria:end -->/p' "$HOME/.codex/instructions.md" > "$codex_local_tmp"
-        if curl -sf --max-time 3 "https://raw.githubusercontent.com/mowinckelb/alexandria/main/factory/skills/codex.md" -o "$codex_factory_tmp" 2>/dev/null; then
+        if curl -sf --max-time 3 "https://raw.githubusercontent.com/benmowinckel/alexandria/main/factory/skills/codex.md" -o "$codex_factory_tmp" 2>/dev/null; then
           codex_local_sha=$($sha_cmd "$codex_local_tmp" | cut -c1-7)
           codex_factory_sha=$($sha_cmd "$codex_factory_tmp" | cut -c1-7)
           if [ -n "$codex_factory_sha" ] && [ -n "$codex_local_sha" ] && [ "$codex_factory_sha" != "$codex_local_sha" ]; then
@@ -533,7 +533,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
       API_KEY="$API_KEY" \
       CLIENT_VERSION="$CLIENT_VERSION" \
       SYNC_LOG="$ALEX_DIR/system/.library_sync_status.json" \
-      GH_LOGIN="${ALEXANDRIA_GH_LOGIN:-mowinckelb}" \
+      GH_LOGIN="${ALEXANDRIA_GH_LOGIN:-benmowinckel}" \
       node -e '
         const fs = require("fs"), path = require("path");
         const root = path.join(process.env.ALEX_DIR, "files/library");
@@ -739,7 +739,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
       fi
     fi
 
-    call_payload='{"modules":[{"id":"github:mowinckelb/alexandria#factory/canon/axioms","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/methodology","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/editor","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/mercury","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/publisher","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/library","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/filter","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/plm","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/twin","text":"default canon module"},{"id":"github:mowinckelb/alexandria#factory/canon/marketplace","text":"default canon module"}]}'
+    call_payload='{"modules":[{"id":"github:benmowinckel/alexandria#factory/canon/axioms","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/methodology","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/editor","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/mercury","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/publisher","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/library","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/filter","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/plm","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/twin","text":"default canon module"},{"id":"github:benmowinckel/alexandria#factory/canon/marketplace","text":"default canon module"}]}'
     if [ -f "$ALEX_DIR/.call_manifest" ]; then
       manifest=$(cat "$ALEX_DIR/.call_manifest" 2>/dev/null)
       [ -n "$manifest" ] && call_payload="$manifest"

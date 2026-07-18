@@ -2,7 +2,7 @@
 
 ## Module ID
 
-`github:mowinckelb/alexandria#factory/systems/capture-pipeline`
+`github:benmowinckel/alexandria#factory/systems/capture-pipeline`
 *(user0-origin, contributed 2026-07-01; machinery: `factory/scripts/capture_resolver.py`, installed by `setup.sh` as a SessionStart hook)*
 
 ## Source
