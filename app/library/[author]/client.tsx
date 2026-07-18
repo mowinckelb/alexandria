@@ -381,8 +381,12 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                 <div style={{ margin: '0 -0.98rem' }}>
                   <PromptBox value={doorQ} onChange={setDoorQ} onSubmit={goAsk} loading={doorGoing} placeholder="ask me anything…" />
                 </div>
+                {/* Concept first, then what it knows, then how it behaves
+                    (founder: "explain what it is conceptually, then how it
+                    works / what it knows — not too long"). The box itself
+                    carries the "use it" part, so no ask-repetition here. */}
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                  {first}&rsquo;s PLM — an ai modeled on everything published and linked on this page. it answers as {first} would.
+                  an ai built from {first}&rsquo;s mind — everything published and linked on this page; it answers as {first} would.
                 </p>
                 <p style={{ fontSize: '0.88rem', margin: '0.3rem 0 0' }}>
                   <span style={{ color: 'var(--text-muted)' }}>{online ? 'online' : 'offline'}</span>
