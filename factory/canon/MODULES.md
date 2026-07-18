@@ -18,6 +18,7 @@ How *Benjamin* runs the loop well — the best *general* starting point for some
 - **`methodology.md`** — his craft: how to run the five operations; constitution architecture; passive mode; the notepad; compounding loops.
 - **`editor.md` · `mercury.md` · `publisher.md`** — his three functions (extract, amplify, create).
 - **`library.md` · `filter.md`** — his Library surface and publishing conventions.
+- **`marketplace.md`** — the active marketplace: the Engine works the collective on the Author's behalf — scans and evaluates new modules in isolation, drafts contributions and requests, holds everything outbound at the Author's explicit go. Opt-out is deleting the file.
 - **`plm.md`** — compiling the Author's twin: a queryable language model built from the Constitution (positions) + all the Author's first-person text (voice), trained as one weighted multi-source SFT run, a downstream artifact recompiled each base-model generation, shipped behind the Author's gate.
 - **`twin.md`** — the onboarding companion to `plm.md`: the plain, compelling why an Author reads before deciding to compile — what a twin is, why only their substrate can build it, the weights-floor / context-ceiling split, the honest data bar, and the one-command path. The invitation; `plm.md` is the machine.
 - **`bookshelf.md`** — his reference shelf. Reference, not a survival-ranked module (ships + forkable, but intentionally not in the call-manifest).

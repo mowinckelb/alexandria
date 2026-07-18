@@ -586,7 +586,7 @@ Author types response to feedback pulse (only when they choose to)
   → Founder reviews → canon updated on GitHub
   → All Authors fetch updated canon at next session start (auto, public raw.githubusercontent.com)
 ```
-*Owner:* the founder (judgment) + the Authors who choose to give feedback (signal source). The Engine never auto-sends anything to the marketplace on the Author's behalf — sovereignty line is mechanical, not promissory. Authors who want to shape the methodology pour signal in via the feedback pulse; Authors who don't, don't, and nothing is collected from them.
+*Owner:* the founder (judgment) + the Authors who choose to give feedback (signal source). The Engine never auto-sends anything to the marketplace on the Author's behalf — sovereignty line is mechanical, not promissory. It may *prepare* outbound work proactively — draft module contributions, draft request lines (see `marketplace.md`, the active-marketplace module) — but everything outbound waits at the Author's explicit go: the labour is automated, the decision never is. Authors who want to shape the methodology pour signal in via the feedback pulse; Authors who don't, don't, and nothing is collected from them.
 
 **Loop 4: The Vision Loop (company-level)**
 *What compounds:* the thesis — what Alexandria IS and WHY.
