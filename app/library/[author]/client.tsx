@@ -199,6 +199,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
     if (l.includes('github')) return 'personal code';
     if (l.includes('substack') || l.includes('medium')) return 'personal writing';
     if (l.includes('youtube')) return 'personal channel';
+    if (l.includes('beli')) return 'personal taste';
     return null;
   };
   const routerLinks: { label: string; url: string; sub: string | null; external: boolean }[] = [
