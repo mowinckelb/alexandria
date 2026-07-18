@@ -388,10 +388,10 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem' }}>
                   {sectionHead('mind', 'a personal language model')}
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
-                    <span aria-hidden style={{ width: '7px', height: '7px', borderRadius: '50%',
-                      background: online ? 'var(--accent)' : 'var(--text-ghost)', display: 'inline-block' }} />
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>{online ? 'online' : 'offline'}</span>
+                  {/* Status as pure typography — accent when live, ghost when
+                      not. No dot geometry to misalign (founder, round 13). */}
+                  <span style={{ color: online ? 'var(--accent)' : 'var(--text-ghost)', fontSize: '0.85rem', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+                    {online ? 'online' : 'offline'}
                   </span>
                 </div>
                 <div style={{ margin: '0.9rem -0.98rem 0' }}>
