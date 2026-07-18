@@ -1267,6 +1267,10 @@ elif [ "$KEYLESS" = "true" ] || [ "$STATUS_KEY" = "ok" ]; then
       echo "waive it."
     fi
   fi
+  # The habit — the one behaviour that makes the product work (founder
+  # 2026-07-17: say it everywhere, make it autopilot-simple).
+  echo ""
+  echo "The habit: open a new tab, type /a, and leave it. That's a session — do it whenever."
   # Cowork / the Claude app / plain chat can't run hooks or the /a skill on
   # their own — but one paste makes them Alexandria-aware.
   echo ""
