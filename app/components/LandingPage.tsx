@@ -2690,33 +2690,48 @@ export default function LandingPage({ brandClassName = '' }: Props) {
            settled boundary; abstract.pdf section titles). Bigger than the
            why/what/how labels so it reads as the section's title, muted
            ink, on a hairline underline spanning only the words. The line
-           is currentColor: the old var(--theme-border) was never defined,
-           which invalidated the declaration and the hairline never drew. */
+           uses --theme-border-soft (a per-theme soft hairline) — fainter
+           than the ink (founder, 2026-07-18); the old var(--theme-border)
+           was never defined, which invalidated the rule and drew nothing. */
         .secs-kicker {
           display: inline-block;
           align-self: flex-start;
           margin: 40px 0 0;
           padding-bottom: 10px;
-          border-bottom: 1px solid currentColor;
+          border-bottom: 1px solid var(--theme-border-soft);
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-size: 16px;
           letter-spacing: 0.02em;
           color: var(--theme-fg-muted);
         }
-        /* The kicker travels with the sections in focus mode (hidden while
-           a section is open so the open body owns the stage). */
+        /* The kicker hides while a section is open so the open body owns
+           the stage — but it must move as ONE unit: fade the whole plate
+           (text + underline together), never let the collapsing height
+           sweep the border up through the text (that "crash-through" was
+           the 2026-07-18 bug). Fix = asymmetric timing so opacity always
+           leads the VISIBLE transition and the space-reclaim happens while
+           the plate is already transparent, both directions:
+             • hiding  → fade out first, THEN collapse height/margin.
+             • showing → expand height/margin first, THEN fade back in. */
         @media (min-width: 900px) {
           .secs-kicker {
             margin-top: 92px;
-            transition: max-height 520ms cubic-bezier(0.33, 0, 0.2, 1), opacity 380ms ease, margin 520ms cubic-bezier(0.33, 0, 0.2, 1);
             overflow: hidden;
             max-height: 40px;
+            /* return-to-visible: space opens (invisible), then unit fades in */
+            transition: max-height 360ms cubic-bezier(0.33, 0, 0.2, 1),
+                        margin 360ms cubic-bezier(0.33, 0, 0.2, 1),
+                        opacity 240ms ease 300ms;
           }
           .right-col:has(.sec.is-open) .secs-kicker {
             max-height: 0;
             opacity: 0;
             margin: 0;
+            /* going-to-hidden: unit fades out, then space closes (invisible) */
+            transition: opacity 200ms ease,
+                        max-height 360ms cubic-bezier(0.33, 0, 0.2, 1) 180ms,
+                        margin 360ms cubic-bezier(0.33, 0, 0.2, 1) 180ms;
           }
         }
         .secs {
@@ -3350,8 +3365,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             background: linear-gradient(
               to bottom,
               #f7f2ec 0,
-              #f7f2ec 112svh,
-              var(--theme-bg) 112svh,
+              #f7f2ec 116svh,
+              var(--theme-bg) 116svh,
               var(--theme-bg) 100%
             ) !important;
           }
@@ -3377,11 +3392,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                the answer line overlapped the arch top on phone heights —
                the epigraph is pixel-anchored (top 112px) while the arch
                rides the cover-scaled scene (top ≈ 0.366 × slide height).
-               112svh drops the arch ~4.4svh clear of the text; the scene,
-               plate, and everything beneath move down with it. Keep the
-               body gradient stop and the film-invite anchor (56svh centre,
-               112svh wall units) in sync with this height. */
-            min-height: 112svh;
+               a taller slide drops the arch clear of the text; the scene,
+               plate, and everything beneath move down with it. 116svh
+               (founder, 2026-07-18) drops the arch a touch further still.
+               Keep the body gradient stop and the film-invite anchor
+               (58svh centre, 116svh wall units) in sync with this height. */
+            min-height: 116svh;
             /* Mobile gets its OWN scene asset — the desktop 16:9 wall
                cropped to portrait made the window wider than the phone
                screen ("too big", founder 2026-07-08). The square asset
@@ -3463,7 +3479,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              bottom edge. */
           .watermark {
             position: fixed;
-            bottom: 16%;
+            bottom: 7%;
             left: 66%;
             transform: translateX(-50%);
             font-size: clamp(150px, 40vw, 240px);
@@ -3523,7 +3539,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           }
           .alpha-mark {
             position: absolute;
-            bottom: 64px;
+            bottom: 210px;
             left: 20px;
             font-size: 10.5px;
           }
@@ -3659,12 +3675,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              line 0.619; caption anchor 0.644. Wall units for a square
              image under cover: both dimensions = max(100vw, 100svh). */
           .film-invite {
-            /* Wall units + centre track the 112svh slide, not the
+            /* Wall units + centre track the 116svh slide, not the
                viewport — the slide is taller than 100svh on mobile. */
-            --wall-w: max(100vw, 112svh);
-            --wall-h: max(100vw, 112svh);
+            --wall-w: max(100vw, 116svh);
+            --wall-h: max(100vw, 116svh);
             left: calc(50vw + 0.005 * var(--wall-w));
-            top: calc(56svh + 0.144 * var(--wall-h));
+            top: calc(58svh + 0.144 * var(--wall-h));
             transform: translate(-50%, -50%);
           }
           .film-invite-btn {
@@ -3744,6 +3760,16 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .phon {
             font-size: clamp(11.5px, 1.1vw, 13px);
             margin-top: -4px;
+          }
+          /* Back-slide kicker on mobile — pull the sections up tight under
+             'on alexandria.' so the plate reads as their header, not a
+             floating line (founder, 2026-07-18). The kicker + sections are
+             flattened (display:contents) into .bottom-inner's flex flow, so
+             a 64px flex GAP sits between them — cancel most of it with a
+             negative margin, leaving ~14px. No collapse animation runs on
+             mobile (that's the desktop focus mode). */
+          .secs {
+            margin-top: -50px;
           }
 
         }
