@@ -53,7 +53,7 @@ export default async function StartPage({
       </header>
 
       <main className="primer-main">
-        <p className="primer-eyebrow">the free tool</p>
+        <p className="primer-eyebrow">the tool</p>
         {/* No lede (2026-07-16, radical simplicity): the two steps are the
             page; the lede's privacy line lives in the fine print below. */}
         <h1 className="primer-h1">becoming an alexandrian</h1>
@@ -120,11 +120,15 @@ export default async function StartPage({
           color: var(--accent); line-height: 1;
         }
 
+        /* The hero — EB Garamond calligraphic italic, matching the /join
+           title treatment (founder 2026-07-17: "I like the bold title we
+           have in the other pages"). */
         .primer-h1 {
-          margin: 0 0 20px; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: italic; font-weight: 400; font-size: 34px; line-height: 1.25;
+          margin: 0 0 26px; font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+          font-style: italic; font-weight: 500;
+          font-size: clamp(27px, 1.5rem + 1.4vw, 34px); line-height: 1.2;
           letter-spacing: -0.01em; color: var(--text-primary); text-wrap: balance;
-          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1;
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "calt" 1, "swsh" 1;
         }
 
         .primer-lede {

@@ -161,11 +161,11 @@ export async function sendFollowerWelcome(email: string, unsubscribeToken?: stri
 
 export async function sendWelcomeEmail(email: string, githubLogin: string, emailToken?: string, apiKey?: string): Promise<void> {
   const websiteHost = WEBSITE_URL.replace(/^https?:\/\//, '');
-  // Invite link uses the TRY door (/start — the free tool), not the paid /join
-  // door: the ask is "get a friend using it", and /start carries the ref
-  // through install → eventual join, so kin attribution is intact either way.
-  const kinLink = `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}`;
-  const kinLinkDisplay = `${websiteHost}/start?ref=${githubLogin}`;
+  // Invite link opens /invite — the self-contained referral landing (who sent
+  // you, what it is, one action). It forwards the ref to /start, so kin
+  // attribution through install → eventual join is intact.
+  const kinLink = `${WEBSITE_URL}/invite?ref=${encodeURIComponent(githubLogin)}`;
+  const kinLinkDisplay = `${websiteHost}/invite?ref=${githubLogin}`;
   // Connect command — carry it in the email body so a user who finishes GitHub
   // OAuth but abandons Stripe is never stranded without their key. Same command
   // the founding-member page shows; re-running setup.sh with the key is
@@ -199,9 +199,9 @@ export async function sendKinFreeUnlocked(
   githubLogin: string,
   emailToken?: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  // TRY door — the sender is already free; "every one after just grows the
-  // tribe" is a get-them-using-it ask, so the link opens the free tool.
-  const kinLink = `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}`;
+  // /invite — the referral landing; forwards the ref to /start for kin
+  // attribution ("every one after just grows the tribe").
+  const kinLink = `${WEBSITE_URL}/invite?ref=${encodeURIComponent(githubLogin)}`;
   const unsubscribeUrl = emailToken ? `${SERVER_URL}/email/stop?t=${emailToken}` : undefined;
   const html = emailShell(`<p style="margin: 0 0 1.4rem;">you&rsquo;re free.</p>
   <p style="margin: 0 0 1.4rem; color: #8a8078;">three friends joined through you and stayed &mdash; so your membership is free for good. no more $10, ever. thank you for building the community.</p>
@@ -259,9 +259,9 @@ export async function sendInstallNudge(
 ): Promise<{ ok: boolean; error?: string }> {
   const MECHANICS_URL = `${WEBSITE_URL}/Mechanics.md`;
   const installUrl = `${SERVER_URL}/install/${installToken}`;
-  // TRY door — a generic "invite link" ask; the friend lands on the free tool
-  // and the ref rides through install → eventual join for kin attribution.
-  const kinLink = `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}`;
+  // /invite — the referral landing; the ref rides through to /start →
+  // install → eventual join for kin attribution.
+  const kinLink = `${WEBSITE_URL}/invite?ref=${encodeURIComponent(githubLogin)}`;
   const unsubscribeUrl = `${SERVER_URL}/email/stop?t=${emailToken}`;
   const html = emailShell(`<p style="margin: 0 0 1.8rem; color: #8a8078;">ready when you are.</p>
 

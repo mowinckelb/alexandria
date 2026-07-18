@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Update, UpdateMeta } from '../../lib/updates';
 import { ThemeToggle } from '../../components/ThemeToggle';
+import { CopyIcon, TickIcon } from '../../join/DoorIcons';
+
+const SITE = 'https://alexandria-library.com';
 
 // The single-update reader — rebuilt onto the shared primer skeleton (founder
 // 2026-07-17, funnel-consistency sweep): CSS-var theme (dark mode now works),
@@ -18,6 +22,17 @@ export default function UpdatePage({
   update: Update;
   chronological: UpdateMeta[];
 }) {
+  // Copied state for the share door — the icon swaps copy→tick in place
+  // (same 15px box, so nothing jitters).
+  const [copied, setCopied] = useState(false);
+  const copySite = async () => {
+    try {
+      await navigator.clipboard.writeText(SITE);
+    } catch { /* clipboard unavailable — the visible link still works */ }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="primer-page">
       <ThemeToggle />
@@ -59,6 +74,27 @@ export default function UpdatePage({
 
           <div className="update-body">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{update.body}</ReactMarkdown>
+          </div>
+
+          {/* Standing share door — the same question/answer idiom as the
+              other pages' fine print, so every update carries the ask without
+              each letter having to write it (founder 2026-07-17). One visible
+              link, one copy icon that ticks in place. */}
+          <div className="update-share">
+            <p className="update-share-q">know someone who&rsquo;d want these?</p>
+            <p className="update-share-line">
+              send them to{' '}
+              <a href={SITE}>alexandria-library.com</a>{' '}
+              <button
+                type="button"
+                className={`update-share-copy${copied ? ' is-done' : ''}`}
+                onClick={copySite}
+                aria-label={copied ? 'copied' : 'copy the link'}
+              >
+                {copied ? <TickIcon /> : <CopyIcon />}
+              </button>{' '}
+              &mdash; they can follow along from there.
+            </p>
           </div>
 
           {chronological.length > 1 ? (
@@ -175,6 +211,39 @@ const styles = `
   }
   .update-body ul, .update-body ol { margin: 0 0 1.4em; padding-left: 1.4em; }
   .update-body li { margin: 0 0 0.5em; }
+
+  /* Share door — the question/answer fine-print idiom. */
+  .update-share {
+    margin-top: 48px; padding-top: 26px;
+    border-top: 1px solid var(--bg-tertiary, rgba(61, 54, 48, 0.14));
+  }
+  .update-share-q {
+    margin: 0 0 10px; font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-weight: 500; font-size: 12px; letter-spacing: 0.12em;
+    text-transform: lowercase; font-variant-caps: all-small-caps;
+    font-feature-settings: "smcp" 1, "kern" 1;
+    color: var(--text-muted); line-height: 1;
+  }
+  .update-share-line {
+    margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: 15px; line-height: 1.6; color: var(--text-secondary);
+  }
+  .update-share-line a {
+    color: var(--text-primary); text-decoration: underline;
+    text-decoration-color: var(--text-muted, rgba(61, 54, 48, 0.4));
+    text-underline-offset: 3px; text-decoration-thickness: 1px;
+    transition: text-decoration-color 200ms;
+  }
+  .update-share-line a:hover { text-decoration-color: var(--text-primary); }
+  /* Fixed 15px glyph box — copy→tick swaps in place, nothing moves. */
+  .update-share-copy {
+    display: inline-flex; align-items: center; vertical-align: -2px;
+    padding: 0; background: none; border: none; cursor: pointer;
+    color: var(--text-muted); transition: color 200ms;
+  }
+  .update-share-copy:hover { color: var(--text-primary); }
+  .update-share-copy.is-done { color: var(--text-primary); cursor: default; }
+  .update-share-copy .door-glyph { display: block; }
 
   .update-nav {
     margin-top: 52px; padding-top: 24px;

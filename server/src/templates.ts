@@ -12,10 +12,6 @@ function getWebsiteUrl() { return process.env.WEBSITE_URL || 'https://alexandria
 // a session. Surfaced as a subtle link on the founding-member page.
 const SHORTCUT_URL = 'https://www.icloud.com/shortcuts/0ea1bb7333fd43a9881e9c7b9938a337';
 
-// How many active kin make membership free for good. Mirrors billing.ts's
-// KIN_THRESHOLD (same env var); the page reads it to show the progress line.
-function getKinThreshold(): number { return parseInt(process.env.KIN_THRESHOLD || '3', 10); }
-
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -41,7 +37,6 @@ function jsLiteral(value: string): string {
 
 const ICON_COPY = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 const ICON_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-const ICON_SHARE =`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
 
 // ---------------------------------------------------------------------------
 // Auth error page — shown when OAuth callback can't complete
@@ -70,8 +65,9 @@ export function authErrorHtml(message: string): string {
 // Callback page — the first brand moment after signup
 // ---------------------------------------------------------------------------
 
-export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false, authorNumber = 0, kinCompliant = 0, rotateUrl = ''): Promise<string> {
+export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToken = false, authorNumber = 0, _kinCompliant = 0, rotateUrl = ''): Promise<string> {
   const WEBSITE_URL = getWebsiteUrl();
+  const host = WEBSITE_URL.replace(/^https?:\/\//, '');
   // The founding-member page (Strava-for-thought, ground truth e1cd27f). You've
   // just JOINED the community — the local tool was already free. The page leads
   // with belonging (you're in), then the two actions: the connect command (links
@@ -90,25 +86,18 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   // links) — re-running setup.sh with the key is idempotent. Branded form: /a is
   // a 307 to the raw setup.sh; the L in -fsSL (--location) follows it — keep it.
   const curlCmd = apiKey ? `curl -fsSL alexandria-library.com/a | bash -s -- ${apiKey}` : '';
-  // The invite link carries the member's code (their github login) through the TRY
-  // door (/start — the free tool), not the paid /join door: the ask on this page is
-  // "send it to friends", and /start forwards the ref through install → eventual
-  // join, where the server credits kin (validates ref → existing login, rejects
-  // self-referral). Three who join and stay = free for good, same as before.
-  const inviteUrl = githubLogin ? `${WEBSITE_URL}/start?ref=${encodeURIComponent(githubLogin)}` : '';
-  // Kin progress — let the member SEE where they stand toward free-for-good.
-  // Membership, not usage: count is the compliant (member-status) kin count
-  // the server already has (countActiveKin at the call site). At/over the
-  // threshold shows the done state; short of it shows how many remain.
-  const kinThreshold = getKinThreshold();
-  const kinDone = kinCompliant >= kinThreshold;
-  const kinRemaining = Math.max(0, kinThreshold - kinCompliant);
-  const kinProgressLine = kinDone
-    ? `you&rsquo;re free for good &mdash; three friends joined through you.`
-    : `${kinCompliant} of ${kinThreshold} friends joined &mdash; ${kinRemaining} more and it&rsquo;s free for good.`;
-  // Warm, brief share text for the Web Share API sheet (native share on
-  // mobile; clipboard-copy fallback on desktop). Brand voice, lowercase.
-  const shareText = 'alexandria — a tribe of people who put their minds into writing, so ai thinks with them, not for them. join me.';
+  // The invite link now opens /invite — the self-contained referral landing
+  // (founder 2026-07-17: a cold recipient dropped on /start had "no idea what
+  // that is"). /invite pitches in one line and forwards the ref to /start,
+  // where install → eventual join credits kin (validates ref → existing
+  // login, rejects self-referral). Three who join and stay = free for good.
+  // The URL is DISPLAYED as well as copied — the visible ref doubles as the
+  // member's kin code, so there's no separate code line to explain.
+  const inviteUrl = githubLogin ? `${WEBSITE_URL}/invite?ref=${encodeURIComponent(githubLogin)}` : '';
+  const inviteDisplay = githubLogin ? `${host}/invite?ref=${githubLogin}` : '';
+  // (Kin progress + the Web Share sheet were cut 2026-07-17 — the count is
+  // ~always 0 on this page, and two buttons with mixed icons read messy. One
+  // visible link, one copy icon.)
   // Inline Mechanics.md so its copy button runs synchronously inside the click handler.
   // Async fetch + clipboard.writeText loses user activation and falls back to opening the raw URL.
   // (block.md is no longer copied here — the agent reads the locally-cached .block after install
@@ -185,12 +174,29 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
     margin: 14px 0 0; font-size: 0.85rem; line-height: 1.65;
     color: var(--ink-muted); max-width: 480px; font-style: italic;
   }
-  /* The invite — the second beat, one step quieter, under its own air. */
+  /* The second beats — invite link + phone shortcut, each a small-caps
+     question, an answer line, and one quiet note (the site's door idiom). */
   .invite { margin-top: 34px; }
-  .invite-line { font-size: 0.95rem; line-height: 1.75; color: var(--ink-muted); max-width: 520px; }
-  .invite-line .action { color: var(--ink-secondary); }
-  .invite-sep { color: var(--ink-faint); margin: 0 2px; }
-  .kin-progress { font-size: 0.9rem; line-height: 1.75; color: var(--ink-muted); margin-top: 10px; max-width: 520px; }
+  .invite-q {
+    margin: 0 0 8px; font-size: 0.72rem; letter-spacing: 0.12em;
+    text-transform: lowercase; font-variant-caps: all-small-caps;
+    color: var(--ink-muted); line-height: 1;
+  }
+  .invite-line { font-size: 0.98rem; line-height: 1.6; color: var(--ink-secondary); max-width: 520px; display: flex; align-items: center; gap: 8px; }
+  .invite-line a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 1px; transition: border-color 0.15s; }
+  .invite-line a:hover { border-bottom-color: var(--ink-muted); }
+  .copybtn {
+    display: inline-flex; align-items: center; flex: none;
+    padding: 0; background: none; border: none; cursor: pointer;
+    color: var(--ink-faint); transition: color 0.15s;
+  }
+  .copybtn:hover { color: var(--ink); }
+  .copybtn.done { color: var(--ink); }
+  .copybtn .icon { display: inline-flex; align-items: center; }
+  .copybtn .icon .icon-check { display: none; }
+  .copybtn.done .icon .icon-copy { display: none; }
+  .copybtn.done .icon .icon-check { display: inline; }
+  .invite-note { margin: 8px 0 0; font-size: 0.85rem; line-height: 1.65; color: var(--ink-muted); max-width: 480px; font-style: italic; }
   /* Fine print — one hairline, everything else. */
   .fineprint {
     margin-top: 36px; padding-top: 26px; max-width: 520px;
@@ -198,7 +204,6 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   }
   .fineprint p { font-size: 0.84rem; line-height: 1.7; color: var(--ink-muted); margin: 0 0 8px; }
   .fineprint p:last-child { margin-bottom: 0; }
-  .fineprint .free { color: var(--ink); }
   .fineprint a { color: var(--ink-muted); text-decoration: none; border-bottom: 1px dotted var(--ink-faint); transition: color 0.15s, border-color 0.15s; }
   .fineprint a:hover { color: var(--ink); border-bottom-color: var(--ink-muted); }
   .fineprint-solo { font-size: 0.78rem; line-height: 1.7; color: var(--ink-faint); margin-top: 34px; }
@@ -256,7 +261,7 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
 <body>
 <a class="brand-corner" href="${WEBSITE_URL}/">alexandria<span class="brand-dot">.</span></a>
 <main class="wrap">
-  <p class="eyebrow">the community</p>
+  <p class="eyebrow">your membership</p>
   <h1 class="welcome">${isReturning ? `welcome back.` : `welcome to alexandria.`}</h1>
   ${isReturning ? `<p class="line">call /alexandria in your coding agent.</p>${rotateUrl ? `
   <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}` : `<div class="steps">
@@ -265,13 +270,17 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
     <p class="step-note">it links your install to your membership &mdash; your thinking stays on your machine.</p>` : `<p class="line">you're in. call /alexandria in your coding agent.</p>${rotateUrl ? `
     <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}`}
     ${inviteUrl ? `<div class="invite">
-    <p class="invite-line">your invite link: <button type="button" class="action" onclick="copyInvite(this)" aria-label="copy your invite link">copy <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button> <span class="invite-sep">&middot;</span> <button type="button" class="action" onclick="shareInvite(this)" aria-label="share your invite link">share <span class="icon"><span class="icon-copy">${ICON_SHARE}</span><span class="icon-check">${ICON_CHECK}</span></span></button> &mdash; three friends join and stay, and yours is free for good.</p>
-    <p class="kin-progress">${kinProgressLine}</p>
+    <p class="invite-q">your invite link</p>
+    <p class="invite-line"><a href="${inviteUrl}">${inviteDisplay}</a> <button type="button" class="copybtn" onclick="copyInvite(this)" aria-label="copy your invite link"><span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></p>
+    <p class="invite-note">send it now, before you forget &mdash; and to as many as you can. not everyone will join; three who do, and yours is free for good.</p>
     </div>` : ''}
+    <div class="invite">
+    <p class="invite-q">on your phone</p>
+    <p class="invite-line"><a href="${SHORTCUT_URL}" target="_blank" rel="noopener noreferrer">add the shortcut</a></p>
+    <p class="invite-note">save anything you read, hear, or think, straight from your phone &mdash; it becomes part of your thinking.</p>
+    </div>
   </div>
   <div class="fineprint">
-    <p><span class="free">first month free</span>, then $10/month &mdash; or free for good with three friends, or just email if that&rsquo;s a stretch. you&rsquo;re joining the community, not paying for the tool.</p>
-    <p>on your phone? <a href="${SHORTCUT_URL}" target="_blank" rel="noopener noreferrer">add the shortcut</a> &mdash; capture anything, anywhere.</p>
     <p>wrong account? <a href="https://github.com/logout" target="_blank" rel="noopener noreferrer">sign out of github</a></p>
   </div>`}
   ${isReturning ? `<p class="fineprint-solo">wrong account? <a href="https://github.com/logout" target="_blank" rel="noopener noreferrer">sign out of github</a></p>` : ''}
@@ -303,18 +312,6 @@ function manualCopy(text, el) {
 }
 function copyCmd(el) { copyText(${jsLiteral(curlCmd)}, el); }
 function copyInvite(el) { copyText(${jsLiteral(inviteUrl)}, el); }
-function shareInvite(el) {
-  var url = ${jsLiteral(inviteUrl)};
-  var text = ${jsLiteral(shareText)};
-  // Web Share API on mobile (one tap → native share sheet). navigator.share
-  // must be called synchronously inside the click to keep user activation.
-  if (navigator.share) {
-    navigator.share({ url: url, text: text }).catch(function() {});
-    return;
-  }
-  // Desktop fallback — no share sheet, so copy the link and flash the check.
-  copyText(url, el);
-}
 </script>
 </body>
 </html>`;

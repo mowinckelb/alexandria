@@ -188,7 +188,7 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
             ? 'couldn’t send — try again.'
             : mailState === 'sent'
               ? 'sent — the line’s in your inbox.'
-              : 'we’ll email you the line for later.'}
+              : 'we’ll send you the line for later.'}
         </p>
       </div>
 
@@ -198,8 +198,8 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
           unsure-about-security answer. */}
       <div className="start-details">
         <p>a plain chat app won&rsquo;t work &mdash; it has to be one of the coding agents above.</p>
-        <p>using cowork? a couple of quick setup steps &mdash; it walks you through, then you&rsquo;re back in cowork.</p>
-        <p>unsure? it all runs on your own computer &mdash; and your agent can read the whole script before running it.</p>
+        <p>using cowork? switch to the code tab just for this one line &mdash; it&rsquo;ll walk you through using cowork as normal after.</p>
+        <p>hesitant to run it? paste it in and ask your ai to check it first &mdash; it&rsquo;ll read the whole script before anything runs.</p>
       </div>
     </section>
   );
