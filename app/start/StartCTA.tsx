@@ -120,20 +120,24 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
         <p className="install-invite">@{validRef} invited you to alexandria.</p>
       )}
 
-      {/* Radically simple (founder, 2026-07-16): the page IS two steps —
-          what to copy, where to paste. Everything else lives below in the
-          fine print, present but never in the way. */}
-      <p className="step-line"><span className="step-num">1 &mdash;</span> copy this line</p>
+      {/* THE 2×2 (founder 2026-07-17): two big sections — your computer,
+          your phone — with two dumb-simple numbered actions each, so a
+          visitor can run the whole thing on autopilot. Normal sentence
+          casing for instructions (his "be normal about that stuff" note);
+          the lowercase stays on brand marks only. */}
+      <p className="start-section">on your computer</p>
+
+      <p className="step-line"><span className="step-num">1 &mdash;</span> Copy this line</p>
       <button type="button" className="install-block" onClick={copy} aria-label="copy the install command">
         <code className="install-cmd">{cmd}</code>
         <span className="install-copy">{copied ? ICON_CHECK : ICON_COPY}</span>
       </button>
 
       <p className="step-line step-two">
-        <span className="step-num">2 &mdash;</span> paste it into your coding agent
+        <span className="step-num">2 &mdash;</span> Paste it into your coding agent
       </p>
       <p className="step-agents">
-        claude code &middot; cursor &middot; codex &middot; factory &mdash; it walks you through the rest.
+        Claude Code &middot; Cursor &middot; Codex &middot; Factory &mdash; it walks you through the rest.
       </p>
 
       {validRef && (
@@ -142,82 +146,80 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
         </p>
       )}
 
-      {/* SECTION TWO — the phone (founder 2026-07-17, consolidated: one
-          layout for every device, computer first). Most visitors have both
-          devices in reach, so this asks for BOTH phone actions: add the
-          shortcut now (always valuable — capture starts today), and the
-          email reminder for whoever isn't at their computer. */}
-      <div className="start-phone">
-        <div className="start-phone-door">
-          <p className="join-door-q">on your phone</p>
-          <p className="start-shortcut-line">
-            <a href={SHORTCUT_URL} target="_blank" rel="noopener noreferrer">add the shortcut</a>
-          </p>
-          <p className="join-door-hint">
-            then share anything to it &mdash; an article, a voice note, a
-            thought &mdash; and it&rsquo;s waiting in your alexandria when you
-            start.
-          </p>
-        </div>
-        <div className="start-phone-door">
-          <p className="join-door-q">not at your computer?</p>
-          <form className="join-door-field" onSubmit={sendEmail}>
-            <input
-              id="start-later-email"
-              key={shakeKey}
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              size={Math.max(EMAIL_GHOST.length, email.length) + 1}
-              placeholder={EMAIL_GHOST}
-              aria-label="your email"
-              data-shake={shakeKey > 0 ? 'on' : 'off'}
-              value={email}
-              readOnly={mailState === 'sent'}
-              onChange={(e) => { setEmail(e.target.value); if (mailState === 'error' || mailState === 'sent') setMailState('idle'); }}
-            />
-            {(email.trim() || mailState === 'sent') && (
-              <button
-                type="submit"
-                className={`join-door-go${mailState === 'sent' ? ' is-done' : ''}`}
-                aria-label={mailState === 'sent' ? 'sent' : 'send'}
-                disabled={mailState === 'sending' || mailState === 'sent'}
-              >
-                {mailState === 'sent' ? (
-                  <TickIcon />
-                ) : (
-                  <>
-                    <span className="join-go-word">send</span>
-                    <ArrowIcon />
-                  </>
-                )}
-              </button>
-            )}
-          </form>
-          <p className="join-door-hint">
-            {mailState === 'error'
-              ? 'couldn’t send — try again.'
-              : mailState === 'sent'
-                ? 'sent — the line’s in your inbox.'
-                : 'we’ll send you the line for later.'}
-          </p>
-        </div>
-      </div>
+      <p className="start-section start-section-later">on your phone</p>
 
-      {/* The fine print — three question/answer pairs in the door idiom
-          (founder 2026-07-17: the flat text block read lazy). */}
+      <p className="step-line">
+        <span className="step-num">3 &mdash;</span>{' '}
+        <a className="start-shortcut-a" href={SHORTCUT_URL} target="_blank" rel="noopener noreferrer">Add the shortcut</a>
+      </p>
+      <p className="step-agents">
+        Share anything to it &mdash; an article, a voice note, a thought &mdash;
+        and it&rsquo;s waiting in your Alexandria.
+      </p>
+
+      <p className="step-line step-two">
+        <span className="step-num">4 &mdash;</span> Leave your email
+      </p>
+      <form className="join-door-field" onSubmit={sendEmail}>
+        <input
+          id="start-later-email"
+          key={shakeKey}
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          size={Math.max(EMAIL_GHOST.length, email.length) + 1}
+          placeholder={EMAIL_GHOST}
+          aria-label="your email"
+          data-shake={shakeKey > 0 ? 'on' : 'off'}
+          value={email}
+          readOnly={mailState === 'sent'}
+          onChange={(e) => { setEmail(e.target.value); if (mailState === 'error' || mailState === 'sent') setMailState('idle'); }}
+        />
+        {(email.trim() || mailState === 'sent') && (
+          <button
+            type="submit"
+            className={`join-door-go${mailState === 'sent' ? ' is-done' : ''}`}
+            aria-label={mailState === 'sent' ? 'sent' : 'send'}
+            disabled={mailState === 'sending' || mailState === 'sent'}
+          >
+            {mailState === 'sent' ? (
+              <TickIcon />
+            ) : (
+              <>
+                <span className="join-go-word">send</span>
+                <ArrowIcon />
+              </>
+            )}
+          </button>
+        )}
+      </form>
+      <p className="join-door-hint">
+        {mailState === 'error'
+          ? 'couldn’t send — try again.'
+          : mailState === 'sent'
+            ? 'sent — the line’s in your inbox.'
+            : 'we’ll send you the line for later, so you can do step 1 then.'}
+      </p>
+
+      {/* The fine print — question/answer pairs in the door idiom. First
+          pair plants the /a habit (founder 2026-07-17: build the habit of
+          triggering the slash command everywhere). */}
       <div className="start-details">
         <div className="start-qa">
+          <p className="start-qa-q">installed &mdash; what now?</p>
+          <p className="start-qa-a">Open a new tab, type <code>/a</code>, and leave it. That&rsquo;s a session &mdash; do it whenever.</p>
+        </div>
+        <div className="start-qa">
           <p className="start-qa-q">on a plain chat app?</p>
-          <p className="start-qa-a">it won&rsquo;t work &mdash; it has to be one of the coding agents above.</p>
+          <p className="start-qa-a">It won&rsquo;t work &mdash; it has to be one of the coding agents above.</p>
         </div>
         <div className="start-qa">
           <p className="start-qa-q">using cowork?</p>
-          <p className="start-qa-a">switch to the code tab just for this one line &mdash; it&rsquo;ll walk you through using cowork as normal after.</p>
+          <p className="start-qa-a">Switch to the code tab just for this one line &mdash; it&rsquo;ll walk you through using Cowork as normal after.</p>
         </div>
         <div className="start-qa">
           <p className="start-qa-q">hesitant to run it?</p>
-          <p className="start-qa-a">paste it in and ask your ai to check it first &mdash; it&rsquo;ll read the whole script before anything runs.</p>
+          <p className="start-qa-a">Paste it in and ask your ai to check it first &mdash; it&rsquo;ll read the whole script before anything runs.</p>
         </div>
       </div>
     </section>

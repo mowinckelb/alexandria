@@ -55,7 +55,7 @@ export default async function StartPage({
         <p className="primer-eyebrow">the tool</p>
         {/* No lede (2026-07-16, radical simplicity): the two steps are the
             page; the lede's privacy line lives in the fine print below. */}
-        <h1 className="primer-h1">becoming an alexandrian</h1>
+        <h1 className="primer-h1">Becoming an Alexandrian</h1>
 
         {/* ONE consolidated layout for every device (founder 2026-07-17 —
             most visitors have both devices in reach, so ask for both
@@ -312,25 +312,26 @@ export default async function StartPage({
           letter-spacing: 0.005em; opacity: 0.72;
         }
 
-        /* THE PHONE SECTION — one hairline, two doors: add-the-shortcut
-           (always valuable, capture starts today) and the email reminder. */
-        .start-phone {
-          margin: 34px 0 0; padding-top: 28px; width: 100%; max-width: 460px;
+        /* The 2×2 section labels — computer / phone. Small-caps, a notch
+           more present than the fine-print questions. */
+        .start-section {
+          margin: 0 0 16px; font-family: var(--font-serif), ui-serif, Georgia, serif;
+          font-weight: 500; font-size: 12.5px; letter-spacing: 0.14em;
+          text-transform: lowercase; font-variant-caps: all-small-caps;
+          font-feature-settings: "smcp" 1, "kern" 1;
+          color: var(--text-muted); line-height: 1;
+        }
+        .start-section-later {
+          margin-top: 38px; padding-top: 28px; width: 100%; max-width: 460px;
           border-top: 1px solid var(--bg-tertiary, rgba(26, 19, 24, 0.10));
-          display: flex; flex-direction: column; gap: 26px;
         }
-        .start-phone-door { width: 100%; }
-        .start-shortcut-line {
-          margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-size: 16px; line-height: 1.55; letter-spacing: 0.01em;
-        }
-        .start-shortcut-line a {
+        .start-shortcut-a {
           color: var(--text-primary);
           text-decoration: underline; text-decoration-color: var(--text-muted, rgba(26, 19, 24, 0.4));
           text-underline-offset: 3px; text-decoration-thickness: 1px;
           transition: text-decoration-color 200ms;
         }
-        .start-shortcut-line a:hover { text-decoration-color: var(--text-primary); }
+        .start-shortcut-a:hover { text-decoration-color: var(--text-primary); }
 
         /* Fine print as three question/answer pairs — the door idiom, one
            notch quieter than the phone section above. */
@@ -347,6 +348,10 @@ export default async function StartPage({
           margin: 0; font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-size: 13.5px; line-height: 1.6; letter-spacing: 0.01em;
           color: var(--text-muted, rgba(26, 19, 24, 0.62));
+        }
+        .start-qa-a code {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 12px; color: var(--text-primary);
         }
 
         @media (max-width: 640px) {

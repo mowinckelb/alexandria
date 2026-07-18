@@ -185,6 +185,11 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
     color: var(--ink); max-width: 520px;
   }
   .step-num { color: var(--ink-faint); }
+  .cmd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em; color: var(--ink);
+    background: var(--rule); border-radius: 4px; padding: 1px 6px;
+  }
   .step-note {
     margin: 14px 0 0; font-size: 0.85rem; line-height: 1.65;
     color: var(--ink-muted); max-width: 480px; font-style: italic;
@@ -294,7 +299,8 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}` : `<div class="steps">
     ${curlCmd ? `<p class="step"><span class="step-num">1 &mdash;</span> <button type="button" class="action" onclick="copyCmd(this)" aria-label="copy connect command">copy your connect command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></p>
     <p class="step"><span class="step-num">2 &mdash;</span> paste it into your coding agent and hit enter</p>
-    <p class="step-note">it links your install to your membership &mdash; your thinking stays on your machine.</p>` : `<p class="line">you're in. call /alexandria in your coding agent.</p>${rotateUrl ? `
+    <p class="step"><span class="step-num">3 &mdash;</span> from then on: open a new tab, type <code class="cmd">/a</code>, and leave it &mdash; that&rsquo;s a session</p>
+    <p class="step-note">it links your install to your membership &mdash; your thinking stays on your machine.</p>` : `<p class="line">you're in. open a new tab and type <code class="cmd">/a</code> &mdash; that&rsquo;s a session.</p>${rotateUrl ? `
     <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}`}
     ${inviteUrl ? `<div class="invite">
     <p class="invite-q">your invite link</p>
