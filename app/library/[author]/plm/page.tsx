@@ -27,7 +27,8 @@ function displayName(name: string): string {
 
 type Msg = { role: 'you' | 'twin'; text: string };
 type Convo = { id: string; messages: Msg[] };
-type FileMeta = { name: string; visibility?: string; title?: string | null };
+type FileMeta = { name: string; visibility?: string; title?: string | null; category?: string };
+type LinkedSurface = { label: string; url: string };
 type OpenPiece = { name: string; nice: string; content: string; pdfUrl: string; loading: boolean };
 
 function convoTitle(c: Convo): string {
@@ -62,6 +63,10 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
   // the server only ever honors depth requests downward.
   const [sel, setSel] = useState<'free' | 'premium'>('free');
   const [contact, setContact] = useState('');
+  // The declared graph (website + socials) — shown in the pieces pane so it's
+  // CLEAR the mind can be asked about the linked surfaces too, not only the
+  // published pieces (the links declare the graph; capture fills it).
+  const [linked, setLinked] = useState<LinkedSurface[]>([]);
   const [showCode, setShowCode] = useState(false);
   const [codeDraft, setCodeDraft] = useState('');
   const [files, setFiles] = useState<FileMeta[]>([]);
@@ -130,6 +135,17 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
       setOnline(dir?.twin?.online === true);
       const d = dir?.twin?.depth; if (d === 'public' || d === 'paid' || d === 'invite') { setDepth(d); if (d === 'invite') setSel('premium'); }
       setContact(typeof dir?.author?.contact === 'string' ? dir.author.contact : '');
+      const cleanUrl = (u: string) => (/^https?:\/\//i.test(u) ? u : `https://${u}`);
+      const site = typeof dir?.author?.website === 'string' && dir.author.website.trim()
+        ? [{ label: dir.author.website.replace(/^https?:\/\//i, '').replace(/\/$/, ''), url: cleanUrl(dir.author.website.trim()) }]
+        : [];
+      const socials = Array.isArray(dir?.author?.socials)
+        ? (dir.author.socials as unknown[])
+            .map((s) => (s && typeof s === 'object' ? s as Record<string, unknown> : {}))
+            .filter((s) => typeof s.label === 'string' && typeof s.url === 'string')
+            .map((s) => ({ label: (s.label as string).trim().toLowerCase(), url: cleanUrl((s.url as string).trim()) }))
+        : [];
+      setLinked([...site, ...socials]);
       setFiles(Array.isArray(dir?.files) ? dir.files : []);
       const vs: TwinVariantSummary[] = Array.isArray(dir?.twin?.variants) ? dir.twin.variants : [];
       setVariants(vs);
@@ -520,23 +536,54 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
             </div>
             <div style={{ flex: 1, overflow: open?.pdfUrl ? 'hidden' : 'auto', minHeight: 0 }}>
               {!open && (
+                // Everything the mind speaks from, structured like the profile:
+                // the published pieces by section, then the LINKED surfaces —
+                // so it's clear you can ask about those too, not only the works
+                // (founder: the links are the point; the pane shouldn't read as
+                // a list of random things).
                 <div style={{ padding: '1.4rem clamp(1.4rem, 4vw, 3rem)' }}>
-                  {files.length === 0 && <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem' }}>nothing to show yet.</p>}
-                  {files.length > 0 && (
-                    <p style={{ color: 'var(--text-ghost)', fontSize: '0.86rem', margin: '0 0 0.9rem' }}>
-                      the published pieces — open one and the mind can discuss it as you read.
+                  {files.length === 0 && linked.length === 0 && <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem' }}>nothing to show yet.</p>}
+                  {(files.length > 0 || linked.length > 0) && (
+                    <p style={{ color: 'var(--text-ghost)', fontSize: '0.86rem', margin: '0 0 1.2rem' }}>
+                      everything this mind speaks from. open a piece and it can discuss it as you read.
                     </p>
                   )}
-                  {files.map((f) => (
-                    <button key={f.name} type="button" onClick={() => void openPiece(f.name)}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem', width: '100%', textAlign: 'left',
-                        border: 'none', borderBottom: '1px solid var(--border-light)', background: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: '0.7rem 0' }}
-                      className="hover:opacity-60">
-                      <span style={{ color: 'var(--text-primary)', fontSize: '1.02rem' }}>{f.title || displayName(f.name)}</span>
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{f.visibility || 'public'}</span>
-                    </button>
-                  ))}
-                  {!signedIn && <p style={{ color: 'var(--text-ghost)', fontSize: '0.86rem', marginTop: '1.6rem' }}>sign in for more of this mind.</p>}
+                  {(['works', 'projects', 'shadows'] as const).map((cat) => {
+                    const items = files.filter((f) => (f.category || 'shadows') === cat);
+                    if (items.length === 0) return null;
+                    return (
+                      <div key={cat} style={{ margin: '0 0 1.5rem' }}>
+                        <p style={{ ...label, margin: '0 0 0.15rem' }}>{cat}</p>
+                        {items.map((f) => (
+                          <button key={f.name} type="button" onClick={() => void openPiece(f.name)}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem', width: '100%', textAlign: 'left',
+                              border: 'none', borderBottom: '1px solid var(--border-light)', background: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: '0.7rem 0' }}
+                            className="hover:opacity-60">
+                            <span style={{ color: 'var(--text-primary)', fontSize: '1.02rem' }}>{f.title || displayName(f.name)}</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{f.visibility || 'public'}</span>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })}
+                  {linked.length > 0 && (
+                    <div style={{ margin: '0 0 1.2rem' }}>
+                      <p style={{ ...label, margin: '0 0 0.15rem' }}>linked</p>
+                      {linked.map((l) => (
+                        <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer"
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem', width: '100%',
+                            borderBottom: '1px solid var(--border-light)', textDecoration: 'none', padding: '0.7rem 0' }}
+                          className="hover:opacity-60">
+                          <span style={{ color: 'var(--text-primary)', fontSize: '1.02rem' }}>{l.label}</span>
+                          <span aria-hidden style={{ color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>↗</span>
+                        </a>
+                      ))}
+                      <p style={{ color: 'var(--text-ghost)', fontSize: '0.84rem', margin: '0.5rem 0 0' }}>
+                        ask the mind about these — or follow them out.
+                      </p>
+                    </div>
+                  )}
+                  {!signedIn && <p style={{ color: 'var(--text-ghost)', fontSize: '0.86rem', marginTop: '1.2rem' }}>sign in for more of this mind.</p>}
                 </div>
               )}
               {open && open.loading && <p style={{ color: 'var(--text-ghost)', padding: '2rem' }}>loading…</p>}
