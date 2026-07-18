@@ -174,6 +174,10 @@ export default async function StartPage({
           font-size: 14px; line-height: 1.6;
           color: var(--text-secondary, rgba(26, 19, 24, 0.75));
         }
+        .step-agents code {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 12.5px; color: var(--text-primary);
+        }
 
         /* The fine print — every caveat, grouped under one hairline, quiet
            enough to skim past and small enough never to compete. */

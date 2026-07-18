@@ -155,9 +155,12 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
         <span className="step-num">3 &mdash;</span>{' '}
         <a className="start-shortcut-a" href={SHORTCUT_URL} target="_blank" rel="noopener noreferrer">Add the shortcut</a>
       </p>
+      {/* The shortcut helper sneaks in the /a concept (founder 2026-07-17)
+          — captures land where the session command finds them. */}
       <p className="step-agents">
         Tap Add, then share anything to it &mdash; an article, a voice note,
-        a thought &mdash; and it&rsquo;s in your Alexandria next session.
+        a thought &mdash; and it&rsquo;s waiting the next time you type{' '}
+        <code>/a</code>.
       </p>
 
       <p className="step-line step-two">
