@@ -200,6 +200,10 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
     if (l.includes('substack') || l.includes('medium')) return 'personal writing';
     if (l.includes('youtube')) return 'personal channel';
     if (l.includes('beli')) return 'personal taste';
+    if (l.includes('strava')) return 'personal training';
+    if (l.includes('goodreads')) return 'personal reading';
+    if (l.includes('pinterest')) return 'personal inspiration';
+    if (l.includes('vsco')) return 'personal photography';
     return null;
   };
   const routerLinks: { label: string; url: string; sub: string | null; external: boolean }[] = [

@@ -1000,13 +1000,16 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           justify-content: space-between;
           pointer-events: auto;
         }
-        /* Default = "top" phase (cream slide, dark ink) */
+        /* Default = "top" phase (cream slide, dark ink). Mark runs at
+           0.72 ink, not full black — founder 2026-07-18 ("too black…
+           more faint"): the corner mark should sit back into the page,
+           not out-ink the argument. */
         .nav .nav-brand {
-          color: #1a1318;
+          color: rgba(26, 19, 24, 0.72);
           transition: color 320ms ease;
         }
         .nav .nav-brand .nav-dot {
-          color: #1a1318;
+          color: rgba(26, 19, 24, 0.72);
           transition: color 320ms ease;
         }
         .nav-links a {
@@ -1023,7 +1026,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         /* Bottom phase — swap to theme fg once peel crosses midpoint */
         .nav.on-bottom .nav-brand,
         .nav.on-bottom .nav-brand .nav-dot {
-          color: var(--theme-fg);
+          /* Same 72% ink weight as the top phase, in the theme's fg. */
+          color: color-mix(in srgb, var(--theme-fg) 72%, transparent);
         }
         .nav.on-bottom .nav-links a {
           color: var(--theme-fg-muted);
@@ -1036,13 +1040,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
 
         .nav-brand {
-          /* Roman wordmark (founder 2026-07-16: "make the top left
-             alexandria not in italics") — upright serif; the italic
-             voice now belongs to the argument lines, not the mark. */
-          font-family: var(--font-serif), ui-serif, Georgia, serif;
-          font-style: normal;
+          /* Garamond italic at faint ink (founder 2026-07-18: picked
+             H·72 from the wordmark compare — supersedes the 07-16
+             upright note). The mark is a frontispiece hand, rhyming
+             with the mentes-aeternae motto below it; 34px because
+             Garamond runs smaller than Spectral at equal size. */
+          font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+          font-style: italic;
           font-weight: 500;
-          font-size: 32px;
+          font-size: 34px;
           line-height: 1;
           text-decoration: none;
           letter-spacing: -0.01em;
@@ -3475,7 +3481,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             -webkit-backdrop-filter: blur(14px) saturate(1.05);
           }
           .nav-brand {
-            font-size: 22px;
+            font-size: 23px;
           }
           /* Mobile shows the reading group only; the places (library ·
              marketplace) live in the colophon footer line instead —
