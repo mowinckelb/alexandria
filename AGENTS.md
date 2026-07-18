@@ -14,7 +14,7 @@ The code maps to four layers:
 
 1. **The collective plumbing** (`server/src/protocol.ts` + `auth.ts` + `kv.ts` + `crypto.ts` + `db.ts` + `file-access.ts` + `marketplace-catalog.ts` + `marketplace.ts` + `audit.ts`) — the incompressible core that makes the library/marketplace/tribe work. 7 endpoints, ~1700 lines including the visibility gate (`file-access.ts`), the module catalog (`marketplace-catalog.ts`), the Author-feedback substrate (`marketplace.ts`), and the tamper-evident access audit (`audit.ts`). Three obligations: account (membership), file (publish monthly), call (communicate). Internally still named `protocol.ts` — a code label for the plumbing, never the public framing.
 
-2. **Factory** (`factory/`) — The founder's system, public on GitHub, forkable. ~48 files: **canon** (10 modules in two tiers — Foundation: `foundation.md` (universal); Founder: `axioms·methodology·editor·mercury·publisher·library·filter·bookshelf` (his default, personalisable) — plus `MODULES.md` index), **hooks** (shim + payload), **setup.sh**, **ship.sh** + signed **manifest.txt**, **skills** (claudecode, codex, cursor, droid, scheduled, install, publish, brief-setup, nudge, …), **systems/** (Author-0 modules, e.g. state-based-sync), **scripts/**, **templates/**, onboarding block. This is the gear — shipped default-on but deletable, forkable, replaceable. The marketplace evolves canon defaults from cross-Author signal. Canon + payload + skills are signature-gated (`ship.sh` re-signs `manifest.txt`).
+2. **Factory** (`factory/`) — The founder's system, public on GitHub, forkable. ~48 files: **canon** (modules in two tiers — Foundation: `foundation.md` (universal); Founder: `axioms·methodology·editor·mercury·publisher·library·filter·marketplace·plm·twin·bookshelf` (his default, personalisable) — plus `MODULES.md` index), **hooks** (shim + payload), **setup.sh**, **ship.sh** + signed **manifest.txt**, **skills** (claudecode, codex, cursor, droid, scheduled, install, publish, brief-setup, nudge, …), **systems/** (Author-0 modules, e.g. state-based-sync), **scripts/**, **templates/**, onboarding block. This is the gear — shipped default-on but deletable, forkable, replaceable. The marketplace evolves canon defaults from cross-Author signal. Canon + payload + skills are signature-gated (`ship.sh` re-signs `manifest.txt`).
 
 3. **Machine** (`~/alexandria/`) — Each Author's personal system. Constitution, vault, marginalia, machine.md, notepad, feedback. Lives locally, never on the server — the sovereign tool running on the Author's own files. The product IS this folder. Alexandria stores what Authors publish, never what they think.
 
@@ -48,8 +48,9 @@ Seven endpoints. The collective's plumbing — internally named "protocol" in co
 | GET | `/library` | Browse all published files |
 | GET | `/library/{id}` | List one Author's files |
 | GET | `/library/{id}/{name}` | Read a specific file |
-| POST | `/call` | Report module usage (the call obligation) |
+| POST | `/call` | Report module usage (the call obligation; optional `requests` — Author-cleared unmet-demand wishes) |
 | GET | `/marketplace` | Browse module usage |
+| GET | `/marketplace/requests` | Unmet-demand board — anonymous, ranked by distinct callers, 90-day window |
 | GET | `/marketplace/{module}` | Read usage for one module |
 
 ### Company Endpoints
@@ -84,6 +85,7 @@ factory/
     methodology.md          # Founder — the craft (the how)
     editor.md  mercury.md  publisher.md   # Founder — the three functions (extract/amplify/create)
     library.md  filter.md   # Founder — Library surface + publishing conventions
+    marketplace.md          # Founder — the active marketplace (proactive read/draft, outbound at explicit go)
     bookshelf.md            # Founder — reference shelf
   hooks/
     shim.sh                 # Immutable local shim

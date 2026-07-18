@@ -410,7 +410,30 @@ export function registerProtocol(app: Hono) {
     }
     if (rows.length === 0) return c.json({ error: 'no valid modules' }, 400);
 
-    const inserts = rows.map((r) => db.prepare(
+    // ── Requests: the call without a match (a2 — the demand side) ──
+    // Optional free-text wishes the Author has explicitly cleared for the
+    // public board ("I wish a module existed for X"). Stored in the same
+    // protocol_calls table under a `request:` module_id prefix — zero new
+    // state, and the `LIKE 'github:%'` catalog filter means a request can
+    // never surface as a module. Aggregated anonymously by
+    // GET /marketplace/requests with the same 90-day forget-window.
+    // The say-so gate is client-side canon (marketplace.md): the Engine only
+    // includes requests the Author cleared. The server can't distinguish
+    // drafted-from-typed — it just bounds abuse (count + length caps riding
+    // the same daily /call budget as everything else).
+    const MAX_REQUESTS_PER_CALL = 5;
+    const REQUEST_MAX_LEN = 300;
+    const requestRows: { mod: string; text: string }[] = [];
+    if (Array.isArray(body.requests)) {
+      for (const r of body.requests.slice(0, MAX_REQUESTS_PER_CALL)) {
+        if (typeof r !== 'string') continue;
+        const text = r.replace(/[\x00-\x1f\x7f]/g, ' ').trim().slice(0, REQUEST_MAX_LEN);
+        if (!text) continue;
+        requestRows.push({ mod: `request:${text}`, text: '' });
+      }
+    }
+
+    const inserts = rows.concat(requestRows).map((r) => db.prepare(
       'INSERT INTO protocol_calls (module_id, account_id, time, text) VALUES (?, ?, ?, ?)'
     ).bind(r.mod, id, now, r.text));
     await db.batch(inserts);
@@ -420,6 +443,7 @@ export function registerProtocol(app: Hono) {
     logEvent('protocol_call', {
       author: auth.account.github_login,
       modules: String(rows.length),
+      requests: String(requestRows.length),
     });
 
     // Bidirectional per a2 — the call IS the closed-loop verification primitive.
@@ -442,14 +466,15 @@ export function registerProtocol(app: Hono) {
       callers_recent: callerCounts.get(mid) ?? 0,
     }));
 
-    return c.json({ ok: true, modules: responseModules });
+    return c.json({ ok: true, modules: responseModules, requests_logged: requestRows.length });
   });
 
   // ── Marketplace: browse module usage ───────────────────────────
   //
-  // Two routes:
-  //   GET /marketplace          — public catalog
-  //   GET /marketplace/:module  — auth-required usage history
+  // Three routes:
+  //   GET /marketplace           — public catalog
+  //   GET /marketplace/requests  — public unmet-demand board (anonymous)
+  //   GET /marketplace/:module   — auth-required usage history
   //
   // Module bodies live at raw.githubusercontent.com — agents fetch from
   // github directly. The catalog returns metadata only.
@@ -514,6 +539,41 @@ export function registerProtocol(app: Hono) {
     // today; when paginated, clients that already iterate via cursor
     // continue working unchanged.
     return c.json({ modules, total: modules.length, next_cursor: null });
+  });
+
+  // ── Marketplace: the request board (the call without a match) ──
+  //
+  // Public, anonymous, derived — revealed unmet demand. Each row is a
+  // free-text wish that arrived through /call (see the requests block in the
+  // /call handler). Exact-text dedup only: consuming Engines cluster
+  // semantically far better than any server-side normalisation would (bitter
+  // lesson — don't hand-engineer what the reading model does for free).
+  // Same 90-day forget-window as the catalog — a wish nobody re-hits drops
+  // out of the default view (`?all=1` lifts the window). Ranked by distinct
+  // callers then recency, so an N=1 spam entry sits at the bottom unseen.
+  // Registered before /marketplace/:module so the static path wins.
+  app.get('/marketplace/requests', async (c) => {
+    const showAll = c.req.query('all') === '1';
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const query = showAll
+      ? getDB().prepare(
+          `SELECT module_id, COUNT(DISTINCT account_id) as callers, MAX(time) as last_seen
+           FROM protocol_calls WHERE module_id LIKE 'request:%'
+           GROUP BY module_id ORDER BY callers DESC, last_seen DESC LIMIT 200`
+        )
+      : getDB().prepare(
+          `SELECT module_id, COUNT(DISTINCT account_id) as callers, MAX(time) as last_seen
+           FROM protocol_calls WHERE module_id LIKE 'request:%' AND time > ?
+           GROUP BY module_id ORDER BY callers DESC, last_seen DESC LIMIT 200`
+        ).bind(ninetyDaysAgo);
+    const { results } = await query.all<{ module_id: string; callers: number; last_seen: string }>();
+    const requests = (results || []).map((r) => ({
+      text: r.module_id.slice('request:'.length),
+      callers: r.callers,
+      last_seen: r.last_seen,
+    }));
+    c.header('Cache-Control', 'public, max-age=300, s-maxage=300');
+    return c.json({ requests, total: requests.length });
   });
 
   app.get('/marketplace/:module', async (c, next) => {
