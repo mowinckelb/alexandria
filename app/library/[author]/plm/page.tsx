@@ -331,8 +331,12 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
         <header style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: '0.9rem', padding: '0.85rem 3.6rem 0.85rem 1.2rem', borderBottom: '1px solid var(--border-light)' }}>
           <Link href={`/library/${encodeURIComponent(author)}`} aria-label="back to the library" title="library"
             style={{ color: 'var(--text-muted)', display: 'flex', textDecoration: 'none' }} className="hover:opacity-60">{ChevronIcon}</Link>
-          <span style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{who}</span>
-          <span style={{ ...label }}>{online ? 'online' : 'offline'}</span>
+          {/* Name + status share a BASELINE (the header centers for the icon,
+              which floated the smaller status word high — founder note). */}
+          <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.9rem' }}>
+            <span style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{who}</span>
+            <span style={{ ...label }}>{online ? 'online' : 'offline'}</span>
+          </span>
         </header>
 
         <div className="plm-tabs" style={{ display: 'none', flex: 'none', borderBottom: '1px solid var(--border-light)' }}>
