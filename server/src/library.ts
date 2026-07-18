@@ -129,6 +129,34 @@ async function getFileSubtitles(authorId: string): Promise<Record<string, string
   return {};
 }
 
+// Owner-set display order (array of file names). Custom order WINS where set;
+// anything not named falls BELOW the ordered items, by recency — so a curated
+// page holds its shape and a fresh publish lands at the bottom instead of
+// jumping the queue (founder, 2026-07-18: recency is only the default).
+async function getFileOrder(authorId: string): Promise<string[]> {
+  try {
+    const raw = await getKV().get(`file_order:${authorId}`);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr.filter((n): n is string => typeof n === 'string');
+    }
+  } catch { /* ignore */ }
+  return [];
+}
+
+/** Stable sort: named files first in the given order, the rest keep their
+ *  existing (recency) order below. */
+function applyFileOrder<T extends { name: string }>(files: T[], order: string[]): T[] {
+  if (!order.length) return files;
+  const rank = new Map(order.map((n, i) => [n, i]));
+  return [...files].sort((a, b) => {
+    const ra = rank.has(a.name) ? (rank.get(a.name) as number) : Number.MAX_SAFE_INTEGER;
+    const rb = rank.has(b.name) ? (rank.get(b.name) as number) : Number.MAX_SAFE_INTEGER;
+    if (ra !== rb) return ra - rb;
+    return files.indexOf(a) - files.indexOf(b); // preserve recency among unranked
+  });
+}
+
 // ---------------------------------------------------------------------------
 // CORS-safe R2 response
 // ---------------------------------------------------------------------------
@@ -528,10 +556,12 @@ export function registerLibraryRoutes(app: Hono): void {
     // owner sets; untagged files fall to 'shadows'.
     const fileCats = await getFileCategories(authorId);
     const fileSubs = await getFileSubtitles(authorId);
+    const fileOrder = await getFileOrder(authorId);
+    const orderedFiles = applyFileOrder(protocolFiles, fileOrder);
     return c.json({
       author: directoryAuthor(account!, legacyAuthor, fallbackIndex),
       twin: twinOut,
-      files: protocolFiles.map(file => ({
+      files: orderedFiles.map(file => ({
         name: file.name,
         title: file.title ?? null,
         // This route is unauthenticated (public directory). Don't leak the
@@ -1887,6 +1917,22 @@ export function registerLibraryRoutes(app: Hono): void {
   // Mirrors file-categories. A one-line, unstructured teaser — no schema; the
   // model/author decides the copy. Blank string clears it. Capped to keep it a
   // teaser, not a body dump. Always public (see getFileSubtitles rationale).
+  // Owner-set display order — an array of file names. Custom order wins;
+  // unnamed files fall below it by recency (new publishes land at the bottom
+  // of the curated shape instead of jumping the queue).
+  app.put('/library/:author/file-order', async (c) => {
+    const authorId = c.req.param('author');
+    const owner = await resolveOwnerOnly(c, authorId);
+    if ('error' in owner) return owner.error;
+    const body = await c.req.json<{ order?: unknown }>().catch(() => ({} as { order?: unknown }));
+    const clean = Array.isArray(body.order)
+      ? body.order.filter((n): n is string => typeof n === 'string' && !!n.trim()).map((n) => n.trim().slice(0, 200)).slice(0, 500)
+      : [];
+    await getKV().put(`file_order:${authorId}`, JSON.stringify(clean));
+    logEvent('file_order_set', { author: authorId, count: String(clean.length) });
+    return c.json({ ok: true, order: clean });
+  });
+
   app.put('/library/:author/file-subtitles', async (c) => {
     const authorId = c.req.param('author');
     const owner = await resolveOwnerOnly(c, authorId);
