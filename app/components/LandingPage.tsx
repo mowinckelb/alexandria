@@ -3480,7 +3480,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .watermark {
             position: fixed;
             bottom: 7%;
-            left: 66%;
+            left: 72%;
             transform: translateX(-50%);
             font-size: clamp(150px, 40vw, 240px);
             /* Desktop's tyrian, one notch stronger — the mobile glyph is
@@ -3539,7 +3539,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           }
           .alpha-mark {
             position: absolute;
-            bottom: 210px;
+            /* Sits BELOW the watermark glyph (founder, 2026-07-18) — the
+               watermark rests at bottom 7%, so the colophon drops beneath
+               it near the slide foot. */
+            bottom: 150px;
             left: 20px;
             font-size: 10.5px;
           }
@@ -3567,6 +3570,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .front-epigraph-line {
             font-size: 16.5px;
             line-height: 1.52;
+          }
+          /* Pull the answer up a touch under the question (founder,
+             2026-07-18) — tighter than the desktop 40px breath. */
+          .front-answer {
+            margin-top: 24px;
           }
 
           /* Mobile spacing — the two-slide peel format is gone here;
@@ -3761,13 +3769,20 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             font-size: clamp(11.5px, 1.1vw, 13px);
             margin-top: -4px;
           }
-          /* Back-slide kicker on mobile — pull the sections up tight under
-             'on alexandria.' so the plate reads as their header, not a
-             floating line (founder, 2026-07-18). The kicker + sections are
-             flattened (display:contents) into .bottom-inner's flex flow, so
-             a 64px flex GAP sits between them — cancel most of it with a
-             negative margin, leaving ~14px. No collapse animation runs on
-             mobile (that's the desktop focus mode). */
+          /* Back-slide kicker on mobile (founder, 2026-07-18):
+             - nudge the whole plate up a touch (margin-top 40->22).
+             - bring its underline closer to the text (padding-bottom
+               10->4), so the rule hugs 'on alexandria.'.
+             - pull the sections up tight under it so it reads as their
+               header, not a floating line. The kicker + sections are
+               flattened (display:contents) into .bottom-inner's flex flow,
+               so a 64px flex GAP sits between them — cancel most of it with
+               a negative margin. No collapse animation runs on mobile
+               (that's the desktop focus mode). */
+          .secs-kicker {
+            margin-top: 22px;
+            padding-bottom: 4px;
+          }
           .secs {
             margin-top: -50px;
           }
