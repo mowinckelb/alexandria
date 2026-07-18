@@ -221,6 +221,13 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
     const lc = text.toLowerCase();
     return files.filter((f) => { const n = displayName(f.name); return n.length >= 5 && lc.includes(n.toLowerCase()) && f.name !== open?.name; });
   };
+  // Linked surfaces the answer names get an "open …" chip too — the mind
+  // routes you OUT to the artifact, not only talks about it (locked platforms
+  // can't render in the pane, so these open in a new tab).
+  const referencedLinks = (text: string) => {
+    const lc = text.toLowerCase();
+    return linked.filter((l) => lc.includes(l.label.toLowerCase()) || lc.includes(l.url.replace(/^https?:\/\//, '').split('/')[0]));
+  };
 
   const newChat = () => {
     const id = String(idRef.current++);
@@ -440,8 +447,15 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                           {referenced(m.text).map((f) => (
                             <button key={f.name} type="button" onClick={() => void openPiece(f.name)} className="hover:opacity-70"
                               style={{ display: 'inline-flex', alignItems: 'center', marginTop: '0.6rem', marginRight: '0.4rem', border: '1px solid var(--border-light)',
-                                color: 'var(--accent)', background: 'transparent', borderRadius: 999, fontFamily: 'inherit', fontSize: '0.82rem', padding: '0.28rem 0.7rem', cursor: 'pointer' }}>
-                              pull up: {displayName(f.name)}
+                                color: 'var(--text-muted)', background: 'transparent', borderRadius: 999, fontFamily: 'inherit', fontSize: '0.85rem', padding: '0.28rem 0.75rem', cursor: 'pointer' }}>
+                              pull up · {displayName(f.name).toLowerCase()}
+                            </button>
+                          ))}
+                          {referencedLinks(m.text).map((l) => (
+                            <button key={l.url} type="button" onClick={() => window.open(l.url, '_blank', 'noopener,noreferrer')} className="hover:opacity-70"
+                              style={{ display: 'inline-flex', alignItems: 'center', marginTop: '0.6rem', marginRight: '0.4rem', border: '1px solid var(--border-light)',
+                                color: 'var(--text-muted)', background: 'transparent', borderRadius: 999, fontFamily: 'inherit', fontSize: '0.85rem', padding: '0.28rem 0.75rem', cursor: 'pointer' }}>
+                              open · {l.label}
                             </button>
                           ))}
                         </div>
@@ -544,7 +558,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                 <div style={{ padding: '1.4rem clamp(1.4rem, 4vw, 3rem)' }}>
                   {files.length === 0 && linked.length === 0 && <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem' }}>nothing to show yet.</p>}
                   {(files.length > 0 || linked.length > 0) && (
-                    <p style={{ color: 'var(--text-ghost)', fontSize: '0.86rem', margin: '0 0 1.2rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.55, margin: '0 0 1.9rem' }}>
                       everything this mind speaks from. open a piece and it can discuss it as you read.
                     </p>
                   )}
@@ -559,12 +573,9 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                             textDecoration: 'none', padding: '0.55rem 0' }}
                           className="hover:opacity-60">
                           <span style={{ color: 'var(--text-primary)', fontSize: '1.02rem' }}>{l.label}</span>
-                          <span aria-hidden style={{ color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>↗</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>public</span>
                         </a>
                       ))}
-                      <p style={{ color: 'var(--text-ghost)', fontSize: '0.84rem', margin: '0.5rem 0 0' }}>
-                        ask the mind about these — or follow them out.
-                      </p>
                     </div>
                   )}
                   {(['works', 'projects', 'shadows'] as const).map((cat) => {

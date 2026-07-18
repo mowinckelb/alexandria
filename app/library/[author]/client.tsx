@@ -5,7 +5,6 @@ import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '../../components/ThemeToggle';
-import StartJoinCTA from '../../components/StartJoinCTA';
 import PromptBox from '../../components/PromptBox';
 import { FETCH_TIMEOUT_MS, SERVER_URL, librarySignInUrlHere } from '../../lib/config';
 import { safeUrl } from '../../lib/url';
@@ -387,7 +386,14 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                 border: '1px solid var(--border-light)', borderRadius: '14px',
                 boxShadow: '0 1px 2px rgba(0,0,0,0.03), 0 6px 18px rgba(0,0,0,0.04)',
               }}>
-                {sectionHead('mind', 'a personal language model')}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem' }}>
+                  {sectionHead('mind', 'a personal language model')}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
+                    <span aria-hidden style={{ width: '7px', height: '7px', borderRadius: '50%',
+                      background: online ? 'var(--accent)' : 'var(--text-ghost)', display: 'inline-block' }} />
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>{online ? 'online' : 'offline'}</span>
+                  </span>
+                </div>
                 <div style={{ margin: '0.9rem -0.98rem 0' }}>
                   <PromptBox value={doorQ} onChange={setDoorQ} onSubmit={goAsk} loading={doorGoing} placeholder="ask me anything…" />
                 </div>
@@ -396,7 +402,13 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                     one for the mind, one that shows it speaks for the LINKED
                     surfaces — the thing no other page can do. */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.85rem' }}>
-                  {['what are you building?', 'what do you believe?',
+                  {[
+                    (() => {
+                      const proj = grouped.find((g) => g.cat === 'projects')?.items[0];
+                      const t = proj ? (proj.title || fileDisplayName(proj.name)).toLowerCase() : null;
+                      return t ? `what is ${t}?` : 'what are you building?';
+                    })(),
+                    'what do you believe?',
                     routerLinks.some((l) => l.label === 'x') ? 'what’s on your x?'
                       : author.website ? 'what’s on your website?' : 'where should i start?'].map((q) => (
                     <button key={q} type="button" onClick={() => goAskWith(q)}
@@ -409,7 +421,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.5, margin: '1rem 0 0' }}>
                   an ai built from {first}&rsquo;s mind — everything published and linked on this page; it answers as {first} would.
                 </p>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', margin: '0.35rem 0 0' }}>{online ? 'online' : 'offline'}</p>
               </div>
             );
           })()}
@@ -459,17 +470,19 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             </div>
           )}
         </section>
-        {/* The "make your own version of these" door — this profile (a mind + a
-            library, built with alexandria) IS the demo; the CTA turns it into a
-            start. Sits above the quiet wordmark so the page ends on the next step,
-            not a link back into the (stranger-empty) directory. */}
-        <div style={{ margin: '4.5rem 0 0' }}>
-          <StartJoinCTA lead="want a mind and a library like this?" />
-        </div>
-        <footer style={{ textAlign: 'center', margin: '3rem 0 0' }}>
-          <Link href="/library" style={{ fontStyle: 'italic', color: 'var(--text-ghost)', fontSize: '1rem', letterSpacing: '0.01em', textDecoration: 'none' }} className="hover:opacity-60">
-            alexandria<span style={{ fontStyle: 'normal' }}>.</span>
-          </Link>
+        {/* A slim footer rounds the page off (founder: borders, a place for
+            the one CTA — this profile IS the demo; "build your own" is the
+            whole pitch). */}
+        <footer style={{ borderTop: '1px solid var(--border-light)', textAlign: 'center', margin: '4rem 0 0', padding: '1.6rem 0 0' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', margin: 0 }}>
+            want your own?{' '}
+            <Link href="/start" style={{ color: 'var(--accent)', textDecoration: 'none' }} className="hover:opacity-60">build your own</Link>
+          </p>
+          <p style={{ margin: '1.4rem 0 0' }}>
+            <Link href="/library" style={{ fontStyle: 'italic', color: 'var(--text-ghost)', fontSize: '1rem', letterSpacing: '0.01em', textDecoration: 'none' }} className="hover:opacity-60">
+              alexandria<span style={{ fontStyle: 'normal' }}>.</span>
+            </Link>
+          </p>
         </footer>
       </main>
     </>
