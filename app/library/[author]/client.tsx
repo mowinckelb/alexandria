@@ -217,6 +217,16 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
     letterSpacing: '0.08em',
     margin: '0 0 0.45rem',
   };
+  // One head style for all five sections — mind · links · works · projects ·
+  // shadows (founder: the five things on the profile). Word underlined (short,
+  // not page-wide), whisper italic behind a symmetric middot.
+  const sectionHead = (word: string, whisper: string) => (
+    <p style={{ ...sectionLabelStyle, color: 'var(--text-muted)' }}>
+      <span style={{ borderBottom: '1px solid var(--text-ghost)', paddingBottom: '3px' }}>{word}</span>
+      <span aria-hidden style={{ color: 'var(--text-ghost)', margin: '0 0.45rem' }}>·</span>
+      <span style={{ color: 'var(--text-ghost)', letterSpacing: 0, fontStyle: 'italic' }}>{whisper}</span>
+    </p>
+  );
   const textSection = (label: string, file: ProtocolFile | null) =>
     file ? (
       <div key={label} style={{ borderTop: '1px solid var(--border-light)', marginTop: '1.6rem', paddingTop: '1.1rem' }}>
@@ -319,23 +329,6 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               {profileText}
             </p>
           )}
-          {/* The links out — the router, one visible line under the bio. */}
-          {routerLinks.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '0.45rem 0.6rem', marginTop: '0.9rem', fontSize: '1rem' }}>
-              {routerLinks.map((l, i) => (
-                <span key={l.url} style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.6rem' }}>
-                  {i > 0 && <span aria-hidden style={{ color: 'var(--text-ghost)' }}>·</span>}
-                  <a href={l.url}
-                    target={l.external ? '_blank' : undefined}
-                    rel={l.external ? 'noopener noreferrer' : undefined}
-                    className="hover:opacity-60"
-                    style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
-                    {l.label}
-                  </a>
-                </span>
-              ))}
-            </div>
-          )}
           {/* Alexandria-native pills — location (filters the directory) and
               contact, side by side in the same form (founder, 2026-07-17). */}
           {(author.location || author.contact) && (
@@ -368,23 +361,15 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             const online = data.twin.online === true;
             const first = (author.display_name || author.id).split(' ')[0];
             return (
-              <div style={{ margin: '0 0 3rem' }}>
-                {/* The door, one job per element (founder, round five): the
-                    title names the thing in full — personal language model —
-                    the placeholder speaks in the mind's own voice, and the
-                    subline gets to use "PLM" and state the reach: the page and
-                    the declared links above. */}
-                <p style={{ color: 'var(--text-primary)', fontSize: '1.1rem', margin: '0 0 0.75rem' }}>personal language model.</p>
-                {/* Outdented by the input's text inset so the ghost text sits
-                    flush with the title above and the lines below (founder,
-                    round six: the indent read as misalignment). */}
-                <div style={{ margin: '0 -0.98rem' }}>
+              <div style={{ margin: '0 0 2.6rem' }}>
+                {/* Section one of five: mind. The head names the PLM; the box
+                    speaks in the mind's voice; the subline gives concept →
+                    reach → behavior; status closes. Box outdented by its text
+                    inset so the ghost text aligns with the lines around it. */}
+                {sectionHead('mind', 'a personal language model')}
+                <div style={{ margin: '0.75rem -0.98rem 0' }}>
                   <PromptBox value={doorQ} onChange={setDoorQ} onSubmit={goAsk} loading={doorGoing} placeholder="ask me anything…" />
                 </div>
-                {/* Concept first, then what it knows, then how it behaves
-                    (founder: "explain what it is conceptually, then how it
-                    works / what it knows — not too long"). The box itself
-                    carries the "use it" part, so no ask-repetition here. */}
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
                   an ai built from {first}&rsquo;s mind — everything published and linked on this page; it answers as {first} would.
                 </p>
@@ -398,6 +383,28 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               </div>
             );
           })()}
+          {/* Section two: links — the router out, and the surfaces the mind
+              provides context for (founder: links as its own section; the
+              primary thing is that the mind speaks for them). */}
+          {routerLinks.length > 0 && (
+            <div style={{ margin: '0 0 2.6rem' }}>
+              {sectionHead('links', 'what this connects to')}
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '0.45rem 0.6rem', marginTop: '0.7rem', fontSize: '1rem' }}>
+                {routerLinks.map((l, i) => (
+                  <span key={l.url} style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.6rem' }}>
+                    {i > 0 && <span aria-hidden style={{ color: 'var(--text-ghost)' }}>·</span>}
+                    <a href={l.url}
+                      target={l.external ? '_blank' : undefined}
+                      rel={l.external ? 'noopener noreferrer' : undefined}
+                      className="hover:opacity-60"
+                      style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+                      {l.label}
+                    </a>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           {grouped.length === 0 ? (
             !data.twin?.enabled && (
               <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem', margin: 0 }}>
@@ -405,24 +412,13 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
               </p>
             )
           ) : (
-            // The library zone — a clear break from the bio + PLM above (founder,
-            // 2026-07-17): one hairline, then the atoms, kept vertically tight.
-            // Section labels carry a whisper of what each is ("shadows" is a term
-            // no visitor arrives knowing): person-free, parallel, same depth;
-            // the descriptor differentiates by italic + a symmetric middot.
+            // The library zone — one hairline breaks it from mind + links
+            // above; the three content sections follow, vertically tight,
+            // items lineless. Whispers person-free and parallel.
             <div style={{ borderTop: '1px solid var(--border-light)', marginTop: '0.4rem' }}>
               {grouped.map(({ cat, items }) => (
                 <div key={cat} style={{ marginTop: '2rem' }}>
-                  {/* Section word carries a short underline (just the word, not
-                      a page-wide rule) and reads a shade darker than ghost —
-                      the items below stay lineless. */}
-                  <p style={{ ...sectionLabelStyle, color: 'var(--text-muted)' }}>
-                    <span style={{ borderBottom: '1px solid var(--text-ghost)', paddingBottom: '3px' }}>{cat}</span>
-                    <span aria-hidden style={{ color: 'var(--text-ghost)', margin: '0 0.45rem' }}>·</span>
-                    <span style={{ color: 'var(--text-ghost)', letterSpacing: 0, fontStyle: 'italic' }}>
-                      {cat === 'works' ? 'what’s been made' : cat === 'projects' ? 'what’s being built' : 'what’s being thought'}
-                    </span>
-                  </p>
+                  {sectionHead(cat, cat === 'works' ? 'what’s been made' : cat === 'projects' ? 'what’s being built' : 'what’s being thought')}
                   {items.map(fileRow)}
                 </div>
               ))}

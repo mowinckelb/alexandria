@@ -548,6 +548,25 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                       everything this mind speaks from. open a piece and it can discuss it as you read.
                     </p>
                   )}
+                  {/* Links FIRST — providing context for the linked surfaces is
+                      the primary thing (founder); the published sections follow. */}
+                  {linked.length > 0 && (
+                    <div style={{ margin: '0 0 1.5rem' }}>
+                      <p style={{ ...label, margin: '0 0 0.15rem' }}>links</p>
+                      {linked.map((l) => (
+                        <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer"
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem', width: '100%',
+                            borderBottom: '1px solid var(--border-light)', textDecoration: 'none', padding: '0.7rem 0' }}
+                          className="hover:opacity-60">
+                          <span style={{ color: 'var(--text-primary)', fontSize: '1.02rem' }}>{l.label}</span>
+                          <span aria-hidden style={{ color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>↗</span>
+                        </a>
+                      ))}
+                      <p style={{ color: 'var(--text-ghost)', fontSize: '0.84rem', margin: '0.5rem 0 0' }}>
+                        ask the mind about these — or follow them out.
+                      </p>
+                    </div>
+                  )}
                   {(['works', 'projects', 'shadows'] as const).map((cat) => {
                     const items = files.filter((f) => (f.category || 'shadows') === cat);
                     if (items.length === 0) return null;
@@ -566,23 +585,6 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                       </div>
                     );
                   })}
-                  {linked.length > 0 && (
-                    <div style={{ margin: '0 0 1.2rem' }}>
-                      <p style={{ ...label, margin: '0 0 0.15rem' }}>linked</p>
-                      {linked.map((l) => (
-                        <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer"
-                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem', width: '100%',
-                            borderBottom: '1px solid var(--border-light)', textDecoration: 'none', padding: '0.7rem 0' }}
-                          className="hover:opacity-60">
-                          <span style={{ color: 'var(--text-primary)', fontSize: '1.02rem' }}>{l.label}</span>
-                          <span aria-hidden style={{ color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>↗</span>
-                        </a>
-                      ))}
-                      <p style={{ color: 'var(--text-ghost)', fontSize: '0.84rem', margin: '0.5rem 0 0' }}>
-                        ask the mind about these — or follow them out.
-                      </p>
-                    </div>
-                  )}
                   {!signedIn && <p style={{ color: 'var(--text-ghost)', fontSize: '0.86rem', marginTop: '1.2rem' }}>sign in for more of this mind.</p>}
                 </div>
               )}
