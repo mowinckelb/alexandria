@@ -812,7 +812,13 @@ fi
 # Secrets live in ~/alexandria/system/ (never under files/), so files/ is safe
 # to mirror wholesale. Writes to a `files` subdir so it can't collide with any
 # other alexandria-backup layout.
-if [ -d "$ICLOUD_DIR" ] && [ "$(uname)" = "Darwin" ] && command -v rsync &>/dev/null; then
+# Skip when a machine-level Alexandria backup loop already exists (the founder's
+# com.alexandria.backup mirrors files/ to iCloud/alexandria on its own schedule) —
+# installing this job there would run two rsync mirrors of the same tree into two
+# iCloud folders. Real Authors never have that plist, so they always get this.
+if [ -f "$HOME/Library/LaunchAgents/com.alexandria.backup.plist" ]; then
+  echo "  iCloud: machine backup loop already present (com.alexandria.backup) — skipping product mirror"
+elif [ -d "$ICLOUD_DIR" ] && [ "$(uname)" = "Darwin" ] && command -v rsync &>/dev/null; then
   ICLOUD_BACKUP="$ICLOUD_DIR/alexandria-backup/files"
   mkdir -p "$ICLOUD_BACKUP" 2>/dev/null
   # Mirror once now so the backup exists immediately, not only after first fire.
