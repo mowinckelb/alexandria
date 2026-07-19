@@ -411,11 +411,11 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                     (() => {
                       const proj = grouped.find((g) => g.cat === 'projects')?.items[0];
                       const t = proj ? (proj.title || fileDisplayName(proj.name)).toLowerCase() : null;
-                      return t ? `what is ${t}?` : 'what are you building?';
+                      return t ? `what is ${t}?` : `what is ${first} building?`;
                     })(),
-                    'what do you believe?',
-                    routerLinks.some((l) => l.label === 'x') ? 'what’s on your x?'
-                      : author.website ? 'what’s on your website?' : 'where should i start?'].map((q) => (
+                    `what does ${first} believe?`,
+                    routerLinks.some((l) => l.label === 'x') ? `what’s on ${first}’s x?`
+                      : author.website ? `what’s on ${first}’s website?` : 'where should i start?'].map((q) => (
                     <button key={q} type="button" onClick={() => goAskWith(q)}
                       style={{ ...tagStyle, background: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'var(--text-muted)', padding: '0.34rem 0.95rem' }}
                       className="hover:opacity-60">
@@ -424,7 +424,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
                   ))}
                 </div>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.5, margin: '1rem 0 0' }}>
-                  an ai built from {first}&rsquo;s mind — everything published and linked on this page; it answers as {first} would.
+                  a mirror of {first}&rsquo;s mind — built from everything published and linked here. it speaks about {first}, in {first}&rsquo;s own thinking, never as {first}; where the mind isn&rsquo;t filled in yet, it says so plainly rather than guess.
                 </p>
               </div>
             );

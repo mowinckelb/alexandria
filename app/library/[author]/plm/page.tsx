@@ -98,16 +98,21 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
   const [invite, setInvite] = useState('');
   const [inviteDraft, setInviteDraft] = useState('');
   const [pendingQ, setPendingQ] = useState('');
+  // Arrived from the profile door WITH a question (?q=)? Then never show the
+  // first-timer explainer — it would flash for the mind-load window and vanish
+  // the instant the question fires, which reads as a glitch (founder 2026-07-18).
+  const [cameWithQuestion, setCameWithQuestion] = useState(false);
   useEffect(() => {
     try {
       const q = new URLSearchParams(window.location.search);
       const v = q.get('variant'); if (v === 'weights' || v === 'context') setActiveVariant(v);
       const inv = q.get('invite')?.trim(); if (inv) { setInvite(inv); setInviteDraft(inv); }
-      const asked = q.get('q')?.trim(); if (asked) setPendingQ(asked);
+      const asked = q.get('q')?.trim(); if (asked) { setPendingQ(asked); setCameWithQuestion(true); }
     } catch { /* */ }
   }, []);
 
   const who = authorName || author;
+  const firstName = who.split(' ')[0] || who;
   // One public mind; DEPTH is structural per querier (public shadow for anyone,
   // the deeper invite shadow for granted friends — server-side). The header
   // shows the sidecar's online state; the public|invite toggle carries depth.
@@ -422,17 +427,20 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
               )}
             </div>
             <div ref={threadRef} style={{ flex: 1, overflow: 'auto', padding: '0.4rem 1.4rem 1.4rem' }}>
-              {who && (active?.messages.length ?? 0) === 0 && !asking && (
-                // The first-timer explainer (founder, round three: "radically
-                // simple, super intuitive — people have never seen anything like
-                // this"): what this is, how far its reach goes, how the pieces
-                // pane relates, and how depth works. Short declarative lines.
+              {who && (active?.messages.length ?? 0) === 0 && !asking && !cameWithQuestion && (
+                // The first-timer explainer — third-person MIRROR framing (it
+                // reflects the Author, it never IS them) + how to use it and the
+                // right mindset. Suppressed when arriving with a ?q= (else it
+                // flashes then vanishes — reads as a glitch; founder 2026-07-18).
                 <div style={{ padding: '0.6rem 0 0.2rem', color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.65 }}>
                   <p style={{ margin: '0 0 0.9rem' }}>
-                    this is <strong style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{who}</strong>’s mind — a personal language model, speaking from everything published and linked on this profile.
+                    this is a <strong style={{ color: 'var(--text-primary)', fontWeight: 500 }}>mirror of {who}’s mind</strong> — a reflection built from everything {firstName} has published and linked here. it speaks <em>about</em> {firstName}, in {firstName}’s own thinking — not as {firstName}.
                   </p>
                   <p style={{ margin: '0 0 0.9rem' }}>
-                    ask it anything. when it mentions a piece, pull it up and read along.
+                    ask what {firstName} thinks, or how {firstName} would approach something. when it names a piece, pull it up and read alongside.
+                  </p>
+                  <p style={{ margin: '0 0 0.9rem' }}>
+                    where {firstName}’s mind isn’t filled in yet, it says so plainly rather than guess — so treat a gap as an honest one, not a dead end.
                   </p>
                   <p style={{ margin: 0 }}>
                     <Link href="/start" style={{ color: 'var(--accent)', textDecoration: 'none' }}>make your own →</Link>
