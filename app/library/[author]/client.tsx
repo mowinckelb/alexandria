@@ -335,7 +335,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           </h1>
           {/* Identity line — number · location · contact on one plain line, same
               style as the member number; cleaner than pills (founder 2026-07-19). */}
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', letterSpacing: '0.02em', margin: '0.35rem 0 0' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', letterSpacing: '0.02em', margin: '0.35rem 0 0', textTransform: 'lowercase' }}>
             {author.alexandria_id}
             {author.location && author.location_key && (
               <>{' '}<span style={{ color: 'var(--text-ghost)' }}>·</span>{' '}
@@ -361,7 +361,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
           {routerLinks.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '0.3rem 1.15rem', marginTop: '0.85rem', fontSize: '0.98rem' }}>
               {routerLinks.map((l) => {
-                const linkStyle: CSSProperties = { color: 'var(--text-primary)', textDecoration: 'underline', textDecorationColor: 'var(--border-light)', textUnderlineOffset: '3px' };
+                const linkStyle: CSSProperties = { color: 'var(--text-muted)', textDecoration: 'underline', textDecorationColor: 'var(--border-light)', textUnderlineOffset: '3px' };
                 if (/beliapp\.co/i.test(l.url)) {
                   const handle = l.url.replace(/\/+$/, '').split('/').pop() || '';
                   return (
@@ -393,15 +393,19 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             if (!anyOn) return null;
             const online = data.twin.online === true;
             const first = (author.display_name || author.id).split(' ')[0];
+            const projs = grouped.find((g) => g.cat === 'projects')?.items || [];
+            const p0 = projs[0] ? (projs[0].title || fileDisplayName(projs[0].name)).toLowerCase() : null;
+            const p1 = projs[1] ? (projs[1].title || fileDisplayName(projs[1].name)).toLowerCase() : null;
             const askExamples = [
-              (() => {
-                const proj = grouped.find((g) => g.cat === 'projects')?.items[0];
-                const t = proj ? (proj.title || fileDisplayName(proj.name)).toLowerCase() : null;
-                return t ? `what is ${t}?` : `what is ${first} building?`;
-              })(),
+              p0 ? `what is ${p0}?` : `what is ${first} building?`,
               `what does ${first} believe?`,
               `what’s ${first} like?`,
-              routerLinks.some((l) => l.label === 'x') ? `what’s on ${first}’s x?` : (author.website ? `what’s on ${first}’s website?` : 'where should i start?'),
+              `how does ${first} think about ai?`,
+              p1 ? `why ${p1}?` : `what matters most to ${first}?`,
+              `what should i read first?`,
+              routerLinks.some((l) => l.label === 'x') ? `what’s on ${first}’s x?` : 'where should i start?',
+              `what’s ${first}’s philosophy?`,
+              `what would ${first} push back on?`,
               'ask anything…',
             ];
             return (

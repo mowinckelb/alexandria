@@ -112,7 +112,6 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
   }, []);
 
   const who = authorName || author;
-  const firstName = who.split(' ')[0] || who;
   // One public mind; DEPTH is structural per querier (public shadow for anyone,
   // the deeper invite shadow for granted friends — server-side). The header
   // shows the sidecar's online state; the public|invite toggle carries depth.
@@ -569,7 +568,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                   {files.length === 0 && <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem' }}>nothing to show yet.</p>}
                   {files.length > 0 && (
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.55, margin: '0 0 1.9rem' }}>
-                      everything this mirror speaks from. open a piece to read it here and talk it through together. you can also ask about {firstName}’s linked surfaces — it knows what {firstName} has shared about them, even the ones it can’t open itself.
+                      open a piece to read it here and talk it through. you can also ask about their linked surfaces — even the ones it can’t open.
                     </p>
                   )}
                   {(['works', 'projects', 'shadows'] as const).map((cat) => {
@@ -601,6 +600,11 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
             </div>
           </article>
         </main>
+        {/* Slim footer to frame the page even with the panes open (founder 2026-07-19). */}
+        <footer style={{ flex: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.3rem', padding: '0.6rem 1.2rem', borderTop: '1px solid var(--border-light)' }}>
+          <Link href="/start" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none' }} className="hover:opacity-60">build your own</Link>
+          <Link href="/library" style={{ fontStyle: 'italic', color: 'var(--text-ghost)', fontSize: '0.85rem', textDecoration: 'none' }} className="hover:opacity-60">alexandria<span style={{ fontStyle: 'normal' }}>.</span></Link>
+        </footer>
       </div>
 
       <style>{`
