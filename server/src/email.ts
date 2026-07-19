@@ -240,7 +240,8 @@ export async function sendKinLapseWarning(
   const unsubscribeUrl = emailToken ? `${SERVER_URL}/email/stop?t=${emailToken}` : undefined;
   const html = emailShell(`<p style="margin: 0 0 1.4rem;">heads up &mdash; your free membership paused.</p>
   <p style="margin: 0 0 0.6rem; color: #8a8078;">you dropped below three active friends, so ${resumeLine}. add one more and it&rsquo;s free again:</p>
-  ${emailLinkLine(kinLink, kinLink.replace(/^https?:\/\//, ''))}`, unsubscribeUrl);
+  ${emailLinkLine(kinLink, kinLink.replace(/^https?:\/\//, ''))}
+  <p style="margin: 0 0 1.8rem; color: #8a8078; font-size: 0.95rem;">can&rsquo;t find anyone and can&rsquo;t pay right now? just reply and i&rsquo;ll waive it.</p>`, unsubscribeUrl);
   return await sendEmail(email, 'alexandria. — back to $10', html,
     unsubscribeUrl ? { unsubscribeUrl } : undefined);
 }
@@ -253,7 +254,7 @@ export async function sendWeekOneCheckIn(
   const html = emailShell(`<p style="margin: 0 0 1.4rem;">hey :)</p>
   <p style="margin: 0 0 1.4rem;">you signed up a week ago &mdash; just checking in.</p>
   <p style="margin: 0 0 1.4rem;">it&rsquo;s like the gym: the more you put in, the more you get out &mdash; and it molds to you. so tell it what you want, what you don&rsquo;t, what&rsquo;s confusing.</p>
-  <p style="margin: 0 0 1.6rem;">and tell me: what&rsquo;s working, what isn&rsquo;t? you&rsquo;re early, so what you say actually shapes what i build &mdash; i read all of it. reply here, or call <a href="tel:+14155038178" style="color: #3d3630;">+1 (415) 503-8178</a>.</p>
+  <p style="margin: 0 0 1.6rem;">and tell me: what&rsquo;s working, what isn&rsquo;t? you&rsquo;re early, so what you say actually shapes what i build &mdash; i read all of it. reply here, email <a href="mailto:${FOUNDER_EMAIL}" style="color: #3d3630;">${FOUNDER_EMAIL}</a>, or call <a href="tel:+14155038178" style="color: #3d3630;">+1 (415) 503-8178</a>.</p>
   <p style="margin: 0 0 1.8rem; color: #8a8078;">want to follow along more closely (and support the work)? <a href="${WEBSITE_URL}/follow" style="color: #3d3630;">here</a>.</p>`, unsubscribeUrl);
   return await sendEmail(email, 'checking in.', html, { unsubscribeUrl });
 }
@@ -264,17 +265,16 @@ export async function sendInstallNudge(
   installToken: string,
   githubLogin: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const MECHANICS_URL = `${WEBSITE_URL}/Mechanics.md`;
+  void githubLogin; // referral link cut from this email — see below
   const installUrl = `${SERVER_URL}/install/${installToken}`;
-  // /invite — the referral landing; the ref rides through to /start →
-  // install → eventual join for kin attribution.
-  const kinLink = `${WEBSITE_URL}/invite?ref=${encodeURIComponent(githubLogin)}`;
   const unsubscribeUrl = `${SERVER_URL}/email/stop?t=${emailToken}`;
+  // One job: get them installed. The referral link + "how your data stays
+  // yours" mechanics link were cut (founder 2026-07-18) — they distract from
+  // the single action; the referral ask comes later, once they're in.
   const html = emailShell(`<p style="margin: 0 0 1.2rem; color: #8a8078;">ready when you are.</p>
   <p style="margin: 0 0 1.2rem;">one thing left: open your install page and run the one line in your coding agent (claude code, cursor, codex, factory). everything stays on your machine.</p>
   ${emailCta('open your install page', installUrl)}
-  <p style="margin: 0 0 1.6rem; color: #8a8078; font-size: 0.95rem;">on your phone? <a href="${SHORTCUT_URL}" style="color: #8a8078;">add the shortcut</a> and start saving things now &mdash; they&rsquo;re waiting the next time you type ${emailKbd('/a')}.</p>
-  <p style="margin: 0 0 1.8rem; font-size: 0.85rem; color: #bbb4aa;"><a href="${kinLink}" style="color: #8a8078;">your invite link</a> &middot; <a href="${MECHANICS_URL}" style="color: #8a8078;">how your data stays yours</a></p>`, unsubscribeUrl);
+  <p style="margin: 0 0 1.8rem; color: #8a8078; font-size: 0.95rem;">on your phone? <a href="${SHORTCUT_URL}" style="color: #8a8078;">add the shortcut</a> and start saving things now &mdash; they&rsquo;re waiting the next time you type ${emailKbd('/a')}.</p>`, unsubscribeUrl);
   return await sendEmail(email, 'alexandria. — finish setup.', html, { unsubscribeUrl });
 }
 

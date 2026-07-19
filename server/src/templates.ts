@@ -222,6 +222,14 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
     margin: 14px 0 0; font-size: 0.85rem; line-height: 1.65;
     color: var(--ink-muted); max-width: 480px; font-style: italic;
   }
+  /* The /a habit — NOT a numbered step (it's an ongoing thing, not a
+     one-time action); differentiated by a plum keyline so it reads as the
+     recurring move. One line. */
+  .habit {
+    margin: 22px 0 0; padding: 10px 0 10px 16px;
+    border-left: 2px solid var(--accent);
+    font-size: 1.02rem; line-height: 1.4; color: var(--ink); max-width: 520px;
+  }
   /* The second beats — invite link + phone shortcut, each a small-caps
      question, an answer line, and one quiet note (the site's door idiom). */
   .invite { margin-top: 34px; }
@@ -335,8 +343,8 @@ export async function callbackPageHtml(apiKey: string, githubLogin = '', viaToke
   <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}` : `<div class="steps">
     ${curlCmd ? `<p class="step"><span class="step-num">1 &mdash;</span> <button type="button" class="action" onclick="copyCmd(this)" aria-label="copy connect command">copy your connect command <span class="icon"><span class="icon-copy">${ICON_COPY}</span><span class="icon-check">${ICON_CHECK}</span></span></button></p>
     <p class="step"><span class="step-num">2 &mdash;</span> paste it into your coding agent and hit enter</p>
-    <p class="step"><span class="step-num">3 &mdash;</span> from then on: open a new tab, type <code class="cmd">/a</code>, and leave it running &mdash; whenever you&rsquo;ve got a minute</p>
-    <p class="step-note">it links your install to your membership &mdash; your thinking stays on your machine.</p>` : `<p class="line">you're in. open a new tab and type <code class="cmd">/a</code> whenever you want to think something through.</p>${rotateUrl ? `
+    <p class="step-note">it links your install to your membership &mdash; your thinking stays on your machine.</p>
+    <p class="habit">then, anytime &mdash; open a new tab and type <code class="cmd">/a</code></p>` : `<p class="line">you're in. open a new tab and type <code class="cmd">/a</code> whenever you want to think something through.</p>${rotateUrl ? `
     <p class="lostkey">lost your key? <a href="${escapeHtml(rotateUrl)}">generate a new one</a> &mdash; your old key stops working.</p>` : ''}`}
     ${inviteUrl ? `<div class="invite">
     <p class="invite-q">share your link &mdash; do it now</p>
