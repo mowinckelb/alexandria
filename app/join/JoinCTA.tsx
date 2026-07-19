@@ -119,15 +119,27 @@ export default function JoinCTA({
       {/* .usd — the serif's dollar glyph read too ornate (founder 2026-07-17:
           "one that's less fancy, one line, consistent with the text"); a
           plain system-sans $ sized to blend. */}
-      <p className="join-explain">
-        After the month, if you haven&rsquo;t found three friends, it&rsquo;s{' '}
-        <span className="usd">$</span>10 a month. Now, before you get yourself
-        worked up &mdash; that&rsquo;s the same as two coffees a month, one
-        Uber ride, or even a package delivery charge. So don&rsquo;t be a
-        penny pincher! A dollar there is the same as a dollar here, but at
-        least here you&rsquo;re supporting our project and trying to help
-        people out.
-      </p>
+      {/* Broken into beats with the three price anchors as a scannable
+          triad (founder 2026-07-18: not a wall of text people skip). His
+          words, restructured — the reframe is the memorable part, so it
+          gets its own line-per-item. */}
+      <div className="join-explain">
+        <p>
+          After the month, if you haven&rsquo;t found three friends, it&rsquo;s{' '}
+          <span className="usd">$</span>10 a month. Before you get worked up
+          &mdash; that&rsquo;s the same as:
+        </p>
+        <ul className="join-anchors">
+          <li>two coffees a month</li>
+          <li>one Uber ride</li>
+          <li>a package delivery charge</li>
+        </ul>
+        <p>
+          So don&rsquo;t be a penny pincher! A dollar there is the same as a
+          dollar here &mdash; but at least here you&rsquo;re supporting our
+          project and trying to help people out.
+        </p>
+      </div>
       {/* "message me" is plain text, not a link (founder 2026-07-17: "don't
           have a link to message me — if they don't have my contact then they
           can't do it lol"). The waive is a casual gesture; people who know

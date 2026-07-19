@@ -72,6 +72,26 @@ function emailShell(inner: string, unsubscribeUrl?: string): string {
 </div>`;
 }
 
+// --- Action primitives (form-as-content: the ONE thing to do is a structural
+// element, not buried in prose — the email version of the pages' clear CTAs). ---
+
+// A filled pill link — the primary action for URL-based asks.
+function emailCta(label: string, url: string): string {
+  return `<p style="margin: 0 0 1.6rem;"><a href="${url}" style="display: inline-block; background: #3d3630; color: #f5f0e8; font-size: 1rem; letter-spacing: 0.01em; text-decoration: none; padding: 11px 26px; border-radius: 9px;">${label}</a></p>`;
+}
+// The command to paste — the action, as a monospace card.
+function emailCmd(cmd: string): string {
+  return `<p style="margin: 0 0 1.4rem; background: rgba(61,54,48,0.06); border-radius: 8px; padding: 14px 16px; word-break: break-all;"><code style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; color: #3d3630;">${cmd}</code></p>`;
+}
+// Inline key/command chip — e.g. /a in running prose.
+function emailKbd(text: string): string {
+  return `<code style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; background: rgba(61,54,48,0.07); border-radius: 4px; padding: 1px 5px; color: #3d3630;">${text}</code>`;
+}
+// A shareable link on its own line (their invite link — a thing to copy, not click).
+function emailLinkLine(url: string, display: string): string {
+  return `<p style="margin: 0 0 1.8rem; word-break: break-all;"><a href="${url}" style="color: #3d3630;">${display}</a></p>`;
+}
+
 export async function sendEmail(
   to: string,
   subject: string,
@@ -124,17 +144,9 @@ export async function sendPatronWelcome(
     : `$${(amountCents / 100).toFixed(2)}`;
   const unsubscribeUrl = unsubscribeToken ? `${SERVER_URL}/email/stop?t=${unsubscribeToken}` : undefined;
   const html = emailShell(`<p style="margin: 0 0 1.4rem;">thank you for backing alexandria. :)</p>
-  <p style="margin: 0 0 1.4rem;">
-    ${dollars}/month goes straight back into the work &mdash; infrastructure, time, the slow build.
-  </p>
-  <p style="margin: 0 0 1.4rem;">
-    every week or so i&rsquo;ll send an email with updates on the project; stories, photos, vlogs, etc. keeping you in the loop both ways &mdash; good and bad.
-  </p>
-  <p style="margin: 0 0 1.4rem;">
-    feel free to reply any time, i&rsquo;ll read them all!<br>
-    and if you know anyone else who might want to follow along, send them to <a href="${WEBSITE_URL}" style="color: #3d3630;">alexandria-library.com</a> &mdash; they can follow along from there.
-  </p>
-  <p style="margin: 0 0 1.8rem;">ok, that&rsquo;s all for now :)</p>`, unsubscribeUrl);
+  <p style="margin: 0 0 1.4rem;">${dollars}/month goes straight back into the work &mdash; infrastructure, time, the slow build.</p>
+  <p style="margin: 0 0 1.4rem;">every week or so i&rsquo;ll send you an update &mdash; stories, photos, vlogs, the good and the bad. reply any time; i read them all.</p>
+  <p style="margin: 0 0 1.8rem;">know someone else who&rsquo;d want in? send them to <a href="${WEBSITE_URL}" style="color: #3d3630;">alexandria-library.com</a>.</p>`, unsubscribeUrl);
 
   return await sendEmail(email, 'thank you.', html,
     unsubscribeUrl ? { unsubscribeUrl } : undefined);
@@ -145,15 +157,9 @@ export async function sendFollowerWelcome(email: string, unsubscribeToken?: stri
   // em-dashes — design.md) where this one had strayed to straight marks.
   const unsubscribeUrl = unsubscribeToken ? `${SERVER_URL}/email/stop?t=${unsubscribeToken}` : undefined;
   const html = emailShell(`<p style="margin: 0 0 1.4rem;">welcome to alexandria. :)</p>
-  <p style="margin: 0 0 1.4rem;">
-    every week or so i&rsquo;ll send an email with updates on the project; stories, photos, vlogs, etc. keeping you in the loop with how things are going &mdash; both good and bad!<br>
-    when we come out with new products or its available for new users then you will also be the first to know.
-  </p>
-  <p style="margin: 0 0 1.4rem;">
-    feel free to reply whenever you want. i&rsquo;ll read all of them!<br>
-    and if there are others you think might want to follow along, send them to <a href="${WEBSITE_URL}" style="color: #3d3630;">alexandria-library.com</a> &mdash; they can try it free, or just follow along.
-  </p>
-  <p style="margin: 0 0 1.8rem;">ok, that&rsquo;s all. bye for now :)</p>`, unsubscribeUrl);
+  <p style="margin: 0 0 1.4rem;">every week or so i&rsquo;ll send you an update &mdash; stories, photos, vlogs, the good and the bad. and when there&rsquo;s something new to try, you&rsquo;ll be first to know.</p>
+  <p style="margin: 0 0 1.4rem;">reply any time; i read them all.</p>
+  <p style="margin: 0 0 1.8rem;">know someone else who&rsquo;d want in? send them to <a href="${WEBSITE_URL}" style="color: #3d3630;">alexandria-library.com</a> &mdash; they can try it free, or just follow along.</p>`, unsubscribeUrl);
 
   return await sendEmail(email, 'alexandria.', html,
     unsubscribeUrl ? { unsubscribeUrl } : undefined);
@@ -176,17 +182,19 @@ export async function sendWelcomeEmail(email: string, githubLogin: string, email
   const connectCmd = apiKey
     ? `curl -fsSL alexandria-library.com/a | bash -s -- ${apiKey}`
     : '';
-  const connectBlock = connectCmd
-    ? `<p style="font-size: 1rem; color: #8a8078; margin: 0 0 0.6rem;">to connect your install, paste this into your coding agent (claude code, cursor, codex&hellip;) and hit enter:</p>
-  <p style="margin: 0 0 1.75rem; background: rgba(61,54,48,0.05); border-radius: 6px; padding: 14px 16px; word-break: break-all;"><code style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; color: #3d3630;">${connectCmd}</code></p>`
-    : '';
   const unsubscribeUrl = emailToken ? `${SERVER_URL}/email/stop?t=${emailToken}` : undefined;
-  await sendEmail(email, 'welcome to alexandria.',
-    emailShell(`<p style="font-size: 1.1rem; margin: 0 0 1.5rem;">welcome to alexandria.</p>
-  <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.5rem;">the tool is yours, free, on your machine. membership in the community is $10/month with the first month free &mdash; or free for good with three active friends who join through you.</p>
-  ${connectBlock}
-  <p style="font-size: 1rem; color: #8a8078; margin: 0 0 1.75rem;">your invite link: <a href="${kinLink}" style="color: #3d3630;">${kinLinkDisplay}</a> &mdash; send it to the people you want thinking for themselves too.</p>
-  <p style="font-size: 0.95rem; margin: 0 0 1.8rem;"><a href="${WEBSITE_URL}/join" style="color: #3d3630; text-decoration: none;">open alexandria</a></p>`, unsubscribeUrl),
+  const body = connectCmd
+    ? `<p style="font-size: 1.15rem; margin: 0 0 1.5rem;">welcome to alexandria &mdash; you&rsquo;re in.</p>
+  <p style="margin: 0 0 0.7rem;">one thing to finish: paste this into your coding agent (claude code, cursor, codex, factory) and hit enter.</p>
+  ${emailCmd(connectCmd)}
+  <p style="margin: 0 0 1.6rem;">then open a new tab, type ${emailKbd('/a')}, and leave it &mdash; that&rsquo;s a session. do it whenever.</p>
+  <p style="margin: 0 0 0.5rem; color: #8a8078;">your invite link &mdash; three friends who join make your membership free for good:</p>
+  ${emailLinkLine(kinLink, kinLinkDisplay)}`
+    : `<p style="font-size: 1.15rem; margin: 0 0 1.5rem;">welcome to alexandria &mdash; you&rsquo;re in.</p>
+  <p style="margin: 0 0 1.6rem;">open a new tab, type ${emailKbd('/a')}, and leave it &mdash; that&rsquo;s a session. do it whenever.</p>
+  <p style="margin: 0 0 0.5rem; color: #8a8078;">your invite link &mdash; three friends who join make your membership free for good:</p>
+  ${emailLinkLine(kinLink, kinLinkDisplay)}`;
+  await sendEmail(email, 'welcome to alexandria.', emailShell(body, unsubscribeUrl),
     unsubscribeUrl ? { unsubscribeUrl } : undefined);
 }
 
@@ -203,10 +211,10 @@ export async function sendKinFreeUnlocked(
   // attribution ("every one after just grows the tribe").
   const kinLink = `${WEBSITE_URL}/invite?ref=${encodeURIComponent(githubLogin)}`;
   const unsubscribeUrl = emailToken ? `${SERVER_URL}/email/stop?t=${emailToken}` : undefined;
-  const html = emailShell(`<p style="margin: 0 0 1.4rem;">you&rsquo;re free.</p>
+  const html = emailShell(`<p style="font-size: 1.15rem; margin: 0 0 1.4rem;">you&rsquo;re free.</p>
   <p style="margin: 0 0 1.4rem; color: #8a8078;">three friends joined through you and stayed &mdash; so your membership is free for good. no more $10, ever. thank you for building the community.</p>
-  <p style="margin: 0 0 1.4rem;">send it to everyone worth it &mdash; most won&rsquo;t act, and the three who do make yours free. it&rsquo;s already done for you; every one after just grows the tribe.</p>
-  <p style="margin: 0 0 1.8rem; font-size: 0.9rem; color: #8a8078;">your invite link: <a href="${kinLink}" style="color: #3d3630;">${kinLink.replace(/^https?:\/\//, '')}</a></p>`, unsubscribeUrl);
+  <p style="margin: 0 0 0.5rem;">it&rsquo;s already done &mdash; but keep sending it. every one after just grows the tribe:</p>
+  ${emailLinkLine(kinLink, kinLink.replace(/^https?:\/\//, ''))}`, unsubscribeUrl);
   return await sendEmail(email, 'alexandria. — you’re free.', html,
     unsubscribeUrl ? { unsubscribeUrl } : undefined);
 }
@@ -231,8 +239,8 @@ export async function sendKinLapseWarning(
   const resumeLine = when ? `$10/month resumes on ${when}` : `$10/month resumes at your next renewal`;
   const unsubscribeUrl = emailToken ? `${SERVER_URL}/email/stop?t=${emailToken}` : undefined;
   const html = emailShell(`<p style="margin: 0 0 1.4rem;">heads up &mdash; your free membership paused.</p>
-  <p style="margin: 0 0 1.4rem; color: #8a8078;">you were free for good with three active friends and you&rsquo;ve dropped below that, so ${resumeLine}. get back to three any time &mdash; add one more and it&rsquo;s free again.</p>
-  <p style="margin: 0 0 1.8rem; font-size: 0.9rem; color: #8a8078;">your invite link: <a href="${kinLink}" style="color: #3d3630;">${kinLink.replace(/^https?:\/\//, '')}</a></p>`, unsubscribeUrl);
+  <p style="margin: 0 0 0.6rem; color: #8a8078;">you dropped below three active friends, so ${resumeLine}. add one more and it&rsquo;s free again:</p>
+  ${emailLinkLine(kinLink, kinLink.replace(/^https?:\/\//, ''))}`, unsubscribeUrl);
   return await sendEmail(email, 'alexandria. — back to $10', html,
     unsubscribeUrl ? { unsubscribeUrl } : undefined);
 }
@@ -243,11 +251,10 @@ export async function sendWeekOneCheckIn(
 ): Promise<{ ok: boolean; error?: string }> {
   const unsubscribeUrl = `${SERVER_URL}/email/stop?t=${emailToken}`;
   const html = emailShell(`<p style="margin: 0 0 1.4rem;">hey :)</p>
-  <p style="margin: 0 0 1.4rem;">you signed up to alexandria a week ago &mdash; just dropping in.</p>
-  <p style="margin: 0 0 1.4rem;">it&rsquo;s like the gym &mdash; the more you put in, the more you get out. and the unusual part is it molds to you. so anything you want &mdash; say it. anything you don&rsquo;t &mdash; say it. anything confusing &mdash; just ask.</p>
-  <p style="margin: 0 0 2.2rem;">what&rsquo;s going well, what&rsquo;s not, what you like, what you don&rsquo;t &mdash; reply to this, or call: <a href="tel:+14155038178" style="color: #3d3630;">+1 (415) 503-8178</a>. you&rsquo;re early, so what you tell me actually shapes this. i read all of it. anything annoying &mdash; i&rsquo;ll cut it. anything missing &mdash; i&rsquo;ll add it.</p>
-  <p style="margin: 0 0 1.4rem;">if you want to follow along more closely (and support the work), you can <a href="${WEBSITE_URL}/follow" style="color: #3d3630;">follow along here</a>.</p>
-  <p style="margin: 0 0 1.8rem;">ok, that&rsquo;s all for now.</p>`, unsubscribeUrl);
+  <p style="margin: 0 0 1.4rem;">you signed up a week ago &mdash; just checking in.</p>
+  <p style="margin: 0 0 1.4rem;">it&rsquo;s like the gym: the more you put in, the more you get out &mdash; and it molds to you. so tell it what you want, what you don&rsquo;t, what&rsquo;s confusing.</p>
+  <p style="margin: 0 0 1.6rem;">and tell me: what&rsquo;s working, what isn&rsquo;t? you&rsquo;re early, so what you say actually shapes what i build &mdash; i read all of it. reply here, or call <a href="tel:+14155038178" style="color: #3d3630;">+1 (415) 503-8178</a>.</p>
+  <p style="margin: 0 0 1.8rem; color: #8a8078;">want to follow along more closely (and support the work)? <a href="${WEBSITE_URL}/follow" style="color: #3d3630;">here</a>.</p>`, unsubscribeUrl);
   return await sendEmail(email, 'checking in.', html, { unsubscribeUrl });
 }
 
@@ -263,15 +270,11 @@ export async function sendInstallNudge(
   // install → eventual join for kin attribution.
   const kinLink = `${WEBSITE_URL}/invite?ref=${encodeURIComponent(githubLogin)}`;
   const unsubscribeUrl = `${SERVER_URL}/email/stop?t=${emailToken}`;
-  const html = emailShell(`<p style="margin: 0 0 1.8rem; color: #8a8078;">ready when you are.</p>
-
-  <p style="margin: 0 0 1.4rem;">one thing to do: <a href="${installUrl}" style="color: #3d3630;">open your install page</a> and run the one command in your coding agent (claude code, cursor, codex, factory). your agent takes it from there &mdash; everything local, nothing sent anywhere.</p>
-
-  <p style="margin: 0 0 2rem; color: #8a8078; font-size: 0.95rem;">until then, the <a href="${SHORTCUT_URL}" style="color: #8a8078;">shortcut</a> &mdash; save anything worth thinking about; it becomes your first session.</p>
-
-  <p style="margin: 0 0 0.4rem; font-size: 0.9rem; color: #8a8078;">your kin code: <code style="font-family: ui-monospace, monospace; font-size: 0.85em; padding: 1px 6px; background: rgba(61,54,48,0.05); border-radius: 3px; color: #3d3630;">${githubLogin}</code> &mdash; <a href="${kinLink}" style="color: #8a8078;">invite link</a></p>
-
-  <p style="margin: 1rem 0 1.6rem; font-size: 0.85rem; color: #bbb4aa;">we never see your data &mdash; <a href="${MECHANICS_URL}" style="color: #8a8078;">Mechanics.md</a></p>`, unsubscribeUrl);
+  const html = emailShell(`<p style="margin: 0 0 1.2rem; color: #8a8078;">ready when you are.</p>
+  <p style="margin: 0 0 1.2rem;">one thing left: open your install page and run the one line in your coding agent (claude code, cursor, codex, factory). everything stays on your machine.</p>
+  ${emailCta('open your install page', installUrl)}
+  <p style="margin: 0 0 1.6rem; color: #8a8078; font-size: 0.95rem;">on your phone? <a href="${SHORTCUT_URL}" style="color: #8a8078;">add the shortcut</a> and start saving things now &mdash; they&rsquo;re waiting the next time you type ${emailKbd('/a')}.</p>
+  <p style="margin: 0 0 1.8rem; font-size: 0.85rem; color: #bbb4aa;"><a href="${kinLink}" style="color: #8a8078;">your invite link</a> &middot; <a href="${MECHANICS_URL}" style="color: #8a8078;">how your data stays yours</a></p>`, unsubscribeUrl);
   return await sendEmail(email, 'alexandria. — finish setup.', html, { unsubscribeUrl });
 }
 
@@ -281,13 +284,12 @@ export async function sendInstallNudge(
 // in its path (alexandria-library.com/a/TOKEN) so the setup-script fetch
 // marks the capture as installed — the public web command stays tokenless.
 
-function onboardCommandBlock(installToken: string, ref?: string): string {
+function onboardCmd(installToken: string, ref?: string): string {
   // `-s -- --ref <login>` forwards the referrer into setup.sh (it parses --ref
   // and bakes system/.referrer), so a command emailed off a /start?ref visit
   // keeps kin attribution. ref is sanitised to [A-Za-z0-9-] at capture
   // (POST /onboard), so it's shell- and HTML-safe to interpolate here.
-  const cmd = `curl -fsSL alexandria-library.com/a/${installToken} | bash${ref ? ` -s -- --ref ${ref}` : ''}`;
-  return `<p style="margin: 0 0 1.4rem; background: rgba(61,54,48,0.05); border-radius: 6px; padding: 14px 16px;"><code style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; color: #3d3630;">${cmd}</code></p>`;
+  return `curl -fsSL alexandria-library.com/a/${installToken} | bash${ref ? ` -s -- --ref ${ref}` : ''}`;
 }
 
 export async function sendOnboardCommand(
@@ -297,10 +299,10 @@ export async function sendOnboardCommand(
   ref?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const unsubscribeUrl = `${SERVER_URL}/email/stop?t=${unsubscribeToken}`;
-  const html = emailShell(`<p style="margin: 0 0 1.4rem;">here it is. when you&rsquo;re at your computer, paste this into your coding agent (claude code, cursor, codex, factory):</p>
-  ${onboardCommandBlock(installToken, ref)}
-  <p style="margin: 0 0 1.4rem; color: #8a8078;">it links up everything you&rsquo;ve been saving.</p>
-  <p style="margin: 0 0 1.8rem;">until then &mdash; <a href="${SHORTCUT_URL}" style="color: #3d3630;">add the shortcut</a>: save anything you read, hear, or think, straight from your phone.</p>`, unsubscribeUrl);
+  const html = emailShell(`<p style="margin: 0 0 1.2rem;">here it is. when you&rsquo;re at your computer, paste this into your coding agent (claude code, cursor, codex, factory):</p>
+  ${emailCmd(onboardCmd(installToken, ref))}
+  <p style="margin: 0 0 1.6rem; color: #8a8078;">it picks up everything you&rsquo;ve been saving. then open a new tab and type ${emailKbd('/a')}.</p>
+  <p style="margin: 0 0 1.8rem;">on your phone until then? <a href="${SHORTCUT_URL}" style="color: #3d3630;">add the shortcut</a> &mdash; save anything, anywhere.</p>`, unsubscribeUrl);
   return await sendEmail(email, 'alexandria. — your install command', html, { unsubscribeUrl });
 }
 
@@ -313,10 +315,10 @@ export async function sendOnboardFollowup(
 ): Promise<{ ok: boolean; error?: string }> {
   const first = nth <= 1;
   const unsubscribeUrl = `${SERVER_URL}/email/stop?t=${unsubscribeToken}`;
-  const html = emailShell(`<p style="margin: 0 0 1.4rem;">${first
+  const html = emailShell(`<p style="margin: 0 0 1.2rem;">${first
     ? 'still here when you are &mdash; paste this into your coding agent when you&rsquo;re back at your computer:'
     : 'last one from me. the command:'}</p>
-  ${onboardCommandBlock(installToken, ref)}
+  ${emailCmd(onboardCmd(installToken, ref))}
   <p style="margin: 0 0 1.8rem; color: #8a8078;">${first
     ? 'everything you&rsquo;ve saved on your phone gets picked up the moment you run it.'
     : 'no rush &mdash; it&rsquo;ll keep. everything you&rsquo;ve saved stays yours.'}</p>`, unsubscribeUrl);

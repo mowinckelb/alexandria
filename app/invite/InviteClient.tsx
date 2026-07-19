@@ -52,20 +52,26 @@ export default function InviteClient({ refCode }: { refCode?: string }) {
             <>A friend sent you alexandria.</>
           )}
         </h1>
-        {/* Texture over block (founder 2026-07-17): short beats, one
-            italic stress, the sample-on-a-plate image — rhythm, not a
-            wall. */}
+        {/* Texture over block; the free-sample metaphor dropped for a
+            zero-context reader (founder 2026-07-18) — say the plain thing:
+            free, nothing to buy or sign up for, take it and figure it out
+            together. */}
         <p className="invite-lede">
           They&rsquo;ve already vetted it. They know you, they know what
-          this is &mdash; and they put the two together. It&rsquo;s free: a
-          sample on a plate, not a purchase. Take it now &mdash; then work
-          out what it can do, <em>together</em>.
+          this is &mdash; and they thought of you. It&rsquo;s free, with
+          nothing to buy and nothing to sign up for. So just take it now,
+          and work out what it can do <em>together</em>.
         </p>
 
         <Link className="invite-btn" href={startHref}>
           take it &mdash; it&rsquo;s free
         </Link>
-        <p className="invite-hint">one line to paste &mdash; it walks you through the rest.</p>
+        {/* Value under the button (founder 2026-07-18: the old 'one line to
+            paste' added nothing) — the concrete facts that make the click
+            feel small: quick, private, and your friend already did it. */}
+        <p className="invite-hint">
+          About five minutes, all on your own computer. Nothing leaves it.
+        </p>
 
         <p className="invite-more">
           Roughly what it is: your thinking, in files your ai reads &mdash;

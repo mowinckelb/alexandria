@@ -179,6 +179,24 @@ export default async function JoinPage({
           font-size: 14.5px; line-height: 1.72; letter-spacing: 0.01em;
           color: var(--text-secondary, rgba(26, 19, 24, 0.75)); text-wrap: pretty;
         }
+        .join-explain p { margin: 0 0 14px; }
+        .join-explain p:last-child { margin-bottom: 0; }
+        /* The three price anchors — the reframe, pulled out as a scannable
+           column so it never reads as a wall. Each on its own line, hung
+           from a hairline marker, in primary ink so the eye lands here. */
+        .join-anchors {
+          list-style: none; margin: 0 0 16px; padding: 0;
+        }
+        .join-anchors li {
+          position: relative; margin: 0 0 7px; padding-left: 20px;
+          font-size: 15.5px; line-height: 1.4; color: var(--text-primary);
+          font-variant-numeric: onum;
+        }
+        .join-anchors li::before {
+          content: ""; position: absolute; left: 2px; top: 0.68em;
+          width: 9px; height: 1px; background: var(--accent);
+        }
+        .join-anchors li:last-child { margin-bottom: 0; }
         /* The waive — quietest: his voice, the generosity that keeps it fair. */
         .join-waive {
           margin: 12px 0 0; max-width: 600px;
