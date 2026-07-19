@@ -571,7 +571,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                   {files.length === 0 && linked.length === 0 && <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem' }}>nothing to show yet.</p>}
                   {(files.length > 0 || linked.length > 0) && (
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.55, margin: '0 0 1.9rem' }}>
-                      everything this mind speaks from. open a piece and it can discuss it as you read.
+                      everything this mirror speaks from. open a piece to read it here and talk it through together; links open in a new tab.
                     </p>
                   )}
                   {/* Links FIRST — providing context for the linked surfaces is
@@ -579,15 +579,29 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                   {linked.length > 0 && (
                     <div style={{ margin: '0 0 1.5rem' }}>
                       <p style={{ ...label, margin: '0 0 0.15rem' }}>links</p>
-                      {linked.map((l) => (
-                        <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer"
-                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem', width: '100%',
-                            textDecoration: 'none', padding: '0.55rem 0' }}
-                          className="hover:opacity-60">
-                          <span style={{ color: 'var(--text-primary)', fontSize: '1.02rem' }}>{l.label}</span>
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>public</span>
-                        </a>
-                      ))}
+                      {linked.map((l) => {
+                        // App-only surfaces (Beli) have no usable web page — the
+                        // profile deep-link is a dead tap in a browser. Show the
+                        // handle to look up + send them to the app's own site to
+                        // get it, instead of a link that only opens inside the app.
+                        const appOnly = /beliapp\.co/i.test(l.url);
+                        const handle = appOnly ? (l.url.replace(/\/+$/, '').split('/').pop() || '') : '';
+                        const href = appOnly ? 'https://beliapp.co' : l.url;
+                        return (
+                          <a key={l.url} href={href} target="_blank" rel="noopener noreferrer"
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem', width: '100%',
+                              textDecoration: 'none', padding: '0.55rem 0' }}
+                            className="hover:opacity-60">
+                            <span style={{ color: 'var(--text-primary)', fontSize: '1.02rem' }}>
+                              {l.label}
+                              {appOnly && handle && (
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}> · @{handle} · get the app</span>
+                              )}
+                            </span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>open&nbsp;↗</span>
+                          </a>
+                        );
+                      })}
                     </div>
                   )}
                   {(['works', 'projects', 'shadows'] as const).map((cat) => {
