@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       { source: '/patron', destination: '/follow', permanent: true },
       // The standardized ask-my-mind door: alexandria-library.com/ask/{author}
       // is the one recognizable URL an Author pastes into every bio — X,
-      // Instagram, their website (a2 § Library V1: the twin is why the link
+      // Instagram, their website (a2 § Library V1: the mirror is why the link
       // spreads). Lands on the profile, which leads with the ask box.
       // NON-permanent so the landing surface stays movable (e.g. straight to
       // the chat later) without breaking the link everyone already pasted.
