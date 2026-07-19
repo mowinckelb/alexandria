@@ -102,6 +102,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
   // first-timer explainer — it would flash for the mind-load window and vanish
   // the instant the question fires, which reads as a glitch (founder 2026-07-18).
   const [cameWithQuestion, setCameWithQuestion] = useState(false);
+  const [beliCopied, setBeliCopied] = useState(false);  // pane links: Beli click-to-reveal
   useEffect(() => {
     try {
       const q = new URLSearchParams(window.location.search);
@@ -565,10 +566,10 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                 // still ask the mirror about the linked surfaces — it answers from
                 // what the Author has shared, even the ones it can't open itself.
                 <div style={{ padding: '1.4rem clamp(1.4rem, 4vw, 3rem)' }}>
-                  {files.length === 0 && <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem' }}>nothing to show yet.</p>}
-                  {files.length > 0 && (
+                  {files.length === 0 && linked.length === 0 && <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem' }}>nothing to show yet.</p>}
+                  {(files.length > 0 || linked.length > 0) && (
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.55, margin: '0 0 1.9rem' }}>
-                      open a piece to read it here and talk it through. you can also ask about their linked surfaces — even the ones it can’t open.
+                      open a piece to read it beside the chat.
                     </p>
                   )}
                   {(['works', 'projects', 'shadows'] as const).map((cat) => {
@@ -589,6 +590,37 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                       </div>
                     );
                   })}
+                  {/* Links — one line, underlined; a reference you can ask the mirror
+                      about, or tap to open yourself (founder 2026-07-19). */}
+                  {linked.length > 0 && (
+                    <div style={{ margin: '1.7rem 0 0' }}>
+                      <p style={{ color: 'var(--text-ghost)', fontSize: '0.8rem', letterSpacing: '0.08em', margin: '0 0 0.35rem' }}>links</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 0.65rem' }}>
+                        ask the mirror about these, or tap to open them.
+                      </p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '0.3rem 1.15rem', fontSize: '0.98rem' }}>
+                        {linked.map((l) => {
+                          if (/beliapp\.co/i.test(l.url)) {
+                            const handle = l.url.replace(/\/+$/, '').split('/').pop() || '';
+                            return (
+                              <button key={l.url} type="button" title="beli has no web page — click to copy the username"
+                                onClick={() => { try { navigator.clipboard?.writeText('@' + handle); } catch { /* */ } setBeliCopied(true); setTimeout(() => setBeliCopied(false), 1800); }}
+                                style={{ color: 'var(--text-muted)', textDecoration: 'underline', textDecorationColor: 'var(--border-light)', textUnderlineOffset: '3px', border: 'none', background: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}
+                                className="hover:opacity-60">
+                                {beliCopied ? `@${handle} · copied ✓` : 'beli'}
+                              </button>
+                            );
+                          }
+                          return (
+                            <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="hover:opacity-60"
+                              style={{ color: 'var(--text-muted)', textDecoration: 'underline', textDecorationColor: 'var(--border-light)', textUnderlineOffset: '3px' }}>
+                              {l.label}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   {!signedIn && <p style={{ color: 'var(--text-ghost)', fontSize: '0.86rem', marginTop: '1.2rem' }}>sign in for more of this mind.</p>}
                 </div>
               )}
@@ -601,7 +633,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
           </article>
         </main>
         {/* Slim footer to frame the page even with the panes open (founder 2026-07-19). */}
-        <footer style={{ flex: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.3rem', padding: '0.6rem 1.2rem', borderTop: '1px solid var(--border-light)' }}>
+        <footer style={{ flex: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.6rem', padding: '1rem 1.2rem', borderTop: '1px solid var(--border-light)' }}>
           <Link href="/start" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none' }} className="hover:opacity-60">build your own</Link>
           <Link href="/library" style={{ fontStyle: 'italic', color: 'var(--text-ghost)', fontSize: '0.85rem', textDecoration: 'none' }} className="hover:opacity-60">alexandria<span style={{ fontStyle: 'normal' }}>.</span></Link>
         </footer>
