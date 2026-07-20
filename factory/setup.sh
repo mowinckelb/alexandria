@@ -184,6 +184,13 @@ for _s in imsg_ctl.sh imsg_run.sh imsg_send.sh imsg_handle.sh agent_reply.sh; do
   chmod +x "$ALEX_DIR/system/scripts/$_s" 2>/dev/null
 done
 fetch_factory "scripts/imsg_daemon.py" "$ALEX_DIR/system/scripts/imsg_daemon.py" "scripts/imsg_daemon.py"
+# Tool adapters (the pixel/acoustic in/out plugs the texting brain drives via [[VERB:]] markers).
+# Seed-if-missing so the Author's own edits survive a re-sync. Inert until they text a command + grant
+# Automation once per app. Add a tool = drop one tools/<verb>.sh (see tools/README.md).
+for _t in show.sh remind.sh note.sh music.sh scene.sh README.md; do
+  fetch_factory "tools/$_t" "$ALEX_DIR/system/tools/$_t" "tools/$_t"
+  case "$_t" in *.sh) chmod +x "$ALEX_DIR/system/tools/$_t" 2>/dev/null;; esac
+done
 # Config template (self-handles) — seed-if-missing so `enable` has a file to fill. No handles
 # ship (never PII): the Author sets IMSG_NUMBER to their own iMessage number.
 if [ ! -f "$ALEX_DIR/system/.imsg_config" ]; then

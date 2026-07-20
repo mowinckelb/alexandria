@@ -52,6 +52,12 @@ SIGNED_FILES=(
   factory/scripts/imsg_handle.sh
   factory/scripts/agent_reply.sh
   factory/scripts/imsg_ctl.sh
+  factory/tools/show.sh
+  factory/tools/remind.sh
+  factory/tools/note.sh
+  factory/tools/music.sh
+  factory/tools/scene.sh
+  factory/tools/README.md
   factory/migrate.sh
 )
 
@@ -69,6 +75,7 @@ MUST_SIGN=(
   factory/scripts/capture_resolver.py factory/migrate.sh
   factory/scripts/imsg_daemon.py factory/scripts/imsg_run.sh factory/scripts/imsg_send.sh
   factory/scripts/imsg_handle.sh factory/scripts/agent_reply.sh factory/scripts/imsg_ctl.sh
+  factory/tools/show.sh factory/tools/remind.sh factory/tools/note.sh factory/tools/music.sh factory/tools/scene.sh
 )
 for f in "${MUST_SIGN[@]}"; do
   printf '%s\n' "${SIGNED_FILES[@]}" | grep -qxF "$f" || {
