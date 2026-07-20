@@ -534,7 +534,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
       CLIENT_VERSION="$CLIENT_VERSION" \
       SYNC_LOG="$ALEX_DIR/system/.library_sync_status.json" \
       GH_LOGIN="${ALEXANDRIA_GH_LOGIN:-benmowinckel}" \
-      node -e '
+      node - <<'ALEXNODE' 2>>"$ALEX_DIR/system/.alexandria_errors"
         const fs = require("fs"), path = require("path");
         const root = path.join(process.env.ALEX_DIR, "files/library");
         const SERVER = process.env.SERVER, KEY = process.env.API_KEY, CV = process.env.CLIENT_VERSION;
@@ -724,7 +724,7 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
           fs.appendFileSync(process.env.ALEX_DIR + "/system/.alexandria_errors",
             new Date().toISOString() + " library sync crashed: " + (e.stack || e.message) + "\n");
         });
-      ' 2>>"$ALEX_DIR/system/.alexandria_errors"
+ALEXNODE
     ) &
 
     # Server status drives reminders. The Engine drafts; the Author approves.
