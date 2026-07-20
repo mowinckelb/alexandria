@@ -173,6 +173,29 @@ fetch_factory "scripts/capture_resolver.py" "$ALEX_DIR/system/scripts/capture_re
 fetch_factory "scripts/verify-fetch.sh" "$ALEX_DIR/system/scripts/verify-fetch.sh" "scripts/verify-fetch.sh" yes
 chmod +x "$ALEX_DIR/system/scripts/verify-fetch.sh" 2>/dev/null
 
+# Texting Presence (off-by-default module — factory/systems/texting-presence.md).
+# Seed the machinery INERT: it reads the Author's iMessage (chat.db) and sends replies ONLY
+# after they run `imsg_ctl.sh enable`, which walks the two macOS grants (Full Disk Access +
+# Automation) and starts a terminal-launched loop. Nothing here starts anything — no hook, no
+# launchd, no grant. Surfaced via the system-path feature drip; the Author opts in. Seed-if-missing
+# (no overwrite) so a re-sync never clobbers the Author's own edits to these scripts.
+for _s in imsg_ctl.sh imsg_run.sh imsg_recv.sh imsg_send.sh imsg_handle.sh agent_reply.sh imsg_reflect.sh imsg_conv.sh; do
+  fetch_factory "scripts/$_s" "$ALEX_DIR/system/scripts/$_s" "scripts/$_s"
+  chmod +x "$ALEX_DIR/system/scripts/$_s" 2>/dev/null
+done
+fetch_factory "scripts/imsg_daemon.py" "$ALEX_DIR/system/scripts/imsg_daemon.py" "scripts/imsg_daemon.py"
+# Config template (self-handles) — seed-if-missing so `enable` has a file to fill. No handles
+# ship (never PII): the Author sets IMSG_NUMBER to their own iMessage number.
+if [ ! -f "$ALEX_DIR/system/.imsg_config" ]; then
+  cat > "$ALEX_DIR/system/.imsg_config" <<'IMSGCFG_END'
+# Alexandria texting presence — self-handles (single source of truth; sourced by every imsg_* script).
+# Set IMSG_NUMBER to your OWN iMessage number (the self-thread the presence reads). IMSG_EMAIL is an
+# optional second self-handle (grey rendering). Then run:  bash ~/alexandria/system/scripts/imsg_ctl.sh enable
+IMSG_NUMBER=
+IMSG_EMAIL=
+IMSGCFG_END
+fi
+
 # Continuous-update module — present = on (default). Its contents ARE the
 # explanation; deleting the file freezes updates (shim + payload both check it,
 # so a delete = zero contact with Alexandria, fully local). Seed-if-missing so a
