@@ -30,6 +30,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
   const [pdfUrl, setPdfUrl] = useState('');
   const [status, setStatus] = useState<'loading' | 'ok' | 'signin' | 'pay' | 'error'>('loading');
   const [checkoutUrl, setCheckoutUrl] = useState('');
+  const [questions, setQuestions] = useState<string[] | undefined>(undefined); // this piece's suggested asks → the rotating ghost text
   const pdfTextRef = useRef('');
   const extractRef = useRef<Promise<void> | null>(null);
   const dlBlobRef = useRef<Blob | null>(null);
@@ -53,6 +54,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
         setAuthorName(dirRes?.author?.display_name || '');
         const f = (dirRes?.files || []).find((x: { name: string }) => x.name === name);
         if (f?.visibility) setVisibility(f.visibility);
+        if (Array.isArray(f?.questions)) setQuestions(f.questions.filter((q: unknown): q is string => typeof q === 'string'));
 
         if (fileRes.ok) {
           const blob = await fileRes.blob();
@@ -122,6 +124,7 @@ export default function ReaderPage({ params }: { params: Promise<{ author: strin
       signInUrl={signInUrl}
       checkoutUrl={checkoutUrl}
       who={who}
+      askQuestions={questions}
       askFn={askFn}
     />
   );
