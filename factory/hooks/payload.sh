@@ -608,6 +608,32 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
           return null;
         }
 
+        // The Artifact Loop's classify step, resolved locally so a file lands in
+        // the right library section without any remembered manual step. Order:
+        //   1. Explicit <name>.category sidecar (works/projects/shadows/other) —
+        //      the escape hatch, for works and anything structure can't infer.
+        //   2. Structural GROUND TRUTH: a stem that names a folder under
+        //      files/projects/ IS a project. Correct-by-construction — a project
+        //      can no longer silently default to a shadow.
+        //   3. null → don't send; the server keeps the existing category
+        //      (default 'shadows'), so nothing regresses.
+        // (.category, like .title/.txt, is not a publishable extension, so it
+        // never ships as a file of its own.)
+        function deriveCategory(stem, absPath) {
+          const sidecar = absPath.replace(/\.[^.]+$/, ".category");
+          try {
+            if (fs.existsSync(sidecar)) {
+              const c = fs.readFileSync(sidecar, "utf8").trim().toLowerCase();
+              if (["works", "projects", "shadows", "other"].includes(c)) return c;
+            }
+          } catch {}
+          try {
+            const pdir = path.join(process.env.ALEX_DIR, "files/projects", stem);
+            if (fs.statSync(pdir).isDirectory()) return "projects";
+          } catch {}
+          return null;
+        }
+
         async function putOne(name, meta) {
           const buf = fs.readFileSync(meta.abs);
           const isText = meta.contentType.startsWith("text/");
@@ -617,6 +643,8 @@ To apply, tell me to pull $module (verified). To keep your version, do nothing."
             text: deriveText(meta.abs, meta.contentType),
             title: deriveTitle(meta.abs),
           };
+          const cat = deriveCategory(name, meta.abs);
+          if (cat) body.category = cat;
           if (isText) body.content = buf.toString("utf8");
           else body.content_b64 = buf.toString("base64");
           const res = await fetch(SERVER + "/file/" + encodeURIComponent(name), {
