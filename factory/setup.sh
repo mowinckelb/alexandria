@@ -179,7 +179,7 @@ chmod +x "$ALEX_DIR/system/scripts/verify-fetch.sh" 2>/dev/null
 # Automation) and starts a terminal-launched loop. Nothing here starts anything — no hook, no
 # launchd, no grant. Surfaced via the system-path feature drip; the Author opts in. Seed-if-missing
 # (no overwrite) so a re-sync never clobbers the Author's own edits to these scripts.
-for _s in imsg_ctl.sh imsg_run.sh imsg_recv.sh imsg_send.sh imsg_handle.sh agent_reply.sh imsg_reflect.sh imsg_conv.sh; do
+for _s in imsg_ctl.sh imsg_run.sh imsg_send.sh imsg_handle.sh agent_reply.sh; do
   fetch_factory "scripts/$_s" "$ALEX_DIR/system/scripts/$_s" "scripts/$_s"
   chmod +x "$ALEX_DIR/system/scripts/$_s" 2>/dev/null
 done
