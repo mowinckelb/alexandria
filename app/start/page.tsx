@@ -56,12 +56,12 @@ export default async function StartPage({
         {/* No lede (2026-07-16, radical simplicity): the two steps are the
             page; the lede's privacy line lives in the fine print below. */}
         <h1 className="primer-h1">Becoming an Alexandrian</h1>
-        {/* The grab line (founder 2026-07-17): send them for both devices
-            before the 2×2 — one is enough, but both is the point. */}
+        {/* The grab line (founder 2026-07-19): never send someone away from
+            their computer — 1 and 2 need a computer, 3 and 4 work on any
+            device, so a computer does all four. Phone-only does the last two. */}
         <p className="start-grab">
-          Best with your computer and your phone both in reach: 1 and 2 are
-          on the computer, 3 is on your phone (do it either way). Only your
-          phone right now? Do 3 and 4.
+          At your computer, you can do all four. Only your phone right now?
+          Just do steps 3 and 4.
         </p>
 
         {/* ONE consolidated layout for every device (founder 2026-07-17 —

@@ -146,19 +146,21 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
         </p>
       )}
 
-      {/* The shortcut is for EVERYONE, not a phone-only fallback (founder
-          2026-07-18): even at your desk, grab your phone and add it. Only
-          step 4 (email) is the genuine phone-only fallback. */}
-      <p className="start-section start-section-later">on your phone &mdash; do this too</p>
+      {/* Steps 3 and 4 work on ANY device (founder 2026-07-19): the shortcut
+          is an iCloud one, so it adds on a Mac too and syncs to the phone, and
+          email is device-agnostic — a visitor at their computer does all four
+          without reaching for their phone. Phone-only visitors do these last
+          two (email step 4 mails them the line for step 1 later). */}
+      <p className="start-section start-section-later">on your phone or Mac</p>
 
       <p className="step-line">
         <span className="step-num">3 &mdash;</span>{' '}
         <a className="start-shortcut-a" href={SHORTCUT_URL} target="_blank" rel="noopener noreferrer">Add the shortcut</a>
       </p>
       <p className="step-agents">
-        Grab your phone even if you&rsquo;re at your desk. Tap Add, then
-        share anything to it &mdash; an article, a voice note, a thought
-        &mdash; and it&rsquo;s waiting the next time you type <code>/a</code>.
+        Add it on either device &mdash; then share anything to it from your
+        phone (an article, a voice note, a thought) and it&rsquo;s waiting the
+        next time you type <code>/a</code>.
       </p>
 
       <p className="step-line step-two">
