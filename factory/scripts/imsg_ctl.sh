@@ -53,7 +53,41 @@ case "${1:-status}" in
       fi
     else
       echo "… chat.db not readable yet — finish grant (a), then re-run: imsg_ctl.sh enable"
-    fi ;;
+    fi
+    # 4. Proactive capture digest — the daily 5pm iMessage that pulls you back into a session
+    #    (a2 § The Proactive Medium). Only outbound (Automation→Messages grant, no chat.db read
+    #    needed), so install it regardless of the FDA check above. Idempotent.
+    DIGEST_PLIST="$HOME/Library/LaunchAgents/com.alexandria.capture-digest.plist"
+    mkdir -p "$HOME/Library/LaunchAgents" 2>/dev/null
+    cat > "$DIGEST_PLIST" <<DIGEST_END
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.alexandria.capture-digest</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>$HOME/alexandria/system/scripts/capture_digest.py</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>17</integer><key>Minute</key><integer>0</integer></dict>
+  <key>RunAtLoad</key><false/>
+  <key>ProcessType</key><string>Background</string>
+  <key>StandardOutPath</key><string>$HOME/alexandria/system/.digest.launchd.out</string>
+  <key>StandardErrorPath</key><string>$HOME/alexandria/system/.digest.launchd.err</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>HOME</key><string>$HOME</string>
+  </dict>
+</dict>
+</plist>
+DIGEST_END
+    launchctl unload "$DIGEST_PLIST" 2>/dev/null
+    launchctl load "$DIGEST_PLIST" 2>/dev/null
+    echo "✓ Capture digest scheduled — 5pm local, iMessage (empty inbox → an accretion nugget)."
+    echo "  OFF: launchctl unload $DIGEST_PLIST" ;;
   status)
     if [ -f "$BASE/.imsg_paused" ]; then echo "state: PAUSED"; else echo "state: ACTIVE"; fi
     if launchctl print gui/$UID_N/com.alexandria.imsg-daemon >/dev/null 2>&1; then echo "launchd: loaded"; else echo "launchd: NOT loaded"; fi
