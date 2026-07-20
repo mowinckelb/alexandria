@@ -8,6 +8,10 @@ import { ThemeProvider } from "./components/ThemeProvider";
 const ebGaramond = EB_Garamond({
   variable: "--font-eb-garamond",
   subsets: ["latin"],
+  // Load the true italic axis — the wordmark and the hero question set in
+  // Garamond italic were previously faux-slanted (no italic file). True
+  // italic gives the proper old-style letterforms (single-story a, etc.).
+  style: ["normal", "italic"],
 });
 
 // Spectral is the website + primer face — modern literary serif. Bound

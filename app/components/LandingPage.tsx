@@ -725,7 +725,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
               and labels all explained what the words already say, so they
               are gone; hierarchy is size and air alone. */}
           <p className="front-lead">When ai can do everything humans can, what do we do?</p>
-          <p className="front-answer">our answer is <span className="front-answer-name">alexandria</span><span className="front-answer-dot">.</span></p>
+          <p className="front-answer">
+            <span className="front-answer-lead">our answer is becoming an</span>
+            <span className="front-answer-nameline"><span className="front-answer-name">alexandrian</span><span className="front-answer-dot">.</span></span>
+          </p>
         </div>
         <div className="top-inner" />
         </div>
@@ -849,10 +852,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
                     the frame / the punch / the action. */}
                 <div className="action-close">
                   <p className="statement-beat action-beat action-beat-final">
-                    <em>See it as a free sample at a supermarket. It&rsquo;s being
-                    handed straight to you &mdash; as long as you&rsquo;re not
-                    allergic, just take it and give it a try. It should be the
-                    smallest decision you make all day.</em>
+                    <em>See it as a free sample at a supermarket, handed
+                    straight to you. Just take it and give it a try &mdash;
+                    the smallest decision you&rsquo;ll make all day.</em>
                   </p>
                 </div>
 
@@ -2880,41 +2882,60 @@ export default function LandingPage({ brandClassName = '' }: Props) {
              read (founder 2026-07-20: "it's not about the color, it's about
              the clarity of reading … too hard to read"). Letterforms stay
              sharp; the soft "fade into the wall" comes from opacity alone,
-             which keeps it legible. Dial that feeling with opacity here —
-             lower = more faded, still crisp. */
-          color: rgba(46, 30, 38, 0.72);
-          mix-blend-mode: multiply;
+             which keeps it legible. NO multiply — it flattened the opacity
+             range so the fade dial barely responded (founder 2026-07-20:
+             "I don't notice a difference between the fade and opacity").
+             Now opacity is a true linear dial: lower = visibly more faded,
+             still crisp. Question clearly faded (0.62) and set BELOW the
+             answer so the two read as a gradient again (founder 2026-07-20:
+             "I liked the differentiation … the gradient of the colour"). */
+          color: rgba(46, 30, 38, 0.62);
           text-wrap: balance;
         }
-        /* The answer (2026-07-17, direction B — restraint): the front is
-           just the question and this one line. Lowercase to match the
-           brand marks (wordmark, a. signature); italic gives it the quiet
-           reveal after the roman question; a generous breath sets it
-           apart. The dot is the wordmark's — roman, tight to the name. */
+        /* The answer as an elegant reveal (founder 2026-07-20: "needs to
+           look more elegant and interesting and cooler" — the flat line read
+           like a caption). A small, quiet, tracked ITALIC lead-in blooms into
+           "alexandrian" as the large ROMAN payoff word (styled below), so the
+           eye lands on the identity, not the sentence. */
         .front-answer {
-          margin: 32px 0 0;
+          margin: 30px 0 0;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
           font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
-          /* Roman, not italic (founder 2026-07-20: "the answer in non
-             italics … a different something") — the upright reply reads as
-             settled against the question's searching italic; same Garamond
-             hand, just a different posture. */
-          font-style: normal;
+          font-style: italic;
           font-weight: 500;
-          font-size: 20px;
-          line-height: 1.4;
-          letter-spacing: 0.006em;
-          /* Sharp, no blur — the underlined name reads clearly; slightly
-             more present than the question. */
-          color: rgba(46, 30, 38, 0.8);
-          mix-blend-mode: multiply;
         }
-        /* The name in the answer, underlined (founder 2026-07-20) — a quiet
-           text-decoration line (always renders, unlike a color-mix border)
-           marks "alexandria" as THE answer. */
+        .front-answer-lead {
+          font-size: 15px;
+          letter-spacing: 0.04em;
+          color: rgba(46, 30, 38, 0.5);
+        }
+        .front-answer-nameline {
+          font-size: 30px;
+          line-height: 1.05;
+          letter-spacing: -0.004em;
+          /* Tyrian / imperial purple — the brand accent (nav + watermark),
+             historically the imperial dye of antiquity, so it ties
+             "alexandrian" to the ancient world (founder 2026-07-20: "let's
+             try the imperial purple"). Muted, not bright (founder 2026-07-20:
+             "a little too bright … more subtle") — low opacity lets the cream
+             soften it toward the palette. The underline inherits it. */
+          color: rgba(58, 15, 61, 0.6);
+        }
+        /* "alexandrian" — the question's OWN Garamond, but ROMAN not italic
+           (founder 2026-07-20: "same font as the question but non italic,
+           underlined"). Upright posture + underline + the imperial purple
+           (set on .front-answer-nameline) differentiate it from the faded
+           italic question; no third font needed. */
         .front-answer-name {
+          font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+          font-style: normal;
+          font-weight: 600;
           text-decoration: underline;
           text-decoration-thickness: 1px;
-          text-underline-offset: 3px;
+          text-underline-offset: 6px;
         }
         .front-answer-dot {
           font-style: normal;
@@ -3506,9 +3527,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             letter-spacing: -0.004em;
           }
           .front-answer {
-            font-size: 18px;
+            align-items: center;
             margin-top: 16px;
           }
+          .front-answer-lead { font-size: 13.5px; }
+          .front-answer-nameline { font-size: 26px; }
 
           /* Mobile spacing — the two-slide peel format is gone here;
              everything flows naturally. Give every block more
