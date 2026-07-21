@@ -298,7 +298,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   const SECTIONS = [
     {
       title: 'why',
-      lead: 'Cultures must value humans; humans must value themselves.',
+      lead: 'Cultures must choose to value humans, but humans must first choose to value themselves.',
       body: [
         'Machines are infinitely better at chess than we are, and yet human chess is more popular than it has ever been — because we still love to watch humans play. But only the ones who can still play the game.',
         'Let ai do your thinking for you, and your mind — like any muscle you stop using — slowly begins to fade. Left without direction, it drifts where it wants to go, not where you want to go. Technology is a multiplier: it will carry you further down whatever path you point it. Keep letting it think for you, and one day you wake up as one of the humans in Wall-E. But choose instead to align it to think with you, right from the start, and there is no limit to how far the two of you can go.',
@@ -316,7 +316,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
     },
     {
       title: 'how',
-      lead: 'Connect your Alexandria folder to any ai, so it knows how you think.',
+      lead: 'Connect your Alexandria folder to any ai, and it comes to know how you think and what to do with it.',
       body: [
         'It’s a private folder on your own computer, holding what you think and how you think it. Pour everything you have into it, and your ai draws it into a single, living map of your mind — a mirror it can look into to see where you are, and keep looking, so that as you change, it stays in tune with you. That tuning is the thread between you and it: the connection that lets the two of you ride forward together, turning the map, slowly, toward making you the best version of yourself.',
         'Privacy is simple, because there’s almost nothing to it: just files on your own computer, yours to ignore, edit, or delete. No server, no account, nothing ever leaving your machine. It’s free to download, so the moment it’s yours, it’s detached from us — yours and yours alone. Think of it like a free sample: we can’t take it back, we ask for nothing in return, we just hope you’ll taste it, and maybe tell us how you liked it.',
@@ -2183,7 +2183,10 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         }
         .right-lower {
           align-self: flex-end;
-          width: 752px;
+          /* 752 → 820: extends the whole right block left into the right-col's
+             own slack (still < the 880px right-col, so left-col / wordmark are
+             untouched) — gives the section previews the room to fit one line. */
+          width: 820px;
           margin-right: -32px;
           display: flex;
           flex-direction: column;
@@ -2658,9 +2661,12 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           margin: 8px 0 0;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
-          font-size: 19px;
+          /* 17px + tight tracking so the full-length previews (why, how) each
+             sit on ONE line at the widened right-lower — the leads stay the
+             biggest, italic first line but no longer wrap. */
+          font-size: 17px;
           line-height: 1.5;
-          letter-spacing: 0.006em;
+          letter-spacing: 0.002em;
           color: var(--theme-fg);
         }
         /* Body reveal — grid-rows 0fr→1fr eases to the body's EXACT height
