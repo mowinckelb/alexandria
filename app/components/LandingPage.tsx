@@ -285,7 +285,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
       title,
       timer: setTimeout(() => {
         focusPending.current = null;
-        focusLockUntil.current = Date.now() + 560;
+        // Hold past the 700ms expand so a stray mouse-move can't re-trigger a
+        // switch mid-animation (which read as a second shudder).
+        focusLockUntil.current = Date.now() + 760;
         setOpenPillar(title);
       }, 160),
     };
@@ -314,11 +316,11 @@ export default function LandingPage({ brandClassName = '' }: Props) {
     },
     {
       title: 'how',
-      lead: 'Connect your Alexandria folder to any ai, and it comes to know how you think and what to do with it.',
+      lead: 'Connect your Alexandria folder to any ai, so it knows how you think.',
       body: [
-        'It’s a private folder that lives on your own computer, holding what you think and how you think it. Pour everything you have into it, and your ai draws it all into a single, living map of your mind. That map is a mirror — one it can look into to see exactly where you are, and keep looking, so that as you move and change, it stays in tune with you. That constant tuning is the thread between you and it: the connection that lets the two of you ride forward together — refining the map, growing it, and turning it, slowly, toward making you the best version of yourself.',
-        'Privacy is simple, because there’s almost nothing to it: the tool is just a folder of files on your computer, yours to ignore, edit, or delete however you like. No server, no account, nothing ever leaving your machine. We’ve made it open and free to download, so the moment it’s yours, it’s completely detached from us — yours and yours alone. Think of it like a free sample of food: we can’t take it back, we ask for nothing in return, we just hope you’ll taste it, and maybe come tell us how you liked it.',
-        'And for those who come to love what they’ve built, and want to find the other Alexandrians out there, we’ve built a community — a place to share the systems you’ve made, to learn from one another, and to publish everything those systems have helped you create.',
+        'It’s a private folder on your own computer, holding what you think and how you think it. Pour everything you have into it, and your ai draws it into a single, living map of your mind — a mirror it can look into to see where you are, and keep looking, so that as you change, it stays in tune with you. That tuning is the thread between you and it: the connection that lets the two of you ride forward together, turning the map, slowly, toward making you the best version of yourself.',
+        'Privacy is simple, because there’s almost nothing to it: just files on your own computer, yours to ignore, edit, or delete. No server, no account, nothing ever leaving your machine. It’s free to download, so the moment it’s yours, it’s detached from us — yours and yours alone. Think of it like a free sample: we can’t take it back, we ask for nothing in return, we just hope you’ll taste it, and maybe tell us how you liked it.',
+        'And for those who come to love what they’ve built, we’ve made a community — a place to share your systems, learn from one another, and publish everything they’ve helped you create.',
       ],
     },
   ];
@@ -2585,19 +2587,24 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             margin-top: 92px;
             overflow: hidden;
             max-height: 40px;
-            /* return-to-visible: space opens (invisible), then unit fades in */
-            transition: max-height 360ms cubic-bezier(0.33, 0, 0.2, 1),
-                        margin 360ms cubic-bezier(0.33, 0, 0.2, 1),
-                        opacity 240ms ease 300ms;
+            /* return-to-visible: space opens (invisible), then unit fades in.
+               Space-reclaim matches the body's 700ms grow so open/close stay
+               height-neutral at every frame; the fast opacity keeps the border
+               transparent before it can sweep through the text. */
+            transition: max-height 700ms cubic-bezier(0.33, 0, 0.2, 1),
+                        margin 700ms cubic-bezier(0.33, 0, 0.2, 1),
+                        opacity 240ms ease 420ms;
           }
           .right-col:has(.sec.is-open) .secs-kicker {
             max-height: 0;
             opacity: 0;
             margin: 0;
-            /* going-to-hidden: unit fades out, then space closes (invisible) */
-            transition: opacity 200ms ease,
-                        max-height 360ms cubic-bezier(0.33, 0, 0.2, 1) 180ms,
-                        margin 360ms cubic-bezier(0.33, 0, 0.2, 1) 180ms;
+            /* going-to-hidden: unit fades out fast, space closes in sync with
+               the opening body (no delay — the delay is what let the body
+               out-run the freed space and shudder the column). */
+            transition: opacity 180ms ease,
+                        max-height 700ms cubic-bezier(0.33, 0, 0.2, 1),
+                        margin 700ms cubic-bezier(0.33, 0, 0.2, 1);
           }
         }
         .secs {
@@ -2641,7 +2648,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           border-right: 1.4px solid var(--theme-fg-faint);
           border-bottom: 1.4px solid var(--theme-fg-faint);
           transform: translateY(-2px) rotate(45deg);
-          transition: transform 520ms cubic-bezier(0.33, 0, 0.2, 1), border-color 200ms ease;
+          transition: transform 700ms cubic-bezier(0.33, 0, 0.2, 1), border-color 200ms ease;
         }
         /* The openers as aphorisms (founder, 2026-07-16: "more interesting
            styling") — the letter's italic voice at display size, so each
@@ -2664,13 +2671,13 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         .sec-body {
           display: grid;
           grid-template-rows: 0fr;
-          transition: grid-template-rows 620ms cubic-bezier(0.33, 0, 0.2, 1);
+          transition: grid-template-rows 700ms cubic-bezier(0.33, 0, 0.2, 1);
         }
         .sec-body-inner {
           overflow: hidden;
           min-height: 0;
           opacity: 0;
-          transition: opacity 500ms ease;
+          transition: opacity 520ms ease;
         }
         /* NO SCROLLING in the expand (founder, 2026-07-17: "i dont want
            scrolling… if we need to hide the other sections to make space
@@ -2700,9 +2707,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             max-height: 160px;
             overflow: hidden;
             transition:
-              max-height 520ms cubic-bezier(0.33, 0, 0.2, 1),
-              opacity 380ms ease,
-              margin 520ms cubic-bezier(0.33, 0, 0.2, 1);
+              max-height 700ms cubic-bezier(0.33, 0, 0.2, 1),
+              opacity 400ms ease,
+              margin 700ms cubic-bezier(0.33, 0, 0.2, 1);
           }
         }
         @media (min-width: 900px) {
@@ -2712,13 +2719,13 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             max-height: 64px;
             overflow: hidden;
             transition:
-              max-height 520ms cubic-bezier(0.33, 0, 0.2, 1),
-              opacity 380ms ease,
-              margin 520ms cubic-bezier(0.33, 0, 0.2, 1),
-              padding 520ms cubic-bezier(0.33, 0, 0.2, 1);
+              max-height 700ms cubic-bezier(0.33, 0, 0.2, 1),
+              opacity 400ms ease,
+              margin 700ms cubic-bezier(0.33, 0, 0.2, 1),
+              padding 700ms cubic-bezier(0.33, 0, 0.2, 1);
           }
           .secs {
-            transition: margin-top 520ms cubic-bezier(0.33, 0, 0.2, 1);
+            transition: margin-top 700ms cubic-bezier(0.33, 0, 0.2, 1);
           }
         }
         /* FOCUS MODE (desktop) — driven by .is-open, NEVER by :hover:
@@ -2754,9 +2761,9 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             max-height: 44px;
             overflow: hidden;
             transition:
-              max-height 520ms cubic-bezier(0.33, 0, 0.2, 1),
-              opacity 380ms ease,
-              margin 520ms cubic-bezier(0.33, 0, 0.2, 1);
+              max-height 700ms cubic-bezier(0.33, 0, 0.2, 1),
+              opacity 400ms ease,
+              margin 700ms cubic-bezier(0.33, 0, 0.2, 1);
           }
           .right-col:has(.sec.is-open) .demo-line {
             max-height: 0;
