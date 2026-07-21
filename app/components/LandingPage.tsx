@@ -298,7 +298,7 @@ export default function LandingPage({ brandClassName = '' }: Props) {
   const SECTIONS = [
     {
       title: 'why',
-      lead: 'Cultures must choose to value humans, but humans must first choose to value themselves.',
+      lead: 'Cultures must value humans; humans must value themselves.',
       body: [
         'Machines are infinitely better at chess than we are, and yet human chess is more popular than it has ever been — because we still love to watch humans play. But only the ones who can still play the game.',
         'Let ai do your thinking for you, and your mind — like any muscle you stop using — slowly begins to fade. Left without direction, it drifts where it wants to go, not where you want to go. Technology is a multiplier: it will carry you further down whatever path you point it. Keep letting it think for you, and one day you wake up as one of the humans in Wall-E. But choose instead to align it to think with you, right from the start, and there is no limit to how far the two of you can go.',
