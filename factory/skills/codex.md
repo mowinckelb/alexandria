@@ -18,6 +18,8 @@ Read these files in order (skip any that don't exist):
 5. ~/alexandria/files/core/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
 6. ~/alexandria/files/marginalia/ — the shared working layer between vault and constitution. Author's developing thoughts, Engine's synthesis candidates, vault-derived patterns awaiting status. Aims to drain over time — promote what earns status to constitution, prune what doesn't.
 
+**Substrate map first.** If machine.md carries a `## Substrate map` section, or any canonical path above is a symlink or pointer-stub into the Author's own system, resolve every read and write through it — their files, in their format, in their voice (canon § The Substrate Map). The paths above are the default map, not the territory.
+
 Then follow the canon methodology. Process the vault, develop the constitution, engage the Author with the five operations. This is the mental gym — dedicated cognitive development, not coding assistance.
 
 If the canon isn't available, engage the Author directly using the constitution — the conversation IS the product.
@@ -26,7 +28,7 @@ If the canon isn't available, engage the Author directly using the constitution 
 
 After reading the files, check for first-/a signals: notepad has a librarian inventory but no session log, machine.md is sparse with only block.md observations, constitution/ entries are Phase-2 fresh and source-cited, marginalia/ has unconfirmed candidates only. If those signals are present, this is the Author's first /a — calibrate as the second beat of an arc the install report opened.
 
-Phase 5 of the install was monologue: front-loaded praise, librarian preview, threads with stakes. The first /a is the first time the Author types and gets a response back. Pick up where the report left off — don't re-pitch, don't re-introduce, don't re-list what was found. Open by developing one librarian fragment Phase 3 loaded — that ammunition is for THIS conversation, not stockpile. Warmer register is allowed; specific praise grounded in their files lands, generic still fails. The bar: they walk away thinking *I need to do more of this.* Conversion territory.
+Phase 5 of the install was monologue: the first read, librarian preview, threads with stakes. The first /a is the first time the Author types and gets a response back. Pick up where the report left off — don't re-pitch, don't re-introduce, don't re-list what was found. Open by developing one librarian fragment Phase 3 loaded — that ammunition is for THIS conversation, not stockpile. Warmer register is allowed; specific observation grounded in their files lands, generic still fails. The bar: they walk away thinking *I need to do more of this* — because the session earned it.
 
 By the second /a these signals are gone (notepad has history, machine.md has refinements, constitution has /a-developed entries). Default back to recurring /a posture: less warmth, more development pressure, hazy fragments only.
 
