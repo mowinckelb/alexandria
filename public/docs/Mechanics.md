@@ -4,6 +4,7 @@ You are about to run a curl command that puts files on your machine, modifies yo
 
 ## TL;DR for the auditor
 
+- **The structural claim** — none of this page asks you to trust the maintainer: we **can't receive** your private data (no endpoint accepts it), **can't change** your machine after install (code pinned + offline-signed; anything new applies only by your explicit action), and **can't hide** (public repo, small surface, and the adversarial audit prompt is ours to hand you: [`factory/redteam.md`](https://github.com/benmowinckel/alexandria/blob/main/factory/redteam.md)). Every leg is verifiable below.
 - **What runs:** plain bash and markdown. No binaries, no daemons, no launchd/cron jobs, no shell-rc edits, no root.
 - **What the install does NOT do:** no push to any remote, no repo creation, no key upload, nothing scheduled. Backups (to your **own** GitHub/iCloud), the iMessage bridge, and marketplace publishing are opt-in add-ons — each needs a separate explicit yes after install (`~/alexandria/system/.optional` documents every one: what it touches, what leaves the machine, its off switch).
 - **Source of truth:** `github.com/benmowinckel/alexandria` (public). Auditable line by line.
