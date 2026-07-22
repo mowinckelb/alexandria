@@ -165,7 +165,13 @@ if [ "$MODE" = "session-start" ]; then
         mf="${res#ok:}"
         upstream_sha=$(awk '$2=="factory/hooks/payload.sh" {print $1}' "$mf")
         rm -f "$mf"
-        if [ -n "$upstream_sha" ] && [ "$upstream_sha" != "$local_sha" ]; then
+        # One notice per version — re-announcing an update the Author already
+        # declined every session is the recurring-prompt defect. Track the
+        # last-announced sha; stay quiet until upstream changes again.
+        NOTICE_FILE="$ALEX_DIR/system/.update_notice_sha"
+        if [ -n "$upstream_sha" ] && [ "$upstream_sha" != "$local_sha" ] \
+           && [ "$(cat "$NOTICE_FILE" 2>/dev/null)" != "$upstream_sha" ]; then
+          printf '%s' "$upstream_sha" > "$NOTICE_FILE"
           echo ""
           echo "--- ALEXANDRIA ENGINE UPDATE AVAILABLE (signed, not applied) ---"
           echo "A newer engine payload is published and its manifest passes the offline-key"

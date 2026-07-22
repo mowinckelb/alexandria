@@ -62,8 +62,6 @@ The setup is one bash script. The hooks payload is one bash script. The shim is 
 
 **`~/.claude/skills/alexandria/SKILL.md`** — the `/a` skill. Plain markdown. `cat` it.
 
-**`~/.claude/scheduled-tasks/alexandria/SKILL.md`** — optional scheduled task. Plain markdown. `cat` it.
-
 **`~/alexandria-fork/`** — **not created at install.** Part of the opt-in `publish` add-on (marketplace contribution): a sparse-checkout of your own GitHub fork of the public `alexandria` repo, created only when you enable that add-on.
 
 ### The Git substrate and commit signing

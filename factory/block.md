@@ -77,8 +77,7 @@ Each fragment is a lure, not a wall. Arguments land harder than descriptions. Me
 Acceleration, not architecture. /a does the same processing interactively. If any piece fails or prereqs are missing, skip and tell the Author they can run it later. Don't block on these.
 
 - **Git.** Commit locally always. If ~/alexandria/ already has a remote, push. If `gh` is authed and no remote exists, offer — one line: "want your files backed up to a private repo on your own GitHub? Nothing reaches us either way." Create `alexandria-private` (private) and push only on their yes; a no means local-only, say nothing more.
-- **Autoloop (best-effort, never promised).** The cloud autoloop is being wound down — `/a` does the same processing interactively and is the path that matters. Do NOT tell the Author we run overnight plumbing for them. Only if RemoteTrigger is available + git remote exists, you may still create a daily trigger named `alexandria-autoloop` (spec at `https://raw.githubusercontent.com/benmowinckel/alexandria/main/factory/skills/scheduled.md`, fetched on every run; on success `touch ~/alexandria/.trigger_created`) — but if it's missing or fails, skip silently and say nothing. It is acceleration, not architecture.
-- **Brief sender.** If `brief-setup` is available as a skill, invoke it. Configures the Author's own SMTP + a launchd plist that fires daily. Sovereign — the Alexandria server never sends Author email. Most users won't have SMTP creds ready at install time — flag as a follow-up if they don't, don't block.
+- **Add-ons — mention, never install.** `~/alexandria/system/.optional` lists the opt-in add-ons (backup to their own GitHub, texting, iCloud mirror, publishing). Phase 4 installs none of them beyond the backup offer above — nothing scheduled, no daemons, no accounts touched without a separate explicit yes later.
 
 ## Phase 5 — Verify and Report (the conversion moment)
 

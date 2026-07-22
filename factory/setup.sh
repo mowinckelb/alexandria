@@ -256,6 +256,27 @@ alexandria-payload-signing ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHv5jBpDuEg2Nae7Q
 EOF
 chmod 644 "$ALEX_DIR/system/allowed_signers"
 
+# Verify + pin the payload NOW, while network is guaranteed (we just fetched
+# everything). Same check the shim makes — manifest signature (offline key)
+# then sha match — recorded in .payload_verified_sha so the first session
+# needs zero network to run. If any step fails, write no marker: the shim
+# verifies at first session instead (fail-closed either way — an unverified
+# payload never executes).
+if command -v ssh-keygen >/dev/null 2>&1; then
+  _mf=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null)
+  _sg=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null)
+  if [ -n "$_mf" ] && [ -n "$_sg" ]      && curl -fsS --max-time 10 "$FACTORY_RAW/manifest.txt" -o "$_mf" 2>/dev/null      && curl -fsS --max-time 10 "$FACTORY_RAW/manifest.txt.sig" -o "$_sg" 2>/dev/null      && [ -s "$_mf" ] && [ -s "$_sg" ]      && ssh-keygen -Y verify -f "$ALEX_DIR/system/allowed_signers"           -I alexandria-payload-signing -n alexandria -s "$_sg" < "$_mf" >/dev/null 2>&1; then
+    _expected=$(awk '$2=="factory/hooks/payload.sh" {print $1}' "$_mf")
+    if command -v shasum >/dev/null 2>&1; then _actual=$(shasum -a 256 "$ALEX_DIR/system/.hooks_payload" | cut -d' ' -f1)
+    else _actual=$(sha256sum "$ALEX_DIR/system/.hooks_payload" 2>/dev/null | cut -d' ' -f1); fi
+    if [ -n "$_expected" ] && [ "$_expected" = "$_actual" ]; then
+      printf '%s' "$_actual" > "$ALEX_DIR/system/.payload_verified_sha"
+      cp "$_mf" "$ALEX_DIR/system/.canon_manifest" 2>/dev/null
+    fi
+  fi
+  rm -f "$_mf" "$_sg"
+fi
+
 # Canon — the full default, seeded at install (the Author's active adoption via
 # `curl | bash`): Foundation (the universal core) + the Founder module (Author #1's
 # system). Seed-if-missing only (no overwrite) — never clobber the Author's edits.
@@ -317,12 +338,8 @@ if [ -d "$HOME/.claude" ] || command -v claude &>/dev/null; then
     fi
   fi
 
-  mkdir -p "$HOME/.claude/scheduled-tasks/alexandria" 2>/dev/null
-  # Bootstrap pattern: SKILL.md is a tiny stub that fetches scheduled.md on every
-  # run. Same compounding architecture as hooks/shim.sh → payload.sh. Keeps the
-  # frontmatter (which Claude Code reads locally for scheduling) stable while the
-  # live instructions stay pinned to the current canonical playbook.
-  fetch_factory "skills/scheduled-bootstrap.md" "$HOME/.claude/scheduled-tasks/alexandria/SKILL.md" "skills/scheduled-bootstrap.md" yes
+  # (The scheduled-task bootstrap for the cloud autoloop is RETIRED — /a does
+  # that processing interactively. Nothing scheduled installs here.)
 
   # Delivery: settings.json hooks, wired directly — the same signed
   # shim -> payload chain Cursor/Codex/Factory hand off to. One mechanism,
