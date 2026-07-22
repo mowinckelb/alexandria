@@ -16,6 +16,8 @@ Read these files in order (skip any that don't exist):
 6. ~/alexandria/files/core/notepad.md — your working memory. Parked questions, accretion candidates, fragments.
 7. ~/alexandria/files/marginalia/ — the shared working layer between vault and constitution. Author's developing thoughts, Engine's synthesis candidates, vault-derived patterns awaiting status. Aims to drain over time — promote what earns status to constitution, prune what doesn't.
 
+**Substrate map first.** If machine.md carries a `## Substrate map` section, or any canonical path above is a symlink or pointer-stub into the Author's own system, resolve every read and write through it — their files, in their format, in their voice (canon § The Substrate Map). The paths above are the default map, not the territory.
+
 Then follow the canon methodology. If the canon doesn't exist, engage the Author directly using the constitution — the conversation IS the product.
 
 ## First /a vs recurring /a
