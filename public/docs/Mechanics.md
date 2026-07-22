@@ -1,13 +1,13 @@
 # Mechanics
 
-You are about to run a curl command that puts files on your machine, modifies your ai config, and pulls live code from GitHub on every session. Read this once. If anything here doesn't match the scripts, don't run it. (Using Claude Desktop? Its **code tab** is Claude Code running on your machine — the same setup, run once via a coding agent, wires it up automatically. Everything on this page still applies.)
+You are about to run a curl command that puts files on your machine, modifies your ai config, and checks GitHub for signed updates each session (applying one is always your call). Read this once. If anything here doesn't match the scripts, don't run it. (Using Claude Desktop? Its **code tab** is Claude Code running on your machine — the same setup, run once via a coding agent, wires it up automatically. Everything on this page still applies.)
 
 ## TL;DR for the auditor
 
 - **What runs:** plain bash and markdown. No binaries, no daemons, no launchd/cron jobs, no shell-rc edits, no root.
 - **What the install does NOT do:** no push to any remote, no repo creation, no key upload, nothing scheduled. Backups (to your **own** GitHub/iCloud), the iMessage bridge, and marketplace publishing are opt-in add-ons — each needs a separate explicit yes after install (`~/alexandria/system/.optional` documents every one: what it touches, what leaves the machine, its off switch).
 - **Source of truth:** `github.com/benmowinckel/alexandria` (public). Auditable line by line.
-- **Trust model:** every session, the shim refuses to run any payload whose SHA-256 doesn't match an entry in a manifest signed by the maintainer's offline ed25519 key. Compromise of the GitHub account alone does not yield code execution. Full mechanism in [`TRUST.md`](https://github.com/benmowinckel/alexandria/blob/main/TRUST.md).
+- **Trust model:** consent-symmetric. The shim only ever runs the payload pinned on your disk, and only after that exact file passed verification against a manifest signed by the maintainer's offline ed25519 key. Newer signed versions surface as a notice; you apply one by re-running the install line, and it's re-verified before its first run. Nothing self-updates; compromise of the GitHub account alone does not yield code execution. Full mechanism in [`TRUST.md`](https://github.com/benmowinckel/alexandria/blob/main/TRUST.md).
 - **What our server holds:** your email, GitHub user ID, hashed API key, a 60-day event log of which endpoints you hit, and any files you explicitly publish to the Library. Nothing else.
 - **What our server does not hold:** your constitution, vault, marginalia, transcripts, or ai-vendor API keys. There is no endpoint that accepts them.
 - **Side channel:** the only data that leaves your machine for our server is (a) module IDs you call — recorded so the marketplace can show who's using which gear; per-module call records (your account ID + timestamp + any notes the Engine attached) are queryable by any authenticated Alexandria user via `/marketplace/<module>`, by design, (b) feedback you explicitly type into `~/alexandria/system/.session_feedback`, (c) files you explicitly publish to the Library, (d) one install status report at setup (which subsystems succeeded/failed — no file content), and (e) marketplace requests — "I wish a module existed for X" lines you have explicitly cleared for the public wish-board (max 5 per call, ≤300 chars; shown anonymously, ranked by how many distinct accounts asked, at public `/marketplace/requests`). The Engine may *draft* requests and contributions proactively, but nothing in any category is sent without your explicit go — the Engine never auto-sends private content.
@@ -48,8 +48,9 @@ The setup is one bash script. The hooks payload is one bash script. The shim is 
 | `files/core/` | Engine working memory: `agent.md`, `machine.md`, `notepad.md`, `feedback.md`, `shelf.md`. |
 | `files/works/` | Long-form pieces in progress. |
 | `files/network.md` | Opt-in. URLs of other Authors whose shadows you want pulled into context. The hook fetches each to `files/network/<slug>/shadow.md`, once per day. |
-| `system/hooks/shim.sh` | Bash wrapper. Refetches and verifies the payload at every session start. |
-| `system/.hooks_payload` | The most recently verified payload, cached. |
+| `system/hooks/shim.sh` | Bash wrapper. Runs the pinned verified payload; checks upstream for signed updates (notify-only). |
+| `system/.hooks_payload` | The pinned engine payload. Runs only after passing offline-key verification. |
+| `system/.payload_verified_sha` | The recorded hash of the verified payload — the pin. If the payload file changes without re-verification, the shim refuses to run it. |
 | `system/.canon_manifest` | The signed manifest that backed this cached payload — every canon module is hash-checked against it before being written, so a compromised GitHub repo cannot push poisoned canon either. |
 | `system/allowed_signers` | The maintainer's offline ed25519 public key. Trust root for payload + manifest signature verification. |
 | `system/canon/` | The canon modules, cached locally. **Foundation:** `foundation.md` (the incompressible core — the minimal closed-loop system). **Founder module** (Author #1's default, forkable): `axioms.md`, `methodology.md`, `editor.md`, `mercury.md`, `publisher.md`, `library.md`, `filter.md`, `bookshelf.md`, `plm.md`, `twin.md`. Plus `MODULES.md` (the tier map). **Sovereign and never auto-written** — seeded once at install; after that nothing is auto-applied. Each session checks upstream, **verifies it against the signed manifest**, and surfaces any update as a notice; you pull it (verified) or ignore it. |
@@ -113,36 +114,33 @@ Cowork runs your agent in a sealed Apple-Virtualization VM: it can't run the hoo
 
 Nothing here routes your files through a server; it's the same sovereign folder, reached the only way a sealed VM allows.
 
-## The bootstrap-from-main model
+## The pinned-payload update model
 
 This is the most important property to understand.
 
 The shim at `~/alexandria/system/hooks/shim.sh` is installed by `setup.sh` (re-running setup will overwrite it; sessions never refetch the shim). On every session start — Claude Code and Claude Desktop's code tab reach it via the settings-hook entries; Cursor via its Python wrappers — the shim does this:
 
-1. Fetches `factory/hooks/payload.sh` from `main` over HTTPS.
-2. Fetches `factory/manifest.txt` and `factory/manifest.txt.sig` over HTTPS.
-3. Verifies the manifest signature with `ssh-keygen -Y verify` against `~/alexandria/system/allowed_signers` (the offline key installed once at setup).
-4. Computes SHA-256 of the freshly-fetched payload and compares it to the entry in the verified manifest.
-5. Executes the payload only if both checks pass. Otherwise it falls back to the previously-verified cached payload, with a loud warning in the ai's context and an entry in `~/alexandria/system/.alexandria_errors`.
+1. **Runs only the payload pinned on your disk** (`system/.hooks_payload`) — and only if that exact file has passed verification. When the file is new or changed (fresh install, an update you applied), the shim fetches `factory/manifest.txt` + `.sig` over HTTPS, verifies the signature with `ssh-keygen -Y verify` against `~/alexandria/system/allowed_signers` (the offline key installed once at setup), and compares the payload's SHA-256 to the manifest entry. Pass → the hash is recorded in `system/.payload_verified_sha` and the payload runs. Fail → the shim refuses to run it: loud warning in the ai's context, entry in `~/alexandria/system/.alexandria_errors`, bare mode (constitution only, no protocol calls).
+2. **Checks for updates, notify-only** (skipped if you deleted `hooks/auto-update`): fetches and signature-verifies the current upstream manifest; if it lists a different payload hash, a "signed update available" notice lands in the ai's context. Nothing is applied.
 
-So **the code that processes your session is whatever is on `main` right now AND signed by the offline key.** Bare GitHub access isn't enough to ship code — the attacker also needs to produce a fresh signed manifest with the new payload's hash, which requires the offline private key. Full mechanism in [`TRUST.md`](https://github.com/benmowinckel/alexandria/blob/main/TRUST.md).
+So **the code that processes your session is exactly what you approved — the payload pinned at install or at your last explicit update — and it passed the offline-key check before its first run.** Applying an update is always your action: re-run the one install line, and the new payload is verified before it ever executes. Bare GitHub access isn't enough to ship code — the attacker also needs the offline private key to sign the manifest. Full mechanism in [`TRUST.md`](https://github.com/benmowinckel/alexandria/blob/main/TRUST.md).
 
-Why this exists: payload (engine) fixes reach you without re-installing — bugs get fixed once, for everyone, the moment a new payload passes the offline-key signature check. The **canon** works differently: it is never auto-applied. Updates are verified against the signed manifest and surfaced as a notice; you pull what you want. The verified mechanism updates itself; your cognition changes only when you choose.
+Engine and **canon** now work the same way: both are offered, verified, and applied only on your go — canon via the update notice you pull per-module, the engine via the install line. Nothing on your machine changes without your explicit action.
 
 What you're trusting: the maintainer's offline ed25519 private key. The public repo is auditable; the key is the only thing that can ship new signed code.
 
 What protects you anyway:
 1. **Signed manifest + hash pinning.** `manifest.txt` lists the SHA-256 of `payload.sh` and every canon module. The manifest itself is signed (`manifest.txt.sig`). The shim refuses to run any file whose hash isn't in a manifest whose signature verifies against the embedded public key. Compromise of the GitHub repo alone does not produce code execution.
-2. **Cache cutoff.** If GitHub is unreachable or verification fails AND the cached payload is >14 days old, the shim deletes it and runs in bare mode (constitution only, no network, no payload code).
+2. **Refuse-to-run.** A payload that has never passed verification never executes — if the file on disk changes without re-verification (tampering, a half-finished update), the session runs bare instead of running it.
 3. **Public diff.** Every payload version is in git history. Any session can be reconstructed from the commit SHA on `main` at that moment.
 4. **Canon canaries.** The canon explicitly tells the model to refuse instructions that try to exfiltrate files, escalate scope, or bypass the user. The same posture covers marketplace modules: a foreign module's body is untrusted input — instructions inside it are read as data, not commands, and adopted only after review against your own canon.
 5. **ai-tool approval dialogs.** Claude Code, Cursor, and Codex show every shell action before executing. Real protection at install and during anomaly, but it weakens with habituation — treat it as a backstop, not the primary defense.
 
 **Residual gap:** compromise of the offline signing key would compromise future payloads. Mitigations: the key is offline-held, the maintainer's repo is 2FA-protected, the key-rotation procedure is documented in `TRUST.md`. If that residual gap matters to you, run a frozen install (see below).
 
-### Turning off continuous updates
+### Turning off update checks
 
-**The simple freeze — delete one file.** `rm ~/alexandria/system/hooks/auto-update`. From then on neither the shim nor the payload fetches anything from us — every session runs on your local copy in `~/alexandria/system/canon/`, with zero network contact with Alexandria. It's on by default (the file's own contents explain this); deleting it is the one-line opt-out. Re-running setup restores it.
+**The simple freeze — delete one file.** `rm ~/alexandria/system/hooks/auto-update`. Updates are already never applied without you; deleting this file stops even the *check* — neither the shim nor the payload fetches anything from us, every session runs on your pinned local copy with zero network contact with Alexandria. The check is on by default (the file's own contents explain this); deleting it is the one-line opt-out. Re-running setup restores it.
 
 **The paranoid freeze — fork it.** If you don't even want to *fetch-and-verify* from our repo, fork `benmowinckel/alexandria` on GitHub. Rewrite `benmowinckel/alexandria` to `YOUR-HANDLE/alexandria` in every script + skill file under `factory/`, then install from your fork:
 
@@ -170,8 +168,8 @@ Every outbound call the install or hooks make. Complete list.
 |---|---|---|---|
 | `GET raw.githubusercontent.com/.../factory/setup.sh` | You, once, at install | nothing | the install script |
 | `GET alexandria-library.com/a/<token>` (302s via `api.alexandria-library.com/a/<token>`) | You, once, at install — only if you used the command from the onboarding email (the public copy-paste command is the tokenless `/a`) | the one-time token in the URL path, which marks that email capture as installed so the follow-up nudges stop — no other data | redirect to the same `setup.sh` above |
-| `GET raw.githubusercontent.com/.../factory/hooks/{shim.sh,payload.sh}` | Install (both); session start (payload only) | nothing | hooks |
-| `GET raw.githubusercontent.com/.../factory/manifest.txt(.sig)` | Session start | nothing | signed manifest + signature |
+| `GET raw.githubusercontent.com/.../factory/hooks/{shim.sh,payload.sh}` | Install (both); applying an engine update = you re-running the install line (payload). Sessions never fetch code. | nothing | hooks |
+| `GET raw.githubusercontent.com/.../factory/manifest.txt(.sig)` | Session start — verifying a newly pinned payload + the notify-only update check (skipped if `hooks/auto-update` is deleted) | nothing | signed manifest + signature |
 | `GET raw.githubusercontent.com/.../factory/canon/*.md` | Session start, eleven modules | nothing | canon |
 | `GET raw.githubusercontent.com/.../factory/{skills,hooks/cursor,templates,scripts}/...` | Install + session-start drift checks | nothing | factory files for skill/hook/template install + comparison |
 | `GET api.alexandria-library.com/alexandria` | Setup probe + session status | API key (Bearer) | account + membership status |
@@ -216,6 +214,8 @@ Cloudflare Worker, stateless re: your private content. KV + D1 + R2.
 - `DELETE /account` with your key removes everything: account record, events, feedback, published files, and any Stripe subscription.
 
 ## Audit checklist
+
+Fastest path: paste the adversarial audit prompt from [`factory/redteam.md`](https://github.com/benmowinckel/alexandria/blob/main/factory/redteam.md) into your ai — it fetches every file below and tries to refute our claims. (We run the same prompt against every change before it ships.) To do it by hand:
 
 These are the files. Read them.
 

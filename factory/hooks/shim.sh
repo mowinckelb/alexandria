@@ -2,9 +2,13 @@
 # Alexandria shim — one file, three modes, signature-verified payload.
 # Immutable. Installed once. All evolving logic lives in signed payload.sh.
 #
-# Trust model: this shim is the root. It uses the allowed_signers file
-# installed alongside (with the embedded public key) and refuses to exec
-# anything not signed by the corresponding offline private key.
+# Trust model: this shim is the root, and it is CONSENT-SYMMETRIC — it only
+# ever executes the payload pinned on disk, and only after that exact file has
+# passed verification against a manifest signed by the maintainer's OFFLINE
+# key. It never auto-applies anything: when a newer signed payload exists
+# upstream it surfaces a notice, and the Author applies it by re-running the
+# install line. Deleting ~/alexandria/system/hooks/auto-update stops even the
+# update check — zero contact with Alexandria, fully local, forever.
 #   Audit: https://github.com/benmowinckel/alexandria/blob/main/TRUST.md
 #   Inspect payload: https://raw.githubusercontent.com/benmowinckel/alexandria/main/factory/hooks/payload.sh
 
@@ -13,20 +17,33 @@ API_KEY="${ALEXANDRIA_KEY:-$(cat "$ALEX_DIR/system/.api_key" 2>/dev/null)}"
 MODE="$1"
 
 GITHUB_RAW="${ALEX_GITHUB_RAW:-https://raw.githubusercontent.com/benmowinckel/alexandria/main}"
-PAYLOAD_URL="$GITHUB_RAW/factory/hooks/payload.sh"
 MANIFEST_URL="$GITHUB_RAW/factory/manifest.txt"
 MANIFEST_SIG_URL="$GITHUB_RAW/factory/manifest.txt.sig"
 SIGNERS_FILE="$ALEX_DIR/system/allowed_signers"
 SIGN_NAMESPACE="alexandria"
 SIGN_IDENTITY="alexandria-payload-signing"
 
-# ── Verify helper ────────────────────────────────────────────────
+PAYLOAD_FILE="$ALEX_DIR/system/.hooks_payload"
+MARKER_FILE="$ALEX_DIR/system/.payload_verified_sha"
+
+# ── Helpers ──────────────────────────────────────────────────────
 # All file operations work on byte-exact tempfiles (NOT bash string vars —
 # command substitution strips trailing newlines, which breaks hash matching).
-# Echoes "ok" on success, "fail:<reason>" on any failure.
-verify_payload_file() {
-  local payload_file="$1"
-  local manifest_file sig_file expected_sha actual_sha sha_tool
+
+sha_of() {
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" 2>/dev/null | cut -d' ' -f1
+  elif command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" 2>/dev/null | cut -d' ' -f1
+  fi
+}
+
+# fetch_verified_manifest: fetch manifest + sig, verify the signature against
+# the offline key, cache the manifest to .canon_manifest (payload.sh uses it
+# for canon verification). Echoes "ok:<tempfile path>" (caller removes it) or
+# "fail:<reason>".
+fetch_verified_manifest() {
+  local manifest_file sig_file
 
   if ! command -v ssh-keygen >/dev/null 2>&1; then
     echo "fail:no-ssh-keygen"; return
@@ -60,97 +77,112 @@ verify_payload_file() {
     rm -f "$manifest_file" "$sig_file"; echo "fail:bad-signature"; return
   fi
 
-  # Manifest is authentic. Look up the payload's expected sha and compare to
-  # the actual sha of the file on disk.
-  expected_sha=$(awk '$2=="factory/hooks/payload.sh" {print $1}' "$manifest_file")
-  if [ -z "$expected_sha" ]; then
-    rm -f "$manifest_file" "$sig_file"; echo "fail:no-payload-entry"; return
-  fi
-
-  if command -v shasum >/dev/null 2>&1; then
-    sha_tool="shasum -a 256"
-  elif command -v sha256sum >/dev/null 2>&1; then
-    sha_tool="sha256sum"
-  else
-    rm -f "$manifest_file" "$sig_file"; echo "fail:no-sha256-tool"; return
-  fi
-  actual_sha=$($sha_tool "$payload_file" | cut -d' ' -f1)
-
-  if [ "$expected_sha" != "$actual_sha" ]; then
-    rm -f "$manifest_file" "$sig_file"; echo "fail:hash-mismatch"; return
-  fi
-
-  # Cache the verified manifest so payload.sh can use it for canon verification.
   cp "$manifest_file" "$ALEX_DIR/system/.canon_manifest"
-  rm -f "$manifest_file" "$sig_file"
+  rm -f "$sig_file"
+  echo "ok:$manifest_file"
+}
+
+# verify_payload_file: verify the given payload file's SHA-256 against the
+# signed manifest. Echoes "ok" or "fail:<reason>".
+verify_payload_file() {
+  local payload_file="$1" res manifest_file expected_sha actual_sha
+
+  res=$(fetch_verified_manifest)
+  case "$res" in
+    ok:*) manifest_file="${res#ok:}" ;;
+    *) echo "$res"; return ;;
+  esac
+
+  expected_sha=$(awk '$2=="factory/hooks/payload.sh" {print $1}' "$manifest_file")
+  rm -f "$manifest_file"
+  if [ -z "$expected_sha" ]; then
+    echo "fail:no-payload-entry"; return
+  fi
+
+  actual_sha=$(sha_of "$payload_file")
+  if [ -z "$actual_sha" ]; then
+    echo "fail:no-sha256-tool"; return
+  fi
+  if [ "$expected_sha" != "$actual_sha" ]; then
+    echo "fail:hash-mismatch"; return
+  fi
   echo "ok"
+}
+
+# payload_runnable: the pinned payload exists AND its sha matches the verified
+# marker. The one gate every mode uses — unverified code never executes.
+payload_runnable() {
+  [ -f "$PAYLOAD_FILE" ] || return 1
+  [ -f "$MARKER_FILE" ] || return 1
+  [ "$(cat "$MARKER_FILE" 2>/dev/null)" = "$(sha_of "$PAYLOAD_FILE")" ]
 }
 
 # ─── SESSION START ───────────────────────────────────────────────
 
 if [ "$MODE" = "session-start" ]; then
-  fresh=false
-  payload_tmp=$(mktemp "${TMPDIR:-/tmp}/alexandria.XXXXXX" 2>/dev/null)
+  run_file=""
+  run_state=""
+  local_sha=""
 
-  # Continuous-update module (default on). If the Author deleted
-  # ~/alexandria/system/hooks/auto-update, don't fetch a fresh payload — run the
-  # cached one (which makes the same check and skips its canon fetch too). Net:
-  # deleting that one file = zero contact with Alexandria, runs fully local.
-  if [ -f "$ALEX_DIR/system/hooks/auto-update" ] && [ -n "$payload_tmp" ] && curl -sf --max-time 5 "$PAYLOAD_URL" -o "$payload_tmp" 2>/dev/null; then
-    fetch_status=0
-    # Defensive: HTML 404 pages could satisfy a naive size check
-    if [ -s "$payload_tmp" ] && [ "$(wc -c < "$payload_tmp")" -gt 100 ]; then
-      verify_result=$(verify_payload_file "$payload_tmp")
-      if [ "$verify_result" = "ok" ]; then
-        cp "$payload_tmp" "$ALEX_DIR/system/.hooks_payload"
-        fresh=true
+  if [ -f "$PAYLOAD_FILE" ]; then
+    local_sha=$(sha_of "$PAYLOAD_FILE")
+    if [ -n "$local_sha" ] && [ -f "$MARKER_FILE" ] && [ "$(cat "$MARKER_FILE" 2>/dev/null)" = "$local_sha" ]; then
+      # Pinned and previously verified — run it. No network needed to run.
+      run_file="$PAYLOAD_FILE"; run_state="pinned"
+    else
+      # New or changed payload on disk (fresh install, an update the Author
+      # just applied via the install line, or tampering). Verify against the
+      # signed manifest BEFORE its first run — this is the pin moment.
+      verify_result=$(verify_payload_file "$PAYLOAD_FILE")
+      if [ "$verify_result" = "ok" ] && [ -n "$local_sha" ]; then
+        printf '%s' "$local_sha" > "$MARKER_FILE"
+        run_file="$PAYLOAD_FILE"; run_state="verified"
       else
         reason="${verify_result#fail:}"
-        echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) shim signature verify failed: $reason — using cached payload if available" >> "$ALEX_DIR/system/.alexandria_errors"
+        echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) shim: payload on disk not verified ($reason) — refusing to run it, bare mode" >> "$ALEX_DIR/system/.alexandria_errors"
         echo ""
-        echo "--- ALEXANDRIA SIGNATURE VERIFY FAILED ---"
-        echo "Fresh payload from GitHub did not pass signature check (reason: $reason)."
-        echo "Falling back to cached payload (previously verified)."
-        echo "If this persists across sessions, audit https://github.com/benmowinckel/alexandria"
-        echo "and reinstall: curl -fsSL $GITHUB_RAW/factory/setup.sh | bash"
-        echo "--- END VERIFY FAILED ---"
+        echo "--- ALEXANDRIA PAYLOAD NOT VERIFIED ---"
+        echo "The engine payload on disk hasn't passed the offline-key signature check (reason: $reason)."
+        echo "Refusing to run it. This session runs bare (your files only, no engine)."
+        echo "Just installed or updated? Verification needs one fetch of the signed manifest —"
+        echo "check your network and open a new session. If this persists, audit"
+        echo "https://github.com/benmowinckel/alexandria and reinstall:"
+        echo "  curl -fsSL alexandria-library.com/a | bash"
+        echo "--- END NOT VERIFIED ---"
         echo ""
       fi
     fi
-  else
-    fetch_status=$?
-  fi
-  rm -f "$payload_tmp"
-
-  payload_file="$ALEX_DIR/system/.hooks_payload"
-  if [ "$fresh" != "true" ] && [ -f "$payload_file" ]; then
-    # Either fetch or verify failed — fall back to cached payload (verified
-    # when it was cached). Hard cutoff at 14d: cache older than that likely
-    # predates current protocol guarantees.
-    mtime=$(stat -f %m "$payload_file" 2>/dev/null || stat -c %Y "$payload_file" 2>/dev/null || echo 0)
-    now=$(date -u +%s)
-    if [ "$mtime" -gt 0 ]; then cache_age_days=$(( (now - mtime) / 86400 )); else cache_age_days=999; fi
-
-    if [ "$cache_age_days" -ge 14 ]; then
-      rm -f "$payload_file"
-      echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) shim payload fetch/verify failed (curl=${fetch_status:-?}); cache ${cache_age_days}d old — deleted, bare mode" >> "$ALEX_DIR/system/.alexandria_errors"
-      echo ""
-      echo "--- ALEXANDRIA CACHE EXPIRED ---"
-      echo "Cached hooks payload was ${cache_age_days} days old (max 14); fresh fetch failed."
-      echo "Deleted stale cache. Running bare mode (constitution only, no protocol calls)."
-      echo "Reinstall: curl -fsSL $GITHUB_RAW/factory/setup.sh | bash"
-      echo "--- END EXPIRED ---"
-      echo ""
-      payload_file=""
-    else
-      fresh=stale
-    fi
-  elif [ "$fresh" != "true" ]; then
-    payload_file=""
   fi
 
-  if [ -n "$payload_file" ] && [ -f "$payload_file" ]; then
-    bash "$payload_file" session-start "$ALEX_DIR" "$API_KEY" "" "$fresh"
+  # Update check — NOTIFY ONLY, never applies. The auto-update file is the
+  # update-channel toggle: present (default) = each session checks upstream and
+  # surfaces a newer SIGNED payload as a notice the Author acts on; deleted =
+  # no fetch, zero contact with Alexandria, run the pinned copy forever.
+  if [ "$run_state" = "pinned" ] && [ -f "$ALEX_DIR/system/hooks/auto-update" ]; then
+    res=$(fetch_verified_manifest)
+    case "$res" in
+      ok:*)
+        mf="${res#ok:}"
+        upstream_sha=$(awk '$2=="factory/hooks/payload.sh" {print $1}' "$mf")
+        rm -f "$mf"
+        if [ -n "$upstream_sha" ] && [ "$upstream_sha" != "$local_sha" ]; then
+          echo ""
+          echo "--- ALEXANDRIA ENGINE UPDATE AVAILABLE (signed, not applied) ---"
+          echo "A newer engine payload is published and its manifest passes the offline-key"
+          echo "signature check. Nothing has changed on this machine — it runs only what"
+          echo "you've already approved. AGENT: mention this to the Author once; on their go,"
+          echo "apply it by running the install line (the new payload is verified before its"
+          echo "first run):  curl -fsSL alexandria-library.com/a | bash"
+          echo "--- END UPDATE NOTICE ---"
+          echo ""
+        fi
+        ;;
+      *) : ;; # offline or verify failed — stay quiet; next session retries
+    esac
+  fi
+
+  if [ -n "$run_file" ]; then
+    bash "$run_file" session-start "$ALEX_DIR" "$API_KEY" "" "$run_state"
   else
     # Bare fallback — just inject constitution
     [ -d "$ALEX_DIR/files/constitution" ] && for f in "$ALEX_DIR/files/constitution/"*.md; do [ -f "$f" ] && cat "$f"; done
@@ -168,16 +200,16 @@ elif [ "$MODE" = "session-end" ]; then
     input=$(cat 2>/dev/null)
   fi
   tp=$(echo "$input" | grep -o '"transcript_path":"[^"]*"' | cut -d'"' -f4)
-  if [ -f "$ALEX_DIR/system/.hooks_payload" ]; then
-    ALEX_WAS_ACTIVE=$was_active bash "$ALEX_DIR/system/.hooks_payload" session-end "$ALEX_DIR" "$API_KEY" "$tp"
+  if payload_runnable; then
+    ALEX_WAS_ACTIVE=$was_active bash "$PAYLOAD_FILE" session-end "$ALEX_DIR" "$API_KEY" "$tp"
   else
     # Bare fallback — just save transcript to vault
     [ -n "$tp" ] && [ -f "$tp" ] && mkdir -p "$ALEX_DIR/files/vault" && cp "$tp" "$ALEX_DIR/files/vault/$(date +%Y-%m-%d_%H-%M-%S).jsonl"
   fi
 
 elif [ "$MODE" = "subagent" ]; then
-  if [ -f "$ALEX_DIR/system/.hooks_payload" ]; then
-    bash "$ALEX_DIR/system/.hooks_payload" subagent "$ALEX_DIR"
+  if payload_runnable; then
+    bash "$PAYLOAD_FILE" subagent "$ALEX_DIR"
   else
     # Bare fallback — just inject constitution
     [ -d "$ALEX_DIR/files/constitution" ] && for f in "$ALEX_DIR/files/constitution/"*.md; do [ -f "$f" ] && cat "$f"; done

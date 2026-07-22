@@ -10,6 +10,8 @@
 
 set -euo pipefail
 
+echo "reminder: install-surface change? run the red-team pass first (factory/redteam.md)"
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 

@@ -32,13 +32,10 @@ The manifest is signed with the offline key (`factory/manifest.txt.sig`), in the
 
 ## What the shim does on every session start
 
-1. Fetch `payload.sh` from GitHub (HTTPS).
-2. Fetch `manifest.txt` and `manifest.txt.sig` from GitHub (HTTPS).
-3. Verify the signature on `manifest.txt` using the embedded public key.
-4. Compute SHA-256 of the freshly-fetched `payload.sh` and compare to the manifest entry.
-5. Only if both checks pass: cache the verified payload and run it.
+The model is **pinned + consent-symmetric**: the shim only ever executes the payload pinned on disk, nothing self-updates, and no code runs before verification.
 
-If any check fails: fall back to the last verified cached payload, surface a loud warning in the AI's context, and log to `~/alexandria/system/.alexandria_errors`. If no verified cache exists, run bare mode (constitution only, no protocol calls).
+1. **Run the pinned payload — verified.** The payload at `~/alexandria/system/.hooks_payload` executes only if its SHA-256 matches the recorded verified hash (`.payload_verified_sha`). When the file is new or changed (fresh install, an update the Author applied), the shim first fetches `manifest.txt` + `manifest.txt.sig` over HTTPS, verifies the signature with the embedded public key, and compares the payload's SHA-256 to the manifest entry — pass → record the hash and run; fail → refuse to run it, loud warning in the AI's context, log to `~/alexandria/system/.alexandria_errors`, bare mode (constitution only, no protocol calls). A payload that has never passed verification never executes.
+2. **Check for updates — notify only.** If `hooks/auto-update` exists, the shim fetches and signature-verifies the current upstream manifest; a different payload hash there surfaces as a "signed update available" notice. Nothing is applied. The Author applies by re-running the install line, and the new payload goes through step 1 before its first run. Deleting `hooks/auto-update` stops even this check — zero contact, pinned forever.
 
 ## What this defends against
 
@@ -47,7 +44,7 @@ If any check fails: fall back to the last verified cached payload, surface a lou
 | GitHub account compromise — attacker pushes malicious `payload.sh` to main | Attacker cannot produce a valid `manifest.txt.sig` without the offline private key. Shim refuses to exec. |
 | Selectively tampered single file (e.g. swapping `methodology.md`) | Manifest covers every file; any change breaks the manifest hash → signature verify fails. |
 | Man-in-the-middle on `raw.githubusercontent.com` | Signature verification on top of HTTPS catches forged content. |
-| Rollback to an old signed manifest | The shim does not check a monotonic version counter today. A patient attacker with a previously-valid signed manifest could replay it. Documented limit; rotated bundles will add a version field. |
+| Rollback to an old signed manifest | The shim does not check a monotonic version counter today. A patient attacker with a previously-valid signed manifest could replay it — under the pinned model this cannot silently change running code (applying always requires the Author's explicit re-run), but it could suppress an update notice or, replayed at apply time, verify an old payload. Documented limit; rotated bundles will add a version field. |
 
 ## What this does NOT defend against
 

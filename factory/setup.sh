@@ -29,10 +29,12 @@
 #   3. OPTIONAL ADD-ONS (GitHub backup to the USER'S own private repo, iCloud
 #      mirror, iMessage bridge, marketplace publishing) install NOTHING here —
 #      each needs a separate explicit yes later (~/alexandria/system/.optional).
-#   4. UPDATES: session hooks fetch engine code from the public repo and refuse
-#      to run anything not hash-pinned in a manifest signed by an OFFLINE
-#      ed25519 key (github.com/benmowinckel/alexandria/blob/main/TRUST.md).
-#      Deleting ~/alexandria/system/hooks/auto-update freezes all of it.
+#   4. UPDATES: nothing self-updates. The session hook runs ONLY the payload
+#      pinned at install, after verifying it against a manifest signed by an
+#      OFFLINE ed25519 key (github.com/benmowinckel/alexandria/blob/main/TRUST.md).
+#      Newer signed versions surface as a notice; applying one = your user
+#      re-running this line, and even then it's verified before first run.
+#      Deleting ~/alexandria/system/hooks/auto-update stops even the check.
 #   5. UNINSTALL: complete, listed at alexandria-library.com/mechanics.
 #
 # This tool works FOR your user, never against them: the methodology it installs
@@ -213,22 +215,26 @@ chmod +x "$ALEX_DIR/system/scripts/verify-fetch.sh" 2>/dev/null
 # it's system documentation, not Author content.
 fetch_factory "optional.md" "$ALEX_DIR/system/.optional" "optional.md" yes
 
-# Continuous-update module — present = on (default). Its contents ARE the
-# explanation; deleting the file freezes updates (shim + payload both check it,
-# so a delete = zero contact with Alexandria, fully local). Seed-if-missing so a
-# deliberate deletion survives unless the Author re-runs setup.
+# Update-check toggle — present = on (default). NOTIFY-ONLY: the shim runs the
+# pinned verified payload and only surfaces newer signed versions as a notice;
+# nothing is ever auto-applied. Its contents ARE the explanation; deleting the
+# file stops even the check (shim + payload both honor it — zero contact with
+# Alexandria, fully local). Seed-if-missing so a deliberate deletion survives
+# unless the Author re-runs setup.
 if [ ! -f "$ALEX_DIR/system/hooks/auto-update" ]; then
   cat > "$ALEX_DIR/system/hooks/auto-update" <<'AUTOUPDATE_END'
-Alexandria — continuous updates: ON
+Alexandria — update checks: ON (updates are offered, never applied)
 
-While this file exists, each session pulls the latest methodology from
-Alexandria's public GitHub and verifies it against the maintainer's offline
-signing key before running anything — nothing unsigned ever runs. The only
-trust here is GitHub (hosting) + the maintainer (the one person who can sign).
-Updates are surfaced as a notice; your local canon is never auto-overwritten.
+While this file exists, each session checks Alexandria's public GitHub for
+updates — engine and methodology — and verifies anything it finds against the
+maintainer's OFFLINE signing key. A newer signed version is surfaced as a
+notice; NOTHING is applied until you say go (applying = re-running the one
+install line, and even then the new code is verified before its first run).
+Your machine only ever runs what you've already approved. The only trust here
+is GitHub (hosting) + the maintainer (the one person who can sign).
 
-DELETE THIS FILE to freeze: no fetch, no contact with Alexandria — you run
-forever on your local copy in ~/alexandria/system/canon/. Fully sovereign.
+DELETE THIS FILE to stop even the check: no fetch, zero contact with
+Alexandria — you run forever on your pinned local copy. Fully sovereign.
 
 Full mechanism: https://alexandria-library.com/mechanics
 AUTOUPDATE_END
