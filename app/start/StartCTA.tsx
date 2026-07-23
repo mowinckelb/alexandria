@@ -164,7 +164,7 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
           is an iCloud one, so it adds on a Mac too and syncs to the phone, and
           email is device-agnostic — a visitor at their computer does all four
           without reaching for their phone. Phone-only visitors do these last
-          two (email step 4 mails them the line for step 1 later). */}
+          two (email step 4 mails them the line for steps 1 and 2 later). */}
       <p className="start-section start-section-later">on your phone or Mac</p>
 
       <p className="step-line">
@@ -218,7 +218,7 @@ export default function StartCTA({ refCode }: { refCode?: string }) {
           ? 'couldn’t send — try again.'
           : mailState === 'sent'
             ? 'sent — the line’s in your inbox.'
-            : 'we’ll send you the line for later, so you can do step 1 then.'}
+            : 'we’ll send you the line for later, so you can do steps 1 and 2 then.'}
       </p>
 
       {/* The fine print — three question/answer pairs, one line each (the
