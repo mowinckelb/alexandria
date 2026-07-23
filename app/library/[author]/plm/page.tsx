@@ -469,7 +469,8 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                     value={codeDraft}
                     onChange={(e) => setCodeDraft(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { const code = codeDraft.trim(); if (code) setInvite(code); } if (e.key === 'Escape') { setShowCode(false); setCodeDraft(''); } }}
-                    placeholder="invite code"
+                    // Leading en-space keeps the autofocus caret off the ghost text.
+                    placeholder={'\u2002invite code'}
                     spellCheck={false}
                     autoCapitalize="off"
                     style={{ width: '7.5rem', border: 'none', borderBottom: '1px solid var(--border-light)', background: 'none', outline: 'none',
@@ -553,7 +554,7 @@ export default function PlmPage({ params }: { params: Promise<{ author: string }
                     {/* Same physics as the composer below it (radius, 1rem font — also the iOS no-zoom floor). */}
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <input value={inviteDraft} onChange={(e) => setInviteDraft(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter') applyInvite(); }} placeholder="invite code" spellCheck={false} autoCapitalize="off"
+                        onKeyDown={(e) => { if (e.key === 'Enter') applyInvite(); }} placeholder={'\u2002invite code'} spellCheck={false} autoCapitalize="off"
                         style={{ flex: 1, minWidth: 0, border: '1px solid var(--border-light)', borderRadius: '12px', background: 'var(--bg-secondary)', outline: 'none',
                           color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '1rem', padding: '0.5rem 0.95rem' }} />
                       <button type="button" onClick={applyInvite} disabled={!inviteDraft.trim()}

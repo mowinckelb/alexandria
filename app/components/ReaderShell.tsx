@@ -131,6 +131,12 @@ export type ReaderShellProps = {
   askQuestions?: string[];
   askFn: (question: string) => Promise<string>;   // the twin call (wrapper decides which)
   intro?: React.ReactNode;                        // chat empty-state (who you're talking to + CTAs)
+  /** Library-only: the invite-code entry, slotted under the sign-in CTA when an
+   *  invite-gated piece is opened signed-out. The wrapper owns the field + the
+   *  unlock submit; the shell just gives it a home on the sign-in wall so a
+   *  reader always has a place to put their code. Website doc readers (always
+   *  public) never reach the signin state, so they never pass this. */
+  inviteField?: React.ReactNode;
 };
 
 export default function ReaderShell({
@@ -138,7 +144,7 @@ export default function ReaderShell({
   numbered = false, plain = false,
   artifactText = '', downloadBlob, downloadName = 'document', downloadExt = 'md',
   signInUrl = '', checkoutUrl = '', who = '', askPlaceholder = 'ask about this piece…', askQuestions, askFn,
-  intro,
+  intro, inviteField,
 }: ReaderShellProps) {
   const book = useMemo(
     () => (numbered && markdown ? processNumbered(markdown) : null),
@@ -358,8 +364,15 @@ export default function ReaderShell({
               {status === 'loading' && <p style={{ color: 'var(--text-ghost)' }}>loading…</p>}
               {status === 'signin' && (
                 <div style={{ maxWidth: '32rem' }}>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>“{name}” is open to people {who} has invited. sign in to read it.</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>
+                    {visibility === 'invite'
+                      ? <>“{name}” is open to people {who} has invited. sign in to read it, or enter your invite code.</>
+                      : visibility === 'paid'
+                        ? <>“{name}” is a paid piece. sign in to unlock it.</>
+                        : <>“{name}” is open to Authors. sign in to read it.</>}
+                  </p>
                   {signInUrl && <a href={signInUrl} style={{ display: 'inline-block', marginTop: '1rem', borderRadius: '11px', background: 'var(--accent)', color: 'var(--bg-primary)', padding: '0.6rem 1.25rem', textDecoration: 'none' }}>sign in</a>}
+                  {inviteField}
                 </div>
               )}
               {status === 'pay' && (

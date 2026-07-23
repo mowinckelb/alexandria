@@ -421,7 +421,7 @@ export default function OpenProtocolFileGatePage({
               type="text"
               value={inviteCode}
               onChange={(event) => setInviteCode(event.target.value)}
-              placeholder="invite code"
+              placeholder={'\u2002invite code'}
               style={{
                 width: '100%',
                 border: 'none',
