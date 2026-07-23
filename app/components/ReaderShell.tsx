@@ -274,7 +274,12 @@ export default function ReaderShell({
 
   return (
     <>
-      <ThemeToggle />
+      {/* Full screen strips all surrounding chrome (footer, panes, strips) so the
+          piece owns the viewport — the theme toggle is chrome too, and it lives in
+          the same top-right corner as the piece's own controls. Hiding it while
+          expanded keeps that corner clear so the shrink control stays clickable
+          (it used to sit under the fixed toggle) — the toggle returns on exit. */}
+      {!expanded && <ThemeToggle />}
       <div className="reader-shell" style={{ height: '100dvh', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-eb-garamond)', background: 'var(--bg-primary)' }}>
         <header style={{ flex: 'none', display: 'flex', alignItems: 'baseline', gap: '0.9rem', padding: '0.85rem 3.6rem 0.85rem 1.2rem', borderBottom: '1px solid var(--border-light)' }}>
           <Link href={backHref} aria-label={`back to ${backTitle}`} title={backTitle}
@@ -498,7 +503,6 @@ export default function ReaderShell({
         main[data-expanded="true"] .pane-history,
         main[data-expanded="true"] .pane-chat,
         main[data-expanded="true"] .piece-collapse { display: none !important; }
-        main[data-expanded="true"] .piece-head { padding-right: 3.4rem; }
         .reader-shell:has(main[data-expanded="true"]) > footer { display: none !important; }
       `}</style>
     </>
