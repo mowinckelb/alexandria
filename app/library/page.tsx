@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { SERVER_URL, pageMetadata, librarySignInUrl, FOUNDER_PROFILE_PATH } from '../lib/config';
 import { LibraryDirectory, type DirectoryAuthor } from './LibraryDirectory';
+import SiteFooter from '../components/SiteFooter';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,7 +70,7 @@ async function loadDirectory(): Promise<DirectoryResponse> {
   }
 }
 
-const linkStyle = { color: 'var(--text-primary)', textDecoration: 'underline', textUnderlineOffset: '3px' };
+const linkStyle = { color: 'var(--text-secondary)', textDecoration: 'underline', textDecorationColor: 'var(--text-muted)', textUnderlineOffset: '3px', textDecorationThickness: '1px' };
 
 export default async function LibraryPage({
   searchParams,
@@ -95,45 +96,46 @@ export default async function LibraryPage({
   const signInUrl = librarySignInUrl(nextPath);
 
   return (
-    <>
+    <div className="lib-page">
       <ThemeToggle />
-      <main style={{ maxWidth: '820px', margin: '0 auto', padding: '6rem 2.5rem 4rem', fontFamily: 'var(--font-eb-garamond)' }}>
-        <header style={{ marginBottom: '1.5rem' }}>
-          <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', display: 'inline-block', padding: '10px 0', margin: '-10px 0' }}>
-            alexandria.
+      <main className={signed_in ? 'lib-main' : 'lib-main lib-main-gate'}>
+        <header className="lib-header">
+          <Link href="/" className="lib-brand">
+            alexandria<span className="lib-brand-dot">.</span>
           </Link>
-          <h1 style={{ fontSize: '1.55rem', fontWeight: 400, color: 'var(--text-primary)', margin: '2rem 0 0', letterSpacing: '-0.01em' }}>
-            library
-          </h1>
+          <p className="lib-eyebrow">the collective</p>
+          <h1 className="lib-h1">the library</h1>
         </header>
 
         {!signed_in ? (
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>
-            <p style={{ margin: '0 0 1rem' }}>
-              the member directory is for the community — sign in to browse the Alexandrians,
+          // The gate a cold, signed-out visitor meets — consolidated to three
+          // crisp blocks (founder 2026-07-23): what it is, the one action worth
+          // taking (see a real mind — no account), and the two doors. The demo
+          // is the centrepiece; sign-in / join sit quiet beneath.
+          <div className="lib-gate">
+            <p className="lib-lede">
+              a living directory of the community — every Alexandrian&rsquo;s mind on its own page.
               find who&rsquo;s near you, and reach them.
             </p>
-            <p style={{ margin: '0 0 1.25rem' }}>
-              new here? see one for real — <Link href={FOUNDER_PROFILE_PATH} style={linkStyle}>Benjamin&rsquo;s mind &amp; library &rarr;</Link>
+            <p className="lib-cta">
+              <span className="lib-cta-lead">see what one looks like — </span>
+              <Link href={FOUNDER_PROFILE_PATH} className="lib-cta-link">Benjamin&rsquo;s mind &amp; library</Link>
             </p>
-            <p style={{ margin: '0 0 0.75rem' }}>
-              <a href={signInUrl} style={linkStyle}>sign in</a>
-            </p>
-            <p style={{ margin: 0, color: 'var(--text-ghost)', fontSize: '0.9rem' }}>
-              not a member yet? <Link href="/join" style={linkStyle}>join the community</Link>.
-              &nbsp;have a direct link to someone&rsquo;s page? that always works.
+            <p className="lib-sub">
+              already a member? <a href={signInUrl} style={linkStyle}>sign in</a>.
+              new here? <Link href="/join" style={linkStyle}>join the community</Link>.
             </p>
           </div>
         ) : (
           <>
             {!you_listed ? (
-              <p style={{ color: 'var(--text-ghost)', fontSize: '0.88rem', lineHeight: 1.6, margin: '0 0 1.75rem' }}>
+              <p className="lib-notlisted">
                 you&rsquo;re not listed yet — add a <em>location</em> (your city) and a{' '}
                 <em>contact</em> to your library file to appear here for the others.
               </p>
             ) : null}
             {authors.length === 0 ? (
-              <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem' }}>
+              <p className="lib-empty">
                 no Alexandrians listed yet — be the first: add your city and a contact to your file.
               </p>
             ) : (
@@ -142,6 +144,71 @@ export default async function LibraryPage({
           </>
         )}
       </main>
-    </>
+      <SiteFooter cta="start your own" />
+
+      <style>{`
+        .lib-page {
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+          background-image:
+            radial-gradient(ellipse 120% 80% at 30% 15%, rgba(91, 31, 71, 0.025) 0%, transparent 60%),
+            radial-gradient(ellipse 100% 70% at 72% 85%, rgba(74, 50, 30, 0.020) 0%, transparent 60%);
+          animation: libFadeIn 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        }
+        @keyframes libFadeIn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: none; } }
+
+        .lib-main { flex: 1; width: 100%; max-width: 660px; margin: 0 auto; padding: 5.5rem 2rem 2rem; }
+        /* The signed-out gate is short — centre it vertically so it reads as a
+           composed card, not a fragment stranded at the top (the /join / primer
+           idiom). The signed-in directory keeps the top-aligned scan layout. */
+        .lib-main-gate { display: flex; flex-direction: column; justify-content: center; padding-top: 3rem; padding-bottom: 4rem; }
+        .lib-header { margin-bottom: 2.4rem; }
+        .lib-brand {
+          font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+          font-style: italic; font-size: 1.25rem; color: var(--text-primary);
+          text-decoration: none; letter-spacing: 0.005em;
+          display: inline-block; padding: 10px 8px; margin: -10px -8px; transition: opacity 220ms ease;
+        }
+        .lib-brand:hover { opacity: 0.6; }
+        .lib-brand-dot { font-style: normal; }
+        .lib-eyebrow {
+          margin: 1.8rem 0 0; font-weight: 500; font-size: 11px; letter-spacing: 0.3em;
+          text-transform: lowercase; font-variant-caps: all-small-caps;
+          font-feature-settings: "smcp" 1, "kern" 1; color: var(--accent); line-height: 1;
+        }
+        .lib-h1 {
+          margin: 0.7rem 0 0; font-style: italic; font-weight: 500;
+          font-size: clamp(28px, 1.5rem + 1.5vw, 36px); line-height: 1.1;
+          letter-spacing: -0.01em; color: var(--text-primary);
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "swsh" 1;
+        }
+
+        .lib-gate { max-width: 30rem; }
+        .lib-lede { margin: 0 0 1.9rem; font-size: 1.08rem; line-height: 1.65; color: var(--text-secondary); text-wrap: pretty; }
+        /* The one primary act — the instruction is plain prose, only the
+           destination is the link (underlining the whole sentence made the
+           instruction itself read as clickable). */
+        .lib-cta { margin: 0 0 1.6rem; font-size: 1.08rem; line-height: 1.5; }
+        .lib-cta-lead { color: var(--text-secondary); }
+        .lib-cta-link {
+          color: var(--text-primary); text-decoration: underline;
+          text-decoration-color: var(--accent); text-underline-offset: 4px; text-decoration-thickness: 1.5px;
+          transition: text-decoration-color 200ms, opacity 200ms;
+        }
+        .lib-cta-link:hover { opacity: 0.7; }
+        .lib-sub { margin: 0; font-size: 0.98rem; line-height: 1.65; color: var(--text-muted); }
+
+        .lib-notlisted { color: var(--text-ghost); font-size: 0.9rem; line-height: 1.6; margin: 0 0 1.75rem; }
+        .lib-empty { color: var(--text-ghost); font-size: 0.95rem; }
+
+        @media (max-width: 640px) {
+          .lib-main { padding: 4rem 1.5rem 1.5rem; }
+        }
+      `}</style>
+    </div>
   );
 }

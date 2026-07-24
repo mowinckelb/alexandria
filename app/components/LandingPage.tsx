@@ -728,7 +728,14 @@ export default function LandingPage({ brandClassName = '' }: Props) {
             foot (2026-07-19) — the arch is now pure scenery, no caption
             stuck on the art. */}
         <div className="stage-top">
-        <span className="alpha-mark">san francisco · mmxxvi</span>
+        {/* The colophon — the front slide signed like a manuscript, the two
+            marks bracketing the hero in opposite corners (founder 2026-07-23):
+            the maker's name bottom-left, the place + year bottom-right, both in
+            the same faded italic hand. "Benjamin a. Mowinckel" keeps caps B + M
+            around the lowercase a. — the same a. that closes a session and dots
+            the wordmark. A printed book credits its maker in the margins. */}
+        <span className="alpha-mark">Benjamin a. Mowinckel</span>
+        <span className="omega-mark">san francisco · mmxxvi</span>
         {/* Front-slide opening (2026-07-12, founder-directed): the letter
             begins on the hero — "to the reader" + the calculator hook —
             set low and centred over the scene, quiet serif. It peels up
@@ -1849,10 +1856,13 @@ export default function LandingPage({ brandClassName = '' }: Props) {
         /* Alpha mark — bottom-left colophon (place + year in
            lowercase Roman). Mirrors 'vol. i' on the right so the
            page is bracketed by manuscript marginalia. */
-        .alpha-mark {
+        /* Two corner marks in the same faded italic hand, bracketing the hero —
+           name bottom-left, place·year bottom-right (founder 2026-07-23:
+           symmetric, both italic; the stacked / upright-roman versions read
+           wrong). Mirrors the old manuscript-folio idea. */
+        .alpha-mark, .omega-mark {
           position: absolute;
           bottom: 56px;
-          left: 58px;
           font-family: var(--font-serif), ui-serif, Georgia, serif;
           font-style: italic;
           font-size: 13px;
@@ -1861,6 +1871,8 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           user-select: none;
           z-index: 2;
         }
+        .alpha-mark { left: 58px; }
+        .omega-mark { right: 58px; }
         /* Scroll cue — soft pulsing chevron beneath the close.
            Tells the reader where to go without saying it. */
         .scroll-cue {
@@ -3520,15 +3532,15 @@ export default function LandingPage({ brandClassName = '' }: Props) {
           .hero-h1 {
             font-size: clamp(30px, 7vw, 56px);
           }
-          .alpha-mark {
-            position: absolute;
-            /* Sits BELOW the watermark glyph (founder, 2026-07-18) — the
+          .alpha-mark, .omega-mark {
+            /* Sit BELOW the watermark glyph (founder, 2026-07-18) — the
                watermark rests at bottom 7%, so the colophon drops beneath
-               it near the slide foot. */
+               it near the slide foot. Both corners share the baseline. */
             bottom: 150px;
-            left: 20px;
             font-size: 10.5px;
           }
+          .alpha-mark { left: 20px; }
+          .omega-mark { right: 20px; }
           /* Front-slide opening on mobile — over the square scene, lower
              third, sized to the viewport (the desktop 648px block would
              overflow). stage-top is display:contents here, so this

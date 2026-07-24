@@ -39,6 +39,10 @@ const CopyIcon = <svg width="17" height="17" {...svgProps}><rect x="9" y="9" wid
 const DownloadIcon = <svg width="17" height="17" {...svgProps}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg>;
 const ExpandIcon = <svg width="17" height="17" {...svgProps}><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M16 3h3a2 2 0 0 1 2 2v3" /><path d="M21 16v3a2 2 0 0 1-2 2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /></svg>;
 const CompressIcon = <svg width="17" height="17" {...svgProps}><path d="M8 3v3a2 2 0 0 1-2 2H3" /><path d="M21 8h-3a2 2 0 0 1-2-2V3" /><path d="M3 16h3a2 2 0 0 1 2 2v3" /><path d="M16 21v-3a2 2 0 0 1 2-2h3" /></svg>;
+// Share — the node graph, deliberately NOT the box+up-arrow (that reads as
+// "upload" beside the box+down-arrow download icon). Shares the artifact's
+// canonical URL so the recipient lands back inside Alexandria, not a loose file.
+const ShareIcon = <svg width="17" height="17" {...svgProps}><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" /></svg>;
 
 /**
  * PdfView — renders a PDF as fit-to-width canvas pages stacked vertically, so it
@@ -271,6 +275,23 @@ export default function ReaderShell({
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
+  // Share the canonical artifact URL — keeps the recipient inside Alexandria
+  // (they open the reader, can ask the mind, then download the file themselves
+  // if they want the object). Native share sheet on mobile; copy-link fallback
+  // on desktop (the ActionButton tick confirms the copy). A cancelled share
+  // (AbortError) must NOT silently copy — only a real failure falls back.
+  const shareArtifact = () => {
+    if (typeof window === 'undefined') return;
+    const url = window.location.origin + window.location.pathname;
+    const nav = typeof navigator !== 'undefined' ? navigator : undefined;
+    if (nav?.share) {
+      void nav.share({ title: name, url }).catch((err: unknown) => {
+        if (!(err instanceof Error) || err.name !== 'AbortError') copyText(url);
+      });
+    } else {
+      copyText(url);
+    }
+  };
 
   return (
     <>
@@ -360,6 +381,7 @@ export default function ReaderShell({
                 <>
                   <ActionButton icon={CopyIcon} onAction={copyArtifact} title="copy text" style={iconBtn} className="hover:opacity-60" />
                   {downloadBlob && <ActionButton icon={DownloadIcon} onAction={downloadArtifact} title="download" style={iconBtn} className="hover:opacity-60" />}
+                  <ActionButton icon={ShareIcon} onAction={shareArtifact} title="share link" style={iconBtn} className="hover:opacity-60" />
                   <button type="button" onClick={toggleExpand} aria-label={expanded ? 'exit full screen' : 'full screen'} title={expanded ? 'exit full screen' : 'full screen'} style={iconBtn} className="hover:opacity-60">{expanded ? CompressIcon : ExpandIcon}</button>
                 </>
               )}
@@ -434,7 +456,7 @@ export default function ReaderShell({
             PLM three-pane pages (founder 2026-07-19). Drops out in full screen. */}
         <footer style={{ flex: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.6rem', padding: '1rem 1.2rem', borderTop: '1px solid var(--border-light)' }}>
           <Link href="/start" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none' }} className="hover:opacity-60">build your own</Link>
-          <Link href="/library" style={{ fontStyle: 'italic', color: 'var(--text-ghost)', fontSize: '0.85rem', textDecoration: 'none' }} className="hover:opacity-60">alexandria<span style={{ fontStyle: 'normal' }}>.</span></Link>
+          <Link href="/" style={{ fontStyle: 'italic', color: 'var(--text-ghost)', fontSize: '0.85rem', textDecoration: 'none' }} className="hover:opacity-60">alexandria<span style={{ fontStyle: 'normal' }}>.</span></Link>
         </footer>
       </div>
 

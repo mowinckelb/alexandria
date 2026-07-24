@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ThemeToggle } from '../components/ThemeToggle';
-import StartJoinCTA from '../components/StartJoinCTA';
+import SiteFooter from '../components/SiteFooter';
 import { SERVER_URL, pageMetadata } from '../lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -78,27 +78,27 @@ export default async function MarketplacePage() {
   const modules = await loadModules();
 
   return (
-    <>
+    <div className="mkt-page">
       <ThemeToggle />
-      <main style={{ maxWidth: '560px', margin: '0 auto', padding: '6rem 2rem 4rem', fontFamily: 'var(--font-eb-garamond)' }}>
-        <header style={{ marginBottom: '1.5rem' }}>
-          <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', display: 'inline-block', padding: '10px 0', margin: '-10px 0' }}>
-            alexandria.
+      <main className="mkt-main">
+        <header className="mkt-header">
+          <Link href="/" className="mkt-brand">
+            alexandria<span className="mkt-brand-dot">.</span>
           </Link>
-          <h1 style={{ fontSize: '1.55rem', fontWeight: 400, color: 'var(--text-primary)', margin: '2rem 0 0', letterSpacing: '-0.01em' }}>
-            marketplace
-          </h1>
-          <p style={{ color: 'var(--text-ghost)', fontSize: '0.88rem', lineHeight: 1.5, margin: '0.6rem 0 0' }}>
+          <p className="mkt-eyebrow">the collective</p>
+          <h1 className="mkt-h1">the marketplace</h1>
+          <p className="mkt-lede">
             each Author&apos;s system decomposes into modules — pooled here so others can learn, share signal, and refine their own.
           </p>
         </header>
 
         {modules.length === 0 ? (
-          <p style={{ color: 'var(--text-ghost)', fontSize: '0.9rem', marginTop: '2rem' }}>
-            no modules yet.
-          </p>
+          <p className="mkt-empty">no modules yet.</p>
         ) : (
-          <section style={{ marginTop: '2rem' }}>
+          // No per-row hairlines — whitespace separates the modules (design.md,
+          // the recurring "too many lines" note). One editorial column, each
+          // module a quiet block.
+          <section className="mkt-list">
             {modules.map((m) => {
               const parsed = parseGithubId(m.id);
               // Click-through targets github directly — github is the marketplace
@@ -109,7 +109,7 @@ export default async function MarketplacePage() {
               const author = canonical ? null : m.author_github_login;
               const inner = (
                 <>
-                  <h2 style={{ fontSize: '1.1rem', fontWeight: 400, color: 'var(--text-primary)', margin: 0 }}>
+                  <h2 style={{ fontSize: '1.12rem', fontWeight: 400, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.005em' }}>
                     {m.name}
                     {canonical && <span style={CANONICAL_BADGE_STYLE}>canonical</span>}
                     {author && (
@@ -119,14 +119,14 @@ export default async function MarketplacePage() {
                     )}
                   </h2>
                   {m.description && (
-                    <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0.6rem 0 0' }}>
+                    <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.55, margin: '0.45rem 0 0' }}>
                       {m.description}
                     </p>
                   )}
                 </>
               );
               return (
-                <article key={m.id} style={{ padding: '1.1rem 0', borderTop: '1px solid var(--border-light)' }}>
+                <article key={m.id}>
                   {href ? (
                     <a
                       href={href}
@@ -143,10 +143,54 @@ export default async function MarketplacePage() {
             })}
           </section>
         )}
-        <div style={{ marginTop: '3.5rem' }}>
-          <StartJoinCTA lead="want your own system in here?" />
-        </div>
       </main>
-    </>
+      <SiteFooter cta="add your own" />
+
+      <style>{`
+        .mkt-page {
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+          background-image:
+            radial-gradient(ellipse 120% 80% at 30% 15%, rgba(91, 31, 71, 0.025) 0%, transparent 60%),
+            radial-gradient(ellipse 100% 70% at 72% 85%, rgba(74, 50, 30, 0.020) 0%, transparent 60%);
+          animation: mktFadeIn 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        }
+        @keyframes mktFadeIn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: none; } }
+
+        .mkt-main { flex: 1; width: 100%; max-width: 600px; margin: 0 auto; padding: 5.5rem 2rem 2rem; }
+        .mkt-header { margin-bottom: 2.6rem; }
+        .mkt-brand {
+          font-family: var(--font-eb-garamond), ui-serif, Georgia, serif;
+          font-style: italic; font-size: 1.25rem; color: var(--text-primary);
+          text-decoration: none; letter-spacing: 0.005em;
+          display: inline-block; padding: 10px 8px; margin: -10px -8px; transition: opacity 220ms ease;
+        }
+        .mkt-brand:hover { opacity: 0.6; }
+        .mkt-brand-dot { font-style: normal; }
+        .mkt-eyebrow {
+          margin: 1.8rem 0 0; font-weight: 500; font-size: 11px; letter-spacing: 0.3em;
+          text-transform: lowercase; font-variant-caps: all-small-caps;
+          font-feature-settings: "smcp" 1, "kern" 1; color: var(--accent); line-height: 1;
+        }
+        .mkt-h1 {
+          margin: 0.7rem 0 0; font-style: italic; font-weight: 500;
+          font-size: clamp(28px, 1.5rem + 1.5vw, 36px); line-height: 1.1;
+          letter-spacing: -0.01em; color: var(--text-primary);
+          font-feature-settings: "kern" 1, "liga" 1, "dlig" 1, "swsh" 1;
+        }
+        .mkt-lede { margin: 1rem 0 0; max-width: 30rem; font-size: 1rem; line-height: 1.6; color: var(--text-secondary); text-wrap: pretty; }
+
+        .mkt-empty { color: var(--text-ghost); font-size: 0.95rem; margin-top: 2rem; }
+        .mkt-list { margin-top: 2.4rem; display: flex; flex-direction: column; gap: 1.7rem; }
+
+        @media (max-width: 640px) {
+          .mkt-main { padding: 4rem 1.5rem 1.5rem; }
+        }
+      `}</style>
+    </div>
   );
 }

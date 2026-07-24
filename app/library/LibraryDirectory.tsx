@@ -182,9 +182,13 @@ export function LibraryDirectory({
           no matches.
         </p>
       ) : (
+        // No per-row hairlines — lines separate sections, never siblings; a rule
+        // under every name is just noise once there are more than two (design.md,
+        // the recurring "too many lines" note). The search bar's underline marks
+        // the one boundary; inside the list, whitespace does the work.
         <section style={{ marginTop: '2rem' }}>
           {filtered.map((author) => (
-            <article key={author.id} style={{ padding: '1.1rem 0', borderTop: '1px solid var(--border-light)' }}>
+            <article key={author.id} style={{ padding: '0.85rem 0' }}>
               <Link
                 href={author.files_url}
                 style={{

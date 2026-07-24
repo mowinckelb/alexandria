@@ -500,7 +500,7 @@ export default function AuthorPageClient({ params }: { params: Promise<{ author:
             <Link href="/start" style={{ color: 'var(--accent)', textDecoration: 'none' }} className="hover:opacity-60">build your own</Link>
           </p>
           <p style={{ margin: '1.4rem 0 0' }}>
-            <Link href="/library" style={{ fontStyle: 'italic', color: 'var(--text-ghost)', fontSize: '1rem', letterSpacing: '0.01em', textDecoration: 'none' }} className="hover:opacity-60">
+            <Link href="/" style={{ fontStyle: 'italic', color: 'var(--text-ghost)', fontSize: '1rem', letterSpacing: '0.01em', textDecoration: 'none' }} className="hover:opacity-60">
               alexandria<span style={{ fontStyle: 'normal' }}>.</span>
             </Link>
           </p>
