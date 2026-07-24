@@ -150,6 +150,10 @@ const PromptBox = forwardRef<PromptBoxHandle, {
 
   const disabled = (loading && !typeWhileLoading) || !value.trim();
   const btn: CSSProperties = {
+    // position:relative so the loading "…" can overlay the label instead of
+    // replacing it — the label stays in flow (invisible) to hold the button's
+    // width, so nothing shifts when ask↔… swap (founder: "lock it tighter").
+    position: 'relative',
     border: 'none', borderRadius: '11px', background: 'var(--accent)', color: 'var(--bg-primary)',
     fontFamily: 'inherit', fontSize: '0.95rem', padding: '0.72rem 1.25rem',
     cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.5 : 1, transition: 'opacity 0.15s', whiteSpace: 'nowrap',
@@ -219,7 +223,12 @@ const PromptBox = forwardRef<PromptBoxHandle, {
         onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.opacity = '0.85'; }}
         onMouseLeave={(e) => { e.currentTarget.style.opacity = disabled ? '0.5' : '1'; }}
         style={btn}>
-        {loading ? '…' : submitLabel}
+        {/* Label always reserves the width; the "…" overlays it centered while
+            loading, so the button never resizes between states. */}
+        <span style={{ visibility: loading ? 'hidden' : undefined }}>{submitLabel}</span>
+        {loading && (
+          <span aria-hidden style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>…</span>
+        )}
       </button>
     </div>
   );
